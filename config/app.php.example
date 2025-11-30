@@ -1,0 +1,12 @@
+<?php
+/**
+ * Application Configuration
+ * 
+ * Copy this file to app.php and update with your settings
+ */
+return [
+    'base_url' => 'http://localhost:8080',
+    'app_name' => 'Forklift & Equipment Pro',
+    'timezone' => 'UTC',
+];
+

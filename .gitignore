@@ -1,0 +1,74 @@
+# PHP Configuration
+*.log
+*.cache
+php.ini
+.htaccess.local
+
+# Environment & Config Files (keep structure but ignore sensitive data)
+config/database.php
+config/app.php
+.env
+.env.local
+*.env
+
+# Storage & Uploads (user-generated content)
+storage/uploads/*
+!storage/uploads/.gitkeep
+storage/cache/*
+!storage/cache/.gitkeep
+storage/logs/*
+!storage/logs/.gitkeep
+storage/backups/*
+!storage/backups/.gitkeep
+
+# Test Files
+test-*.php
+*test.php
+hello.php
+fix-*.php
+verify-*.php
+check-*.php
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Node modules (if any)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Composer
+vendor/
+composer.lock
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Build files
+dist/
+build/
+
+# Documentation files (keep main ones, ignore generated)
+*.docx
+*.pdf
+

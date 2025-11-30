@@ -1,0 +1,30 @@
+Website Setup Information
+=========================
+
+To access your website, use these URLs:
+
+1. Homepage: http://localhost:8080/s3vgroup/index.php
+   OR: http://localhost:8080/s3vgroup/
+
+2. Test PHP: http://localhost:8080/s3vgroup/test.php
+
+3. Setup: http://localhost:8080/s3vgroup/setup.php
+
+4. Admin: http://localhost:8080/s3vgroup/admin/login.php
+
+If you get "Not Found" errors:
+
+1. Make sure Apache is running in XAMPP
+2. Make sure you're using the correct URL with :8080
+3. Try accessing index.php directly: http://localhost:8080/s3vgroup/index.php
+4. Check if the folder path is correct in XAMPP (should be in htdocs/s3vgroup)
+
+File structure:
+- All files are in: C:\xampp\htdocs\s3vgroup\
+- This is correct for XAMPP
+
+If issues persist:
+1. Check XAMPP Control Panel - Apache must be running
+2. Check Apache error logs in XAMPP
+3. Make sure port 8080 is not blocked
+

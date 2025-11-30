@@ -1,0 +1,284 @@
+<?php
+require_once __DIR__ . '/../bootstrap/app.php';
+require_once __DIR__ . '/includes/auth.php';
+
+$message = '';
+$successMessage = '';
+
+// Handle mark as read
+if (!empty($_GET['mark_read'])) {
+    db()->update('contact_messages', ['is_read' => 1], 'id = :id', ['id' => (int)$_GET['mark_read']]);
+    $successMessage = 'Message marked as read.';
+}
+
+// Handle delete
+if (!empty($_GET['delete'])) {
+    db()->delete('contact_messages', 'id = :id', ['id' => (int)$_GET['delete']]);
+    $successMessage = 'Message deleted successfully.';
+}
+
+// Get filter parameters
+$search = trim($_GET['search'] ?? '');
+$readFilter = $_GET['read'] ?? 'all';
+$dateFrom = $_GET['date_from'] ?? '';
+$dateTo = $_GET['date_to'] ?? '';
+$sort = $_GET['sort'] ?? 'date_desc';
+
+// Build query
+$where = [];
+$params = [];
+
+if ($readFilter === 'unread') {
+    $where[] = "is_read = 0";
+} elseif ($readFilter === 'read') {
+    $where[] = "is_read = 1";
+}
+
+if ($search) {
+    $where[] = "(name LIKE :search OR email LIKE :search OR phone LIKE :search OR subject LIKE :search OR message LIKE :search)";
+    $params['search'] = '%' . $search . '%';
+}
+
+if ($dateFrom) {
+    $where[] = "created_at >= :date_from";
+    $params['date_from'] = $dateFrom . ' 00:00:00';
+}
+
+if ($dateTo) {
+    $where[] = "created_at <= :date_to";
+    $params['date_to'] = $dateTo . ' 23:59:59';
+}
+
+$whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$messages = db()->fetchAll(
+    "SELECT * FROM contact_messages $whereClause ORDER BY created_at DESC",
+    $params
+);
+
+// Sort messages
+switch ($sort) {
+    case 'date_desc':
+        usort($messages, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
+        break;
+    case 'date_asc':
+        usort($messages, fn($a, $b) => strtotime($a['created_at']) - strtotime($b['created_at']));
+        break;
+    case 'name_asc':
+        usort($messages, fn($a, $b) => strcmp($a['name'], $b['name']));
+        break;
+}
+
+// Column visibility
+$selectedColumns = $_GET['columns'] ?? ['date', 'name', 'email', 'subject', 'status', 'actions'];
+$availableColumns = [
+    'date' => 'Date',
+    'name' => 'Name',
+    'email' => 'Email',
+    'phone' => 'Phone',
+    'subject' => 'Subject',
+    'message' => 'Message',
+    'status' => 'Status',
+    'actions' => 'Actions'
+];
+
+$pageTitle = 'Contact Messages';
+include __DIR__ . '/includes/header.php';
+
+// Setup filter component
+$filterId = 'messages-filter';
+$filters = [
+    'search' => true,
+    'status' => [
+        'options' => [
+            'all' => 'All Messages',
+            'unread' => 'Unread',
+            'read' => 'Read'
+        ]
+    ],
+    'date_range' => true
+];
+$sortOptions = [
+    'date_desc' => 'Newest First',
+    'date_asc' => 'Oldest First',
+    'name_asc' => 'Name (A-Z)'
+];
+$defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
+?>
+
+<div class="p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Contact Messages</h1>
+    </div>
+    
+    <?php if ($successMessage): ?>
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            <?= escape($successMessage) ?>
+        </div>
+    <?php endif; ?>
+    
+    <!-- Advanced Filters -->
+    <?php include __DIR__ . '/includes/advanced-filters.php'; ?>
+    
+    <div class="mb-4 text-gray-600">
+        Showing <?= count($messages) ?> message(s)
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <?php if (in_array('date', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="date">Date</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name">Name</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('email', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="email">Email</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('phone', $selectedColumns)): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="phone">Phone</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('subject', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="subject">Subject</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('message', $selectedColumns)): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="message">Message</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('status', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="status">Status</th>
+                    <?php endif; ?>
+                    
+                    <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions">Actions</th>
+                    <?php endif; ?>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <?php if (empty($messages)): ?>
+                    <tr>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No messages found.</td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($messages as $msg): ?>
+                    <tr class="<?= !$msg['is_read'] ? 'bg-blue-50' : '' ?>">
+                        <?php if (in_array('date', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="date">
+                            <?= date('M d, Y H:i', strtotime($msg['created_at'])) ?>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4" data-column="name">
+                            <div class="text-sm font-medium"><?= escape($msg['name']) ?></div>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('email', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="email">
+                            <a href="mailto:<?= escape($msg['email']) ?>" class="text-blue-600 hover:underline">
+                                <?= escape($msg['email']) ?>
+                            </a>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('phone', $selectedColumns)): ?>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="phone">
+                            <?= escape($msg['phone'] ?? '-') ?>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('subject', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4 text-sm text-gray-900" data-column="subject">
+                            <?= escape($msg['subject'] ?? 'No Subject') ?>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('message', $selectedColumns)): ?>
+                        <td class="px-6 py-4 text-sm text-gray-500" data-column="message">
+                            <div class="max-w-xs truncate" title="<?= escape($msg['message'] ?? '') ?>">
+                                <?= escape(substr($msg['message'] ?? '', 0, 50)) ?>...
+                            </div>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('status', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="status">
+                            <?php if (!$msg['is_read']): ?>
+                                <span class="px-2 py-1 text-xs rounded bg-blue-100 text-blue-800">New</span>
+                            <?php else: ?>
+                                <span class="px-2 py-1 text-xs rounded bg-gray-100 text-gray-800">Read</span>
+                            <?php endif; ?>
+                        </td>
+                        <?php endif; ?>
+                        
+                        <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2" data-column="actions">
+                            <button onclick="showMessage(<?= htmlspecialchars(json_encode($msg), ENT_QUOTES) ?>)" 
+                                    class="text-blue-600 hover:text-blue-900" title="View">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <?php if (!$msg['is_read']): ?>
+                                <a href="?mark_read=<?= $msg['id'] ?>" class="text-green-600 hover:text-green-900" title="Mark Read">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                            <?php endif; ?>
+                            <a href="?delete=<?= $msg['id'] ?>" 
+                               onclick="return confirm('Are you sure?')" 
+                               class="text-red-600 hover:text-red-900" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                        <?php endif; ?>
+                    </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="messageModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Message Details</h3>
+            <button onclick="closeMessage()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <div id="messageContent"></div>
+        <button onclick="closeMessage()" class="mt-4 btn-primary">
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+function showMessage(msg) {
+    const content = document.getElementById('messageContent');
+    content.innerHTML = `
+        <div class="space-y-3">
+            <div><strong>From:</strong> ${msg.name} &lt;${msg.email}&gt;</div>
+            ${msg.phone ? `<div><strong>Phone:</strong> ${msg.phone}</div>` : ''}
+            <div><strong>Subject:</strong> ${msg.subject || 'No Subject'}</div>
+            <div><strong>Date:</strong> ${new Date(msg.created_at).toLocaleString()}</div>
+            <div class="border-t pt-3 mt-3">
+                <strong>Message:</strong>
+                <p class="mt-2 text-gray-700 whitespace-pre-wrap">${msg.message}</p>
+            </div>
+        </div>
+    `;
+    document.getElementById('messageModal').classList.remove('hidden');
+}
+
+function closeMessage() {
+    document.getElementById('messageModal').classList.add('hidden');
+}
+</script>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>

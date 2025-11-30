@@ -1,0 +1,156 @@
+<?php
+require_once __DIR__ . '/../bootstrap/app.php';
+require_once __DIR__ . '/includes/auth.php';
+
+$message = '';
+$error = '';
+
+// Handle approve
+if (!empty($_GET['approve'])) {
+    db()->update('product_reviews', ['is_approved' => 1], 'id = :id', ['id' => (int)$_GET['approve']]);
+    $message = 'Review approved successfully.';
+}
+
+// Handle delete
+if (!empty($_GET['delete'])) {
+    db()->delete('product_reviews', 'id = :id', ['id' => (int)$_GET['delete']]);
+    $message = 'Review deleted successfully.';
+}
+
+$filter = $_GET['filter'] ?? 'all';
+$where = [];
+$params = [];
+
+if ($filter === 'pending') {
+    $where[] = "is_approved = 0";
+} elseif ($filter === 'approved') {
+    $where[] = "is_approved = 1";
+}
+
+$whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$reviews = db()->fetchAll(
+    "SELECT r.*, p.name as product_name, p.slug as product_slug 
+     FROM product_reviews r
+     LEFT JOIN products p ON r.product_id = p.id
+     $whereClause
+     ORDER BY r.created_at DESC",
+    $params
+);
+
+$pageTitle = 'Product Reviews';
+include __DIR__ . '/includes/header.php';
+?>
+
+<h1 class="text-3xl font-bold mb-6">Product Reviews</h1>
+
+<div class="mb-6 flex space-x-4">
+    <a href="?filter=all" class="px-4 py-2 rounded <?= $filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
+        All Reviews
+    </a>
+    <a href="?filter=pending" class="px-4 py-2 rounded <?= $filter === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
+        Pending Approval
+    </a>
+    <a href="?filter=approved" class="px-4 py-2 rounded <?= $filter === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
+        Approved
+    </a>
+</div>
+
+<div class="bg-white rounded-lg shadow overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reviewer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comment</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+            <?php foreach ($reviews as $review): ?>
+            <tr>
+                <td class="px-6 py-4">
+                    <a href="<?= url('product.php?slug=' . escape($review['product_slug'])) ?>" target="_blank"
+                       class="text-blue-600 hover:underline">
+                        <?= escape($review['product_name']) ?>
+                    </a>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium"><?= escape($review['name']) ?></div>
+                    <div class="text-xs text-gray-500"><?= escape($review['email']) ?></div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <i class="fas fa-star text-sm <?= $i <= $review['rating'] ? 'text-yellow-400' : 'text-gray-300' ?>"></i>
+                        <?php endfor; ?>
+                        <span class="ml-2 text-sm"><?= $review['rating'] ?>/5</span>
+                    </div>
+                    <?php if ($review['title']): ?>
+                        <div class="text-sm font-semibold mt-1"><?= escape($review['title']) ?></div>
+                    <?php endif; ?>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                    <?= escape($review['comment']) ?>
+                </td>
+                <td class="px-6 py-4">
+                    <?php if ($review['is_approved']): ?>
+                        <span class="px-2 py-1 text-xs rounded bg-green-100 text-green-800">Approved</span>
+                    <?php else: ?>
+                        <span class="px-2 py-1 text-xs rounded bg-yellow-100 text-yellow-800">Pending</span>
+                    <?php endif; ?>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-500">
+                    <?= date('M d, Y', strtotime($review['created_at'])) ?>
+                </td>
+                <td class="px-6 py-4 text-sm font-medium space-x-2">
+                    <?php if (!$review['is_approved']): ?>
+                        <a href="?approve=<?= $review['id'] ?>" class="text-green-600 hover:text-green-900">
+                            Approve
+                        </a>
+                    <?php endif; ?>
+                    <button onclick="showReview('<?= escape(addslashes($review['comment'])) ?>')" 
+                            class="text-blue-600 hover:text-blue-900">
+                        View
+                    </button>
+                    <a href="?delete=<?= $review['id'] ?>" 
+                       onclick="return confirm('Are you sure?')" 
+                       class="text-red-600 hover:text-red-900">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
+
+<div id="reviewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold">Full Review</h3>
+            <button onclick="closeReview()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+        </div>
+        <div id="reviewContent" class="text-gray-700"></div>
+        <button onclick="closeReview()" class="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            Close
+        </button>
+    </div>
+</div>
+
+<script>
+function showReview(comment) {
+    document.getElementById('reviewContent').textContent = comment;
+    document.getElementById('reviewModal').classList.remove('hidden');
+}
+
+function closeReview() {
+    document.getElementById('reviewModal').classList.add('hidden');
+}
+</script>
+
+<?php include __DIR__ . '/includes/footer.php'; ?>
+

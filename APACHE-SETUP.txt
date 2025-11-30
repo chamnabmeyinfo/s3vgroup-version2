@@ -1,0 +1,53 @@
+IMPORTANT: Apache Configuration for Root Access
+================================================
+
+Your files are in: C:\xampp\htdocs\s3vgroup\
+
+But you want to access via: http://localhost:8080/ (root, no /s3vgroup)
+
+You have TWO OPTIONS:
+
+OPTION 1: Configure Apache Virtual Host (Recommended)
+-----------------------------------------------------
+1. Open: C:\xampp\apache\conf\extra\httpd-vhosts.conf
+2. Add this at the bottom:
+
+<VirtualHost *:8080>
+    DocumentRoot "C:/xampp/htdocs/s3vgroup"
+    ServerName localhost
+    <Directory "C:/xampp/htdocs/s3vgroup">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+
+3. Restart Apache in XAMPP Control Panel
+
+OPTION 2: Move Files to Root (Easier)
+--------------------------------------
+1. Move ALL files from:
+   C:\xampp\htdocs\s3vgroup\
+   
+   TO:
+   C:\xampp\htdocs\
+
+2. Then access: http://localhost:8080/
+
+OPTION 3: Use Alias (Alternative)
+----------------------------------
+1. Open: C:\xampp\apache\conf\httpd.conf
+2. Find the <IfModule alias_module> section
+3. Add this line:
+   Alias / "C:/xampp/htdocs/s3vgroup/"
+4. Restart Apache
+
+RECOMMENDED: Use OPTION 1 (Virtual Host)
+It's cleaner and doesn't affect other projects.
+
+After configuration, access:
+- http://localhost:8080/
+- http://localhost:8080/index.php
+- http://localhost:8080/setup.php
+- http://localhost:8080/admin/login.php
+
