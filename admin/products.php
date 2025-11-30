@@ -103,6 +103,19 @@ switch ($sort) {
 // Get all categories for filter
 $categories = $categoryModel->getAll();
 
+// Get variant counts for products
+$variantCounts = [];
+try {
+    $variantData = db()->fetchAll(
+        "SELECT product_id, COUNT(*) as count FROM product_variants WHERE is_active = 1 GROUP BY product_id"
+    );
+    foreach ($variantData as $v) {
+        $variantCounts[$v['product_id']] = $v['count'];
+    }
+} catch (Exception $e) {
+    // Variants table might not exist
+}
+
 // Column visibility
 $selectedColumns = $_GET['columns'] ?? ['checkbox', 'image', 'name', 'category', 'price', 'status', 'actions'];
 $availableColumns = [
@@ -311,7 +324,14 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                         
                         <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
                         <td class="px-6 py-4" data-column="name">
-                            <div class="text-sm font-medium text-gray-900"><?= escape($product['name']) ?></div>
+                            <div class="flex items-center gap-2">
+                                <div class="text-sm font-medium text-gray-900"><?= escape($product['name']) ?></div>
+                                <?php if (isset($variantCounts[$product['id']]) && $variantCounts[$product['id']] > 0): ?>
+                                    <span class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full" title="<?= $variantCounts[$product['id']] ?> variant(s)">
+                                        <i class="fas fa-layer-group mr-1"></i><?= $variantCounts[$product['id']] ?>
+                                    </span>
+                                <?php endif; ?>
+                            </div>
                             <?php if (!empty($product['short_description'])): ?>
                                 <div class="text-xs text-gray-500 line-clamp-1"><?= escape(substr($product['short_description'], 0, 50)) ?>...</div>
                             <?php endif; ?>

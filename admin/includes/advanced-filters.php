@@ -21,13 +21,13 @@ $sortOptions = $sortOptions ?? [];
                 <button onclick="resetFilters('<?= $filterId ?>')" class="btn-secondary-sm">
                     <i class="fas fa-redo mr-1"></i> Reset
                 </button>
-                <button onclick="toggleFilterPanel('<?= $filterId ?>')" class="btn-secondary-sm">
-                    <i class="fas fa-chevron-up" id="toggle-icon-<?= $filterId ?>"></i>
+                <button onclick="toggleFilterPanel('<?= $filterId ?>')" class="btn-secondary-sm" title="Toggle Filters">
+                    <i class="fas fa-chevron-down" id="toggle-icon-<?= $filterId ?>"></i>
                 </button>
             </div>
         </div>
         
-        <div id="filter-content-<?= $filterId ?>" class="filter-content">
+        <div id="filter-content-<?= $filterId ?>" class="filter-content hidden">
             <form method="GET" id="filter-form-<?= $filterId ?>" class="space-y-6">
                 
                 <!-- Text Search -->
@@ -81,6 +81,34 @@ $sortOptions = $sortOptions ?? [];
                     <select name="featured" class="w-full px-4 py-2 border rounded-lg" onchange="applyFilters('<?= $filterId ?>')">
                         <?php foreach ($filters['featured']['options'] as $value => $label): ?>
                             <option value="<?= escape($value) ?>" <?= ($_GET['featured'] ?? '') === $value || ($_GET['featured'] === '' && $value === 'all') ? 'selected' : '' ?>>
+                                <?= escape($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Type Filter -->
+                <?php if (isset($filters['type'])): ?>
+                <div>
+                    <label class="block text-sm font-medium mb-2">File Type</label>
+                    <select name="type" class="w-full px-4 py-2 border rounded-lg" onchange="applyFilters('<?= $filterId ?>')">
+                        <?php foreach ($filters['type']['options'] as $value => $label): ?>
+                            <option value="<?= escape($value) ?>" <?= ($_GET['type'] ?? '') === $value || ($_GET['type'] === '' && $value === 'all') ? 'selected' : '' ?>>
+                                <?= escape($label) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Size Filter -->
+                <?php if (isset($filters['size'])): ?>
+                <div>
+                    <label class="block text-sm font-medium mb-2">File Size</label>
+                    <select name="size" class="w-full px-4 py-2 border rounded-lg" onchange="applyFilters('<?= $filterId ?>')">
+                        <?php foreach ($filters['size']['options'] as $value => $label): ?>
+                            <option value="<?= escape($value) ?>" <?= ($_GET['size'] ?? '') === $value || ($_GET['size'] === '' && $value === 'all') ? 'selected' : '' ?>>
                                 <?= escape($label) ?>
                             </option>
                         <?php endforeach; ?>
@@ -148,7 +176,7 @@ $sortOptions = $sortOptions ?? [];
                 
                 <!-- Preserve other GET parameters -->
                 <?php foreach ($_GET as $key => $value): ?>
-                    <?php if (!in_array($key, ['search', 'status', 'category', 'featured', 'sort', 'date_from', 'date_to', 'price_min', 'price_max', 'columns', 'page'])): ?>
+                    <?php if (!in_array($key, ['search', 'status', 'category', 'featured', 'type', 'size', 'sort', 'date_from', 'date_to', 'price_min', 'price_max', 'columns', 'page'])): ?>
                         <?php if (is_array($value)): ?>
                             <?php foreach ($value as $v): ?>
                                 <input type="hidden" name="<?= escape($key) ?>[]" value="<?= escape($v) ?>">
@@ -178,8 +206,14 @@ function toggleFilterPanel(filterId) {
     const icon = document.getElementById('toggle-icon-' + filterId);
     
     content.classList.toggle('hidden');
-    icon.classList.toggle('fa-chevron-up');
-    icon.classList.toggle('fa-chevron-down');
+    // Update icon based on visibility
+    if (content.classList.contains('hidden')) {
+        icon.classList.remove('fa-chevron-up');
+        icon.classList.add('fa-chevron-down');
+    } else {
+        icon.classList.remove('fa-chevron-down');
+        icon.classList.add('fa-chevron-up');
+    }
 }
 
 function applyFilters(filterId) {

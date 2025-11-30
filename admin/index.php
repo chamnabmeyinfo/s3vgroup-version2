@@ -8,6 +8,15 @@ use App\Models\Category;
 $productModel = new Product();
 $categoryModel = new Category();
 
+// Check if orders table exists
+$hasOrders = false;
+try {
+    db()->fetchOne("SELECT 1 FROM orders LIMIT 1");
+    $hasOrders = true;
+} catch (Exception $e) {
+    // Orders table doesn't exist
+}
+
 $stats = [
     'total_products' => db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_active = 1")['count'],
     'total_products_all' => db()->fetchOne("SELECT COUNT(*) as count FROM products")['count'],
@@ -20,6 +29,13 @@ $stats = [
     'quotes_today' => db()->fetchOne("SELECT COUNT(*) as count FROM quote_requests WHERE DATE(created_at) = CURDATE()")['count'],
     'messages_today' => db()->fetchOne("SELECT COUNT(*) as count FROM contact_messages WHERE DATE(created_at) = CURDATE()")['count'],
 ];
+
+if ($hasOrders) {
+    $stats['pending_orders'] = db()->fetchOne("SELECT COUNT(*) as count FROM orders WHERE status = 'pending'")['count'];
+    $stats['total_orders'] = db()->fetchOne("SELECT COUNT(*) as count FROM orders")['count'];
+    $stats['orders_today'] = db()->fetchOne("SELECT COUNT(*) as count FROM orders WHERE DATE(created_at) = CURDATE()")['count'];
+    $stats['orders_revenue'] = db()->fetchOne("SELECT COALESCE(SUM(total), 0) as total FROM orders WHERE payment_status = 'paid'")['total'] ?? 0;
+}
 
 $recentProducts = $productModel->getAll(['limit' => 5]);
 $recentQuotes = db()->fetchAll(
@@ -71,6 +87,20 @@ include __DIR__ . '/includes/header.php';
         <a href="<?= url('admin/quotes.php') ?>" class="text-xs text-yellow-600 hover:underline mt-2 block">View All (<?= $stats['total_quotes'] ?>) →</a>
     </div>
     
+    <?php if ($hasOrders): ?>
+    <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="text-gray-600">Pending Orders</p>
+                <p class="text-3xl font-bold"><?= $stats['pending_orders'] ?></p>
+                <p class="text-sm text-gray-500"><?= $stats['orders_today'] ?> today</p>
+            </div>
+            <i class="fas fa-shopping-cart text-4xl text-purple-600"></i>
+        </div>
+        <a href="<?= url('admin/orders.php') ?>" class="text-xs text-purple-600 hover:underline mt-2 block">View All (<?= $stats['total_orders'] ?>) →</a>
+    </div>
+    <?php endif; ?>
+    
     <div class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition-shadow">
         <div class="flex items-center justify-between">
             <div>
@@ -84,10 +114,61 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<?php if ($hasOrders): ?>
+<!-- Revenue Summary -->
+<div class="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow-lg p-6 mb-8 text-white">
+    <div class="flex items-center justify-between">
+        <div>
+            <p class="text-green-100 text-sm mb-1">Total Revenue</p>
+            <p class="text-4xl font-bold">$<?= number_format($stats['orders_revenue'], 2) ?></p>
+            <p class="text-green-100 text-sm mt-1">From paid orders</p>
+        </div>
+        <i class="fas fa-dollar-sign text-6xl opacity-50"></i>
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="grid md:grid-cols-2 gap-6">
+    <?php if ($hasOrders && !empty($recentOrders)): ?>
+    <!-- Recent Orders -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Recent Orders</h2>
+            <a href="<?= url('admin/orders.php') ?>" class="text-sm text-blue-600 hover:underline">View All →</a>
+        </div>
+        <div class="space-y-3">
+            <?php foreach ($recentOrders as $order): ?>
+            <div class="flex justify-between items-center border-b pb-2">
+                <div>
+                    <a href="<?= url('admin/order-view.php?id=' . $order['id']) ?>" 
+                       class="text-blue-600 hover:underline font-semibold">
+                        <?= escape($order['order_number']) ?>
+                    </a>
+                    <p class="text-sm text-gray-500">
+                        <?php if ($order['first_name'] || $order['last_name']): ?>
+                            <?= escape($order['first_name'] . ' ' . $order['last_name']) ?>
+                        <?php else: ?>
+                            Guest
+                        <?php endif; ?>
+                        • <?= escape($order['item_count'] ?? 0) ?> item(s)
+                    </p>
+                </div>
+                <div class="text-right">
+                    <span class="font-bold text-green-600">$<?= number_format($order['total'], 2) ?></span>
+                    <p class="text-xs text-gray-500"><?= date('M d', strtotime($order['created_at'])) ?></p>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+    
     <!-- Recent Products -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-4">Recent Products</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Recent Products</h2>
+            <a href="<?= url('admin/products.php') ?>" class="text-sm text-blue-600 hover:underline">View All →</a>
+        </div>
         <div class="space-y-3">
             <?php foreach ($recentProducts as $product): ?>
             <div class="flex justify-between items-center border-b pb-2">
@@ -97,12 +178,16 @@ include __DIR__ . '/includes/header.php';
             </div>
             <?php endforeach; ?>
         </div>
-        <a href="<?= url('admin/products.php') ?>" class="block mt-4 text-blue-600 hover:underline">View All →</a>
     </div>
-    
+</div>
+
+<div class="grid md:grid-cols-2 gap-6 mt-6">
     <!-- Recent Quote Requests -->
     <div class="bg-white rounded-lg shadow p-6">
-        <h2 class="text-xl font-bold mb-4">Recent Quote Requests</h2>
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-bold">Recent Quote Requests</h2>
+            <a href="<?= url('admin/quotes.php') ?>" class="text-sm text-blue-600 hover:underline">View All →</a>
+        </div>
         <div class="space-y-3">
             <?php foreach ($recentQuotes as $quote): ?>
             <div class="border-b pb-2">
@@ -121,7 +206,6 @@ include __DIR__ . '/includes/header.php';
             </div>
             <?php endforeach; ?>
         </div>
-        <a href="<?= url('admin/quotes.php') ?>" class="block mt-4 text-blue-600 hover:underline">View All →</a>
     </div>
 </div>
 

@@ -9,6 +9,8 @@ config/database.php
 !config/database.php.example
 config/app.php
 !config/app.php.example
+config/under-construction.php
+!config/under-construction.php.example
 .env
 .env.local
 *.env

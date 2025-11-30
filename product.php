@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/bootstrap/app.php';
 
+// Check under construction mode
+use App\Helpers\UnderConstruction;
+UnderConstruction::show();
+
 use App\Models\Product;
 use App\Models\Category;
 
@@ -60,6 +64,40 @@ if (!empty($product['specifications'])) {
     $specifications = json_decode($product['specifications'], true) ?? [];
 }
 
+// Get product variants
+$variants = [];
+$variantAttributes = [];
+try {
+    $variants = db()->fetchAll(
+        "SELECT * FROM product_variants WHERE product_id = :product_id AND is_active = 1 ORDER BY sort_order, id",
+        ['product_id' => $product['id']]
+    );
+    
+    if (!empty($variants)) {
+        $variantIds = array_column($variants, 'id');
+        $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
+        $attributes = db()->fetchAll(
+            "SELECT * FROM product_variant_attributes WHERE variant_id IN ($placeholders)",
+            $variantIds
+        );
+        
+        foreach ($attributes as $attr) {
+            if (!isset($variantAttributes[$attr['variant_id']])) {
+                $variantAttributes[$attr['variant_id']] = [];
+            }
+            $variantAttributes[$attr['variant_id']][$attr['attribute_name']] = $attr['attribute_value'];
+        }
+        
+        // Add attributes to variants
+        foreach ($variants as &$variant) {
+            $variant['attributes'] = $variantAttributes[$variant['id']] ?? [];
+        }
+    }
+} catch (Exception $e) {
+    // Variants table might not exist
+    $variants = [];
+}
+
 $pageTitle = escape($product['name']) . ' - Forklift & Equipment Pro';
 $metaDescription = escape($product['short_description'] ?? $product['description'] ?? '');
 
@@ -68,6 +106,33 @@ include __DIR__ . '/includes/header.php';
 
 <main class="py-8">
     <div class="container mx-auto px-4">
+        <!-- Admin Bar (if logged in) -->
+        <?php if (session('admin_logged_in')): ?>
+        <div class="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded flex items-center justify-between">
+            <div class="flex items-center gap-2 text-sm text-yellow-800">
+                <i class="fas fa-user-shield"></i>
+                <span>Admin Mode: You're viewing as administrator</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
+                   class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center gap-1">
+                    <i class="fas fa-edit"></i>
+                    <span>Edit Product</span>
+                </a>
+                <a href="<?= url('admin/products.php') ?>" 
+                   class="px-3 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm flex items-center gap-1">
+                    <i class="fas fa-list"></i>
+                    <span>All Products</span>
+                </a>
+                <a href="<?= url('admin/index.php') ?>" 
+                   class="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span class="hidden sm:inline ml-1">Dashboard</span>
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+        
         <!-- Breadcrumb -->
         <nav class="text-sm text-gray-600 mb-6">
             <a href="<?= url() ?>" class="hover:text-blue-600">Home</a>
@@ -127,7 +192,17 @@ include __DIR__ . '/includes/header.php';
                     </span>
                 <?php endif; ?>
                 
-                <h1 class="text-3xl font-bold mb-4"><?= escape($product['name']) ?></h1>
+                <div class="flex justify-between items-start mb-4">
+                    <h1 class="text-3xl font-bold"><?= escape($product['name']) ?></h1>
+                    <?php if (session('admin_logged_in')): ?>
+                        <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
+                           class="ml-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2 text-sm"
+                           title="Edit Product">
+                            <i class="fas fa-edit"></i>
+                            <span class="hidden sm:inline">Edit</span>
+                        </a>
+                    <?php endif; ?>
+                </div>
                 
                 <?php if (!empty($product['category_name'])): ?>
                     <p class="text-gray-600 mb-4">Category: 
@@ -156,8 +231,69 @@ include __DIR__ . '/includes/header.php';
                     <p class="text-gray-700 mb-6"><?= nl2br(escape($product['short_description'])) ?></p>
                 <?php endif; ?>
                 
+                <!-- Product Variants -->
+                <?php if (!empty($variants)): ?>
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg border">
+                    <h3 class="font-semibold mb-4 flex items-center">
+                        <i class="fas fa-layer-group mr-2 text-purple-600"></i>
+                        Available Variants
+                    </h3>
+                    
+                    <?php
+                    // Group variants by attributes
+                    $attributeGroups = [];
+                    foreach ($variants as $variant) {
+                        foreach ($variant['attributes'] as $attrName => $attrValue) {
+                            if (!isset($attributeGroups[$attrName])) {
+                                $attributeGroups[$attrName] = [];
+                            }
+                            if (!in_array($attrValue, $attributeGroups[$attrName])) {
+                                $attributeGroups[$attrName][] = $attrValue;
+                            }
+                        }
+                    }
+                    ?>
+                    
+                    <div id="variant-selector" class="space-y-4">
+                        <?php foreach ($attributeGroups as $attrName => $attrValues): ?>
+                        <div>
+                            <label class="block text-sm font-medium mb-2"><?= escape($attrName) ?></label>
+                            <select class="variant-attribute-select w-full px-4 py-2 border rounded-lg" 
+                                    data-attribute="<?= escape($attrName) ?>"
+                                    onchange="updateVariantSelection()">
+                                <option value="">Select <?= escape($attrName) ?></option>
+                                <?php foreach ($attrValues as $value): ?>
+                                    <option value="<?= escape($value) ?>"><?= escape($value) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <?php endforeach; ?>
+                        
+                        <div id="selected-variant-info" class="hidden p-3 bg-blue-50 border border-blue-200 rounded">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold text-blue-900">Selected Variant:</span>
+                                <span id="selected-variant-name" class="text-blue-700"></span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <span id="selected-variant-price" class="text-2xl font-bold text-blue-600"></span>
+                                    <span id="selected-variant-sale-price" class="text-lg text-gray-400 line-through ml-2"></span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-600">Stock:</span>
+                                    <span id="selected-variant-stock" class="ml-2 font-semibold"></span>
+                                </div>
+                            </div>
+                            <div id="selected-variant-sku" class="text-xs text-gray-600 mt-2"></div>
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="selected-variant-id" value="">
+                </div>
+                <?php endif; ?>
+                
                 <div class="flex gap-4 mb-6 flex-wrap">
-                    <button onclick="addToCart(<?= $product['id'] ?>)" class="btn-primary flex-1 text-center min-w-[140px]">
+                    <button onclick="addToCart(<?= $product['id'] ?>)" id="add-to-cart-btn" class="btn-primary flex-1 text-center min-w-[140px]">
                         <i class="fas fa-shopping-cart mr-2"></i> Add to Cart
                     </button>
                     <a href="<?= url('quote.php?product_id=' . $product['id']) ?>" class="btn-secondary flex-1 text-center min-w-[140px]">
@@ -303,6 +439,144 @@ function changeMainImage(imageSrc, thumbnail) {
     }
 }
 
+// Variant Management
+const variants = <?= json_encode($variants ?? []) ?>;
+let selectedVariant = null;
+
+// Debug: Log variants
+console.log('Product Variants:', variants);
+
+function updateVariantSelection() {
+    console.log('updateVariantSelection called');
+    const selects = document.querySelectorAll('.variant-attribute-select');
+    const selectedAttributes = {};
+    
+    selects.forEach(select => {
+        const attrName = select.dataset.attribute;
+        const attrValue = select.value;
+        if (attrValue) {
+            selectedAttributes[attrName] = attrValue;
+        }
+    });
+    
+    console.log('Selected attributes:', selectedAttributes);
+    console.log('Available variants:', variants);
+    
+    // Find matching variant
+    selectedVariant = variants.find(variant => {
+        if (Object.keys(selectedAttributes).length === 0) return false;
+        
+        // Must have attributes
+        if (!variant.attributes || Object.keys(variant.attributes).length === 0) {
+            return false;
+        }
+        
+        // Check if all selected attributes match this variant
+        let allMatch = true;
+        for (const [attrName, attrValue] of Object.entries(selectedAttributes)) {
+            if (variant.attributes[attrName] !== attrValue) {
+                allMatch = false;
+                break;
+            }
+        }
+        
+        if (!allMatch) return false;
+        
+        // Check if variant has exactly the same number of attributes as selected
+        // (to ensure we're matching the complete variant, not a partial match)
+        const variantAttrCount = Object.keys(variant.attributes).length;
+        const selectedAttrCount = Object.keys(selectedAttributes).length;
+        
+        return variantAttrCount === selectedAttrCount;
+    });
+    
+    // Update UI
+    const infoDiv = document.getElementById('selected-variant-info');
+    const variantIdInput = document.getElementById('selected-variant-id');
+    
+    if (selectedVariant) {
+        console.log('Found matching variant:', selectedVariant);
+        infoDiv.classList.remove('hidden');
+        document.getElementById('selected-variant-name').textContent = selectedVariant.name || 'Selected Variant';
+        
+        // Update price
+        if (selectedVariant.sale_price) {
+            document.getElementById('selected-variant-price').textContent = '$' + parseFloat(selectedVariant.sale_price).toFixed(2);
+            document.getElementById('selected-variant-sale-price').textContent = '$' + parseFloat(selectedVariant.price).toFixed(2);
+            document.getElementById('selected-variant-sale-price').classList.remove('hidden');
+        } else {
+            document.getElementById('selected-variant-price').textContent = '$' + parseFloat(selectedVariant.price).toFixed(2);
+            document.getElementById('selected-variant-sale-price').classList.add('hidden');
+        }
+        
+        // Update stock
+        const stockStatus = selectedVariant.stock_status === 'in_stock' ? 
+            '<span class="text-green-600">In Stock</span>' : 
+            (selectedVariant.stock_status === 'out_of_stock' ? 
+                '<span class="text-red-600">Out of Stock</span>' : 
+                '<span class="text-yellow-600">On Order</span>');
+        document.getElementById('selected-variant-stock').innerHTML = stockStatus;
+        
+        if (selectedVariant.stock_quantity > 0) {
+            document.getElementById('selected-variant-stock').innerHTML += ' (' + selectedVariant.stock_quantity + ' available)';
+        }
+        
+        // Update SKU
+        if (selectedVariant.sku) {
+            document.getElementById('selected-variant-sku').textContent = 'SKU: ' + selectedVariant.sku;
+        }
+        
+        variantIdInput.value = selectedVariant.id;
+        
+        // Update main image if variant has image
+        if (selectedVariant.image) {
+            const mainImage = document.getElementById('main-image');
+            if (mainImage) {
+                mainImage.src = '<?= asset('storage/uploads/') ?>' + selectedVariant.image;
+            }
+        }
+        
+        // Update add to cart button
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        if (addToCartBtn) {
+            if (selectedVariant.stock_status === 'out_of_stock') {
+                addToCartBtn.disabled = true;
+                addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                addToCartBtn.innerHTML = '<i class="fas fa-ban mr-2"></i> Out of Stock';
+            } else {
+                addToCartBtn.disabled = false;
+                addToCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i> Add to Cart';
+            }
+        }
+    } else {
+        console.log('No matching variant found');
+        infoDiv.classList.add('hidden');
+        variantIdInput.value = '';
+        
+        // Reset add to cart button
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        if (addToCartBtn && variants.length > 0) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i> Select Variant';
+        }
+    }
+}
+
+
+// Initialize - disable add to cart if variants exist but none selected
+document.addEventListener('DOMContentLoaded', function() {
+    if (variants.length > 0) {
+        const addToCartBtn = document.getElementById('add-to-cart-btn');
+        if (addToCartBtn) {
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            addToCartBtn.innerHTML = '<i class="fas fa-shopping-cart mr-2"></i> Select Variant';
+        }
+    }
+});
+
 function showTab(tabName) {
     // Hide all tab contents
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -321,8 +595,20 @@ function showTab(tabName) {
     event.target.classList.add('active', 'border-b-2', 'border-blue-600');
 }
 
-function addToCart(productId) {
-    fetch('<?= url('api/cart.php') ?>?action=add&product_id=' + productId, {
+function addToCart(productId, variantId) {
+    variantId = variantId || document.getElementById('selected-variant-id')?.value;
+    
+    if (variants.length > 0 && !variantId) {
+        alert('Please select a variant first.');
+        return;
+    }
+    
+    let url = '<?= url('api/cart.php') ?>?action=add&product_id=' + productId;
+    if (variantId) {
+        url += '&variant_id=' + variantId;
+    }
+    
+    fetch(url, {
         method: 'POST'
     })
     .then(response => response.json())

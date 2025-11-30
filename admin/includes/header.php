@@ -13,11 +13,15 @@
             <div class="flex justify-between items-center h-16">
                 <a href="<?= url('admin/index.php') ?>" class="text-xl font-bold">Admin Panel</a>
                 <div class="flex items-center space-x-4">
-                    <span>Welcome, <?= escape(session('admin_username')) ?></span>
-                    <?php if (session('admin_role_name')): ?>
-                    <span class="text-sm opacity-75">Role: <?= escape(session('admin_role_name')) ?></span>
-                <?php endif; ?>
-                <a href="<?= url('admin/logout.php') ?>" class="hover:underline">Logout</a>
+                    <?php if (session('admin_username')): ?>
+                        <span>Welcome, <?= escape(session('admin_username')) ?></span>
+                        <?php if (session('admin_role_name')): ?>
+                            <span class="text-sm opacity-75">Role: <?= escape(session('admin_role_name')) ?></span>
+                        <?php endif; ?>
+                        <a href="<?= url('admin/logout.php') ?>" class="hover:underline">Logout</a>
+                    <?php else: ?>
+                        <a href="<?= url('admin/login.php') ?>" class="hover:underline">Login</a>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -34,6 +38,9 @@
                 </a>
                 <a href="<?= url('admin/categories.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-tags mr-2"></i> Categories
+                </a>
+                <a href="<?= url('admin/orders.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-shopping-cart mr-2"></i> Orders
                 </a>
                 <a href="<?= url('admin/quotes.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-calculator mr-2"></i> Quote Requests
@@ -65,35 +72,42 @@
                 <div class="border-t border-gray-700 my-2"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase">User Management</div>
                 <?php 
-                // Only show user management if role system is set up
-                try {
-                    db()->fetchOne("SELECT 1 FROM roles LIMIT 1");
-                    if (hasPermission('view_users')): 
-                ?>
-                <a href="<?= url('admin/users.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-users mr-2"></i> Users
-                </a>
-                <?php 
-                    endif;
-                    if (hasPermission('view_roles')): 
-                ?>
-                <a href="<?= url('admin/roles.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-user-shield mr-2"></i> Roles & Permissions
-                </a>
-                <?php 
-                    endif;
-                } catch (\Exception $e) {
-                    // Roles table doesn't exist - don't show menu items
+                // Only show user management if role system is set up and hasPermission function exists
+                if (function_exists('hasPermission')) {
+                    try {
+                        db()->fetchOne("SELECT 1 FROM roles LIMIT 1");
+                        if (hasPermission('view_users')): 
+                    ?>
+                    <a href="<?= url('admin/users.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                        <i class="fas fa-users mr-2"></i> Users
+                    </a>
+                    <?php 
+                        endif;
+                        if (hasPermission('view_roles')): 
+                    ?>
+                    <a href="<?= url('admin/roles.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                        <i class="fas fa-user-shield mr-2"></i> Roles & Permissions
+                    </a>
+                    <?php 
+                        endif;
+                    } catch (\Exception $e) {
+                        // Roles table doesn't exist - don't show menu items
+                    }
                 }
                 ?>
                 <div class="border-t border-gray-700 my-2"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase">Advanced</div>
-                <?php if (hasPermission('use_api')): ?>
+                <?php if (function_exists('hasPermission') && hasPermission('use_api')): ?>
                 <a href="<?= url('admin/api-test.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-code mr-2"></i> API Testing
                 </a>
                 <?php endif; ?>
                 <div class="border-t border-gray-700 my-2"></div>
+                <?php if (!function_exists('hasPermission') || hasPermission('manage_under_construction')): ?>
+                <a href="<?= url('admin/under-construction.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-hard-hat mr-2"></i> Under Construction
+                </a>
+                <?php endif; ?>
                 <a href="<?= url('admin/settings.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-cog mr-2"></i> Settings
                 </a>

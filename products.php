@@ -1,6 +1,10 @@
 <?php
 require_once __DIR__ . '/bootstrap/app.php';
 
+// Check under construction mode
+use App\Helpers\UnderConstruction;
+UnderConstruction::show();
+
 use App\Models\Product;
 use App\Models\Category;
 
