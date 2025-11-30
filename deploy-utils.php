@@ -47,4 +47,3 @@ if (!function_exists('fnmatch')) {
         return preg_match('/^' . $pattern . '$/i', $string);
     }
 }
-

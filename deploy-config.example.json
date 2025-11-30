@@ -11,7 +11,8 @@
     "enabled": true,
     "branch": "main",
     "auto_commit": true,
-    "commit_message": "Auto deploy: {timestamp}"
+    "commit_message": "Auto deploy: {timestamp}",
+    "token": "your_github_personal_access_token_here"
   },
   "upload": {
     "images": true,

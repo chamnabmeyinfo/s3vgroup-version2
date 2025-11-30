@@ -72,10 +72,54 @@ function deployGit($config, $log) {
     
     // Push
     $log->info("  Pushing to GitHub...");
-    exec("git push origin {$branch}", $output, $returnCode);
+    
+    // Check if token is configured
+    $token = $config['git']['token'] ?? null;
+    $remoteUrl = null;
+    
+    if ($token) {
+        // Get current remote URL
+        exec('git remote get-url origin', $remoteOutput, $remoteReturnCode);
+        if ($remoteReturnCode === 0 && !empty($remoteOutput)) {
+            $currentUrl = trim($remoteOutput[0]);
+            
+            // If URL doesn't already contain token, add it
+            if (strpos($currentUrl, '@') === false || strpos($currentUrl, '://' . $token . '@') === false) {
+                // Extract repo path from URL
+                if (preg_match('#https?://(?:[^@]+@)?github\.com/(.+)#', $currentUrl, $matches)) {
+                    $repoPath = $matches[1];
+                    $remoteUrl = "https://{$token}@github.com/{$repoPath}";
+                    
+                    // Temporarily set remote URL with token
+                    exec("git remote set-url origin {$remoteUrl}", $setUrlOutput, $setUrlReturnCode);
+                    if ($setUrlReturnCode !== 0) {
+                        $log->warning("  ⚠️  Could not set remote URL with token, trying without...");
+                    }
+                }
+            }
+        }
+    }
+    
+    // Push with token in URL (if configured)
+    exec("git push origin {$branch} 2>&1", $output, $returnCode);
+    
+    // Restore original remote URL if we changed it
+    if ($token && $remoteUrl) {
+        exec('git remote get-url origin', $checkOutput);
+        $currentUrl = trim($checkOutput[0] ?? '');
+        if (strpos($currentUrl, $token) !== false) {
+            // Remove token from URL for security
+            $cleanUrl = preg_replace('#https://[^@]+@github\.com/#', 'https://github.com/', $currentUrl);
+            exec("git remote set-url origin {$cleanUrl}", $restoreOutput, $restoreReturnCode);
+        }
+    }
     
     if ($returnCode !== 0) {
-        $result['message'] = 'Failed to push: ' . implode("\n", $output);
+        $errorMsg = implode("\n", $output);
+        // Don't expose token in error messages
+        $errorMsg = preg_replace('#https://[^@]+@github\.com/#', 'https://github.com/', $errorMsg);
+        $result['message'] = 'Failed to push: ' . $errorMsg;
+        $log->error("  ✗ Push failed");
         return $result;
     }
     

@@ -639,3 +639,165 @@ Validation passed with warnings. Continuing deployment...
 [2025-11-30 16:44:42] [INFO]   Checking for changes...
 [2025-11-30 16:44:42] [INFO]   Found 2 changed file(s)
 [2025-11-30 16:44:42] [INFO]   Adding files...
+[2025-11-30 16:44:42] [INFO]   ✓ Files added
+[2025-11-30 16:44:42] [INFO]   Committing changes...
+[2025-11-30 16:44:43] [INFO]   ✓ Committed
+[2025-11-30 16:44:43] [INFO]   Pushing to GitHub...
+[2025-11-30 16:44:53] [INFO]   ✓ Pushed to origin/main
+[2025-11-30 16:44:53] [INFO] 
+[2/4] Uploading via FTP (Smart Mode)...
+[2025-11-30 16:44:53] [INFO]   Connecting to FTP server...
+[2025-11-30 16:44:53] [INFO]   ✓ Connected
+[2025-11-30 16:44:53] [INFO]   Found 23 file(s) to check
+[2025-11-30 16:44:53] [INFO]   Analyzing files (change detection)...
+[2025-11-30 16:44:56] [INFO]   Analysis complete:
+[2025-11-30 16:44:56] [INFO]     - New/changed: 0
+[2025-11-30 16:44:56] [INFO]     - Unchanged (skipped): 0
+[2025-11-30 16:44:56] [INFO]     - Conflicts: 23
+[2025-11-30 16:44:56] [WARNING]   ⚠️  Conflicts detected!
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-30 12:09:48 (126197 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:11 (126197 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (25828 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:12 (25828 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (27260 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:13 (27260 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (26337 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:13 (26337 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (22928 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:14 (22928 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (25957 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:14 (25957 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 21:57:34 (68691 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:15 (68691 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:34:07 (237975 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:16 (237975 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:35:09 (1140428 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:17 (1140428 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:35:21 (1651681 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:20 (1651681 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 23:07:01 (454428 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:21 (454428 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 23:07:35 (150061 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:22 (150061 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 23:07:54 (184127 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:23 (184127 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-30 12:22:42 (968155 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:24 (968155 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (25206 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:25 (25206 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (26120 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:26 (26120 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (25276 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:26 (25276 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (22862 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:27 (22862 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (24914 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:27 (24914 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:07 (27336 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:28 (27336 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:47:55 (27227 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:29 (27227 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-29 22:48:23 (24242 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:29 (24242 bytes)
+[2025-11-30 16:44:56] [WARNING]     - storage/uploads/.gitkeep
+[2025-11-30 16:44:56] [WARNING]       Local: 2025-11-30 09:37:00 (93 bytes)
+[2025-11-30 16:44:56] [WARNING]       Remote: 2025-11-30 16:40:30 (93 bytes)
+[2025-11-30 16:44:56] [INFO]   Creating backups for conflicted files...
+[2025-11-30 16:44:57] [INFO]     ✓ Backed up: storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:44:58] [INFO]     ✓ Backed up: storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:44:58] [INFO]     ✓ Backed up: storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:44:59] [INFO]     ✓ Backed up: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:45:00] [INFO]     ✓ Backed up: storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:45:00] [INFO]     ✓ Backed up: storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:45:01] [INFO]     ✓ Backed up: storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:45:03] [INFO]     ✓ Backed up: storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:45:06] [INFO]     ✓ Backed up: storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:45:09] [INFO]     ✓ Backed up: storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:45:11] [INFO]     ✓ Backed up: storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:45:12] [INFO]     ✓ Backed up: storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:45:13] [INFO]     ✓ Backed up: storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:45:15] [INFO]     ✓ Backed up: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:45:16] [INFO]     ✓ Backed up: storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:45:17] [INFO]     ✓ Backed up: storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:45:17] [INFO]     ✓ Backed up: storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:45:18] [INFO]     ✓ Backed up: storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:45:19] [INFO]     ✓ Backed up: storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:45:20] [INFO]     ✓ Backed up: storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:45:21] [INFO]     ✓ Backed up: storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:45:21] [INFO]     ✓ Backed up: storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:45:22] [INFO]     ✓ Backed up: storage/uploads/.gitkeep
+[2025-11-30 16:45:22] [INFO]   Uploading 23 file(s)...
+[2025-11-30 16:45:22] [INFO]   [4%] Uploading: storage/uploads/S-3-008-1_692c25fc92396.jpg (conflict (backed up))...
+[2025-11-30 16:45:23] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:23] [INFO]   [9%] Uploading: storage/uploads/cat-ep16c2-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:45:23] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:23] [INFO]   [13%] Uploading: storage/uploads/crown-sc-4500-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:45:24] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:24] [INFO]   [17%] Uploading: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:45:24] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:24] [INFO]   [22%] Uploading: storage/uploads/fork-positioner-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:45:25] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:25] [INFO]   [26%] Uploading: storage/uploads/hyster-h50xm-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:45:25] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:25] [INFO]   [30%] Uploading: storage/uploads/img_692b5e3e06c599.40575246.jpg (conflict (backed up))...
+[2025-11-30 16:45:26] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:26] [INFO]   [35%] Uploading: storage/uploads/img_692b66cf389029.91931429.png (conflict (backed up))...
+[2025-11-30 16:45:26] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:27] [INFO]   [39%] Uploading: storage/uploads/img_692b670d57f5e2.47899934.jpg (conflict (backed up))...
+[2025-11-30 16:45:28] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:28] [INFO]   [43%] Uploading: storage/uploads/img_692b671940fb62.65700892.jpg (conflict (backed up))...
+[2025-11-30 16:45:30] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:31] [INFO]   [48%] Uploading: storage/uploads/img_692b6e850a1386.91083690.png (conflict (backed up))...
+[2025-11-30 16:45:31] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:31] [INFO]   [52%] Uploading: storage/uploads/img_692b6ea74814b6.35163555.jpg (conflict (backed up))...
+[2025-11-30 16:45:32] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:32] [INFO]   [57%] Uploading: storage/uploads/img_692b6eba253204.95036072.jpg (conflict (backed up))...
+[2025-11-30 16:45:33] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:33] [INFO]   [61%] Uploading: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg (conflict (backed up))...
+[2025-11-30 16:45:34] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:34] [INFO]   [65%] Uploading: storage/uploads/kalmar-drf-450-1200-sideloader.jpg (conflict (backed up))...
+[2025-11-30 16:45:34] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:35] [INFO]   [70%] Uploading: storage/uploads/raymond-102xm-order-picker.jpg (conflict (backed up))...
+[2025-11-30 16:45:35] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:35] [INFO]   [74%] Uploading: storage/uploads/raymond-easi-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:45:35] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:36] [INFO]   [78%] Uploading: storage/uploads/rotating-clamp-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:45:36] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:36] [INFO]   [83%] Uploading: storage/uploads/toyota-8fbrt25-reach-truck.jpg (conflict (backed up))...
+[2025-11-30 16:45:36] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:37] [INFO]   [87%] Uploading: storage/uploads/toyota-8fgu25-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:45:37] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:37] [INFO]   [91%] Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:45:37] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:38] [INFO]   [96%] Uploading: storage/uploads/yale-msw025-stacker.jpg (conflict (backed up))...
+[2025-11-30 16:45:38] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:38] [INFO]   [100%] Uploading: storage/uploads/.gitkeep (conflict (backed up))...
+[2025-11-30 16:45:38] [INFO]     ✓ Uploaded
+[2025-11-30 16:45:38] [INFO]   💡 Smart: Handled 23 conflict(s)
+[2025-11-30 16:45:38] [INFO] 
+[3/4] Finalizing...
+[2025-11-30 16:45:38] [INFO] ========================================
+[2025-11-30 16:45:38] [INFO] Deployment Complete!
+[2025-11-30 16:45:38] [INFO] ========================================
