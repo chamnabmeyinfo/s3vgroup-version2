@@ -52,10 +52,13 @@ When human explains a requirement:
    **Priority Questions:**
    
    1. [CRITICAL] [Question about core functionality]
-   2. [IMPORTANT] [Question about implementation approach]
-   3. [IMPORTANT] [Question about data/structure]
-   4. [NICE-TO-HAVE] [Question about optional features]
+   2. [CRITICAL] [Question about user flow/data/security - ask all critical questions first]
+   3. [IMPORTANT] [Question about implementation approach]
+   4. [IMPORTANT] [Question about integration/performance]
+   5. [NICE-TO-HAVE] [Question about optional features]
    ```
+   
+   **Note:** Ask ALL critical questions first (2-4 questions depending on context), then important questions, then nice-to-have. The example below shows 2 critical questions, but you may need more based on the requirement.
 
 3. **Wait for Answers**
    - Don't proceed until human answers
