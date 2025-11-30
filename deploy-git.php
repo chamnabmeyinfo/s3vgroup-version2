@@ -77,6 +77,8 @@ function deployGit($config, $log) {
     $token = $config['git']['token'] ?? null;
     $remoteUrl = null;
     $originalUrl = null; // Store original URL for restoration
+    $urlModifiedSuccessfully = false; // Track if we successfully modified the URL
+    $attemptedModification = false; // Track if we attempted to modify the URL
     
     if ($token) {
         // Get current remote URL
@@ -94,17 +96,21 @@ function deployGit($config, $log) {
                     $remoteUrl = "{$protocol}://{$token}@github.com/{$repoPath}";
                     
                     // Temporarily set remote URL with token
+                    $attemptedModification = true; // We attempted to modify
                     exec("git remote set-url origin " . escapeshellarg($remoteUrl), $setUrlOutput, $setUrlReturnCode);
-                    if ($setUrlReturnCode !== 0) {
+                    if ($setUrlReturnCode === 0) {
+                        $urlModifiedSuccessfully = true; // Successfully modified URL
+                    } else {
                         $log->warning("  ⚠️  Could not set remote URL with token, trying without...");
                         $remoteUrl = null; // Don't try to restore if we didn't change it
                     }
                 }
             } else {
                 // Token already in URL (from previous deployment or manual config)
-                // We still need to clean it up after push, so mark it for cleanup
+                // We didn't modify it, but we'll use it for push and clean it up after
                 $remoteUrl = null; // Don't modify before push
-                // But we'll clean it up after push - originalUrl is already stored
+                $attemptedModification = false; // We didn't attempt to modify
+                // Note: $urlModifiedSuccessfully remains false - we didn't modify it
             }
         }
     }
@@ -113,14 +119,16 @@ function deployGit($config, $log) {
     exec("git push origin " . escapeshellarg($branch) . " 2>&1", $output, $returnCode);
     
     // Restore/clean remote URL if token was used (CRITICAL for security)
-    // Check $originalUrl to handle both cases: token we added OR token already present
+    // Only clean up if we successfully modified the URL OR if token was already present (we used it)
     if ($token && $originalUrl) {
         // Check if original URL contains any token (indicated by @ in URL)
-        $needsCleanup = (strpos($originalUrl, '@') !== false);
+        $originalHadToken = (strpos($originalUrl, '@') !== false);
         
-        // If we modified the URL, we definitely need cleanup
-        // If token was already present, we also need cleanup
-        if ($remoteUrl || $needsCleanup) {
+        // Clean up only if:
+        // 1. We successfully modified the URL (added our token), OR
+        // 2. Original URL had a token AND we didn't attempt to modify it (token was already there, we used it)
+        //    BUT NOT if we attempted modification and failed (don't touch original token if modification failed)
+        if ($urlModifiedSuccessfully || ($originalHadToken && !$attemptedModification)) {
             // Try to get current URL to verify token is present
             exec('git remote get-url origin', $checkOutput, $checkReturnCode);
             
