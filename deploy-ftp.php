@@ -1,0 +1,225 @@
+<?php
+/**
+ * FTP Deployment Module
+ * Handles uploading non-Git files via FTP
+ */
+
+function deployFTP($config, $log) {
+    $result = ['success' => false, 'message' => '', 'files_uploaded' => 0];
+    
+    // Check FTP config
+    $ftpConfig = $config['ftp'] ?? [];
+    if (empty($ftpConfig['host']) || empty($ftpConfig['username'])) {
+        $result['message'] = 'FTP configuration incomplete';
+        return $result;
+    }
+    
+    // Connect to FTP
+    $log->info("  Connecting to FTP server...");
+    $ftp = @ftp_connect($ftpConfig['host'], $ftpConfig['port'] ?? 21);
+    
+    if (!$ftp) {
+        $result['message'] = 'Failed to connect to FTP server';
+        return $result;
+    }
+    
+    // Login
+    $password = $ftpConfig['password'] ?? '';
+    if (!@ftp_login($ftp, $ftpConfig['username'], $password)) {
+        ftp_close($ftp);
+        $result['message'] = 'FTP login failed';
+        return $result;
+    }
+    
+    // Enable passive mode
+    ftp_pasv($ftp, true);
+    $log->info("  ✓ Connected");
+    
+    // Get files to upload
+    $filesToUpload = getFilesToUpload($config, $log);
+    
+    if (empty($filesToUpload)) {
+        $log->info("  No files to upload");
+        ftp_close($ftp);
+        $result['success'] = true;
+        $result['message'] = 'No files to upload';
+        return $result;
+    }
+    
+    $log->info("  Found " . count($filesToUpload) . " file(s) to upload");
+    
+    // Set remote path
+    $remotePath = rtrim($ftpConfig['remote_path'] ?? '/public_html', '/');
+    
+    // Upload files
+    $uploaded = 0;
+    $failed = 0;
+    
+    foreach ($filesToUpload as $file) {
+        $localPath = $file['local'];
+        $remoteFile = $remotePath . '/' . $file['remote'];
+        
+        // Create remote directory if needed
+        $remoteDir = dirname($remoteFile);
+        createRemoteDirectory($ftp, $remoteDir);
+        
+        // Upload file
+        $log->info("  Uploading: {$file['remote']}...");
+        
+        if (@ftp_put($ftp, $remoteFile, $localPath, FTP_BINARY)) {
+            $uploaded++;
+            $log->info("    ✓ Uploaded");
+            
+            // Set permissions if specified
+            if (isset($file['permissions'])) {
+                ftp_chmod($ftp, $file['permissions'], $remoteFile);
+            }
+        } else {
+            $failed++;
+            $log->error("    ✗ Failed to upload");
+        }
+    }
+    
+    ftp_close($ftp);
+    
+    if ($failed > 0) {
+        $result['message'] = "Uploaded {$uploaded}, failed {$failed}";
+    } else {
+        $result['success'] = true;
+        $result['files_uploaded'] = $uploaded;
+        $result['message'] = "Uploaded {$uploaded} file(s)";
+    }
+    
+    return $result;
+}
+
+function getFilesToUpload($config, $log) {
+    $files = [];
+    $uploadConfig = $config['upload'] ?? [];
+    
+    // Get ignored files from .gitignore
+    $ignoredFiles = getIgnoredFiles();
+    
+    // Filter by category
+    foreach ($ignoredFiles as $file) {
+        $shouldUpload = false;
+        $category = getFileCategory($file);
+        
+        // Check upload rules
+        if ($category === 'image' && ($uploadConfig['images'] ?? true)) {
+            $shouldUpload = true;
+        } elseif ($category === 'config' && ($uploadConfig['configs'] ?? false)) {
+            $shouldUpload = true;
+        } elseif ($category === 'other' && ($uploadConfig['others'] ?? false)) {
+            $shouldUpload = true;
+        }
+        
+        if ($shouldUpload) {
+            // Check exclude patterns
+            $excludePatterns = $config['exclude'] ?? [];
+            $excluded = false;
+            
+            foreach ($excludePatterns as $pattern) {
+                if (fnmatch($pattern, $file)) {
+                    $excluded = true;
+                    break;
+                }
+            }
+            
+            if (!$excluded && file_exists($file)) {
+                $files[] = [
+                    'local' => $file,
+                    'remote' => $file,
+                    'permissions' => getFilePermissions($file)
+                ];
+            }
+        }
+    }
+    
+    return $files;
+}
+
+function getIgnoredFiles() {
+    $files = [];
+    
+    // Read .gitignore
+    if (!file_exists('.gitignore')) {
+        return $files;
+    }
+    
+    $gitignore = file('.gitignore', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $baseDir = __DIR__ . '/';
+    
+    // Get actual ignored files
+    exec('git status --ignored --porcelain', $output);
+    
+    foreach ($output as $line) {
+        if (preg_match('/^!!\s+(.+)$/', $line, $matches)) {
+            $file = trim($matches[1]);
+            if (file_exists($file) && is_file($file)) {
+                $files[] = $file;
+            }
+        }
+    }
+    
+    // Also check storage/uploads directory
+    $uploadsDir = __DIR__ . '/storage/uploads/';
+    if (is_dir($uploadsDir)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($uploadsDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $relativePath = str_replace($baseDir, '', $file->getPathname());
+                $relativePath = str_replace('\\', '/', $relativePath);
+                if (!in_array($relativePath, $files)) {
+                    $files[] = $relativePath;
+                }
+            }
+        }
+    }
+    
+    return $files;
+}
+
+function getFileCategory($file) {
+    if (strpos($file, 'storage/uploads/') !== false) {
+        return 'image';
+    } elseif (strpos($file, 'config/') !== false) {
+        return 'config';
+    } else {
+        return 'other';
+    }
+}
+
+function getFilePermissions($file) {
+    // Default permissions
+    if (is_dir($file)) {
+        return 0755;
+    } else {
+        // Images and PHP files
+        if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $file)) {
+            return 0644;
+        } elseif (preg_match('/\.php$/', $file)) {
+            return 0644;
+        } else {
+            return 0644;
+        }
+    }
+}
+
+function createRemoteDirectory($ftp, $dir) {
+    $parts = explode('/', trim($dir, '/'));
+    $currentDir = '';
+    
+    foreach ($parts as $part) {
+        if (empty($part)) continue;
+        $currentDir .= '/' . $part;
+        
+        // Try to create directory (will fail if exists, that's ok)
+        @ftp_mkdir($ftp, $currentDir);
+    }
+}
+

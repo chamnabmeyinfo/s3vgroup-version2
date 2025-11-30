@@ -14,6 +14,8 @@ config/under-construction.php
 .env
 .env.local
 *.env
+deploy-config.json
+!deploy-config.example.json
 
 # Storage & Uploads (user-generated content)
 storage/uploads/*

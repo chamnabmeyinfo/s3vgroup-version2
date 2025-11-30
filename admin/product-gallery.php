@@ -5,6 +5,8 @@
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
+use App\Models\Product;
+
 header('Content-Type: application/json');
 
 $response = ['success' => false, 'message' => ''];
@@ -19,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    use App\Models\Product;
     $productModel = new Product();
     $product = $productModel->getById($productId);
     

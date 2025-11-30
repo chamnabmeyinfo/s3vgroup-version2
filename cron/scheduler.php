@@ -2,7 +2,7 @@
 /**
  * Cron Job Scheduler
  * Run this file via cron job or scheduled task
- * Example: */5 * * * * php /path/to/cron/scheduler.php
+ * Example: Run every 5 minutes: php /path/to/cron/scheduler.php
  */
 require_once __DIR__ . '/../bootstrap/app.php';
 

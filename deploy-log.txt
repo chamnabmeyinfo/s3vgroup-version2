@@ -1,0 +1,616 @@
+[2025-11-30 16:23:59] [INFO] ========================================
+[2025-11-30 16:23:59] [INFO] One-Click Deployment Started
+[2025-11-30 16:23:59] [INFO] ========================================
+[2025-11-30 16:23:59] [INFO] 
+[1/3] Pushing to GitHub...
+[2025-11-30 16:23:59] [INFO]   Checking for changes...
+[2025-11-30 16:23:59] [INFO]   Found 12 changed file(s)
+[2025-11-30 16:23:59] [INFO]   Adding files...
+[2025-11-30 16:24:00] [INFO]   ✓ Files added
+[2025-11-30 16:24:00] [INFO]   Committing changes...
+[2025-11-30 16:24:00] [INFO] 
+[2/3] Uploading via FTP...
+[2025-11-30 16:24:00] [INFO]   Connecting to FTP server...
+[2025-11-30 16:24:03] [INFO] 
+[3/3] Finalizing...
+[2025-11-30 16:24:03] [INFO] ========================================
+[2025-11-30 16:24:03] [ERROR] Deployment completed with errors:
+[2025-11-30 16:24:03] [ERROR]   - Git push failed: Failed to commit:  M .gitignore
+ D s3vgroup-deployment-20251130.zip
+?? DEPLOYMENT-SYSTEM-README.md
+?? ONE-CLICK-DEPLOYMENT-PLAN.md
+?? QUICK-SETUP-DEPLOYMENT.md
+?? deploy-config.example.json
+?? deploy-ftp.php
+?? deploy-git.php
+?? deploy-log.txt
+?? deploy-main.php
+?? deploy-utils.php
+?? deploy.bat
+[2025-11-30 16:24:03] [ERROR]   - FTP upload failed: Failed to connect to FTP server
+[2025-11-30 16:24:03] [ERROR] ========================================
+[2025-11-30 16:25:52] [INFO] ========================================
+[2025-11-30 16:25:52] [INFO] One-Click Deployment Started
+[2025-11-30 16:25:52] [INFO] ========================================
+[2025-11-30 16:25:52] [INFO] 
+[1/3] Pushing to GitHub...
+[2025-11-30 16:25:52] [INFO]   Checking for changes...
+[2025-11-30 16:25:52] [INFO]   Found 12 changed file(s)
+[2025-11-30 16:25:52] [INFO]   Adding files...
+[2025-11-30 16:25:52] [INFO]   ✓ Files added
+[2025-11-30 16:25:52] [INFO]   Committing changes...
+[2025-11-30 16:25:52] [INFO] 
+[2/3] Uploading via FTP...
+[2025-11-30 16:25:52] [INFO]   Connecting to FTP server...
+[2025-11-30 16:25:52] [INFO]   ✓ Connected
+[2025-11-30 16:25:52] [INFO]   Found 23 file(s) to upload
+[2025-11-30 16:25:53] [INFO]   Uploading: storage/uploads/S-3-008-1_692c25fc92396.jpg...
+[2025-11-30 16:25:53] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:53] [INFO]   Uploading: storage/uploads/cat-ep16c2-gas-forklift.jpg...
+[2025-11-30 16:25:53] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:54] [INFO]   Uploading: storage/uploads/crown-sc-4500-electric-forklift.jpg...
+[2025-11-30 16:25:54] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:54] [INFO]   Uploading: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg...
+[2025-11-30 16:25:54] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:55] [INFO]   Uploading: storage/uploads/fork-positioner-attachment.jpg...
+[2025-11-30 16:25:55] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:55] [INFO]   Uploading: storage/uploads/hyster-h50xm-gas-forklift.jpg...
+[2025-11-30 16:25:55] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:56] [INFO]   Uploading: storage/uploads/img_692b5e3e06c599.40575246.jpg...
+[2025-11-30 16:25:56] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:56] [INFO]   Uploading: storage/uploads/img_692b66cf389029.91931429.png...
+[2025-11-30 16:25:57] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:57] [INFO]   Uploading: storage/uploads/img_692b670d57f5e2.47899934.jpg...
+[2025-11-30 16:25:59] [INFO]     ✓ Uploaded
+[2025-11-30 16:25:59] [INFO]   Uploading: storage/uploads/img_692b671940fb62.65700892.jpg...
+[2025-11-30 16:26:02] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:02] [INFO]   Uploading: storage/uploads/img_692b6e850a1386.91083690.png...
+[2025-11-30 16:26:03] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:03] [INFO]   Uploading: storage/uploads/img_692b6ea74814b6.35163555.jpg...
+[2025-11-30 16:26:04] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:04] [INFO]   Uploading: storage/uploads/img_692b6eba253204.95036072.jpg...
+[2025-11-30 16:26:04] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:05] [INFO]   Uploading: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg...
+[2025-11-30 16:26:06] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:06] [INFO]   Uploading: storage/uploads/kalmar-drf-450-1200-sideloader.jpg...
+[2025-11-30 16:26:06] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:06] [INFO]   Uploading: storage/uploads/raymond-102xm-order-picker.jpg...
+[2025-11-30 16:26:07] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:07] [INFO]   Uploading: storage/uploads/raymond-easi-pallet-truck.jpg...
+[2025-11-30 16:26:07] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:07] [INFO]   Uploading: storage/uploads/rotating-clamp-attachment.jpg...
+[2025-11-30 16:26:08] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:08] [INFO]   Uploading: storage/uploads/toyota-8fbrt25-reach-truck.jpg...
+[2025-11-30 16:26:08] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:08] [INFO]   Uploading: storage/uploads/toyota-8fgu25-electric-forklift.jpg...
+[2025-11-30 16:26:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:09] [INFO]   Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg...
+[2025-11-30 16:26:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:09] [INFO]   Uploading: storage/uploads/yale-msw025-stacker.jpg...
+[2025-11-30 16:26:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:10] [INFO]   Uploading: storage/uploads/.gitkeep...
+[2025-11-30 16:26:10] [INFO]     ✓ Uploaded
+[2025-11-30 16:26:10] [INFO] 
+[3/3] Finalizing...
+[2025-11-30 16:26:10] [INFO] ========================================
+[2025-11-30 16:26:10] [ERROR] Deployment completed with errors:
+[2025-11-30 16:26:10] [ERROR]   - Git push failed: Failed to commit: M  .gitignore
+A  DEPLOYMENT-SYSTEM-README.md
+A  ONE-CLICK-DEPLOYMENT-PLAN.md
+A  QUICK-SETUP-DEPLOYMENT.md
+A  deploy-config.example.json
+A  deploy-ftp.php
+A  deploy-git.php
+AM deploy-log.txt
+A  deploy-main.php
+A  deploy-utils.php
+A  deploy.bat
+D  s3vgroup-deployment-20251130.zip
+[2025-11-30 16:26:10] [ERROR] ========================================
+[2025-11-30 16:28:25] [INFO] ========================================
+[2025-11-30 16:28:25] [INFO] One-Click Deployment Started
+[2025-11-30 16:28:25] [INFO] ========================================
+[2025-11-30 16:28:25] [INFO] 
+[1/3] Pushing to GitHub...
+[2025-11-30 16:28:25] [INFO]   Checking for changes...
+[2025-11-30 16:28:25] [INFO]   Found 13 changed file(s)
+[2025-11-30 16:28:25] [INFO]   Adding files...
+[2025-11-30 16:28:26] [INFO]   ✓ Files added
+[2025-11-30 16:28:26] [INFO]   Committing changes...
+[2025-11-30 16:28:26] [INFO] 
+[2/3] Uploading via FTP...
+[2025-11-30 16:28:26] [INFO]   Connecting to FTP server...
+[2025-11-30 16:28:26] [INFO]   ✓ Connected
+[2025-11-30 16:28:26] [INFO]   Found 23 file(s) to upload
+[2025-11-30 16:28:26] [INFO]   Uploading: storage/uploads/S-3-008-1_692c25fc92396.jpg...
+[2025-11-30 16:28:27] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:27] [INFO]   Uploading: storage/uploads/cat-ep16c2-gas-forklift.jpg...
+[2025-11-30 16:28:27] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:27] [INFO]   Uploading: storage/uploads/crown-sc-4500-electric-forklift.jpg...
+[2025-11-30 16:28:28] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:28] [INFO]   Uploading: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg...
+[2025-11-30 16:28:28] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:28] [INFO]   Uploading: storage/uploads/fork-positioner-attachment.jpg...
+[2025-11-30 16:28:29] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:29] [INFO]   Uploading: storage/uploads/hyster-h50xm-gas-forklift.jpg...
+[2025-11-30 16:28:29] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:30] [INFO]   Uploading: storage/uploads/img_692b5e3e06c599.40575246.jpg...
+[2025-11-30 16:28:30] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:30] [INFO]   Uploading: storage/uploads/img_692b66cf389029.91931429.png...
+[2025-11-30 16:28:31] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:31] [INFO]   Uploading: storage/uploads/img_692b670d57f5e2.47899934.jpg...
+[2025-11-30 16:28:32] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:32] [INFO]   Uploading: storage/uploads/img_692b671940fb62.65700892.jpg...
+[2025-11-30 16:28:35] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:35] [INFO]   Uploading: storage/uploads/img_692b6e850a1386.91083690.png...
+[2025-11-30 16:28:35] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:36] [INFO]   Uploading: storage/uploads/img_692b6ea74814b6.35163555.jpg...
+[2025-11-30 16:28:36] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:37] [INFO]   Uploading: storage/uploads/img_692b6eba253204.95036072.jpg...
+[2025-11-30 16:28:37] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:37] [INFO]   Uploading: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg...
+[2025-11-30 16:28:38] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:39] [INFO]   Uploading: storage/uploads/kalmar-drf-450-1200-sideloader.jpg...
+[2025-11-30 16:28:39] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:39] [INFO]   Uploading: storage/uploads/raymond-102xm-order-picker.jpg...
+[2025-11-30 16:28:39] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:40] [INFO]   Uploading: storage/uploads/raymond-easi-pallet-truck.jpg...
+[2025-11-30 16:28:40] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:40] [INFO]   Uploading: storage/uploads/rotating-clamp-attachment.jpg...
+[2025-11-30 16:28:40] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:41] [INFO]   Uploading: storage/uploads/toyota-8fbrt25-reach-truck.jpg...
+[2025-11-30 16:28:41] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:41] [INFO]   Uploading: storage/uploads/toyota-8fgu25-electric-forklift.jpg...
+[2025-11-30 16:28:42] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:42] [INFO]   Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg...
+[2025-11-30 16:28:42] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:42] [INFO]   Uploading: storage/uploads/yale-msw025-stacker.jpg...
+[2025-11-30 16:28:43] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:43] [INFO]   Uploading: storage/uploads/.gitkeep...
+[2025-11-30 16:28:43] [INFO]     ✓ Uploaded
+[2025-11-30 16:28:43] [INFO] 
+[3/3] Finalizing...
+[2025-11-30 16:28:43] [INFO] ========================================
+[2025-11-30 16:28:43] [ERROR] Deployment completed with errors:
+[2025-11-30 16:28:43] [ERROR]   - Git push failed: Failed to commit: M  .gitignore
+A  DEPLOYMENT-SYSTEM-README.md
+A  ONE-CLICK-DEPLOYMENT-PLAN.md
+A  QUICK-SETUP-DEPLOYMENT.md
+A  deploy-config.example.json
+A  deploy-ftp.php
+A  deploy-git.php
+AM deploy-log.txt
+A  deploy-main.php
+A  deploy-utils.php
+A  deploy.bat
+D  s3vgroup-deployment-20251130.zip
+?? s3vgroup-deployment-20251130.zip
+[2025-11-30 16:28:43] [ERROR] ========================================
+[2025-11-30 16:36:42] [INFO] ========================================
+[2025-11-30 16:36:42] [INFO] One-Click Deployment Started
+[2025-11-30 16:36:42] [INFO] ========================================
+[2025-11-30 16:36:42] [INFO] 
+[0/4] Pre-Deployment Validation...
+[2025-11-30 16:36:42] [INFO]   Running pre-deployment checks...
+[2025-11-30 16:36:42] [INFO]   [1/5] Checking PHP syntax...
+[2025-11-30 16:37:10] [ERROR]     ✗ Found 3 syntax error(s)
+[2025-11-30 16:37:10] [ERROR]       - product-gallery.php:  Parse error: syntax error, unexpected token "use" in admin\product-gallery.php on line 22 Errors parsing admin\product-gallery.php
+[2025-11-30 16:37:10] [ERROR]       - product-gallery.php:  Parse error: syntax error, unexpected token "use" in .\admin\product-gallery.php on line 22 Errors parsing .\admin\product-gallery.php
+[2025-11-30 16:37:10] [ERROR]       - scheduler.php:  Parse error: syntax error, unexpected token "*" in .\cron\scheduler.php on line 5 Errors parsing .\cron\scheduler.php
+[2025-11-30 16:37:10] [INFO]   [2/5] Validating config files...
+[2025-11-30 16:37:10] [WARNING]     ⚠️  Found 1 config warning(s)
+[2025-11-30 16:37:10] [WARNING]       - config/database.php: Database password is empty
+[2025-11-30 16:37:10] [INFO]   [3/5] Checking required files...
+[2025-11-30 16:37:10] [INFO]     ✓ Required files present
+[2025-11-30 16:37:10] [INFO]   [4/5] Checking file permissions...
+[2025-11-30 16:37:10] [INFO]     ✓ File permissions OK
+[2025-11-30 16:37:10] [INFO]   [5/5] Checking database connection...
+[2025-11-30 16:37:10] [INFO]     ✓ Database connection OK
+[2025-11-30 16:37:10] [ERROR]   ✗ Validation failed with 3 error(s)
+[2025-11-30 16:37:10] [ERROR] 
+Validation failed! Please fix errors before deploying.
+[2025-11-30 16:37:10] [ERROR] Deployment cancelled.
+[2025-11-30 16:38:46] [INFO] ========================================
+[2025-11-30 16:38:46] [INFO] One-Click Deployment Started
+[2025-11-30 16:38:46] [INFO] ========================================
+[2025-11-30 16:38:46] [INFO] 
+[0/4] Pre-Deployment Validation...
+[2025-11-30 16:38:46] [INFO]   Running pre-deployment checks...
+[2025-11-30 16:38:46] [INFO]   [1/5] Checking PHP syntax...
+[2025-11-30 16:39:01] [INFO] ========================================
+[2025-11-30 16:39:01] [INFO] One-Click Deployment Started
+[2025-11-30 16:39:01] [INFO] ========================================
+[2025-11-30 16:39:01] [INFO] 
+[0/4] Pre-Deployment Validation...
+[2025-11-30 16:39:01] [INFO]   Running pre-deployment checks...
+[2025-11-30 16:39:01] [INFO]   [1/5] Checking PHP syntax...
+[2025-11-30 16:39:15] [INFO]     ✓ PHP syntax OK
+[2025-11-30 16:39:15] [INFO]   [2/5] Validating config files...
+[2025-11-30 16:39:15] [WARNING]     ⚠️  Found 1 config warning(s)
+[2025-11-30 16:39:15] [WARNING]       - config/database.php: Database password is empty
+[2025-11-30 16:39:15] [INFO]   [3/5] Checking required files...
+[2025-11-30 16:39:15] [INFO]     ✓ Required files present
+[2025-11-30 16:39:15] [INFO]   [4/5] Checking file permissions...
+[2025-11-30 16:39:15] [INFO]     ✓ File permissions OK
+[2025-11-30 16:39:15] [INFO]   [5/5] Checking database connection...
+[2025-11-30 16:39:15] [INFO]     ✓ Database connection OK
+[2025-11-30 16:39:15] [WARNING]   ⚠️  Validation passed with 1 warning(s)
+[2025-11-30 16:39:15] [WARNING] 
+Validation passed with warnings. Continuing deployment...
+[2025-11-30 16:39:15] [INFO] 
+[1/4] Pushing to GitHub...
+[2025-11-30 16:39:15] [INFO]   Checking for changes...
+[2025-11-30 16:39:16] [INFO]   Found 18 changed file(s)
+[2025-11-30 16:39:16] [INFO]   Adding files...
+[2025-11-30 16:39:16] [INFO]   ✓ Files added
+[2025-11-30 16:39:16] [INFO]   Committing changes...
+[2025-11-30 16:39:16] [INFO] 
+[2/4] Uploading via FTP (Smart Mode)...
+[2025-11-30 16:39:16] [INFO]   Connecting to FTP server...
+[2025-11-30 16:39:16] [INFO]   ✓ Connected
+[2025-11-30 16:39:16] [INFO]   Found 23 file(s) to check
+[2025-11-30 16:39:16] [INFO]   Analyzing files (change detection)...
+[2025-11-30 16:39:20] [INFO]   Analysis complete:
+[2025-11-30 16:39:20] [INFO]     - New/changed: 0
+[2025-11-30 16:39:20] [INFO]     - Unchanged (skipped): 0
+[2025-11-30 16:39:20] [INFO]     - Conflicts: 23
+[2025-11-30 16:39:20] [WARNING]   ⚠️  Conflicts detected!
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-30 12:09:48 (126197 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:29 (126197 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (25828 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:29 (25828 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (27260 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:30 (27260 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (26337 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:30 (26337 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (22928 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:31 (22928 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (25957 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:32 (25957 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 21:57:34 (68691 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:32 (68691 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:34:07 (237975 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:33 (237975 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:35:09 (1140428 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:34 (1140428 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:35:21 (1651681 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:37 (1651681 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 23:07:01 (454428 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:38 (454428 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 23:07:35 (150061 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:38 (150061 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 23:07:54 (184127 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:39 (184127 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-30 12:22:42 (968155 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:41 (968155 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (25206 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:41 (25206 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (26120 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:42 (26120 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (25276 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:42 (25276 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (22862 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:43 (22862 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (24914 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:43 (24914 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:07 (27336 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:44 (27336 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:47:55 (27227 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:44 (27227 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-29 22:48:23 (24242 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:45 (24242 bytes)
+[2025-11-30 16:39:20] [WARNING]     - storage/uploads/.gitkeep
+[2025-11-30 16:39:20] [WARNING]       Local: 2025-11-30 09:37:00 (93 bytes)
+[2025-11-30 16:39:20] [WARNING]       Remote: 2025-11-30 16:28:46 (93 bytes)
+[2025-11-30 16:39:20] [INFO]   Creating backups for conflicted files...
+[2025-11-30 16:39:21] [INFO]     ✓ Backed up: storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:39:22] [INFO]     ✓ Backed up: storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:39:23] [INFO]     ✓ Backed up: storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:39:24] [INFO]     ✓ Backed up: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:39:25] [INFO]     ✓ Backed up: storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:39:25] [INFO]     ✓ Backed up: storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:39:26] [INFO]     ✓ Backed up: storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:39:28] [INFO]     ✓ Backed up: storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:39:31] [INFO]     ✓ PHP syntax OK
+[2025-11-30 16:39:31] [INFO]   [2/5] Validating config files...
+[2025-11-30 16:39:31] [WARNING]     ⚠️  Found 1 config warning(s)
+[2025-11-30 16:39:31] [WARNING]       - config/database.php: Database password is empty
+[2025-11-30 16:39:31] [INFO]   [3/5] Checking required files...
+[2025-11-30 16:39:31] [INFO]     ✓ Required files present
+[2025-11-30 16:39:31] [INFO]   [4/5] Checking file permissions...
+[2025-11-30 16:39:31] [INFO]     ✓ File permissions OK
+[2025-11-30 16:39:31] [INFO]   [5/5] Checking database connection...
+[2025-11-30 16:39:31] [INFO]     ✓ Database connection OK
+[2025-11-30 16:39:31] [WARNING]   ⚠️  Validation passed with 1 warning(s)
+[2025-11-30 16:39:31] [WARNING] 
+Validation passed with warnings. Continuing deployment...
+[2025-11-30 16:39:31] [INFO] 
+[1/4] Pushing to GitHub...
+[2025-11-30 16:39:31] [INFO]   Checking for changes...
+[2025-11-30 16:39:31] [INFO]   Found 18 changed file(s)
+[2025-11-30 16:39:31] [INFO]   Adding files...
+[2025-11-30 16:39:31] [INFO]     ✓ Backed up: storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:39:31] [INFO]   ✓ Files added
+[2025-11-30 16:39:31] [INFO]   Committing changes...
+[2025-11-30 16:39:31] [INFO] 
+[2/4] Uploading via FTP (Smart Mode)...
+[2025-11-30 16:39:31] [INFO]   Connecting to FTP server...
+[2025-11-30 16:39:31] [INFO]   ✓ Connected
+[2025-11-30 16:39:32] [INFO]   Found 23 file(s) to check
+[2025-11-30 16:39:32] [INFO]   Analyzing files (change detection)...
+[2025-11-30 16:39:35] [INFO]   Analysis complete:
+[2025-11-30 16:39:35] [INFO]     - New/changed: 0
+[2025-11-30 16:39:35] [INFO]     - Unchanged (skipped): 0
+[2025-11-30 16:39:35] [INFO]     - Conflicts: 23
+[2025-11-30 16:39:35] [WARNING]   ⚠️  Conflicts detected!
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-30 12:09:48 (126197 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:29 (126197 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (25828 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:29 (25828 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (27260 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:30 (27260 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (26337 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:30 (26337 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (22928 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:31 (22928 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (25957 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:32 (25957 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 21:57:34 (68691 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:32 (68691 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:34:07 (237975 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:33 (237975 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:35:09 (1140428 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:34 (1140428 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:35:21 (1651681 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:37 (1651681 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 23:07:01 (454428 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:38 (454428 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 23:07:35 (150061 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:38 (150061 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 23:07:54 (184127 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:39 (184127 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-30 12:22:42 (968155 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:41 (968155 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (25206 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:41 (25206 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (26120 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:42 (26120 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (25276 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:42 (25276 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (22862 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:43 (22862 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (24914 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:43 (24914 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:07 (27336 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:44 (27336 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:47:55 (27227 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:44 (27227 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-29 22:48:23 (24242 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:45 (24242 bytes)
+[2025-11-30 16:39:35] [WARNING]     - storage/uploads/.gitkeep
+[2025-11-30 16:39:35] [WARNING]       Local: 2025-11-30 09:37:00 (93 bytes)
+[2025-11-30 16:39:35] [WARNING]       Remote: 2025-11-30 16:28:46 (93 bytes)
+[2025-11-30 16:39:35] [INFO]   Creating backups for conflicted files...
+[2025-11-30 16:39:36] [INFO]     ✓ Backed up: storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:39:36] [INFO]     ✓ Backed up: storage/uploads/S-3-008-1_692c25fc92396.jpg
+[2025-11-30 16:39:37] [INFO]     ✓ Backed up: storage/uploads/cat-ep16c2-gas-forklift.jpg
+[2025-11-30 16:39:37] [INFO]     ✓ Backed up: storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:39:38] [INFO]     ✓ Backed up: storage/uploads/crown-sc-4500-electric-forklift.jpg
+[2025-11-30 16:39:39] [INFO]     ✓ Backed up: storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:39:39] [INFO]     ✓ Backed up: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg
+[2025-11-30 16:39:40] [INFO]     ✓ Backed up: storage/uploads/fork-positioner-attachment.jpg
+[2025-11-30 16:39:41] [INFO]     ✓ Backed up: storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:39:41] [INFO]     ✓ Backed up: storage/uploads/hyster-h50xm-gas-forklift.jpg
+[2025-11-30 16:39:42] [INFO]     ✓ Backed up: storage/uploads/img_692b5e3e06c599.40575246.jpg
+[2025-11-30 16:39:43] [INFO]     ✓ Backed up: storage/uploads/img_692b66cf389029.91931429.png
+[2025-11-30 16:39:46] [INFO]     ✓ Backed up: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:39:47] [INFO]     ✓ Backed up: storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:39:47] [INFO]     ✓ Backed up: storage/uploads/img_692b670d57f5e2.47899934.jpg
+[2025-11-30 16:39:48] [INFO]     ✓ Backed up: storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:39:48] [INFO]     ✓ Backed up: storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:39:49] [INFO]     ✓ Backed up: storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:39:50] [INFO]     ✓ Backed up: storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:39:51] [INFO]     ✓ Backed up: storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:39:52] [INFO]     ✓ Backed up: storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:39:53] [INFO]     ✓ Backed up: storage/uploads/img_692b671940fb62.65700892.jpg
+[2025-11-30 16:39:53] [INFO]     ✓ Backed up: storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:39:54] [INFO]     ✓ Backed up: storage/uploads/.gitkeep
+[2025-11-30 16:39:54] [INFO]   Uploading 23 file(s)...
+[2025-11-30 16:39:54] [INFO]   [4%] Uploading: storage/uploads/S-3-008-1_692c25fc92396.jpg (conflict (backed up))...
+[2025-11-30 16:39:55] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:55] [INFO]   [9%] Uploading: storage/uploads/cat-ep16c2-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:39:55] [INFO]     ✓ Backed up: storage/uploads/img_692b6e850a1386.91083690.png
+[2025-11-30 16:39:55] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:55] [INFO]   [13%] Uploading: storage/uploads/crown-sc-4500-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:39:56] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:56] [INFO]   [17%] Uploading: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:39:56] [INFO]     ✓ Backed up: storage/uploads/img_692b6ea74814b6.35163555.jpg
+[2025-11-30 16:39:56] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:57] [INFO]   [22%] Uploading: storage/uploads/fork-positioner-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:39:57] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:57] [INFO]   [26%] Uploading: storage/uploads/hyster-h50xm-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:39:57] [INFO]     ✓ Backed up: storage/uploads/img_692b6eba253204.95036072.jpg
+[2025-11-30 16:39:58] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:58] [INFO]   [30%] Uploading: storage/uploads/img_692b5e3e06c599.40575246.jpg (conflict (backed up))...
+[2025-11-30 16:39:58] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:58] [INFO]   [35%] Uploading: storage/uploads/img_692b66cf389029.91931429.png (conflict (backed up))...
+[2025-11-30 16:39:59] [INFO]     ✓ Uploaded
+[2025-11-30 16:39:59] [INFO]   [39%] Uploading: storage/uploads/img_692b670d57f5e2.47899934.jpg (conflict (backed up))...
+[2025-11-30 16:40:01] [INFO]     ✓ Backed up: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg
+[2025-11-30 16:40:01] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:01] [INFO]   [43%] Uploading: storage/uploads/img_692b671940fb62.65700892.jpg (conflict (backed up))...
+[2025-11-30 16:40:02] [INFO]     ✓ Backed up: storage/uploads/kalmar-drf-450-1200-sideloader.jpg
+[2025-11-30 16:40:03] [INFO]     ✓ Backed up: storage/uploads/raymond-102xm-order-picker.jpg
+[2025-11-30 16:40:03] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:03] [INFO]   [48%] Uploading: storage/uploads/img_692b6e850a1386.91083690.png (conflict (backed up))...
+[2025-11-30 16:40:03] [INFO]     ✓ Backed up: storage/uploads/raymond-easi-pallet-truck.jpg
+[2025-11-30 16:40:04] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:04] [INFO]     ✓ Backed up: storage/uploads/rotating-clamp-attachment.jpg
+[2025-11-30 16:40:04] [INFO]   [52%] Uploading: storage/uploads/img_692b6ea74814b6.35163555.jpg (conflict (backed up))...
+[2025-11-30 16:40:05] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:05] [INFO]     ✓ Backed up: storage/uploads/toyota-8fbrt25-reach-truck.jpg
+[2025-11-30 16:40:05] [INFO]   [57%] Uploading: storage/uploads/img_692b6eba253204.95036072.jpg (conflict (backed up))...
+[2025-11-30 16:40:06] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:06] [INFO]   [61%] Uploading: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg (conflict (backed up))...
+[2025-11-30 16:40:06] [INFO]     ✓ Backed up: storage/uploads/toyota-8fgu25-electric-forklift.jpg
+[2025-11-30 16:40:07] [INFO]     ✓ Backed up: storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-11-30 16:40:07] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:08] [INFO]   [65%] Uploading: storage/uploads/kalmar-drf-450-1200-sideloader.jpg (conflict (backed up))...
+[2025-11-30 16:40:08] [INFO]     ✓ Backed up: storage/uploads/yale-msw025-stacker.jpg
+[2025-11-30 16:40:08] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:08] [INFO]   [70%] Uploading: storage/uploads/raymond-102xm-order-picker.jpg (conflict (backed up))...
+[2025-11-30 16:40:08] [INFO]     ✓ Backed up: storage/uploads/.gitkeep
+[2025-11-30 16:40:08] [INFO]   Uploading 23 file(s)...
+[2025-11-30 16:40:09] [INFO]   [4%] Uploading: storage/uploads/S-3-008-1_692c25fc92396.jpg (conflict (backed up))...
+[2025-11-30 16:40:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:09] [INFO]   [74%] Uploading: storage/uploads/raymond-easi-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:40:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:09] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:09] [INFO]   [9%] Uploading: storage/uploads/cat-ep16c2-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:09] [INFO]   [78%] Uploading: storage/uploads/rotating-clamp-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:40:10] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:10] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:10] [INFO]   [13%] Uploading: storage/uploads/crown-sc-4500-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:10] [INFO]   [83%] Uploading: storage/uploads/toyota-8fbrt25-reach-truck.jpg (conflict (backed up))...
+[2025-11-30 16:40:10] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:11] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:11] [INFO]   [17%] Uploading: storage/uploads/crown-wp-3000-electric-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:40:11] [INFO]   [87%] Uploading: storage/uploads/toyota-8fgu25-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:11] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:11] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:11] [INFO]   [22%] Uploading: storage/uploads/fork-positioner-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:40:11] [INFO]   [91%] Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:12] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:12] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:12] [INFO]   [26%] Uploading: storage/uploads/hyster-h50xm-gas-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:12] [INFO]   [96%] Uploading: storage/uploads/yale-msw025-stacker.jpg (conflict (backed up))...
+[2025-11-30 16:40:12] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:12] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:12] [INFO]   [30%] Uploading: storage/uploads/img_692b5e3e06c599.40575246.jpg (conflict (backed up))...
+[2025-11-30 16:40:13] [INFO]   [100%] Uploading: storage/uploads/.gitkeep (conflict (backed up))...
+[2025-11-30 16:40:13] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:13] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:13] [INFO]   💡 Smart: Handled 23 conflict(s)
+[2025-11-30 16:40:13] [INFO] 
+[3/4] Finalizing...
+[2025-11-30 16:40:13] [INFO] ========================================
+[2025-11-30 16:40:13] [ERROR] Deployment completed with errors:
+[2025-11-30 16:40:13] [ERROR]   - Git push failed: Failed to commit: M  .gitignore
+A  DEPLOYMENT-SYSTEM-README.md
+A  ONE-CLICK-DEPLOYMENT-PLAN.md
+A  QUICK-SETUP-DEPLOYMENT.md
+ M admin/product-gallery.php
+ M cron/scheduler.php
+AM deploy-config.example.json
+A  deploy-ftp.php
+A  deploy-git.php
+AM deploy-log.txt
+AM deploy-main.php
+A  deploy-utils.php
+A  deploy.bat
+M  s3vgroup-deployment-20251130.zip
+?? SMART-DEPLOYMENT-IDEAS.md
+?? SMART-FEATURES-COMPLETE.md
+?? deploy-smart-ftp.php
+?? deploy-validation.php
+[2025-11-30 16:40:13] [ERROR] ========================================
+[2025-11-30 16:40:13] [INFO]   [35%] Uploading: storage/uploads/img_692b66cf389029.91931429.png (conflict (backed up))...
+[2025-11-30 16:40:14] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:14] [INFO]   [39%] Uploading: storage/uploads/img_692b670d57f5e2.47899934.jpg (conflict (backed up))...
+[2025-11-30 16:40:15] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:16] [INFO]   [43%] Uploading: storage/uploads/img_692b671940fb62.65700892.jpg (conflict (backed up))...
+[2025-11-30 16:40:18] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:18] [INFO]   [48%] Uploading: storage/uploads/img_692b6e850a1386.91083690.png (conflict (backed up))...
+[2025-11-30 16:40:19] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:19] [INFO]   [52%] Uploading: storage/uploads/img_692b6ea74814b6.35163555.jpg (conflict (backed up))...
+[2025-11-30 16:40:20] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:20] [INFO]   [57%] Uploading: storage/uploads/img_692b6eba253204.95036072.jpg (conflict (backed up))...
+[2025-11-30 16:40:21] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:21] [INFO]   [61%] Uploading: storage/uploads/img_df939330246ff9bd_692c2902b6d39.jpg (conflict (backed up))...
+[2025-11-30 16:40:22] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:22] [INFO]   [65%] Uploading: storage/uploads/kalmar-drf-450-1200-sideloader.jpg (conflict (backed up))...
+[2025-11-30 16:40:23] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:23] [INFO]   [70%] Uploading: storage/uploads/raymond-102xm-order-picker.jpg (conflict (backed up))...
+[2025-11-30 16:40:23] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:24] [INFO]   [74%] Uploading: storage/uploads/raymond-easi-pallet-truck.jpg (conflict (backed up))...
+[2025-11-30 16:40:24] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:24] [INFO]   [78%] Uploading: storage/uploads/rotating-clamp-attachment.jpg (conflict (backed up))...
+[2025-11-30 16:40:24] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:25] [INFO]   [83%] Uploading: storage/uploads/toyota-8fbrt25-reach-truck.jpg (conflict (backed up))...
+[2025-11-30 16:40:25] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:25] [INFO]   [87%] Uploading: storage/uploads/toyota-8fgu25-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:26] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:26] [INFO]   [91%] Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg (conflict (backed up))...
+[2025-11-30 16:40:26] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:27] [INFO]   [96%] Uploading: storage/uploads/yale-msw025-stacker.jpg (conflict (backed up))...
+[2025-11-30 16:40:27] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:27] [INFO]   [100%] Uploading: storage/uploads/.gitkeep (conflict (backed up))...
+[2025-11-30 16:40:28] [INFO]     ✓ Uploaded
+[2025-11-30 16:40:28] [INFO]   💡 Smart: Handled 23 conflict(s)
+[2025-11-30 16:40:28] [INFO] 
+[3/4] Finalizing...
+[2025-11-30 16:40:28] [INFO] ========================================
+[2025-11-30 16:40:28] [ERROR] Deployment completed with errors:
+[2025-11-30 16:40:28] [ERROR]   - Git push failed: Failed to commit: M  .gitignore
+A  DEPLOYMENT-SYSTEM-README.md
+A  ONE-CLICK-DEPLOYMENT-PLAN.md
+A  QUICK-SETUP-DEPLOYMENT.md
+A  SMART-DEPLOYMENT-IDEAS.md
+A  SMART-FEATURES-COMPLETE.md
+M  admin/product-gallery.php
+M  cron/scheduler.php
+A  deploy-config.example.json
+A  deploy-ftp.php
+A  deploy-git.php
+AM deploy-log.txt
+A  deploy-main.php
+A  deploy-smart-ftp.php
+A  deploy-utils.php
+A  deploy-validation.php
+A  deploy.bat
+M  s3vgroup-deployment-20251130.zip
+[2025-11-30 16:40:28] [ERROR] ========================================
