@@ -13,8 +13,39 @@ if (!empty($_GET['mark_read'])) {
 
 // Handle delete
 if (!empty($_GET['delete'])) {
-    db()->delete('contact_messages', 'id = :id', ['id' => (int)$_GET['delete']]);
-    $successMessage = 'Message deleted successfully.';
+    try {
+        $messageId = (int)$_GET['delete'];
+        
+        // Validate ID
+        if ($messageId <= 0) {
+            $successMessage = '';
+            $message = 'Invalid message ID.';
+        } else {
+            // Check if message exists
+            $msg = db()->fetchOne(
+                "SELECT id FROM contact_messages WHERE id = :id",
+                ['id' => $messageId]
+            );
+            
+            if (!$msg) {
+                $successMessage = '';
+                $message = 'Message not found.';
+            } else {
+                // Delete message
+                $deleted = db()->delete('contact_messages', 'id = :id', ['id' => $messageId]);
+                if ($deleted > 0) {
+                    $successMessage = 'Message deleted successfully.';
+                    $message = '';
+                } else {
+                    $successMessage = '';
+                    $message = 'Failed to delete message.';
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        $successMessage = '';
+        $message = 'Error deleting message: ' . $e->getMessage();
+    }
 }
 
 // Get filter parameters
@@ -114,6 +145,12 @@ $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
     <?php if ($successMessage): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             <?= escape($successMessage) ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if ($message): ?>
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <?= escape($message) ?>
         </div>
     <?php endif; ?>
     

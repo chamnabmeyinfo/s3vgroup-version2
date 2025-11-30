@@ -9,8 +9,40 @@ $message = '';
 $error = '';
 
 if (!empty($_GET['delete'])) {
-    db()->delete('categories', 'id = :id', ['id' => $_GET['delete']]);
-    $message = 'Category deleted successfully.';
+    try {
+        $categoryId = (int)$_GET['delete'];
+        
+        // Validate ID
+        if ($categoryId <= 0) {
+            $error = 'Invalid category ID.';
+        } else {
+            // Check if category exists
+            $category = $categoryModel->getById($categoryId);
+            if (!$category) {
+                $error = 'Category not found.';
+            } else {
+                // Check if category has products
+                $productCount = db()->fetchOne(
+                    "SELECT COUNT(*) as count FROM products WHERE category_id = :id",
+                    ['id' => $categoryId]
+                )['count'] ?? 0;
+                
+                if ($productCount > 0) {
+                    $error = "Cannot delete category. It has {$productCount} product(s) assigned. Please reassign or delete products first.";
+                } else {
+                    // Safe to delete
+                    $deleted = db()->delete('categories', 'id = :id', ['id' => $categoryId]);
+                    if ($deleted > 0) {
+                        $message = 'Category deleted successfully.';
+                    } else {
+                        $error = 'Failed to delete category.';
+                    }
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        $error = 'Error deleting category: ' . $e->getMessage();
+    }
 }
 
 // Get filter parameters

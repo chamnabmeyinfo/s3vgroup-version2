@@ -66,8 +66,26 @@ if (!empty($_GET['update_payment_status']) && !empty($_GET['id'])) {
 
 // Handle delete
 if (!empty($_GET['delete'])) {
-    $orderModel->delete($_GET['delete']);
-    $message = 'Order deleted successfully.';
+    try {
+        $orderId = (int)$_GET['delete'];
+        
+        // Validate ID
+        if ($orderId <= 0) {
+            $error = 'Invalid order ID.';
+        } else {
+            // Check if order exists
+            $order = $orderModel->getById($orderId);
+            if (!$order) {
+                $error = 'Order not found.';
+            } else {
+                // Perform delete
+                $orderModel->delete($orderId);
+                $message = 'Order deleted successfully.';
+            }
+        }
+    } catch (\Exception $e) {
+        $error = 'Error deleting order: ' . $e->getMessage();
+    }
 }
 
 // Get filter parameters

@@ -13,8 +13,26 @@ $error = '';
 
 // Handle delete
 if (!empty($_GET['delete'])) {
-    $productModel->delete($_GET['delete']);
-    $message = 'Product deleted successfully.';
+    try {
+        $productId = (int)$_GET['delete'];
+        
+        // Validate ID
+        if ($productId <= 0) {
+            $error = 'Invalid product ID.';
+        } else {
+            // Check if product exists
+            $product = $productModel->getById($productId);
+            if (!$product) {
+                $error = 'Product not found.';
+            } else {
+                // Perform delete
+                $productModel->delete($productId);
+                $message = 'Product deleted successfully.';
+            }
+        }
+    } catch (\Exception $e) {
+        $error = 'Error deleting product: ' . $e->getMessage();
+    }
 }
 
 // Handle toggle featured

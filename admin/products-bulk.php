@@ -5,6 +5,8 @@
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
+use App\Models\Product;
+
 header('Content-Type: application/json');
 
 $response = ['success' => false, 'message' => ''];
@@ -25,9 +27,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         switch ($action) {
             case 'delete':
-                db()->query("UPDATE products SET is_active = 0 WHERE id IN ($placeholders)", $productIds);
-                $response['success'] = true;
-                $response['message'] = count($productIds) . ' product(s) deleted successfully.';
+                $productModel = new Product();
+                $deletedCount = 0;
+                $errors = [];
+                
+                foreach ($productIds as $productId) {
+                    try {
+                        $productModel->delete($productId);
+                        $deletedCount++;
+                    } catch (\Exception $e) {
+                        $errors[] = "Product ID {$productId}: " . $e->getMessage();
+                    }
+                }
+                
+                if ($deletedCount > 0) {
+                    $response['success'] = true;
+                    $response['message'] = $deletedCount . ' product(s) deleted successfully.';
+                    if (!empty($errors)) {
+                        $response['message'] .= ' Some products could not be deleted: ' . implode(', ', $errors);
+                    }
+                } else {
+                    $response['success'] = false;
+                    $response['message'] = 'Failed to delete products: ' . implode(', ', $errors);
+                }
                 break;
                 
             case 'activate':

@@ -5,6 +5,38 @@ require_once __DIR__ . '/includes/auth.php';
 $message = '';
 $error = '';
 
+// Handle delete
+if (!empty($_GET['delete'])) {
+    try {
+        $quoteId = (int)$_GET['delete'];
+        
+        // Validate ID
+        if ($quoteId <= 0) {
+            $error = 'Invalid quote request ID.';
+        } else {
+            // Check if quote exists
+            $quote = db()->fetchOne(
+                "SELECT id FROM quote_requests WHERE id = :id",
+                ['id' => $quoteId]
+            );
+            
+            if (!$quote) {
+                $error = 'Quote request not found.';
+            } else {
+                // Delete quote
+                $deleted = db()->delete('quote_requests', 'id = :id', ['id' => $quoteId]);
+                if ($deleted > 0) {
+                    $message = 'Quote request deleted successfully.';
+                } else {
+                    $error = 'Failed to delete quote request.';
+                }
+            }
+        }
+    } catch (\Exception $e) {
+        $error = 'Error deleting quote request: ' . $e->getMessage();
+    }
+}
+
 // Handle status update
 if (!empty($_GET['update_status']) && !empty($_GET['id'])) {
     $status = $_GET['update_status'];
