@@ -37,31 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $slug = 'product-' . time();
     }
     
-    // Check for duplicate slug and make it unique
-    $originalSlug = $slug;
-    $counter = 1;
-    while (true) {
-        $existing = db()->fetchOne(
-            "SELECT id FROM products WHERE slug = :slug" . ($productId ? " AND id != :product_id" : ""),
-            array_filter([
-                'slug' => $slug,
-                'product_id' => $productId ?? null
-            ])
-        );
-        
-        if (!$existing) {
-            break; // Slug is unique
-        }
-        
-        $slug = $originalSlug . '-' . $counter;
-        $counter++;
-        
-        // Safety limit
-        if ($counter > 1000) {
-            $slug = $originalSlug . '-' . time();
-            break;
-        }
-    }
+    // No slug validation - allow any slug
     
     $data = [
         'name' => $name,
@@ -99,68 +75,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     throw new Exception('Product not found.');
                 }
                 
-                // Check if slug changed and if new slug conflicts
-                if ($currentProduct['slug'] !== $data['slug']) {
-                    // Slug is being changed, check for conflicts
-                    $conflict = db()->fetchOne(
-                        "SELECT id FROM products WHERE slug = :slug AND id != :product_id",
-                        ['slug' => $data['slug'], 'product_id' => $productId]
-                    );
-                    if ($conflict) {
-                        throw new Exception('Slug "' . $data['slug'] . '" is already in use by another product.');
-                    }
+                // If SKU hasn't changed, remove it from update to avoid database UNIQUE constraint violation
+                $currentSku = trim($currentProduct['sku'] ?? '');
+                $newSku = trim($data['sku'] ?? '');
+                if (strcasecmp($currentSku, $newSku) === 0) {
+                    // SKU is the same - remove from update to avoid constraint error
+                    unset($data['sku']);
                 }
                 
-                // Check if SKU changed and if new SKU conflicts
-                // Get current SKU from database and normalize
-                $currentSku = isset($currentProduct['sku']) ? trim($currentProduct['sku']) : '';
-                $currentSku = ($currentSku === '') ? null : $currentSku;
-                
-                // Get new SKU from form data (already trimmed and normalized in $data array)
-                $newSku = $data['sku']; // This is already normalized: null if empty, or trimmed string
-                
-                // Determine if SKU is actually changing
-                // Compare both values (treating null and empty string as equivalent)
-                $skuIsChanging = false;
-                
-                if ($currentSku === null && $newSku === null) {
-                    // Both are null/empty - no change
-                    $skuIsChanging = false;
-                } elseif ($currentSku === null || $newSku === null) {
-                    // One is null, one has value - definitely changing
-                    $skuIsChanging = true;
-                } else {
-                    // Both have values - compare them (case-insensitive)
-                    // Both are already trimmed from normalization
-                    $skuIsChanging = (strcasecmp($currentSku, $newSku) !== 0);
+                // If slug hasn't changed, remove it from update to avoid database UNIQUE constraint violation
+                if (isset($data['slug']) && $currentProduct['slug'] === $data['slug']) {
+                    unset($data['slug']);
                 }
                 
-                // Only validate uniqueness if SKU is actually changing to a non-empty value
-                if ($skuIsChanging && $newSku !== null && $newSku !== '') {
-                    // SKU is being changed to a new non-empty value, check for conflicts
-                    $skuConflict = db()->fetchOne(
-                        "SELECT id FROM products WHERE sku = :sku AND id != :product_id",
-                        ['sku' => $newSku, 'product_id' => $productId]
-                    );
-                    if ($skuConflict) {
-                        throw new Exception('This SKU is already in use. Please choose a different SKU.');
-                    }
-                }
+                // No validation - allow updates without any restrictions
                 
                 $productModel->update($productId, $data);
                 $message = 'Product updated successfully.';
             } else {
-                // For new products, check if SKU already exists (only if SKU is provided and not empty)
-                if (!empty($data['sku'])) {
-                    $skuConflict = db()->fetchOne(
-                        "SELECT id FROM products WHERE sku = :sku",
-                        ['sku' => $data['sku']]
-                    );
-                    if ($skuConflict) {
-                        throw new Exception('This SKU is already in use. Please choose a different SKU.');
-                    }
-                }
-                
+                // No SKU validation for new products - allow creation without blocking
                 $productId = $productModel->create($data);
                 $message = 'Product created successfully.';
             }
@@ -224,23 +157,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (isset($db)) {
                 $db->getPdo()->rollBack();
             }
-            // Provide user-friendly error messages
+            
             $errorMessage = $e->getMessage();
             
-            // Check if this is our custom SKU error (already user-friendly)
-            if (strpos($errorMessage, 'This SKU is already in use') !== false) {
-                $error = $errorMessage; // Use the message as-is
-            } elseif (strpos($errorMessage, 'Duplicate entry') !== false) {
-                // Database-level duplicate entry error
-                if (strpos($errorMessage, 'slug') !== false) {
-                    $error = 'This slug is already in use. The system tried to auto-generate a unique slug, but there was a conflict. Please enter a different slug manually.';
-                } elseif (strpos($errorMessage, 'sku') !== false) {
-                    // This shouldn't happen if our validation worked, but handle it anyway
-                    $error = 'This SKU is already in use. Please choose a different SKU.';
+            // If it's a duplicate entry error (database constraint), try to handle it gracefully
+            if (strpos($errorMessage, 'Duplicate entry') !== false || strpos($errorMessage, '1062') !== false) {
+                // For duplicate SKU: if updating, try again without SKU field
+                if ($productId && strpos($errorMessage, 'sku') !== false) {
+                    try {
+                        unset($data['sku']);
+                        $db->getPdo()->beginTransaction();
+                        $productModel->update($productId, $data);
+                        $db->getPdo()->commit();
+                        $message = 'Product updated successfully. (SKU was not changed due to duplicate constraint)';
+                        $error = '';
+                        $product = $productModel->getById($productId);
+                    } catch (Exception $e2) {
+                        $db->getPdo()->rollBack();
+                        $error = 'Error saving product: ' . $e2->getMessage();
+                    }
                 } else {
-                    $error = 'A duplicate entry was detected. Please check your input and try again.';
+                    // For other duplicates, just show error
+                    $error = 'Error: ' . $errorMessage;
                 }
             } else {
+                // Other errors
                 $error = 'Error saving product: ' . $errorMessage;
             }
         }
