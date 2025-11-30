@@ -16,7 +16,7 @@
   },
   "upload": {
     "images": true,
-    "configs": false,
+    "configs": true,
     "others": false,
     "create_backup": true,
     "dry_run": false
