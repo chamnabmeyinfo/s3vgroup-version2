@@ -67,16 +67,21 @@ class BackupService {
                 // Create table
                 $createTable = $this->db->fetchOne("SHOW CREATE TABLE `{$tableName}`");
                 
-                if (empty($createTable) || !isset($createTable['Create Table'])) {
-                    // Try alternative column name
-                    $createTable = $this->db->fetchOne("SHOW CREATE TABLE `{$tableName}`");
-                    $createTableSql = $createTable['Create Table'] ?? $createTable['CREATE TABLE'] ?? null;
-                    
-                    if (empty($createTableSql)) {
-                        continue; // Skip if we can't get CREATE TABLE statement
-                    }
-                } else {
-                    $createTableSql = $createTable['Create Table'];
+                if (empty($createTable)) {
+                    // No result from query - table might not exist or query failed
+                    $sql .= "-- Error: Could not get CREATE TABLE statement for `{$tableName}`\n\n";
+                    continue;
+                }
+                
+                // Check for both possible column name variations (case-sensitive vs case-insensitive)
+                // MySQL returns 'Create Table' but some drivers might return 'CREATE TABLE'
+                $createTableSql = $createTable['Create Table'] ?? $createTable['CREATE Table'] ?? 
+                                  $createTable['CREATE TABLE'] ?? $createTable['create table'] ?? null;
+                
+                if (empty($createTableSql)) {
+                    // Could not find CREATE TABLE statement in result
+                    $sql .= "-- Error: CREATE TABLE statement not found in result for `{$tableName}`\n\n";
+                    continue;
                 }
                 
                 $sql .= $createTableSql . ";\n\n";
