@@ -6,7 +6,9 @@ php.ini
 
 # Environment & Config Files (keep structure but ignore sensitive data)
 config/database.php
+!config/database.php.example
 config/app.php
+!config/app.php.example
 .env
 .env.local
 *.env
