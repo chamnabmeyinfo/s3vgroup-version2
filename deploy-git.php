@@ -48,7 +48,7 @@ function deployGit($config, $log) {
     
     // Properly escape commit message for Windows/PowerShell
     $commitMessageEscaped = escapeshellarg($commitMessage);
-    exec("git commit -m {$commitMessageEscaped} 2>&1", $output, $returnCode);
+    exec("git commit -m " . $commitMessageEscaped . " 2>&1", $output, $returnCode);
     
     if ($returnCode !== 0) {
         // Check if commit failed because no changes (already committed)
@@ -87,82 +87,100 @@ function deployGit($config, $log) {
             
             // If URL doesn't already contain token, add it
             if (strpos($currentUrl, '@') === false || strpos($currentUrl, '://' . $token . '@') === false) {
-                // Extract repo path from URL
-                if (preg_match('#https?://(?:[^@]+@)?github\.com/(.+)#', $currentUrl, $matches)) {
-                    $repoPath = $matches[1];
-                    $remoteUrl = "https://{$token}@github.com/{$repoPath}";
+                // Extract protocol and repo path from URL
+                if (preg_match('#(https?)://(?:[^@]+@)?github\.com/(.+)#', $currentUrl, $matches)) {
+                    $protocol = $matches[1]; // Preserve original protocol (http or https)
+                    $repoPath = $matches[2];
+                    $remoteUrl = "{$protocol}://{$token}@github.com/{$repoPath}";
                     
                     // Temporarily set remote URL with token
-                    exec("git remote set-url origin {$remoteUrl}", $setUrlOutput, $setUrlReturnCode);
+                    exec("git remote set-url origin " . escapeshellarg($remoteUrl), $setUrlOutput, $setUrlReturnCode);
                     if ($setUrlReturnCode !== 0) {
                         $log->warning("  ⚠️  Could not set remote URL with token, trying without...");
                         $remoteUrl = null; // Don't try to restore if we didn't change it
                     }
                 }
             } else {
-                // Token already in URL, don't modify
-                $remoteUrl = null;
+                // Token already in URL (from previous deployment or manual config)
+                // We still need to clean it up after push, so mark it for cleanup
+                $remoteUrl = null; // Don't modify before push
+                // But we'll clean it up after push - originalUrl is already stored
             }
         }
     }
     
     // Push with token in URL (if configured)
-    exec("git push origin {$branch} 2>&1", $output, $returnCode);
+    exec("git push origin " . escapeshellarg($branch) . " 2>&1", $output, $returnCode);
     
-    // Restore original remote URL if we changed it (CRITICAL for security)
-    if ($token && $remoteUrl) {
-        // Try to get current URL to verify token is present
-        exec('git remote get-url origin', $checkOutput, $checkReturnCode);
+    // Restore/clean remote URL if token was used (CRITICAL for security)
+    // Check $originalUrl to handle both cases: token we added OR token already present
+    if ($token && $originalUrl) {
+        // Check if original URL contains any token (indicated by @ in URL)
+        $needsCleanup = (strpos($originalUrl, '@') !== false);
         
-        if ($checkReturnCode === 0 && !empty($checkOutput)) {
-            $currentUrl = trim($checkOutput[0]);
-            // Verify token is still in URL before attempting removal
-            if (strpos($currentUrl, $token) !== false) {
-                // Remove token from URL for security
-                $cleanUrl = preg_replace('#https://[^@]+@github\.com/#', 'https://github.com/', $currentUrl);
-                exec("git remote set-url origin {$cleanUrl}", $restoreOutput, $restoreReturnCode);
-                
-                if ($restoreReturnCode !== 0) {
-                    $log->error("  ⚠️  SECURITY WARNING: Failed to remove token from git remote URL!");
-                    $log->error("  ⚠️  Please manually run: git remote set-url origin " . escapeshellarg($originalUrl));
+        // If we modified the URL, we definitely need cleanup
+        // If token was already present, we also need cleanup
+        if ($remoteUrl || $needsCleanup) {
+            // Try to get current URL to verify token is present
+            exec('git remote get-url origin', $checkOutput, $checkReturnCode);
+            
+            if ($checkReturnCode === 0 && !empty($checkOutput)) {
+                $currentUrl = trim($checkOutput[0]);
+                // Check if current URL contains any token (indicated by @ in URL)
+                if (strpos($currentUrl, '@') !== false) {
+                    // Remove ANY token from URL for security (our token or previously existing token)
+                    // Match both http:// and https:// protocols
+                    $cleanUrl = preg_replace('#(https?)://[^@]+@github\.com/#', '$1://github.com/', $currentUrl);
+                    exec("git remote set-url origin " . escapeshellarg($cleanUrl), $restoreOutput, $restoreReturnCode);
+                    
+                    if ($restoreReturnCode !== 0) {
+                        $log->error("  ⚠️  SECURITY WARNING: Failed to remove token from git remote URL!");
+                        // If original URL didn't have a token, restore it; otherwise suggest manual cleanup
+                        if (strpos($originalUrl, '@') === false) {
+                            $log->error("  ⚠️  Please manually run: git remote set-url origin " . escapeshellarg($originalUrl));
+                        } else {
+                            $log->error("  ⚠️  Please manually run: git remote set-url origin " . escapeshellarg($cleanUrl));
+                        }
+                    } else {
+                        $log->info("  ✓ Token removed from git remote URL");
+                    }
                 } else {
-                    $log->info("  ✓ Token removed from git remote URL");
+                    // No token found in URL - check if we need to restore original (if it was different)
+                    if ($currentUrl !== $originalUrl && strpos($originalUrl, '@') === false) {
+                        // Original URL didn't have token, current doesn't either, but they differ - restore original
+                        $log->warning("  ⚠️  URLs differ, restoring original URL...");
+                        exec("git remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
+                        
+                        if ($restoreReturnCode !== 0) {
+                            $log->error("  ⚠️  SECURITY WARNING: Failed to restore original git remote URL!");
+                        } else {
+                            $log->info("  ✓ Restored original git remote URL");
+                        }
+                    }
                 }
             } else {
-                // Token not found in URL (unexpected, but restore original URL anyway for safety)
-                if ($originalUrl && $currentUrl !== $originalUrl) {
-                    $log->warning("  ⚠️  Token not found in URL, restoring original URL...");
+                // get-url failed, but we must still restore - use original URL
+                if ($originalUrl) {
+                    $log->warning("  ⚠️  Could not verify current URL, restoring original...");
                     exec("git remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
                     
                     if ($restoreReturnCode !== 0) {
                         $log->error("  ⚠️  SECURITY WARNING: Failed to restore original git remote URL!");
+                        $log->error("  ⚠️  Token may still be in git config. Please manually check and fix.");
                     } else {
                         $log->info("  ✓ Restored original git remote URL");
                     }
-                }
-            }
-        } else {
-            // get-url failed, but we must still restore - use original URL
-            if ($originalUrl) {
-                $log->warning("  ⚠️  Could not verify current URL, restoring original...");
-                exec("git remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
-                
-                if ($restoreReturnCode !== 0) {
-                    $log->error("  ⚠️  SECURITY WARNING: Failed to restore original git remote URL!");
-                    $log->error("  ⚠️  Token may still be in git config. Please manually check and fix.");
                 } else {
-                    $log->info("  ✓ Restored original git remote URL");
+                    $log->error("  ⚠️  SECURITY WARNING: Could not restore git remote URL - token may remain!");
                 }
-            } else {
-                $log->error("  ⚠️  SECURITY WARNING: Could not restore git remote URL - token may remain!");
             }
         }
     }
     
     if ($returnCode !== 0) {
         $errorMsg = implode("\n", $output);
-        // Don't expose token in error messages
-        $errorMsg = preg_replace('#https://[^@]+@github\.com/#', 'https://github.com/', $errorMsg);
+        // Don't expose token in error messages (match both http:// and https://)
+        $errorMsg = preg_replace('#(https?)://[^@]+@github\.com/#', '$1://github.com/', $errorMsg);
         $result['message'] = 'Failed to push: ' . $errorMsg;
         $log->error("  ✗ Push failed");
         return $result;
