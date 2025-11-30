@@ -18,8 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action']) && $_POST['action'] === 'create_backup') {
         try {
             $backupFile = $backupService->backupDatabase();
-            $message = 'Backup created successfully!';
-        } catch (Exception $e) {
+            $message = 'Backup created successfully! File: ' . basename($backupFile);
+        } catch (\Exception $e) {
             $error = 'Error creating backup: ' . $e->getMessage();
         }
     }

@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'name' => $name,
         'slug' => $slug,
-        'sku' => trim($_POST['sku'] ?? ''),
+        'sku' => !empty(trim($_POST['sku'] ?? '')) ? trim($_POST['sku']) : null,
         'description' => trim($_POST['description'] ?? ''),
         'short_description' => trim($_POST['short_description'] ?? ''),
         'price' => floatval($_POST['price'] ?? 0),
@@ -93,9 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $db->getPdo()->beginTransaction();
             
             if ($productId) {
-                // Check if slug changed and if new slug conflicts
+                // Get current product data
                 $currentProduct = $productModel->getById($productId);
-                if ($currentProduct && $currentProduct['slug'] !== $data['slug']) {
+                if (!$currentProduct) {
+                    throw new Exception('Product not found.');
+                }
+                
+                // Check if slug changed and if new slug conflicts
+                if ($currentProduct['slug'] !== $data['slug']) {
                     // Slug is being changed, check for conflicts
                     $conflict = db()->fetchOne(
                         "SELECT id FROM products WHERE slug = :slug AND id != :product_id",
@@ -106,9 +111,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
                 
+                // Check if SKU changed and if new SKU conflicts
+                // Get current SKU from database and normalize
+                $currentSku = isset($currentProduct['sku']) ? trim($currentProduct['sku']) : '';
+                $currentSku = ($currentSku === '') ? null : $currentSku;
+                
+                // Get new SKU from form data (already trimmed and normalized in $data array)
+                $newSku = $data['sku']; // This is already normalized: null if empty, or trimmed string
+                
+                // Determine if SKU is actually changing
+                // Compare both values (treating null and empty string as equivalent)
+                $skuIsChanging = false;
+                
+                if ($currentSku === null && $newSku === null) {
+                    // Both are null/empty - no change
+                    $skuIsChanging = false;
+                } elseif ($currentSku === null || $newSku === null) {
+                    // One is null, one has value - definitely changing
+                    $skuIsChanging = true;
+                } else {
+                    // Both have values - compare them (case-insensitive)
+                    // Both are already trimmed from normalization
+                    $skuIsChanging = (strcasecmp($currentSku, $newSku) !== 0);
+                }
+                
+                // Only validate uniqueness if SKU is actually changing to a non-empty value
+                if ($skuIsChanging && $newSku !== null && $newSku !== '') {
+                    // SKU is being changed to a new non-empty value, check for conflicts
+                    $skuConflict = db()->fetchOne(
+                        "SELECT id FROM products WHERE sku = :sku AND id != :product_id",
+                        ['sku' => $newSku, 'product_id' => $productId]
+                    );
+                    if ($skuConflict) {
+                        throw new Exception('This SKU is already in use. Please choose a different SKU.');
+                    }
+                }
+                
                 $productModel->update($productId, $data);
                 $message = 'Product updated successfully.';
             } else {
+                // For new products, check if SKU already exists (only if SKU is provided and not empty)
+                if (!empty($data['sku'])) {
+                    $skuConflict = db()->fetchOne(
+                        "SELECT id FROM products WHERE sku = :sku",
+                        ['sku' => $data['sku']]
+                    );
+                    if ($skuConflict) {
+                        throw new Exception('This SKU is already in use. Please choose a different SKU.');
+                    }
+                }
+                
                 $productId = $productModel->create($data);
                 $message = 'Product created successfully.';
             }
@@ -174,10 +226,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             // Provide user-friendly error messages
             $errorMessage = $e->getMessage();
-            if (strpos($errorMessage, 'Duplicate entry') !== false) {
+            
+            // Check if this is our custom SKU error (already user-friendly)
+            if (strpos($errorMessage, 'This SKU is already in use') !== false) {
+                $error = $errorMessage; // Use the message as-is
+            } elseif (strpos($errorMessage, 'Duplicate entry') !== false) {
+                // Database-level duplicate entry error
                 if (strpos($errorMessage, 'slug') !== false) {
                     $error = 'This slug is already in use. The system tried to auto-generate a unique slug, but there was a conflict. Please enter a different slug manually.';
                 } elseif (strpos($errorMessage, 'sku') !== false) {
+                    // This shouldn't happen if our validation worked, but handle it anyway
                     $error = 'This SKU is already in use. Please choose a different SKU.';
                 } else {
                     $error = 'A duplicate entry was detected. Please check your input and try again.';
@@ -924,30 +982,59 @@ function uploadMainImage(file) {
     formData.append('file', file);
     
     const preview = document.getElementById('mainImagePreview');
+    const placeholder = document.getElementById('mainImagePlaceholder');
+    
     if (preview) {
         preview.style.opacity = '0.5';
+    }
+    if (placeholder) {
+        placeholder.innerHTML = '<i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i><p class="text-gray-600">Uploading...</p>';
     }
     
     fetch('<?= url('admin/upload.php') ?>', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            setMainImage(data.file);
-            if (allImages.length > 0) {
-                allImages.unshift({
-                    filename: data.file,
-                    url: data.url
-                });
+            // Support both old format (data.file) and new format (data.files[0])
+            const filename = data.file || (data.files && data.files[0] ? data.files[0].filename : null);
+            const url = data.url || (data.files && data.files[0] ? data.files[0].url : null);
+            
+            if (filename) {
+                setMainImage(filename);
+                if (allImages.length > 0) {
+                    allImages.unshift({
+                        filename: filename,
+                        url: url || '<?= asset('storage/uploads/') ?>' + filename
+                    });
+                }
+            } else {
+                throw new Error('No file returned from server');
             }
         } else {
-            alert('Upload failed: ' + data.message);
+            throw new Error(data.message || 'Upload failed');
         }
     })
     .catch(error => {
+        if (placeholder) {
+            placeholder.innerHTML = `
+                <i class="fas fa-image text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 mb-4">No main image selected</p>
+                <p class="text-red-500 text-sm mb-2">Upload failed: ${error.message}</p>
+                <button type="button" onclick="openImageBrowser('main')" class="btn-primary">
+                    <i class="fas fa-upload mr-2"></i> Select or Upload Image
+                </button>
+            `;
+        }
         alert('Upload error: ' + error.message);
+        console.error('Upload error:', error);
     });
 }
 
@@ -1029,13 +1116,34 @@ function uploadGalleryImages(files) {
         formData.append('files[]', files[i]);
     }
     
+    // Show loading indicator
+    const galleryContainer = document.getElementById('galleryContainer');
+    if (galleryContainer) {
+        const loadingMsg = document.createElement('div');
+        loadingMsg.id = 'upload-loading';
+        loadingMsg.className = 'col-span-full text-center py-4 text-blue-600';
+        loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Uploading images...';
+        galleryContainer.appendChild(loadingMsg);
+    }
+    
     fetch('<?= url('admin/upload.php') ?>', {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
-        if (data.success && data.files) {
+        // Remove loading indicator
+        const loadingMsg = document.getElementById('upload-loading');
+        if (loadingMsg) {
+            loadingMsg.remove();
+        }
+        
+        if (data.success && data.files && data.files.length > 0) {
             data.files.forEach(file => {
                 addToGallery(file.filename);
             });
@@ -1046,7 +1154,13 @@ function uploadGalleryImages(files) {
         }
     })
     .catch(error => {
+        // Remove loading indicator
+        const loadingMsg = document.getElementById('upload-loading');
+        if (loadingMsg) {
+            loadingMsg.remove();
+        }
         alert('Upload error: ' + error.message);
+        console.error('Upload error:', error);
     });
 }
 

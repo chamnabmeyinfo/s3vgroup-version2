@@ -21,62 +21,115 @@ class BackupService {
      * Create database backup
      */
     public function backupDatabase() {
-        $config = require __DIR__ . '/../../../config/database.php';
-        $dbName = $config['database'];
-        
-        $backupFile = $this->backupDir . 'db_backup_' . date('Y-m-d_H-i-s') . '.sql';
-        
-        // Get all tables
-        $tables = $this->db->fetchAll("SHOW TABLES");
-        $tableColumn = "Tables_in_{$dbName}";
-        
-        $sql = "-- Database Backup\n";
-        $sql .= "-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
-        $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
-        
-        foreach ($tables as $table) {
-            $tableName = $table[$tableColumn];
+        try {
+            $config = require __DIR__ . '/../../../config/database.php';
             
-            // Drop table
-            $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
+            // Get database name from config (use 'dbname' key)
+            $dbName = $config['dbname'] ?? $config['database'] ?? null;
             
-            // Create table
-            $createTable = $this->db->fetchOne("SHOW CREATE TABLE `{$tableName}`");
-            $sql .= $createTable['Create Table'] . ";\n\n";
+            if (empty($dbName)) {
+                throw new \Exception('Database name not found in configuration');
+            }
             
-            // Insert data
-            $rows = $this->db->fetchAll("SELECT * FROM `{$tableName}`");
-            if (!empty($rows)) {
-                $columns = array_keys($rows[0]);
-                $sql .= "INSERT INTO `{$tableName}` (`" . implode('`, `', $columns) . "`) VALUES\n";
+            $backupFile = $this->backupDir . 'db_backup_' . date('Y-m-d_H-i-s') . '.sql';
+            
+            // Get all tables - SHOW TABLES returns a dynamic column name
+            $tables = $this->db->fetchAll("SHOW TABLES");
+            
+            if (empty($tables)) {
+                throw new \Exception('No tables found in database');
+            }
+            
+            // Get the column name from the first result (it's dynamic based on database name)
+            // The column name format is "Tables_in_{database_name}"
+            $firstTable = reset($tables);
+            $tableColumn = array_key_first($firstTable);
+            
+            if (empty($tableColumn)) {
+                throw new \Exception('Could not determine table column name from SHOW TABLES result');
+            }
+            
+            $sql = "-- Database Backup\n";
+            $sql .= "-- Generated: " . date('Y-m-d H:i:s') . "\n\n";
+            $sql .= "SET FOREIGN_KEY_CHECKS=0;\n\n";
+            
+            foreach ($tables as $table) {
+                // Get table name from the dynamic column
+                $tableName = $table[$tableColumn] ?? null;
                 
-                $values = [];
-                foreach ($rows as $row) {
-                    $rowValues = array_map(function($value) {
-                        if ($value === null) {
-                            return 'NULL';
-                        }
-                        return "'" . addslashes($value) . "'";
-                    }, array_values($row));
-                    
-                    $values[] = "(" . implode(", ", $rowValues) . ")";
+                if (empty($tableName)) {
+                    continue; // Skip if table name is empty
                 }
                 
-                $sql .= implode(",\n", $values) . ";\n\n";
+                // Drop table
+                $sql .= "DROP TABLE IF EXISTS `{$tableName}`;\n";
+            
+                // Create table
+                $createTable = $this->db->fetchOne("SHOW CREATE TABLE `{$tableName}`");
+                
+                if (empty($createTable) || !isset($createTable['Create Table'])) {
+                    // Try alternative column name
+                    $createTable = $this->db->fetchOne("SHOW CREATE TABLE `{$tableName}`");
+                    $createTableSql = $createTable['Create Table'] ?? $createTable['CREATE TABLE'] ?? null;
+                    
+                    if (empty($createTableSql)) {
+                        continue; // Skip if we can't get CREATE TABLE statement
+                    }
+                } else {
+                    $createTableSql = $createTable['Create Table'];
+                }
+                
+                $sql .= $createTableSql . ";\n\n";
+                
+                // Insert data
+                try {
+                    $rows = $this->db->fetchAll("SELECT * FROM `{$tableName}`");
+                    if (!empty($rows)) {
+                        $columns = array_keys($rows[0]);
+                        $sql .= "INSERT INTO `{$tableName}` (`" . implode('`, `', $columns) . "`) VALUES\n";
+                        
+                        $values = [];
+                        foreach ($rows as $row) {
+                            $rowValues = array_map(function($value) {
+                                if ($value === null) {
+                                    return 'NULL';
+                                }
+                                // Properly escape the value
+                                // Replace single quotes and escape special characters
+                                $escaped = str_replace(['\\', "\x00", "\n", "\r", "'", '"', "\x1a"], 
+                                    ['\\\\', '\\0', '\\n', '\\r', "\\'", '\\"', '\\Z'], $value);
+                                return "'" . $escaped . "'";
+                            }, array_values($row));
+                            
+                            $values[] = "(" . implode(", ", $rowValues) . ")";
+                        }
+                        
+                        $sql .= implode(",\n", $values) . ";\n\n";
+                    }
+                } catch (\Exception $e) {
+                    // Log error but continue with other tables
+                    $sql .= "-- Error reading data from table `{$tableName}`: " . $e->getMessage() . "\n\n";
+                }
             }
+            
+            $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
+            
+            // Write backup file
+            if (file_put_contents($backupFile, $sql) === false) {
+                throw new \Exception('Failed to write backup file');
+            }
+            
+            // Compress backup
+            $compressedFile = $this->compressBackup($backupFile);
+            
+            // Clean old backups (keep last 30 days)
+            $this->cleanOldBackups();
+            
+            return $compressedFile ?: $backupFile;
+            
+        } catch (\Exception $e) {
+            throw new \Exception('Error creating backup: ' . $e->getMessage());
         }
-        
-        $sql .= "SET FOREIGN_KEY_CHECKS=1;\n";
-        
-        file_put_contents($backupFile, $sql);
-        
-        // Compress backup
-        $this->compressBackup($backupFile);
-        
-        // Clean old backups (keep last 30 days)
-        $this->cleanOldBackups();
-        
-        return $backupFile;
     }
     
     /**

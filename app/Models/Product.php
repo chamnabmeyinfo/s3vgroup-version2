@@ -186,4 +186,3 @@ class Product
         return true;
     }
 }
-

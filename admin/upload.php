@@ -14,7 +14,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Create upload directory if it doesn't exist
     if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
+        if (!mkdir($uploadDir, 0755, true)) {
+            $response['message'] = 'Failed to create upload directory.';
+            echo json_encode($response);
+            exit;
+        }
+    }
+    
+    // Check if directory is writable
+    if (!is_writable($uploadDir)) {
+        $response['message'] = 'Upload directory is not writable.';
+        echo json_encode($response);
+        exit;
     }
     
     $uploadedFiles = [];
@@ -22,8 +33,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // Handle multiple files (files[]) or single file (file)
     $files = [];
+    
+    // Check for files[] (multiple files from FormData)
     if (isset($_FILES['files']) && is_array($_FILES['files']['name'])) {
-        // Multiple files
+        // Multiple files - files[] format
         for ($i = 0; $i < count($_FILES['files']['name']); $i++) {
             $files[] = [
                 'name' => $_FILES['files']['name'][$i],
@@ -36,22 +49,74 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (isset($_FILES['file'])) {
         // Single file (backward compatibility)
         $files[] = $_FILES['file'];
+    } else {
+        // No files found
+        $response['message'] = 'No files were uploaded.';
+        echo json_encode($response);
+        exit;
     }
     
     foreach ($files as $file) {
         // Check for errors
         if ($file['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = $file['name'] . ': Upload error occurred.';
+            $errorMessage = 'Upload error occurred.';
+            switch ($file['error']) {
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                    $errorMessage = 'File too large. Maximum upload size is ' . ini_get('upload_max_filesize');
+                    break;
+                case UPLOAD_ERR_PARTIAL:
+                    $errorMessage = 'File was only partially uploaded.';
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $errorMessage = 'No file was uploaded.';
+                    break;
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $errorMessage = 'Missing temporary folder.';
+                    break;
+                case UPLOAD_ERR_CANT_WRITE:
+                    $errorMessage = 'Failed to write file to disk.';
+                    break;
+                case UPLOAD_ERR_EXTENSION:
+                    $errorMessage = 'File upload stopped by extension.';
+                    break;
+            }
+            $errors[] = $file['name'] . ': ' . $errorMessage;
             continue;
         }
         
         // Validate file type
         $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-        $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_file($finfo, $file['tmp_name']);
-        finfo_close($finfo);
         
-        if (!in_array($mimeType, $allowedTypes)) {
+        // Check if file exists and is readable
+        if (!file_exists($file['tmp_name']) || !is_readable($file['tmp_name'])) {
+            $errors[] = $file['name'] . ': File is not readable.';
+            continue;
+        }
+        
+        // Get MIME type
+        $mimeType = null;
+        if (function_exists('finfo_open')) {
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $file['tmp_name']);
+            finfo_close($finfo);
+        } elseif (function_exists('mime_content_type')) {
+            $mimeType = mime_content_type($file['tmp_name']);
+        } else {
+            // Fallback to file extension
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $extensionMap = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'svg' => 'image/svg+xml'
+            ];
+            $mimeType = $extensionMap[$extension] ?? null;
+        }
+        
+        if (!$mimeType || !in_array($mimeType, $allowedTypes)) {
             $errors[] = $file['name'] . ': Invalid file type. Only images are allowed.';
             continue;
         }
@@ -94,6 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $response['success'] = true;
         $response['message'] = 'Successfully uploaded ' . count($uploadedFiles) . ' file(s).';
         $response['files'] = $uploadedFiles;
+        
+        // For backward compatibility with single file uploads
+        // If only one file was uploaded, also provide 'file' and 'url' keys
+        if (count($uploadedFiles) === 1) {
+            $response['file'] = $uploadedFiles[0]['filename'];
+            $response['url'] = $uploadedFiles[0]['url'];
+        }
+        
         if (!empty($errors)) {
             $response['message'] .= ' ' . count($errors) . ' file(s) failed.';
             $response['errors'] = $errors;
