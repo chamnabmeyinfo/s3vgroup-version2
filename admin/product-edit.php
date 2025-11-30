@@ -99,18 +99,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             // Handle variants
-            if ($productId && !empty($_POST['variants'])) {
-                $variants = json_decode($_POST['variants'], true) ?? [];
+            if ($productId) {
+                $variants = !empty($_POST['variants']) ? json_decode($_POST['variants'], true) ?? [] : [];
                 
-                // Delete existing variants
+                // Get existing variants
+                $existingVariants = [];
                 try {
-                    $db->delete('product_variant_attributes', 'variant_id IN (SELECT id FROM product_variants WHERE product_id = :product_id)', ['product_id' => $productId]);
-                    $db->delete('product_variants', 'product_id = :product_id', ['product_id' => $productId]);
+                    $existingVariantsRaw = $db->fetchAll(
+                        "SELECT id FROM product_variants WHERE product_id = :product_id",
+                        ['product_id' => $productId]
+                    );
+                    $existingVariants = array_column($existingVariantsRaw, 'id');
                 } catch (Exception $e) {
                     // Tables might not exist yet
                 }
                 
-                // Insert new variants
+                $processedVariantIds = [];
+                
+                // Update or insert variants
                 foreach ($variants as $variant) {
                     // Allow variants without attributes (they can be added later)
                     if (!isset($variant['attributes']) || !is_array($variant['attributes'])) {
@@ -131,17 +137,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'sort_order' => intval($variant['sort_order'] ?? 0)
                     ];
                     
-                    $variantId = $db->insert('product_variants', $variantData);
+                    // Check if variant has an ID (existing variant)
+                    $variantId = null;
+                    if (!empty($variant['id']) && in_array($variant['id'], $existingVariants)) {
+                        // Update existing variant
+                        $variantId = (int)$variant['id'];
+                        try {
+                            $db->update('product_variants', $variantData, 'id = :id', ['id' => $variantId]);
+                            
+                            // Delete existing attributes
+                            $db->delete('product_variant_attributes', 'variant_id = :variant_id', ['variant_id' => $variantId]);
+                        } catch (Exception $e) {
+                            // If update fails, try insert
+                            $variantId = $db->insert('product_variants', $variantData);
+                        }
+                    } else {
+                        // Insert new variant
+                        try {
+                            $variantId = $db->insert('product_variants', $variantData);
+                        } catch (Exception $e) {
+                            // If insert fails, log and continue
+                            error_log('Failed to insert variant: ' . $e->getMessage());
+                            continue;
+                        }
+                    }
                     
-                    // Insert variant attributes
-                    foreach ($variant['attributes'] as $attrName => $attrValue) {
-                        if (empty($attrName) || empty($attrValue)) continue;
+                    if ($variantId) {
+                        $processedVariantIds[] = $variantId;
                         
-                        $db->insert('product_variant_attributes', [
-                            'variant_id' => $variantId,
-                            'attribute_name' => trim($attrName),
-                            'attribute_value' => trim($attrValue)
-                        ]);
+                        // Insert variant attributes
+                        foreach ($variant['attributes'] as $attrName => $attrValue) {
+                            if (empty($attrName) || empty($attrValue)) continue;
+                            
+                            try {
+                                $db->insert('product_variant_attributes', [
+                                    'variant_id' => $variantId,
+                                    'attribute_name' => trim($attrName),
+                                    'attribute_value' => trim($attrValue)
+                                ]);
+                            } catch (Exception $e) {
+                                error_log('Failed to insert variant attribute: ' . $e->getMessage());
+                            }
+                        }
+                    }
+                }
+                
+                // Delete variants that are no longer in the list
+                if (!empty($existingVariants) && !empty($processedVariantIds)) {
+                    $variantsToDelete = array_diff($existingVariants, $processedVariantIds);
+                    if (!empty($variantsToDelete)) {
+                        try {
+                            // Delete variant attributes first
+                            foreach ($variantsToDelete as $variantIdToDelete) {
+                                $db->delete('product_variant_attributes', 'variant_id = :variant_id', ['variant_id' => $variantIdToDelete]);
+                            }
+                            // Then delete variants
+                            foreach ($variantsToDelete as $variantIdToDelete) {
+                                $db->delete('product_variants', 'id = :id', ['id' => $variantIdToDelete]);
+                            }
+                        } catch (Exception $e) {
+                            error_log('Failed to delete variants: ' . $e->getMessage());
+                        }
+                    }
+                } elseif (!empty($existingVariants) && empty($variants)) {
+                    // All variants were removed
+                    try {
+                        $db->delete('product_variant_attributes', 'variant_id IN (SELECT id FROM product_variants WHERE product_id = :product_id)', ['product_id' => $productId]);
+                        $db->delete('product_variants', 'product_id = :product_id', ['product_id' => $productId]);
+                    } catch (Exception $e) {
+                        error_log('Failed to delete all variants: ' . $e->getMessage());
                     }
                 }
             }
@@ -530,134 +594,190 @@ include __DIR__ . '/includes/header.php';
                 <!-- Variant Management -->
                 <div>
                     <div class="flex justify-between items-center mb-4">
-                        <label class="block text-sm font-medium">Product Variants (<?= count($variants) ?>)</label>
-                        <button type="button" onclick="addVariant()" class="btn-primary">
-                            <i class="fas fa-plus mr-2"></i> Add Variant
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 shadow-sm">
+                                <i class="fas fa-layer-group text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-base font-bold text-gray-900">Product Variants</h3>
+                                <p class="text-xs text-gray-500 mt-0.5"><?= count($variants) ?> variant<?= count($variants) !== 1 ? 's' : '' ?> configured</p>
+                            </div>
+                        </div>
+                        <button type="button" onclick="addVariant()" class="btn-primary flex items-center gap-2 px-4 py-2 text-sm rounded-lg font-medium shadow-sm hover:shadow-md transition-all hover:scale-105">
+                            <i class="fas fa-plus"></i> <span class="hidden sm:inline">Add Variant</span>
                         </button>
                     </div>
                     
-                    <div id="variantsContainer" class="space-y-4">
+                    <div id="variantsContainer" class="bg-white rounded-xl shadow-sm border border-gray-200/60 overflow-hidden backdrop-blur-sm">
                         <?php if (empty($variants)): ?>
-                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
-                                <i class="fas fa-layer-group text-4xl mb-4"></i>
-                                <p>No variants created yet.</p>
-                                <p class="text-sm mt-2">Click "Add Variant" to create your first variant, or use the generator below.</p>
+                            <div class="border-2 border-dashed border-blue-200 rounded-xl p-8 text-center bg-gradient-to-br from-blue-50/50 to-white">
+                                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4 transform hover:scale-110 transition-transform">
+                                    <i class="fas fa-layer-group text-2xl text-white"></i>
+                                </div>
+                                <h4 class="text-base font-bold text-gray-900 mb-2">No variants yet</h4>
+                                <p class="text-sm text-gray-600 mb-4 max-w-sm mx-auto">Create product variations with different sizes, colors, or options to offer more choices to your customers</p>
+                                <button type="button" onclick="addVariant()" class="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-105">
+                                    <i class="fas fa-plus"></i> Create First Variant
+                                </button>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($variants as $index => $variant): ?>
-                            <div class="variant-item border rounded-lg p-4 bg-gray-50" data-index="<?= $index ?>">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-semibold">Variant #<?= $index + 1 ?></span>
-                                        <button type="button" onclick="removeVariant(<?= $index ?>)" class="text-red-600 hover:text-red-800 text-sm">
-                                            <i class="fas fa-trash"></i> Remove
-                                        </button>
-                                    </div>
-                                    <div class="flex items-center gap-2">
-                                        <label class="flex items-center text-sm">
-                                            <input type="checkbox" class="variant-active" <?= ($variant['is_active'] ?? 1) ? 'checked' : '' ?>>
-                                            <span class="ml-1">Active</span>
-                                        </label>
-                                    </div>
-                                </div>
-                                
-                                <div class="grid md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Variant Name</label>
-                                        <input type="text" class="variant-name w-full px-3 py-2 border rounded" 
-                                               value="<?= escape($variant['name'] ?? '') ?>"
-                                               placeholder="e.g., Small - Red">
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">SKU</label>
-                                        <input type="text" class="variant-sku w-full px-3 py-2 border rounded" 
-                                               value="<?= escape($variant['sku'] ?? '') ?>"
-                                               placeholder="e.g., PROD-001-SM-RED">
-                                    </div>
-                                </div>
-                                
-                                <div class="grid md:grid-cols-3 gap-4 mb-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Price</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2 top-2 text-gray-500">$</span>
-                                            <input type="number" step="0.01" class="variant-price w-full pl-6 pr-3 py-2 border rounded" 
-                                                   value="<?= escape($variant['price'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Sale Price</label>
-                                        <div class="relative">
-                                            <span class="absolute left-2 top-2 text-gray-500">$</span>
-                                            <input type="number" step="0.01" class="variant-sale-price w-full pl-6 pr-3 py-2 border rounded" 
-                                                   value="<?= escape($variant['sale_price'] ?? '') ?>">
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Stock Quantity</label>
-                                        <input type="number" class="variant-stock w-full px-3 py-2 border rounded" 
-                                               value="<?= escape($variant['stock_quantity'] ?? 0) ?>">
-                                    </div>
-                                </div>
-                                
-                                <div class="grid md:grid-cols-2 gap-4 mb-4">
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Stock Status</label>
-                                        <select class="variant-stock-status w-full px-3 py-2 border rounded">
-                                            <option value="in_stock" <?= ($variant['stock_status'] ?? 'in_stock') === 'in_stock' ? 'selected' : '' ?>>In Stock</option>
-                                            <option value="out_of_stock" <?= ($variant['stock_status'] ?? '') === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
-                                            <option value="on_order" <?= ($variant['stock_status'] ?? '') === 'on_order' ? 'selected' : '' ?>>On Order</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium mb-1">Variant Image (Optional)</label>
-                                        <div class="flex gap-2">
-                                            <input type="text" class="variant-image flex-1 px-3 py-2 border rounded" 
-                                                   value="<?= escape($variant['image'] ?? '') ?>"
-                                                   placeholder="image.jpg">
-                                            <button type="button" onclick="openImageBrowserForVariant(this)" class="btn-secondary">
-                                                <i class="fas fa-folder-open"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Attributes -->
-                                <div class="variant-attributes border-t pt-4">
-                                    <label class="block text-sm font-medium mb-2">Attributes</label>
-                                    <div class="attributes-list space-y-2">
-                                        <?php if (!empty($variant['attributes'])): ?>
-                                            <?php foreach ($variant['attributes'] as $attrName => $attrValue): ?>
-                                                <div class="attribute-row flex gap-2 items-center">
-                                                    <input type="text" class="attr-name flex-1 px-3 py-2 border rounded text-sm" 
-                                                           value="<?= escape($attrName) ?>" placeholder="Attribute name">
-                                                    <span class="text-gray-500">:</span>
-                                                    <input type="text" class="attr-value flex-1 px-3 py-2 border rounded text-sm" 
-                                                           value="<?= escape($attrValue) ?>" placeholder="Value">
-                                                    <button type="button" onclick="removeAttribute(this)" class="text-red-600 hover:text-red-800">
-                                                        <i class="fas fa-times"></i>
+                            <div class="overflow-x-auto">
+                                <table class="w-full border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-50 border-b">
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 80px;">Image</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 150px;">Name</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 110px;">SKU</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 75px;">Price</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 75px;">Sale</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 70px;">Stock</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 100px;">Status</th>
+                                            <th class="px-3 py-2.5 text-center text-xs font-semibold text-gray-600" style="width: 60px;">Active</th>
+                                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 200px;">Attributes</th>
+                                            <th class="px-3 py-2.5 text-center text-xs font-semibold text-gray-600" style="width: 60px;">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($variants as $index => $variant): ?>
+                                        <tr class="variant-item hover:bg-gray-50 border-b" data-index="<?= $index ?>" data-variant-id="<?= escape($variant['id'] ?? '') ?>">
+                                            <!-- Image -->
+                                            <td class="px-3 py-3 whitespace-nowrap" style="width: 80px;">
+                                                <div class="flex flex-col items-center gap-1">
+                                                    <div class="relative group/image">
+                                                        <?php if (!empty($variant['image'])): ?>
+                                                            <img src="<?= asset('storage/uploads/' . escape($variant['image'])) ?>" 
+                                                                 alt="Variant" 
+                                                                 class="w-12 h-12 object-cover rounded border border-gray-200 shadow-sm group-hover/image:border-blue-400 transition-all"
+                                                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2748%27 height=%2748%27%3E%3Crect fill=%27%23f3f4f6%27 width=%2748%27 height=%2748%27/%3E%3Ctext fill=%27%239ca3af%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 font-size=%2710%27%3E%3C/text%3E%3C/svg%3E'">
+                                                        <?php else: ?>
+                                                            <div class="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                                                                <i class="fas fa-image text-gray-400 text-sm"></i>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <div class="absolute inset-0 bg-black/0 group-hover/image:bg-black/30 rounded transition-all flex items-center justify-center gap-1 opacity-0 group-hover/image:opacity-100">
+                                                            <button type="button" onclick="openImageBrowserForVariant(this)" class="bg-white rounded p-1 shadow hover:bg-blue-50 text-blue-600 text-xs" title="Browse">
+                                                                <i class="fas fa-folder-open"></i>
+                                                            </button>
+                                                            <label class="bg-white rounded p-1 shadow hover:bg-blue-50 text-blue-600 text-xs cursor-pointer" title="Upload">
+                                                                <i class="fas fa-upload"></i>
+                                                                <input type="file" accept="image/*" class="hidden" onchange="uploadVariantImage(this, <?= $index ?>)">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                    <input type="text" class="variant-image hidden" value="<?= escape($variant['image'] ?? '') ?>">
+                                                </div>
+                                            </td>
+                                            
+                                            <!-- Name -->
+                                            <td class="px-3 py-3" style="width: 150px;">
+                                                <input type="text" class="variant-name w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-400" 
+                                                       value="<?= escape($variant['name'] ?? '') ?>"
+                                                       placeholder="Variant name">
+                                                <input type="text" class="variant-name-header hidden" value="<?= escape($variant['name'] ?? '') ?>">
+                                            </td>
+                                            
+                                            <!-- SKU -->
+                                            <td class="px-3 py-3" style="width: 110px;">
+                                                <input type="text" class="variant-sku w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-400 font-mono" 
+                                                       value="<?= escape($variant['sku'] ?? '') ?>"
+                                                       placeholder="SKU">
+                                            </td>
+                                            
+                                            <!-- Price -->
+                                            <td class="px-2 py-3" style="width: 75px;">
+                                                <div class="relative">
+                                                    <span class="absolute left-1.5 top-1.5 text-gray-500 text-xs">$</span>
+                                                    <input type="number" step="0.01" class="variant-price w-full pl-4 pr-1 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                                                           value="<?= escape($variant['price'] ?? '') ?>"
+                                                           placeholder="0.00">
+                                                </div>
+                                            </td>
+                                            
+                                            <!-- Sale Price -->
+                                            <td class="px-2 py-3" style="width: 75px;">
+                                                <div class="relative">
+                                                    <span class="absolute left-1.5 top-1.5 text-gray-500 text-xs">$</span>
+                                                    <input type="number" step="0.01" class="variant-sale-price w-full pl-4 pr-1 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                                                           value="<?= escape($variant['sale_price'] ?? '') ?>"
+                                                           placeholder="0.00">
+                                                </div>
+                                            </td>
+                                            
+                                            <!-- Stock -->
+                                            <td class="px-3 py-3" style="width: 70px;">
+                                                <input type="number" class="variant-stock w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-center" 
+                                                       value="<?= escape($variant['stock_quantity'] ?? 0) ?>"
+                                                       placeholder="0">
+                                            </td>
+                                            
+                                            <!-- Status -->
+                                            <td class="px-3 py-3" style="width: 100px;">
+                                                <?php 
+                                                $status = $variant['stock_status'] ?? 'in_stock';
+                                                $statusColors = [
+                                                    'in_stock' => 'bg-green-100 text-green-700 border-green-300',
+                                                    'out_of_stock' => 'bg-red-100 text-red-700 border-red-300',
+                                                    'on_order' => 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                                                ];
+                                                ?>
+                                                <select class="variant-stock-status w-full px-2 py-1.5 border rounded text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all <?= $statusColors[$status] ?>">
+                                                    <option value="in_stock" <?= $status === 'in_stock' ? 'selected' : '' ?>>In Stock</option>
+                                                    <option value="out_of_stock" <?= $status === 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
+                                                    <option value="on_order" <?= $status === 'on_order' ? 'selected' : '' ?>>On Order</option>
+                                                </select>
+                                            </td>
+                                            
+                                            <!-- Active -->
+                                            <td class="px-3 py-3 text-center" style="width: 60px;">
+                                                <input type="checkbox" class="variant-active w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer" <?= ($variant['is_active'] ?? 1) ? 'checked' : '' ?>>
+                                            </td>
+                                            
+                                            <!-- Attributes -->
+                                            <td class="px-3 py-3" style="width: 200px;">
+                                                <div class="variant-attributes">
+                                                    <div class="attributes-list space-y-1 max-h-24 overflow-y-auto">
+                                                        <?php if (!empty($variant['attributes'])): ?>
+                                                            <?php foreach ($variant['attributes'] as $attrName => $attrValue): ?>
+                                                                <div class="attribute-row flex gap-1 items-center text-xs">
+                                                                    <input type="text" class="attr-name flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                                                           value="<?= escape($attrName) ?>" placeholder="Name">
+                                                                    <span class="text-gray-400">:</span>
+                                                                    <input type="text" class="attr-value flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                                                           value="<?= escape($attrValue) ?>" placeholder="Value">
+                                                                    <button type="button" onclick="removeAttribute(this)" class="text-red-500 hover:text-red-700 px-1">
+                                                                        <i class="fas fa-times text-xs"></i>
+                                                                    </button>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                        <div class="attribute-row flex gap-1 items-center text-xs">
+                                                            <input type="text" class="attr-name flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                                                   placeholder="Name">
+                                                            <span class="text-gray-400">:</span>
+                                                            <input type="text" class="attr-value flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                                                   placeholder="Value">
+                                                            <button type="button" onclick="removeAttribute(this)" class="text-red-500 hover:text-red-700 px-1">
+                                                                <i class="fas fa-times text-xs"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <button type="button" onclick="addAttributeToVariant(this)" class="mt-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                                                        <i class="fas fa-plus mr-1"></i>Add Attribute
                                                     </button>
                                                 </div>
-                                            <?php endforeach; ?>
-                                        <?php else: ?>
-                                            <div class="attribute-row flex gap-2 items-center">
-                                                <input type="text" class="attr-name flex-1 px-3 py-2 border rounded text-sm" 
-                                                       placeholder="e.g., Size">
-                                                <span class="text-gray-500">:</span>
-                                                <input type="text" class="attr-value flex-1 px-3 py-2 border rounded text-sm" 
-                                                       placeholder="e.g., Small">
-                                                <button type="button" onclick="removeAttribute(this)" class="text-red-600 hover:text-red-800">
-                                                    <i class="fas fa-times"></i>
+                                            </td>
+                                            
+                                            <!-- Actions -->
+                                            <td class="px-3 py-3 text-center" style="width: 60px;">
+                                                <button type="button" onclick="removeVariant(<?= $index ?>)" class="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1.5 transition-colors" title="Remove">
+                                                    <i class="fas fa-trash"></i>
                                                 </button>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                    <button type="button" onclick="addAttributeToVariant(this)" class="mt-2 text-sm text-blue-600 hover:text-blue-800">
-                                        <i class="fas fa-plus mr-1"></i> Add Attribute
-                                    </button>
-                                </div>
+                                            </td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
-                            <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
                     
@@ -766,10 +886,22 @@ include __DIR__ . '/includes/header.php';
 <div id="imageBrowserModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onclick="closeImageBrowser()">
     <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-auto" onclick="event.stopPropagation()">
         <div class="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
-            <h3 class="text-xl font-bold">Select Image</h3>
-            <button onclick="closeImageBrowser()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times text-2xl"></i>
-            </button>
+            <div class="flex items-center gap-4">
+                <h3 class="text-xl font-bold">Select Image</h3>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="multiSelectToggle" onchange="toggleMultiSelect(this.checked)" class="w-4 h-4">
+                    <span class="text-sm text-gray-600">Select Multiple</span>
+                </label>
+                <span id="selectedCount" class="text-sm text-blue-600 font-semibold hidden"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="addSelectedBtn" onclick="addSelectedImages()" class="btn-primary hidden">
+                    <i class="fas fa-check mr-2"></i> Add Selected (<span id="selectedCountBtn">0</span>)
+                </button>
+                <button onclick="closeImageBrowser()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
         </div>
         <div class="p-6">
             <div class="mb-4">
@@ -785,7 +917,7 @@ include __DIR__ . '/includes/header.php';
 </div>
 
 <script>
-// Tab switching
+// Make sure switchTab is available globally
 function switchTab(tab) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(content => {
@@ -797,15 +929,26 @@ function switchTab(tab) {
     });
     
     // Show selected tab
-    document.getElementById('tab-content-' + tab).classList.remove('hidden');
+    const tabContent = document.getElementById('tab-content-' + tab);
     const tabBtn = document.getElementById('tab-' + tab);
-    tabBtn.classList.add('active', 'border-blue-500', 'text-blue-600');
-    tabBtn.classList.remove('border-transparent', 'text-gray-500');
+    
+    if (tabContent) {
+        tabContent.classList.remove('hidden');
+    }
+    if (tabBtn) {
+        tabBtn.classList.add('active', 'border-blue-500', 'text-blue-600');
+        tabBtn.classList.remove('border-transparent', 'text-gray-500');
+    }
 }
+
+// Make it globally available
+window.switchTab = switchTab;
 
 // Gallery management
 let gallery = <?= json_encode($gallery ?? []) ?>;
 let imageBrowserMode = 'main'; // 'main' or 'gallery'
+let multiSelectMode = false;
+let selectedImages = new Set();
 
 // Load all images for browser
 let allImages = [];
@@ -837,9 +980,20 @@ function displayImagesInBrowser(filter = '') {
         return;
     }
     
-    grid.innerHTML = filtered.map(img => `
-        <div class="border rounded-lg overflow-hidden hover:shadow-lg cursor-pointer image-browser-item" 
-             onclick="selectImage('${img.filename}')">
+    grid.innerHTML = filtered.map(img => {
+        const isSelected = selectedImages.has(img.filename);
+        return `
+        <div class="border rounded-lg overflow-hidden hover:shadow-lg cursor-pointer image-browser-item relative ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : ''}" 
+             onclick="handleImageClick('${img.filename}', event)"
+             data-filename="${img.filename}">
+            ${multiSelectMode ? `
+            <div class="absolute top-2 left-2 z-10">
+                <input type="checkbox" 
+                       class="image-checkbox w-5 h-5 cursor-pointer" 
+                       ${isSelected ? 'checked' : ''}
+                       onclick="event.stopPropagation(); toggleImageSelection('${img.filename}', this.checked)">
+            </div>
+            ` : ''}
             <div class="aspect-square bg-gray-100 overflow-hidden">
                 <img src="${img.url}" alt="${img.filename}" class="w-full h-full object-cover">
             </div>
@@ -847,21 +1001,123 @@ function displayImagesInBrowser(filter = '') {
                 <p class="text-xs text-gray-600 truncate" title="${img.filename}">${img.filename}</p>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
 }
 
 function filterImages(search) {
+    // Preserve selected images when filtering
     displayImagesInBrowser(search);
+}
+
+function toggleMultiSelect(enabled) {
+    multiSelectMode = enabled;
+    if (!enabled) {
+        selectedImages.clear();
+        updateSelectedCount();
+    }
+    displayImagesInBrowser(document.getElementById('imageSearch')?.value || '');
+}
+
+function toggleImageSelection(filename, checked) {
+    if (checked) {
+        selectedImages.add(filename);
+    } else {
+        selectedImages.delete(filename);
+    }
+    updateSelectedCount();
+    // Update visual state
+    const item = document.querySelector(`[data-filename="${filename}"]`);
+    if (item) {
+        if (checked) {
+            item.classList.add('ring-2', 'ring-blue-500', 'border-blue-500');
+        } else {
+            item.classList.remove('ring-2', 'ring-blue-500', 'border-blue-500');
+        }
+    }
+}
+
+function updateSelectedCount() {
+    const count = selectedImages.size;
+    const countSpan = document.getElementById('selectedCount');
+    const countBtn = document.getElementById('selectedCountBtn');
+    const addBtn = document.getElementById('addSelectedBtn');
+    
+    if (multiSelectMode && imageBrowserMode === 'gallery') {
+        if (count > 0) {
+            countSpan.textContent = `${count} selected`;
+            countSpan.classList.remove('hidden');
+            countBtn.textContent = count;
+            addBtn.classList.remove('hidden');
+        } else {
+            countSpan.classList.add('hidden');
+            addBtn.classList.add('hidden');
+        }
+    } else {
+        countSpan.classList.add('hidden');
+        addBtn.classList.add('hidden');
+    }
+}
+
+function handleImageClick(filename, event) {
+    if (multiSelectMode && imageBrowserMode === 'gallery') {
+        // Toggle selection for gallery in multi-select mode
+        const checkbox = event.currentTarget.querySelector('.image-checkbox');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            toggleImageSelection(filename, checkbox.checked);
+        }
+    } else {
+        // Single selection mode
+        selectImage(filename);
+    }
+}
+
+function addSelectedImages() {
+    if (selectedImages.size === 0) return;
+    
+    if (imageBrowserMode === 'gallery') {
+        // Add all selected images to gallery
+        selectedImages.forEach(filename => {
+            if (!gallery.includes(filename)) {
+                gallery.push(filename);
+            }
+        });
+        updateGalleryDisplay();
+        closeImageBrowser();
+    }
 }
 
 function openImageBrowser(mode) {
     imageBrowserMode = mode;
+    multiSelectMode = false;
+    selectedImages.clear();
+    const toggle = document.getElementById('multiSelectToggle');
+    const toggleLabel = toggle?.parentElement;
+    
+    if (toggle) {
+        toggle.checked = false;
+        // Only show multi-select toggle for gallery mode
+        if (toggleLabel) {
+            if (mode === 'gallery') {
+                toggleLabel.classList.remove('hidden');
+            } else {
+                toggleLabel.classList.add('hidden');
+            }
+        }
+    }
+    
     document.getElementById('imageBrowserModal').classList.remove('hidden');
+    updateSelectedCount();
     loadImagesForBrowser();
 }
 
 function closeImageBrowser() {
     document.getElementById('imageBrowserModal').classList.add('hidden');
+    multiSelectMode = false;
+    selectedImages.clear();
+    document.getElementById('multiSelectToggle').checked = false;
+    updateSelectedCount();
 }
 
 function selectImage(filename) {
@@ -1218,6 +1474,7 @@ function updateVariantsDisplay() {
     
     hiddenInput.value = JSON.stringify(variants);
     
+    // Update display without reloading page
     if (variants.length === 0) {
         if (container) {
             container.innerHTML = `
@@ -1231,7 +1488,7 @@ function updateVariantsDisplay() {
         return;
     }
     
-    // Reload page to show updated variants
+    // Reload to show new table structure
     location.reload();
 }
 
@@ -1262,13 +1519,37 @@ function removeAttribute(button) {
     updateVariantsData();
 }
 
+function updateVariantNameHeader(input, index) {
+    // Sync header input with the variant-name input (for backward compatibility)
+    const variantItem = input.closest('.variant-item');
+    const nameInput = variantItem?.querySelector('.variant-name');
+    if (nameInput) {
+        nameInput.value = input.value;
+    }
+    updateVariantsData();
+}
+
+function syncVariantName(input, index) {
+    // Sync variant-name input with header input (for backward compatibility)
+    const variantItem = input.closest('.variant-item');
+    const headerInput = variantItem?.querySelector('.variant-name-header');
+    if (headerInput) {
+        headerInput.value = input.value;
+    }
+    updateVariantsData();
+}
+
 function updateVariantsData() {
     const variantItems = document.querySelectorAll('.variant-item');
     variants = [];
     
     variantItems.forEach((item, index) => {
+        const variantId = item.dataset.variantId || null;
+        // Get name from either header or name input (prefer name input)
+        const nameInput = item.querySelector('.variant-name') || item.querySelector('.variant-name-header');
         const variant = {
-            name: item.querySelector('.variant-name')?.value || '',
+            id: variantId ? parseInt(variantId) : null,
+            name: nameInput?.value || '',
             sku: item.querySelector('.variant-sku')?.value || '',
             price: parseFloat(item.querySelector('.variant-price')?.value || 0),
             sale_price: item.querySelector('.variant-sale-price')?.value ? parseFloat(item.querySelector('.variant-sale-price').value) : null,
@@ -1415,6 +1696,128 @@ function openImageBrowserForVariant(button) {
     openImageBrowser('variant');
 }
 
+function uploadVariantImage(input, variantIndex) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const variantItems = document.querySelectorAll('.variant-item');
+    if (variantIndex >= variantItems.length) return;
+    
+    const variantItem = variantItems[variantIndex];
+    if (!variantItem) return;
+    
+    const imageInput = variantItem.querySelector('.variant-image');
+    if (!imageInput) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show loading state
+    const originalValue = imageInput.value;
+    imageInput.value = 'Uploading...';
+    imageInput.disabled = true;
+    
+    fetch('<?= url('admin/upload.php') ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.file) {
+            imageInput.value = data.file;
+            updateVariantsData();
+            
+            // Update preview if exists
+            const preview = variantItem.querySelector('img');
+            if (preview && data.url) {
+                preview.src = data.url;
+            } else if (preview) {
+                preview.src = '<?= asset('storage/uploads/') ?>' + data.file;
+            } else {
+                // Create preview if it doesn't exist
+                const imageContainer = variantItem.querySelector('.variant-image').parentElement.parentElement;
+                if (imageContainer) {
+                    const previewDiv = document.createElement('div');
+                    previewDiv.className = 'mt-2';
+                    previewDiv.innerHTML = `<img src="${data.url || '<?= asset('storage/uploads/') ?>' + data.file}" alt="Variant image" class="max-w-32 max-h-32 object-contain rounded border" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27%3E%3Crect fill=%27%23ddd%27 width=%27100%27 height=%27100%27/%3E%3Ctext fill=%27%23999%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27%3EBroken%3C/text%3E%3C/svg%3E'">`;
+                    imageContainer.appendChild(previewDiv);
+                }
+            }
+        } else {
+            throw new Error(data.message || 'Upload failed');
+        }
+    })
+    .catch(error => {
+        alert('Upload failed: ' + error.message);
+        imageInput.value = originalValue;
+        console.error('Upload error:', error);
+    })
+    .finally(() => {
+        imageInput.disabled = false;
+        input.value = ''; // Reset file input
+    });
+}
+
+function uploadVariantImage(input, variantIndex) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const variantItem = document.querySelectorAll('.variant-item')[variantIndex];
+    if (!variantItem) return;
+    
+    const imageInput = variantItem.querySelector('.variant-image');
+    if (!imageInput) return;
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show loading state
+    const originalValue = imageInput.value;
+    imageInput.value = 'Uploading...';
+    imageInput.disabled = true;
+    
+    fetch('<?= url('admin/upload.php') ?>', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success && data.file) {
+            imageInput.value = data.file;
+            updateVariantsData();
+            
+            // Update preview if exists
+            const preview = variantItem.querySelector('img');
+            if (preview && data.url) {
+                preview.src = data.url;
+            } else if (preview) {
+                preview.src = '<?= asset('storage/uploads/') ?>' + data.file;
+            }
+        } else {
+            throw new Error(data.message || 'Upload failed');
+        }
+    })
+    .catch(error => {
+        alert('Upload failed: ' + error.message);
+        imageInput.value = originalValue;
+        console.error('Upload error:', error);
+    })
+    .finally(() => {
+        imageInput.disabled = false;
+        input.value = ''; // Reset file input
+    });
+}
+
 // Update variants data on input change
 document.addEventListener('DOMContentLoaded', function() {
     // Add event listeners to all variant inputs
@@ -1488,6 +1891,199 @@ function generateSlugFromName() {
 }
 .gallery-item:hover {
     transform: scale(1.05);
+}
+
+/* Variant Table - Clean & Simple */
+#variantsContainer table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#variantsContainer thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f9fafb;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+#variantsContainer tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+#variantsContainer tbody tr:hover {
+    background: #f9fafb;
+}
+
+#variantsContainer tbody td {
+    vertical-align: middle;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+#variantsContainer input[type="text"],
+#variantsContainer input[type="number"],
+#variantsContainer select {
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+#variantsContainer input[type="text"]:focus,
+#variantsContainer input[type="number"]:focus,
+#variantsContainer select:focus {
+    outline: none;
+}
+
+#variantsContainer .attributes-list {
+    max-height: 120px;
+    overflow-y: auto;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+}
+
+#variantsContainer tbody tr:last-child td {
+    border-bottom: none;
+}
+
+#variantsContainer input[type="text"],
+#variantsContainer input[type="number"],
+#variantsContainer select {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    font-size: 0.75rem;
+    border-width: 1.5px;
+}
+
+#variantsContainer input[type="text"]:focus,
+#variantsContainer input[type="number"]:focus,
+#variantsContainer select:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 1px 2px rgba(0, 0, 0, 0.05);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+#variantsContainer input[type="text"]:hover:not(:focus),
+#variantsContainer input[type="number"]:hover:not(:focus),
+#variantsContainer select:hover:not(:focus) {
+    border-color: #cbd5e1;
+}
+
+#variantsContainer .attribute-row {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#variantsContainer .attribute-row:hover {
+    background: linear-gradient(to right, #f3f4f6, #e5e7eb);
+    transform: translateX(2px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Status Badge Styling */
+#variantsContainer select.variant-stock-status {
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+#variantsContainer select.variant-stock-status option {
+    background: white;
+    color: #374151;
+}
+
+/* Image Hover Effects */
+#variantsContainer .group\/image:hover img {
+    transform: scale(1.1);
+}
+
+#variantsContainer .group\/image:hover .fa-image {
+    transform: scale(1.2);
+}
+
+/* Checkbox Styling */
+#variantsContainer input[type="checkbox"] {
+    accent-color: #3b82f6;
+    cursor: pointer;
+}
+
+#variantsContainer input[type="checkbox"]:checked {
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L4 12.586l7.793-7.793a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+}
+
+/* Scrollbar styling for attributes */
+#variantsContainer .attributes-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #cbd5e1, #94a3b8);
+    border-radius: 4px;
+}
+
+#variantsContainer .attributes-list::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #94a3b8, #64748b);
+}
+
+/* Button Enhancements */
+#variantsContainer button {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#variantsContainer button:hover {
+    transform: translateY(-1px);
+}
+
+#variantsContainer button:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1280px) {
+    #variantsContainer table {
+        font-size: 0.7rem;
+    }
+    
+    #variantsContainer thead th {
+        padding: 0.6rem 0.6rem;
+        font-size: 0.65rem;
+    }
+    
+    #variantsContainer tbody td {
+        padding: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    #variantsContainer {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0.5rem;
+    }
+    
+    #variantsContainer table {
+        min-width: 1000px;
+    }
+    
+    #variantsContainer thead th:nth-child(n+6),
+    #variantsContainer tbody td:nth-child(n+6) {
+        display: none;
+    }
+    
+    #variantsContainer thead th:nth-child(-n+5),
+    #variantsContainer tbody td:nth-child(-n+5) {
+        display: table-cell;
+    }
 }
 </style>
 
