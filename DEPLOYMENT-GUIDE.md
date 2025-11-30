@@ -195,6 +195,28 @@ chmod 777 storage/uploads  # Or 755 if possible
 
 ---
 
+## 🔧 Step 5.5: Fix Image Paths (Important!)
+
+After importing the database, you may notice images still reference `http://localhost:8080/`. Fix this:
+
+### Option 1: Use Admin Script (Recommended)
+1. Login to admin: `https://s3vgroup.com/admin/login.php`
+2. Go to: `https://s3vgroup.com/admin/fix-image-paths.php`
+3. Click "Fix Image Paths" button
+4. Done!
+
+### Option 2: Run SQL in phpMyAdmin
+1. Open phpMyAdmin in cPanel
+2. Select your database
+3. Go to SQL tab
+4. Run queries from `database/fix-image-paths.sql`
+
+**Note:** Make sure image files are already in `storage/uploads/` on cPanel before fixing paths.
+
+See `FIX-IMAGE-PATHS.md` for detailed instructions.
+
+---
+
 ## ✅ Step 6: Post-Deployment Checks
 
 ### 6.1 Test Database Connection
