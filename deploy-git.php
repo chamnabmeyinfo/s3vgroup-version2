@@ -45,15 +45,25 @@ function deployGit($config, $log) {
     
     $log->info("  Committing changes...");
     $branch = $config['git']['branch'] ?? 'main';
-    exec("git commit -m \"" . escapeshellarg($commitMessage) . "\"", $output, $returnCode);
+    
+    // Properly escape commit message for Windows/PowerShell
+    $commitMessageEscaped = escapeshellarg($commitMessage);
+    exec("git commit -m {$commitMessageEscaped} 2>&1", $output, $returnCode);
     
     if ($returnCode !== 0) {
         // Check if commit failed because no changes (already committed)
         $outputStr = implode("\n", $output);
-        if (strpos($outputStr, 'nothing to commit') !== false) {
+        if (strpos($outputStr, 'nothing to commit') !== false || 
+            strpos($outputStr, 'no changes added to commit') !== false) {
             $log->info("  ✓ Already committed");
         } else {
-            $result['message'] = 'Failed to commit: ' . implode("\n", $output);
+            // Show actual error
+            $errorMsg = trim($outputStr);
+            if (empty($errorMsg)) {
+                $errorMsg = 'Unknown commit error (exit code: ' . $returnCode . ')';
+            }
+            $result['message'] = 'Failed to commit: ' . $errorMsg;
+            $log->error("  ✗ Commit failed: " . $errorMsg);
             return $result;
         }
     } else {
