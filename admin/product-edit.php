@@ -96,10 +96,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // No SKU validation for new products - allow creation without blocking
                 $productId = $productModel->create($data);
                 $message = 'Product created successfully.';
+                $isNewProduct = true; // Track that this is a new product
             }
             
             // Handle variants
             if ($productId) {
+                // Create variant images table if it doesn't exist
+                try {
+                    $tableExists = $db->fetchOne("SHOW TABLES LIKE 'product_variant_images'");
+                    if (!$tableExists) {
+                        // Try with foreign key first
+                        try {
+                            $db->getPdo()->exec("
+                                CREATE TABLE product_variant_images (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    variant_id INT NOT NULL,
+                                    image VARCHAR(255) NOT NULL,
+                                    sort_order INT DEFAULT 0,
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE CASCADE,
+                                    INDEX idx_variant_id (variant_id)
+                                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                            ");
+                        } catch (Exception $e) {
+                            // If foreign key fails, create without it
+                            $db->getPdo()->exec("
+                                CREATE TABLE product_variant_images (
+                                    id INT AUTO_INCREMENT PRIMARY KEY,
+                                    variant_id INT NOT NULL,
+                                    image VARCHAR(255) NOT NULL,
+                                    sort_order INT DEFAULT 0,
+                                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                    INDEX idx_variant_id (variant_id)
+                                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+                            ");
+                        }
+                    }
+                } catch (Exception $e) {
+                    // Table might already exist
+                    error_log('Variant images table check: ' . $e->getMessage());
+                }
+                
                 $variants = !empty($_POST['variants']) ? json_decode($_POST['variants'], true) ?? [] : [];
                 
                 // Get existing variants
@@ -133,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'stock_status' => $variant['stock_status'] ?? 'in_stock',
                         'image' => trim($variant['image'] ?? ''),
                         'weight' => !empty($variant['weight']) ? floatval($variant['weight']) : null,
-                        'is_active' => isset($variant['is_active']) ? 1 : 1,
+                        'is_active' => !empty($variant['is_active']) ? 1 : 0,
                         'sort_order' => intval($variant['sort_order'] ?? 0)
                     ];
                     
@@ -179,6 +216,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 error_log('Failed to insert variant attribute: ' . $e->getMessage());
                             }
                         }
+                        
+                        // Handle variant gallery
+                        if (!empty($variant['gallery']) && is_array($variant['gallery'])) {
+                            try {
+                                // Delete existing gallery images
+                                $db->delete('product_variant_images', 'variant_id = :variant_id', ['variant_id' => $variantId]);
+                                
+                                // Insert new gallery images
+                                foreach ($variant['gallery'] as $sortOrder => $image) {
+                                    if (!empty($image)) {
+                                        $db->insert('product_variant_images', [
+                                            'variant_id' => $variantId,
+                                            'image' => trim($image),
+                                            'sort_order' => $sortOrder
+                                        ]);
+                                    }
+                                }
+                            } catch (Exception $e) {
+                                error_log('Failed to insert variant gallery: ' . $e->getMessage());
+                            }
+                        }
                     }
                 }
                 
@@ -187,7 +245,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $variantsToDelete = array_diff($existingVariants, $processedVariantIds);
                     if (!empty($variantsToDelete)) {
                         try {
-                            // Delete variant attributes first
+                            // Delete variant gallery images first
+                            foreach ($variantsToDelete as $variantIdToDelete) {
+                                $db->delete('product_variant_images', 'variant_id = :variant_id', ['variant_id' => $variantIdToDelete]);
+                            }
+                            // Delete variant attributes
                             foreach ($variantsToDelete as $variantIdToDelete) {
                                 $db->delete('product_variant_attributes', 'variant_id = :variant_id', ['variant_id' => $variantIdToDelete]);
                             }
@@ -202,6 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif (!empty($existingVariants) && empty($variants)) {
                     // All variants were removed
                     try {
+                        $db->delete('product_variant_images', 'variant_id IN (SELECT id FROM product_variants WHERE product_id = :product_id)', ['product_id' => $productId]);
                         $db->delete('product_variant_attributes', 'variant_id IN (SELECT id FROM product_variants WHERE product_id = :product_id)', ['product_id' => $productId]);
                         $db->delete('product_variants', 'product_id = :product_id', ['product_id' => $productId]);
                     } catch (Exception $e) {
@@ -212,7 +275,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $db->getPdo()->commit();
             
-            if (!$productId) {
+            // Redirect to edit page after creating a new product
+            if (isset($isNewProduct) && $isNewProduct && $productId) {
                 header('Location: ' . url('admin/product-edit.php?id=' . $productId));
                 exit;
             }
@@ -271,6 +335,8 @@ if ($productId) {
         if (!empty($variants)) {
             $variantIds = array_column($variants, 'id');
             $placeholders = implode(',', array_fill(0, count($variantIds), '?'));
+            
+            // Get attributes
             $attributes = db()->fetchAll(
                 "SELECT * FROM product_variant_attributes WHERE variant_id IN ($placeholders)",
                 $variantIds
@@ -283,9 +349,28 @@ if ($productId) {
                 $variantAttributes[$attr['variant_id']][$attr['attribute_name']] = $attr['attribute_value'];
             }
             
-            // Add attributes to variants
+            // Get variant galleries
+            $variantGalleries = [];
+            try {
+                $galleryImages = db()->fetchAll(
+                    "SELECT * FROM product_variant_images WHERE variant_id IN ($placeholders) ORDER BY sort_order, id",
+                    $variantIds
+                );
+                
+                foreach ($galleryImages as $img) {
+                    if (!isset($variantGalleries[$img['variant_id']])) {
+                        $variantGalleries[$img['variant_id']] = [];
+                    }
+                    $variantGalleries[$img['variant_id']][] = $img['image'];
+                }
+            } catch (Exception $e) {
+                // Table might not exist yet
+            }
+            
+            // Add attributes and galleries to variants
             foreach ($variants as &$variant) {
                 $variant['attributes'] = $variantAttributes[$variant['id']] ?? [];
+                $variant['gallery'] = $variantGalleries[$variant['id']] ?? [];
             }
         }
     } catch (Exception $e) {
@@ -626,6 +711,12 @@ include __DIR__ . '/includes/header.php';
                                     <thead>
                                         <tr class="bg-gray-50 border-b">
                                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 80px;">Image</th>
+                                            <th class="px-2 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 160px;">
+                                                <div class="flex items-center gap-1">
+                                                    <i class="fas fa-images text-blue-600 text-xs"></i>
+                                                    <span>Gallery</span>
+                                                </div>
+                                            </th>
                                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 150px;">Name</th>
                                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 110px;">SKU</th>
                                             <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 75px;">Price</th>
@@ -665,6 +756,67 @@ include __DIR__ . '/includes/header.php';
                                                         </div>
                                                     </div>
                                                     <input type="text" class="variant-image hidden" value="<?= escape($variant['image'] ?? '') ?>">
+                                                </div>
+                                            </td>
+                                            
+                                            <!-- Gallery -->
+                                            <td class="px-2 py-2" style="width: 160px;">
+                                                <div class="variant-gallery bg-blue-50/20 border border-blue-200 rounded p-1.5">
+                                                    <div class="flex items-center gap-1 mb-1">
+                                                        <i class="fas fa-images text-blue-600 text-xs"></i>
+                                                        <label class="text-xs font-semibold text-gray-700">Gallery</label>
+                                                        <?php 
+                                                        $variantGallery = $variant['gallery'] ?? [];
+                                                        if (!empty($variantGallery)): 
+                                                        ?>
+                                                        <span class="ml-auto text-xs text-blue-600 font-medium"><?= count($variantGallery) ?></span>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    
+                                                    <div class="gallery-images flex flex-wrap gap-1 max-h-20 overflow-y-auto mb-1.5 p-1 bg-white rounded border border-dashed border-gray-300 min-h-[50px]">
+                                                        <?php 
+                                                        if (!empty($variantGallery)): 
+                                                            foreach ($variantGallery as $galleryImage): 
+                                                                $escapedGalleryImage = htmlspecialchars($galleryImage, ENT_QUOTES, 'UTF-8');
+                                                        ?>
+                                                            <div class="relative group/gallery">
+                                                                <img src="<?= asset('storage/uploads/' . escape($galleryImage)) ?>" 
+                                                                     alt="Gallery" 
+                                                                     class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
+                                                                     onerror="this.style.display='none'">
+                                                                <button type="button" onclick="removeVariantGalleryImage(this, <?= $index ?>, '<?= $escapedGalleryImage ?>')" 
+                                                                        class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
+                                                                        title="Remove">
+                                                                    <i class="fas fa-times"></i>
+                                                                </button>
+                                                            </div>
+                                                        <?php 
+                                                            endforeach;
+                                                        else:
+                                                        ?>
+                                                            <div class="w-full text-center py-2 text-gray-400 text-xs">
+                                                                <i class="fas fa-image text-lg mb-0.5 block opacity-50"></i>
+                                                                <span>No images</span>
+                                                            </div>
+                                                        <?php 
+                                                        endif; 
+                                                        ?>
+                                                    </div>
+                                                    
+                                                    <div class="flex gap-1">
+                                                        <button type="button" onclick="openImageBrowserForVariantGallery(this, <?= $index ?>)" 
+                                                                class="flex-1 text-xs text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-1.5 py-1 rounded border border-blue-300 transition-colors flex items-center justify-center gap-1 font-medium">
+                                                            <i class="fas fa-folder-open text-xs"></i>
+                                                            <span>Browse</span>
+                                                        </button>
+                                                        <label class="flex-1 text-xs text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 px-1.5 py-1 rounded border border-green-300 transition-colors flex items-center justify-center gap-1 font-medium cursor-pointer">
+                                                            <i class="fas fa-upload text-xs"></i>
+                                                            <span>Upload</span>
+                                                            <input type="file" accept="image/*" multiple class="hidden" onchange="uploadVariantGalleryImages(this, <?= $index ?>)">
+                                                        </label>
+                                                    </div>
+                                                    
+                                                    <input type="hidden" class="variant-gallery-data" value="<?= escape(json_encode($variantGallery ?? [])) ?>">
                                                 </div>
                                             </td>
                                             
@@ -1043,7 +1195,7 @@ function updateSelectedCount() {
     const countBtn = document.getElementById('selectedCountBtn');
     const addBtn = document.getElementById('addSelectedBtn');
     
-    if (multiSelectMode && imageBrowserMode === 'gallery') {
+    if (multiSelectMode && (imageBrowserMode === 'gallery' || imageBrowserMode === 'variant-gallery')) {
         if (count > 0) {
             countSpan.textContent = `${count} selected`;
             countSpan.classList.remove('hidden');
@@ -1060,8 +1212,8 @@ function updateSelectedCount() {
 }
 
 function handleImageClick(filename, event) {
-    if (multiSelectMode && imageBrowserMode === 'gallery') {
-        // Toggle selection for gallery in multi-select mode
+    if (multiSelectMode && (imageBrowserMode === 'gallery' || imageBrowserMode === 'variant-gallery')) {
+        // Toggle selection for gallery and variant-gallery in multi-select mode
         const checkbox = event.currentTarget.querySelector('.image-checkbox');
         if (checkbox) {
             checkbox.checked = !checkbox.checked;
@@ -1085,6 +1237,12 @@ function addSelectedImages() {
         });
         updateGalleryDisplay();
         closeImageBrowser();
+    } else if (imageBrowserMode === 'variant-gallery' && window.currentVariantGalleryIndex !== undefined) {
+        // Add all selected images to variant gallery
+        selectedImages.forEach(filename => {
+            addToVariantGallery(filename, window.currentVariantGalleryIndex);
+        });
+        closeImageBrowser();
     }
 }
 
@@ -1097,9 +1255,9 @@ function openImageBrowser(mode) {
     
     if (toggle) {
         toggle.checked = false;
-        // Only show multi-select toggle for gallery mode
+        // Show multi-select toggle for gallery and variant-gallery modes
         if (toggleLabel) {
-            if (mode === 'gallery') {
+            if (mode === 'gallery' || mode === 'variant-gallery') {
                 toggleLabel.classList.remove('hidden');
             } else {
                 toggleLabel.classList.add('hidden');
@@ -1128,9 +1286,56 @@ function selectImage(filename) {
         window.currentVariantImageInput.value = filename;
         updateVariantsData();
         closeImageBrowser();
+    } else if (imageBrowserMode === 'variant-gallery' && window.currentVariantGalleryIndex !== undefined) {
+        addToVariantGallery(filename, window.currentVariantGalleryIndex);
+        closeImageBrowser();
     } else {
         addToGallery(filename);
         closeImageBrowser();
+    }
+}
+
+function addToVariantGallery(filename, variantIndex) {
+    const variantItem = document.querySelectorAll('.variant-item')[variantIndex];
+    if (!variantItem) return;
+    
+    const galleryContainer = variantItem.querySelector('.gallery-images');
+    const galleryDataInput = variantItem.querySelector('.variant-gallery-data');
+    if (!galleryContainer || !galleryDataInput) return;
+    
+    // Get current gallery
+    let currentGallery = [];
+    try {
+        currentGallery = JSON.parse(galleryDataInput.value) || [];
+    } catch (e) {
+        currentGallery = [];
+    }
+    
+    // Add new image
+    if (!currentGallery.includes(filename)) {
+        currentGallery.push(filename);
+        
+        // Add image preview
+        const imgDiv = document.createElement('div');
+        imgDiv.className = 'relative group/gallery';
+        // Escape filename for use in HTML attribute
+        const escapedFilename = filename.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        imgDiv.innerHTML = `
+            <img src="<?= asset('storage/uploads/') ?>${escapedFilename}" 
+                 alt="Gallery" 
+                 class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
+                 onerror="this.style.display='none'">
+            <button type="button" onclick="removeVariantGalleryImage(this, ${variantIndex}, '${escapedFilename}')" 
+                    class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
+                    title="Remove">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        galleryContainer.appendChild(imgDiv);
+        
+        // Update hidden input
+        galleryDataInput.value = JSON.stringify(currentGallery);
+        updateVariantsData();
     }
 }
 
@@ -1443,7 +1648,8 @@ document.addEventListener('keydown', (e) => {
 let variants = <?= json_encode($variants ?? []) ?>;
 
 function addVariant() {
-    variants.push({
+    // Add variant at the beginning of the array (top of table)
+    variants.unshift({
         name: '',
         sku: '',
         price: <?= floatval($product['price'] ?? 0) ?>,
@@ -1452,11 +1658,24 @@ function addVariant() {
         stock_status: 'in_stock',
         image: '',
         attributes: {},
+        gallery: [],
         is_active: 1,
-        sort_order: variants.length
+        sort_order: 0
     });
+    
+    // Update sort_order for all variants
+    variants.forEach((variant, index) => {
+        variant.sort_order = index;
+    });
+    
     updateVariantsDisplay();
     switchTab('variants');
+    
+    // Scroll to top of variants container
+    const container = document.getElementById('variantsContainer');
+    if (container) {
+        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function removeVariant(index) {
@@ -1478,18 +1697,264 @@ function updateVariantsDisplay() {
     if (variants.length === 0) {
         if (container) {
             container.innerHTML = `
-                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center text-gray-500">
-                    <i class="fas fa-layer-group text-4xl mb-4"></i>
-                    <p>No variants created yet.</p>
-                    <p class="text-sm mt-2">Click "Add Variant" to create your first variant, or use the generator below.</p>
+                <div class="border-2 border-dashed border-blue-200 rounded-xl p-8 text-center bg-gradient-to-br from-blue-50/50 to-white">
+                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-4 transform hover:scale-110 transition-transform">
+                        <i class="fas fa-layer-group text-2xl text-white"></i>
+                    </div>
+                    <h4 class="text-base font-bold text-gray-900 mb-2">No variants yet</h4>
+                    <p class="text-sm text-gray-600 mb-4 max-w-sm mx-auto">Create product variations with different sizes, colors, or options to offer more choices to your customers</p>
+                    <button type="button" onclick="addVariant()" class="btn-primary inline-flex items-center gap-2 px-5 py-2.5 rounded-lg shadow-md hover:shadow-lg transition-all hover:scale-105">
+                        <i class="fas fa-plus"></i> Create First Variant
+                    </button>
                 </div>
             `;
         }
         return;
     }
     
-    // Reload to show new table structure
-    location.reload();
+    // Check if table exists, if not, create it
+    let table = container.querySelector('table');
+    let tbody = container.querySelector('tbody');
+    
+    if (!table) {
+        // Create table structure
+        container.innerHTML = `
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 border-b">
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 80px;">Image</th>
+                            <th class="px-2 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 160px;">
+                                <div class="flex items-center gap-1">
+                                    <i class="fas fa-images text-blue-600 text-xs"></i>
+                                    <span>Gallery</span>
+                                </div>
+                            </th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 150px;">Name</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 110px;">SKU</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 75px;">Price</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 75px;">Sale</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 70px;">Stock</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 100px;">Status</th>
+                            <th class="px-3 py-2.5 text-center text-xs font-semibold text-gray-600" style="width: 60px;">Active</th>
+                            <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-600" style="width: 200px;">Attributes</th>
+                            <th class="px-3 py-2.5 text-center text-xs font-semibold text-gray-600" style="width: 60px;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        `;
+        tbody = container.querySelector('tbody');
+    }
+    
+    // Clear existing rows
+    if (tbody) {
+        tbody.innerHTML = '';
+    }
+    
+    // Add all variant rows (newest first at top)
+    // Insert in reverse order so newest appears at top
+    for (let i = variants.length - 1; i >= 0; i--) {
+        const row = createVariantRow(variants[i], i);
+        // Insert at the beginning of tbody (top of table)
+        if (tbody.firstChild) {
+            tbody.insertBefore(row, tbody.firstChild);
+        } else {
+            tbody.appendChild(row);
+        }
+    }
+    
+    // Update variants data
+    updateVariantsData();
+}
+
+function createVariantRow(variant, index) {
+    const row = document.createElement('tr');
+    row.className = 'variant-item hover:bg-gray-50 border-b';
+    row.setAttribute('data-index', index);
+    row.setAttribute('data-variant-id', variant.id || '');
+    
+    const defaultPrice = <?= floatval($product['price'] ?? 0) ?>;
+    const imageUrl = variant.image ? '<?= asset('storage/uploads/') ?>' + variant.image : '';
+    
+    row.innerHTML = `
+        <!-- Image -->
+        <td class="px-3 py-3 whitespace-nowrap" style="width: 80px;">
+            <div class="flex flex-col items-center gap-1">
+                <div class="relative group/image">
+                    ${variant.image ? `
+                        <img src="${imageUrl}" 
+                             alt="Variant" 
+                             class="w-12 h-12 object-cover rounded border border-gray-200 shadow-sm group-hover/image:border-blue-400 transition-all"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2748%27 height=%2748%27%3E%3Crect fill=%27%23f3f4f6%27 width=%2748%27 height=%2748%27/%3E%3Ctext fill=%27%239ca3af%27 x=%2750%25%27 y=%2750%25%27 text-anchor=%27middle%27 font-size=%2710%27%3E%3C/text%3E%3C/svg%3E'">
+                    ` : `
+                        <div class="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                            <i class="fas fa-image text-gray-400 text-sm"></i>
+                        </div>
+                    `}
+                    <div class="absolute inset-0 bg-black/0 group-hover/image:bg-black/30 rounded transition-all flex items-center justify-center gap-1 opacity-0 group-hover/image:opacity-100">
+                        <button type="button" onclick="openImageBrowserForVariant(this)" class="bg-white rounded p-1 shadow hover:bg-blue-50 text-blue-600 text-xs" title="Browse">
+                            <i class="fas fa-folder-open"></i>
+                        </button>
+                        <label class="bg-white rounded p-1 shadow hover:bg-blue-50 text-blue-600 text-xs cursor-pointer" title="Upload">
+                            <i class="fas fa-upload"></i>
+                            <input type="file" accept="image/*" class="hidden" onchange="uploadVariantImage(this, ${index})">
+                        </label>
+                    </div>
+                </div>
+                <input type="text" class="variant-image hidden" value="${variant.image || ''}">
+            </div>
+        </td>
+        
+        <!-- Gallery -->
+        <td class="px-2 py-2" style="width: 160px;">
+            <div class="variant-gallery bg-blue-50/20 border border-blue-200 rounded p-1.5">
+                <div class="flex items-center gap-1 mb-1">
+                    <i class="fas fa-images text-blue-600 text-xs"></i>
+                    <label class="text-xs font-semibold text-gray-700">Gallery</label>
+                    ${variant.gallery && variant.gallery.length > 0 ? `<span class="ml-auto text-xs text-blue-600 font-medium">${variant.gallery.length}</span>` : ''}
+                </div>
+                
+                <div class="gallery-images flex flex-wrap gap-1 max-h-20 overflow-y-auto mb-1.5 p-1 bg-white rounded border border-dashed border-gray-300 min-h-[50px]">
+                    ${variant.gallery && variant.gallery.length > 0 ? variant.gallery.map((galleryImage) => {
+                        const escapedImage = galleryImage.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                        return `
+                        <div class="relative group/gallery">
+                            <img src="<?= asset('storage/uploads/') ?>${escapedImage}" 
+                                 alt="Gallery" 
+                                 class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
+                                 onerror="this.style.display='none'">
+                            <button type="button" onclick="removeVariantGalleryImage(this, ${index}, '${escapedImage}')" 
+                                    class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
+                                    title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    `;
+                    }).join('') : `
+                        <div class="w-full text-center py-2 text-gray-400 text-xs">
+                            <i class="fas fa-image text-lg mb-0.5 block opacity-50"></i>
+                            <span>No images</span>
+                        </div>
+                    `}
+                </div>
+                
+                <div class="flex gap-1">
+                    <button type="button" onclick="openImageBrowserForVariantGallery(this, ${index})" 
+                            class="flex-1 text-xs text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-1.5 py-1 rounded border border-blue-300 transition-colors flex items-center justify-center gap-1 font-medium">
+                        <i class="fas fa-folder-open text-xs"></i>
+                        <span>Browse</span>
+                    </button>
+                    <label class="flex-1 text-xs text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 px-1.5 py-1 rounded border border-green-300 transition-colors flex items-center justify-center gap-1 font-medium cursor-pointer">
+                        <i class="fas fa-upload text-xs"></i>
+                        <span>Upload</span>
+                        <input type="file" accept="image/*" multiple class="hidden" onchange="uploadVariantGalleryImages(this, ${index})">
+                    </label>
+                </div>
+                
+                <input type="hidden" class="variant-gallery-data" value="${JSON.stringify(variant.gallery || []).replace(/"/g, '&quot;')}">
+            </div>
+        </td>
+        
+        <!-- Name -->
+        <td class="px-3 py-3" style="width: 150px;">
+            <input type="text" class="variant-name w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-400" 
+                   value="${(variant.name || '').replace(/"/g, '&quot;')}"
+                   placeholder="Variant name">
+            <input type="text" class="variant-name-header hidden" value="${(variant.name || '').replace(/"/g, '&quot;')}">
+        </td>
+        
+        <!-- SKU -->
+        <td class="px-3 py-3" style="width: 110px;">
+            <input type="text" class="variant-sku w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-700 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all placeholder:text-gray-400 font-mono" 
+                   value="${(variant.sku || '').replace(/"/g, '&quot;')}"
+                   placeholder="SKU">
+        </td>
+        
+        <!-- Price -->
+        <td class="px-2 py-3" style="width: 75px;">
+            <div class="relative">
+                <span class="absolute left-1.5 top-1.5 text-gray-500 text-xs">$</span>
+                <input type="number" step="0.01" class="variant-price w-full pl-4 pr-1 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                       value="${variant.price || defaultPrice}"
+                       placeholder="0.00">
+            </div>
+        </td>
+        
+        <!-- Sale Price -->
+        <td class="px-2 py-3" style="width: 75px;">
+            <div class="relative">
+                <span class="absolute left-1.5 top-1.5 text-gray-500 text-xs">$</span>
+                <input type="number" step="0.01" class="variant-sale-price w-full pl-4 pr-1 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all" 
+                       value="${String(variant.sale_price || '').replace(/"/g, '&quot;')}"
+                       placeholder="0.00">
+            </div>
+        </td>
+        
+        <!-- Stock -->
+        <td class="px-3 py-3" style="width: 70px;">
+            <input type="number" class="variant-stock w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-center" 
+                   value="${variant.stock_quantity || 0}"
+                   placeholder="0">
+        </td>
+        
+        <!-- Status -->
+        <td class="px-3 py-3" style="width: 100px;">
+            <select class="variant-stock-status w-full px-2 py-1.5 border rounded text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all ${variant.stock_status === 'in_stock' ? 'bg-green-100 text-green-700 border-green-300' : variant.stock_status === 'out_of_stock' ? 'bg-red-100 text-red-700 border-red-300' : 'bg-yellow-100 text-yellow-700 border-yellow-300'}">
+                <option value="in_stock" ${variant.stock_status === 'in_stock' ? 'selected' : ''}>In Stock</option>
+                <option value="out_of_stock" ${variant.stock_status === 'out_of_stock' ? 'selected' : ''}>Out of Stock</option>
+                <option value="on_order" ${variant.stock_status === 'on_order' ? 'selected' : ''}>On Order</option>
+            </select>
+        </td>
+        
+        <!-- Active -->
+        <td class="px-3 py-3 text-center" style="width: 60px;">
+            <input type="checkbox" class="variant-active w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer" ${variant.is_active ? 'checked' : ''}>
+        </td>
+        
+        <!-- Attributes -->
+        <td class="px-3 py-3" style="width: 200px;">
+            <div class="variant-attributes">
+                <div class="attributes-list space-y-1 max-h-24 overflow-y-auto">
+                    ${Object.keys(variant.attributes || {}).map(attrName => `
+                        <div class="attribute-row flex gap-1 items-center text-xs">
+                            <input type="text" class="attr-name flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                   value="${attrName.replace(/"/g, '&quot;')}" placeholder="Name">
+                            <span class="text-gray-400">:</span>
+                            <input type="text" class="attr-value flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                                   value="${(variant.attributes[attrName] || '').replace(/"/g, '&quot;')}" placeholder="Value">
+                            <button type="button" onclick="removeAttribute(this)" class="text-red-500 hover:text-red-700 px-1">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                    <div class="attribute-row flex gap-1 items-center text-xs">
+                        <input type="text" class="attr-name flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                               placeholder="Name">
+                        <span class="text-gray-400">:</span>
+                        <input type="text" class="attr-value flex-1 px-2 py-1 border border-gray-200 rounded text-xs focus:ring-1 focus:ring-blue-400 focus:border-blue-400" 
+                               placeholder="Value">
+                        <button type="button" onclick="removeAttribute(this)" class="text-red-500 hover:text-red-700 px-1">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+                <button type="button" onclick="addAttributeToVariant(this)" class="mt-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
+                    <i class="fas fa-plus mr-1"></i>Add Attribute
+                </button>
+            </div>
+        </td>
+        
+        <!-- Actions -->
+        <td class="px-3 py-3 text-center" style="width: 60px;">
+            <button type="button" onclick="removeVariant(${index})" class="text-red-500 hover:text-red-700 hover:bg-red-50 rounded p-1.5 transition-colors" title="Remove">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+    `;
+    
+    return row;
 }
 
 function addAttributeToVariant(button) {
@@ -1556,10 +2021,21 @@ function updateVariantsData() {
             stock_quantity: parseInt(item.querySelector('.variant-stock')?.value || 0),
             stock_status: item.querySelector('.variant-stock-status')?.value || 'in_stock',
             image: item.querySelector('.variant-image')?.value || '',
+            gallery: [],
             attributes: {},
             is_active: item.querySelector('.variant-active')?.checked ? 1 : 0,
             sort_order: index
         };
+        
+        // Get gallery images
+        const galleryDataInput = item.querySelector('.variant-gallery-data');
+        if (galleryDataInput && galleryDataInput.value) {
+            try {
+                variant.gallery = JSON.parse(galleryDataInput.value) || [];
+            } catch (e) {
+                variant.gallery = [];
+            }
+        }
         
         // Get attributes
         const attrRows = item.querySelectorAll('.attribute-row');
@@ -1700,10 +2176,8 @@ function uploadVariantImage(input, variantIndex) {
     const file = input.files[0];
     if (!file) return;
     
-    const variantItems = document.querySelectorAll('.variant-item');
-    if (variantIndex >= variantItems.length) return;
-    
-    const variantItem = variantItems[variantIndex];
+    // Get variant item from input's parent
+    const variantItem = input.closest('.variant-item');
     if (!variantItem) return;
     
     const imageInput = variantItem.querySelector('.variant-image');
@@ -1763,23 +2237,33 @@ function uploadVariantImage(input, variantIndex) {
     });
 }
 
-function uploadVariantImage(input, variantIndex) {
-    const file = input.files[0];
-    if (!file) return;
+// Variant Gallery Functions
+function openImageBrowserForVariantGallery(button, variantIndex) {
+    window.currentVariantGalleryIndex = variantIndex;
+    imageBrowserMode = 'variant-gallery';
+    openImageBrowser('variant-gallery');
+}
+
+function uploadVariantGalleryImages(input, variantIndex) {
+    const files = input.files;
+    if (!files || files.length === 0) return;
     
     const variantItem = document.querySelectorAll('.variant-item')[variantIndex];
     if (!variantItem) return;
     
-    const imageInput = variantItem.querySelector('.variant-image');
-    if (!imageInput) return;
+    const galleryContainer = variantItem.querySelector('.gallery-images');
+    if (!galleryContainer) return;
+    
+    // Show loading indicator
+    const loadingMsg = document.createElement('div');
+    loadingMsg.className = 'w-full text-center py-2 text-blue-600 text-xs';
+    loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Uploading...';
+    galleryContainer.appendChild(loadingMsg);
     
     const formData = new FormData();
-    formData.append('file', file);
-    
-    // Show loading state
-    const originalValue = imageInput.value;
-    imageInput.value = 'Uploading...';
-    imageInput.disabled = true;
+    for (let i = 0; i < files.length; i++) {
+        formData.append('files[]', files[i]);
+    }
     
     fetch('<?= url('admin/upload.php') ?>', {
         method: 'POST',
@@ -1792,31 +2276,76 @@ function uploadVariantImage(input, variantIndex) {
         return response.json();
     })
     .then(data => {
-        if (data.success && data.file) {
-            imageInput.value = data.file;
-            updateVariantsData();
-            
-            // Update preview if exists
-            const preview = variantItem.querySelector('img');
-            if (preview && data.url) {
-                preview.src = data.url;
-            } else if (preview) {
-                preview.src = '<?= asset('storage/uploads/') ?>' + data.file;
-            }
+        loadingMsg.remove();
+        
+        if (data.success && data.files && data.files.length > 0) {
+            data.files.forEach(file => {
+                addToVariantGallery(file.filename, variantIndex);
+            });
+            // Reload images for browser
+            loadImagesForBrowser();
+        } else if (data.success && data.file) {
+            // Single file response (backward compatibility)
+            addToVariantGallery(data.file, variantIndex);
+            loadImagesForBrowser();
         } else {
             throw new Error(data.message || 'Upload failed');
         }
     })
     .catch(error => {
+        loadingMsg.remove();
         alert('Upload failed: ' + error.message);
-        imageInput.value = originalValue;
         console.error('Upload error:', error);
     })
     .finally(() => {
-        imageInput.disabled = false;
         input.value = ''; // Reset file input
     });
 }
+
+function removeVariantGalleryImage(button, variantIndex, filename) {
+    const variantItem = document.querySelectorAll('.variant-item')[variantIndex];
+    if (!variantItem) return;
+    
+    const galleryDataInput = variantItem.querySelector('.variant-gallery-data');
+    if (!galleryDataInput) return;
+    
+    // Get current gallery
+    let currentGallery = [];
+    try {
+        currentGallery = JSON.parse(galleryDataInput.value) || [];
+    } catch (e) {
+        currentGallery = [];
+    }
+    
+    // Find and remove image by filename (more reliable than index)
+    const imageIndex = currentGallery.indexOf(filename);
+    if (imageIndex !== -1) {
+        currentGallery.splice(imageIndex, 1);
+        
+        // Update hidden input
+        galleryDataInput.value = JSON.stringify(currentGallery);
+        
+        // Remove image element from DOM
+        const imageElement = button.closest('.relative.group\\/gallery');
+        if (imageElement) {
+            imageElement.remove();
+        }
+        
+        // If gallery is empty, show empty state
+        const galleryContainer = variantItem.querySelector('.gallery-images');
+        if (galleryContainer && currentGallery.length === 0) {
+            galleryContainer.innerHTML = `
+                <div class="w-full text-center py-2 text-gray-400 text-xs">
+                    <i class="fas fa-image text-lg mb-0.5 block opacity-50"></i>
+                    <span>No images</span>
+                </div>
+            `;
+        }
+        
+        updateVariantsData();
+    }
+}
+
 
 // Update variants data on input change
 document.addEventListener('DOMContentLoaded', function() {
