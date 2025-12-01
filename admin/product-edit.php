@@ -777,18 +777,14 @@ include __DIR__ . '/includes/header.php';
                                                         <?php 
                                                         if (!empty($variantGallery)): 
                                                             foreach ($variantGallery as $galleryImage): 
-                                                                // Escape for JavaScript string literal (single quotes)
-                                                                // Escape backslashes first, then single quotes, then other control chars
-                                                                $escapedGalleryImageJs = addslashes($galleryImage);
-                                                                // Escape for HTML attribute
-                                                                $escapedGalleryImageHtml = escape($galleryImage);
+                                                                $escapedGalleryImage = htmlspecialchars($galleryImage, ENT_QUOTES, 'UTF-8');
                                                         ?>
                                                             <div class="relative group/gallery">
-                                                                <img src="<?= asset('storage/uploads/' . $escapedGalleryImageHtml) ?>" 
+                                                                <img src="<?= asset('storage/uploads/' . escape($galleryImage)) ?>" 
                                                                      alt="Gallery" 
                                                                      class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
                                                                      onerror="this.style.display='none'">
-                                                                <button type="button" onclick="removeVariantGalleryImage(this, <?= $index ?>, '<?= $escapedGalleryImageJs ?>')" 
+                                                                <button type="button" onclick="removeVariantGalleryImage(this, <?= $index ?>, '<?= $escapedGalleryImage ?>')" 
                                                                         class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
                                                                         title="Remove">
                                                                     <i class="fas fa-times"></i>
@@ -1109,19 +1105,6 @@ let selectedImages = new Set();
 // Load all images for browser
 let allImages = [];
 
-// Escape string for use in JavaScript string literal (single quotes)
-function escapeJsString(str) {
-    if (str == null) return '';
-    return String(str)
-        .replace(/\\/g, '\\\\')  // Escape backslashes first
-        .replace(/'/g, "\\'")    // Escape single quotes
-        .replace(/\n/g, '\\n')   // Escape newlines
-        .replace(/\r/g, '\\r')   // Escape carriage returns
-        .replace(/\t/g, '\\t')   // Escape tabs
-        .replace(/\f/g, '\\f')   // Escape form feeds
-        .replace(/\v/g, '\\v');  // Escape vertical tabs
-}
-
 function loadImagesForBrowser() {
     fetch('<?= url('admin/api/get-images.php') ?>')
         .then(response => response.json())
@@ -1151,17 +1134,16 @@ function displayImagesInBrowser(filter = '') {
     
     grid.innerHTML = filtered.map(img => {
         const isSelected = selectedImages.has(img.filename);
-        const escapedFilename = escapeJsString(img.filename);
         return `
         <div class="border rounded-lg overflow-hidden hover:shadow-lg cursor-pointer image-browser-item relative ${isSelected ? 'ring-2 ring-blue-500 border-blue-500' : ''}" 
-             onclick="handleImageClick('${escapedFilename}', event)"
-             data-filename="${img.filename.replace(/"/g, '&quot;')}">
+             onclick="handleImageClick('${img.filename}', event)"
+             data-filename="${img.filename}">
             ${multiSelectMode ? `
             <div class="absolute top-2 left-2 z-10">
                 <input type="checkbox" 
                        class="image-checkbox w-5 h-5 cursor-pointer" 
                        ${isSelected ? 'checked' : ''}
-                       onclick="event.stopPropagation(); toggleImageSelection('${escapedFilename}', this.checked)">
+                       onclick="event.stopPropagation(); toggleImageSelection('${img.filename}', this.checked)">
             </div>
             ` : ''}
             <div class="aspect-square bg-gray-100 overflow-hidden">
@@ -1336,16 +1318,14 @@ function addToVariantGallery(filename, variantIndex) {
         // Add image preview
         const imgDiv = document.createElement('div');
         imgDiv.className = 'relative group/gallery';
-        // Escape filename for use in JavaScript string literal (onclick handler)
-        const escapedFilenameJs = escapeJsString(filename);
-        // Escape filename for use in HTML attribute (src attribute)
-        const escapedFilenameHtml = filename.replace(/"/g, '&quot;');
+        // Escape filename for use in HTML attribute
+        const escapedFilename = filename.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
         imgDiv.innerHTML = `
-            <img src="<?= asset('storage/uploads/') ?>${escapedFilenameHtml}" 
+            <img src="<?= asset('storage/uploads/') ?>${escapedFilename}" 
                  alt="Gallery" 
                  class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
                  onerror="this.style.display='none'">
-            <button type="button" onclick="removeVariantGalleryImage(this, ${variantIndex}, '${escapedFilenameJs}')" 
+            <button type="button" onclick="removeVariantGalleryImage(this, ${variantIndex}, '${escapedFilename}')" 
                     class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
                     title="Remove">
                 <i class="fas fa-times"></i>
@@ -1838,17 +1818,14 @@ function createVariantRow(variant, index) {
                 
                 <div class="gallery-images flex flex-wrap gap-1 max-h-20 overflow-y-auto mb-1.5 p-1 bg-white rounded border border-dashed border-gray-300 min-h-[50px]">
                     ${variant.gallery && variant.gallery.length > 0 ? variant.gallery.map((galleryImage) => {
-                        // Escape for JavaScript string literal (onclick handler)
-                        const escapedImageJs = escapeJsString(galleryImage);
-                        // Escape for HTML attribute (src attribute)
-                        const escapedImageHtml = galleryImage.replace(/"/g, '&quot;');
+                        const escapedImage = galleryImage.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
                         return `
                         <div class="relative group/gallery">
-                            <img src="<?= asset('storage/uploads/') ?>${escapedImageHtml}" 
+                            <img src="<?= asset('storage/uploads/') ?>${escapedImage}" 
                                  alt="Gallery" 
                                  class="w-10 h-10 object-cover rounded border border-gray-300 group-hover/gallery:border-blue-400 transition-all"
                                  onerror="this.style.display='none'">
-                            <button type="button" onclick="removeVariantGalleryImage(this, ${index}, '${escapedImageJs}')" 
+                            <button type="button" onclick="removeVariantGalleryImage(this, ${index}, '${escapedImage}')" 
                                     class="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center opacity-0 group-hover/gallery:opacity-100 transition-opacity text-xs hover:bg-red-600"
                                     title="Remove">
                                 <i class="fas fa-times"></i>

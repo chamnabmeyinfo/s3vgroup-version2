@@ -106,11 +106,9 @@
                 </a>
                 <?php endif; ?>
                 <div class="border-t border-gray-700 my-2"></div>
-                <?php if (!function_exists('hasPermission') || hasPermission('manage_under_construction')): ?>
                 <a href="<?= url('admin/under-construction.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-hard-hat mr-2"></i> Under Construction
                 </a>
-                <?php endif; ?>
                 <a href="<?= url('admin/settings.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-cog mr-2"></i> Settings
                 </a>
