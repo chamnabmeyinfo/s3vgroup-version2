@@ -370,18 +370,22 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                         
                         <?php if (in_array('price', $selectedColumns) || empty($_GET['columns'])): ?>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-column="price">
-                            <?php if ($product['sale_price']): ?>
-                                <div class="text-blue-600 font-bold">$<?= number_format($product['sale_price'], 2) ?></div>
-                                <div class="text-xs text-gray-400 line-through">$<?= number_format($product['price'], 2) ?></div>
+                            <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
+                                <div class="text-blue-600 font-bold">$<?= number_format((float)$product['sale_price'], 2) ?></div>
+                                <?php if (!empty($product['price']) && $product['price'] > 0): ?>
+                                    <div class="text-xs text-gray-400 line-through">$<?= number_format((float)$product['price'], 2) ?></div>
+                                <?php endif; ?>
+                            <?php elseif (!empty($product['price']) && $product['price'] > 0): ?>
+                                <div class="font-semibold">$<?= number_format((float)$product['price'], 2) ?></div>
                             <?php else: ?>
-                                <div class="font-semibold">$<?= number_format($product['price'], 2) ?></div>
+                                <span class="text-gray-400">-</span>
                             <?php endif; ?>
                         </td>
                         <?php endif; ?>
                         
                         <?php if (in_array('sale_price', $selectedColumns)): ?>
                         <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price">
-                            <?= $product['sale_price'] ? '$' . number_format($product['sale_price'], 2) : '-' ?>
+                            <?= (!empty($product['sale_price']) && $product['sale_price'] > 0) ? '$' . number_format((float)$product['sale_price'], 2) : '-' ?>
                         </td>
                         <?php endif; ?>
                         

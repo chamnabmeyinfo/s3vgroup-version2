@@ -36,6 +36,9 @@
                 <a href="<?= url('admin/products.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-box mr-2"></i> Products
                 </a>
+                <a href="<?= url('admin/import-unforklift.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-download mr-2"></i> Import from UN Forklift
+                </a>
                 <a href="<?= url('admin/categories.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-tags mr-2"></i> Categories
                 </a>

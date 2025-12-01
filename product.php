@@ -214,16 +214,22 @@ include __DIR__ . '/includes/header.php';
                 <?php endif; ?>
                 
                 <div class="mb-6">
-                    <?php if ($product['sale_price']): ?>
+                    <?php 
+                    $price = !empty($product['price']) && $product['price'] > 0 ? (float)$product['price'] : null;
+                    $salePrice = !empty($product['sale_price']) && $product['sale_price'] > 0 ? (float)$product['sale_price'] : null;
+                    ?>
+                    <?php if ($salePrice && $price): ?>
                         <div class="flex items-center gap-4">
-                            <span class="text-4xl font-bold text-blue-600">$<?= number_format($product['sale_price'], 2) ?></span>
-                            <span class="text-2xl text-gray-400 line-through">$<?= number_format($product['price'], 2) ?></span>
+                            <span class="text-4xl font-bold text-blue-600">$<?= number_format($salePrice, 2) ?></span>
+                            <span class="text-2xl text-gray-400 line-through">$<?= number_format($price, 2) ?></span>
                             <span class="bg-red-500 text-white px-2 py-1 rounded text-sm">
-                                Save <?= number_format((($product['price'] - $product['sale_price']) / $product['price']) * 100, 0) ?>%
+                                Save <?= number_format((($price - $salePrice) / $price) * 100, 0) ?>%
                             </span>
                         </div>
+                    <?php elseif ($price): ?>
+                        <span class="text-4xl font-bold text-blue-600">$<?= number_format($price, 2) ?></span>
                     <?php else: ?>
-                        <span class="text-4xl font-bold text-blue-600">$<?= number_format($product['price'], 2) ?></span>
+                        <span class="text-4xl font-bold text-gray-500">Price on Request</span>
                     <?php endif; ?>
                 </div>
                 
@@ -322,7 +328,9 @@ include __DIR__ . '/includes/header.php';
                         <span class="text-green-600 font-semibold"><?= ucwords(str_replace('_', ' ', $product['stock_status'])) ?></span>
                     </p>
                     <?php if (!empty($product['weight'])): ?>
-                        <p><strong>Weight:</strong> <?= number_format($product['weight'], 2) ?> lbs</p>
+                        <?php if (!empty($product['weight']) && $product['weight'] > 0): ?>
+                            <p><strong>Weight:</strong> <?= number_format((float)$product['weight'], 2) ?> lbs</p>
+                        <?php endif; ?>
                     <?php endif; ?>
                     <?php if (!empty($product['dimensions'])): ?>
                         <p><strong>Dimensions:</strong> <?= escape($product['dimensions']) ?></p>
@@ -412,7 +420,11 @@ include __DIR__ . '/includes/header.php';
                         </div>
                         <div class="p-4">
                             <h3 class="font-bold text-lg mb-2"><?= escape($related['name']) ?></h3>
-                            <p class="text-lg font-bold text-blue-600">$<?= number_format($related['price'], 2) ?></p>
+                            <?php if (!empty($related['price']) && $related['price'] > 0): ?>
+                                <p class="text-lg font-bold text-blue-600">$<?= number_format((float)$related['price'], 2) ?></p>
+                            <?php else: ?>
+                                <p class="text-lg font-bold text-gray-500">Price on Request</p>
+                            <?php endif; ?>
                         </div>
                     </a>
                 </div>

@@ -139,13 +139,19 @@ include __DIR__ . '/includes/header.php';
                                     <p class="text-sm text-gray-600 mb-2"><?= escape($product['category_name'] ?? '') ?></p>
                                     <p class="text-sm text-gray-600 mb-3 line-clamp-2"><?= escape($product['short_description'] ?? '') ?></p>
                                     <div class="flex justify-between items-center">
-                                        <?php if ($product['sale_price']): ?>
+                                        <?php 
+                                        $price = !empty($product['price']) && $product['price'] > 0 ? (float)$product['price'] : null;
+                                        $salePrice = !empty($product['sale_price']) && $product['sale_price'] > 0 ? (float)$product['sale_price'] : null;
+                                        ?>
+                                        <?php if ($salePrice && $price): ?>
                                             <div>
-                                                <span class="text-lg font-bold text-blue-600">$<?= number_format($product['sale_price'], 2) ?></span>
-                                                <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format($product['price'], 2) ?></span>
+                                                <span class="text-lg font-bold text-blue-600">$<?= number_format($salePrice, 2) ?></span>
+                                                <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format($price, 2) ?></span>
                                             </div>
+                                        <?php elseif ($price): ?>
+                                            <span class="text-lg font-bold text-blue-600">$<?= number_format($price, 2) ?></span>
                                         <?php else: ?>
-                                            <span class="text-lg font-bold text-blue-600">$<?= number_format($product['price'], 2) ?></span>
+                                            <span class="text-lg font-bold text-gray-500">Price on Request</span>
                                         <?php endif; ?>
                                     </div>
                                     <div class="flex gap-2 mt-3">
