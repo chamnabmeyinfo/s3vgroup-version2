@@ -109,6 +109,9 @@
                 <a href="<?= url('admin/under-construction.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-hard-hat mr-2"></i> Under Construction
                 </a>
+                <a href="<?= url('admin/tools.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-tools mr-2"></i> Optional Tools
+                </a>
                 <a href="<?= url('admin/settings.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-cog mr-2"></i> Settings
                 </a>
