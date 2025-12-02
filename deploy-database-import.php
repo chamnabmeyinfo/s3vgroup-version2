@@ -26,6 +26,10 @@ function importDatabaseToCPanel($config, $log) {
         return $result;
     }
     
+    $isCompressed = false;
+    $tempSqlFile = null;
+    $sqlFile = null;
+    
     try {
         // Step 1: Load database config
         $log->info("  [1/4] Loading database configuration...");
@@ -92,8 +96,31 @@ function importDatabaseToCPanel($config, $log) {
         
         $log->info("    ✓ Connected to MySQL");
         
+        // Decompress if needed
+        $isCompressed = false;
+        $tempSqlFile = $sqlFile;
+        if (pathinfo($sqlFile, PATHINFO_EXTENSION) === 'gz') {
+            $log->info("    Decompressing SQL file...");
+            if (function_exists('gzdecode')) {
+                $compressedData = file_get_contents($sqlFile);
+                $sqlContent = gzdecode($compressedData);
+                if ($sqlContent === false) {
+                    throw new Exception("Failed to decompress SQL file");
+                }
+                // Create temporary uncompressed file
+                $tempSqlFile = str_replace('.gz', '', $sqlFile);
+                if (file_put_contents($tempSqlFile, $sqlContent) === false) {
+                    throw new Exception("Failed to write decompressed SQL file");
+                }
+                $isCompressed = true;
+                $log->info("    ✓ File decompressed");
+            } else {
+                throw new Exception("gzip decompression not available (gzdecode function missing)");
+            }
+        }
+        
         // Read SQL file
-        $sql = file_get_contents($sqlFile);
+        $sql = file_get_contents($tempSqlFile);
         if (empty($sql)) {
             throw new Exception("SQL file is empty");
         }
@@ -191,11 +218,17 @@ function importDatabaseToCPanel($config, $log) {
         $tableCount = $pdo->query("SHOW TABLES")->rowCount();
         $log->info("    ✓ Database now has {$tableCount} table(s)");
         
-        // Clean up SQL file if not keeping
+        // Clean up SQL files if not keeping
         if (!($dbImportConfig['keep_sql_file'] ?? false)) {
+            // Remove temporary decompressed file if it was created
+            if ($isCompressed && file_exists($tempSqlFile) && $tempSqlFile !== $sqlFile) {
+                unlink($tempSqlFile);
+                $log->info("    ✓ Removed temporary decompressed SQL file");
+            }
+            // Remove original compressed file if requested
             if (file_exists($sqlFile)) {
                 unlink($sqlFile);
-                $log->info("    ✓ Removed temporary SQL file");
+                $log->info("    ✓ Removed SQL backup file");
             }
         }
         
@@ -216,6 +249,12 @@ function importDatabaseToCPanel($config, $log) {
             } catch (Exception $rollbackError) {
                 // Ignore rollback errors
             }
+        }
+        
+        // Clean up temporary decompressed file if it was created
+        if ($isCompressed && $tempSqlFile && file_exists($tempSqlFile) && $sqlFile && $tempSqlFile !== $sqlFile) {
+            @unlink($tempSqlFile);
+            $log->info("    ✓ Cleaned up temporary decompressed SQL file");
         }
     }
     
