@@ -126,19 +126,40 @@ if (($config['database_import']['enabled'] ?? false) && ($config['database_impor
 }
 
 if ($dbOperation === 'import') {
-    $log->info("\n[4/5] Importing database directly...");
-    try {
-        require_once __DIR__ . '/bootstrap/app.php';
-        require_once __DIR__ . '/deploy-database-import.php';
-        $importResult = importDatabaseToCPanel($config, $log);
-        if ($importResult['success']) {
-            $log->info("  ✓ Database import completed");
-        } else {
-            $log->warning("  ⚠️  Database import failed: " . $importResult['message']);
+    // Check if remote database is configured - use FTP method if so
+    $remoteDbConfig = $config['database_remote'] ?? [];
+    $useRemote = ($remoteDbConfig['use_remote'] ?? false) && !empty($remoteDbConfig['dbname']);
+    
+    if ($useRemote) {
+        $log->info("\n[4/5] Importing database via FTP + PHP script...");
+        try {
+            require_once __DIR__ . '/bootstrap/app.php';
+            require_once __DIR__ . '/deploy-database-import-remote.php';
+            $importResult = importDatabaseViaFTP($config, $log);
+            if ($importResult['success']) {
+                $log->info("  ✓ Database import completed");
+            } else {
+                $log->warning("  ⚠️  Database import failed: " . $importResult['message']);
+            }
+        } catch (Exception $e) {
+            $log->warning("  ⚠️  Database import error: " . $e->getMessage());
+            $log->warning("  Continuing with deployment...");
         }
-    } catch (Exception $e) {
-        $log->warning("  ⚠️  Database import error: " . $e->getMessage());
-        $log->warning("  Continuing with deployment...");
+    } else {
+        $log->info("\n[4/5] Importing database directly...");
+        try {
+            require_once __DIR__ . '/bootstrap/app.php';
+            require_once __DIR__ . '/deploy-database-import.php';
+            $importResult = importDatabaseToCPanel($config, $log);
+            if ($importResult['success']) {
+                $log->info("  ✓ Database import completed");
+            } else {
+                $log->warning("  ⚠️  Database import failed: " . $importResult['message']);
+            }
+        } catch (Exception $e) {
+            $log->warning("  ⚠️  Database import error: " . $e->getMessage());
+            $log->warning("  Continuing with deployment...");
+        }
     }
 } elseif ($dbOperation === 'upload') {
     $log->info("\n[4/5] Uploading database to cPanel...");
