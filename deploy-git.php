@@ -73,6 +73,26 @@ function deployGit($config, $log) {
     // Push
     $log->info("  Pushing to GitHub...");
     
+    // Configure Git to avoid credential prompts
+    // Set environment variables to suppress prompts
+    putenv('GIT_TERMINAL_PROMPT=0');
+    putenv('GCM_INTERACTIVE=never');
+    putenv('GIT_ASKPASS=echo');
+    
+    // Try to configure credential helper (non-blocking)
+    if ($config['git']['use_credential_helper'] ?? true) {
+        // Try Windows Credential Manager first (most common on Windows)
+        @exec('git config --global credential.helper manager-core 2>&1', $credHelperOutput, $credHelperReturnCode);
+        if ($credHelperReturnCode !== 0) {
+            // Try wincred (older Windows)
+            @exec('git config --global credential.helper wincred 2>&1', $credHelperOutput2, $credHelperReturnCode2);
+            if ($credHelperReturnCode2 !== 0) {
+                // Fallback to store (works everywhere but less secure)
+                @exec('git config --global credential.helper store 2>&1', $credHelperOutput3, $credHelperReturnCode3);
+            }
+        }
+    }
+    
     // Check if token is configured
     $token = $config['git']['token'] ?? null;
     $remoteUrl = null;
@@ -116,7 +136,47 @@ function deployGit($config, $log) {
     }
     
     // Push with token in URL (if configured)
-    exec("git push origin " . escapeshellarg($branch) . " 2>&1", $output, $returnCode);
+    // Use proc_open for better environment variable control on Windows
+    $descriptorspec = [
+        0 => ['pipe', 'r'],  // stdin
+        1 => ['pipe', 'w'],  // stdout
+        2 => ['pipe', 'w']   // stderr
+    ];
+    
+    $env = $_ENV;
+    $env['GIT_TERMINAL_PROMPT'] = '0';
+    $env['GCM_INTERACTIVE'] = 'never';
+    $env['GIT_ASKPASS'] = 'echo';
+    
+    $pushCommand = "git push origin " . escapeshellarg($branch) . " 2>&1";
+    
+    $process = @proc_open($pushCommand, $descriptorspec, $pipes, null, $env);
+    
+    if (is_resource($process)) {
+        // Close stdin
+        fclose($pipes[0]);
+        
+        // Read output
+        $output = [];
+        $outputStr = stream_get_contents($pipes[1]);
+        $errorStr = stream_get_contents($pipes[2]);
+        
+        if ($outputStr) {
+            $output = explode("\n", trim($outputStr));
+        }
+        if ($errorStr) {
+            $output = array_merge($output, explode("\n", trim($errorStr)));
+        }
+        
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        
+        // Get return code
+        $returnCode = proc_close($process);
+    } else {
+        // Fallback to exec if proc_open fails
+        exec($pushCommand, $output, $returnCode);
+    }
     
     // Restore/clean remote URL if token was used (CRITICAL for security)
     // Only clean up if we successfully modified the URL OR if token was already present (we used it)

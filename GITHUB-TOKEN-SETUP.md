@@ -1,144 +1,103 @@
-# GitHub Token Setup for Deployment
+# How to Get GitHub Personal Access Token
 
-## Why Use a Token?
+## Quick Steps
 
-Using a GitHub Personal Access Token (PAT) instead of password authentication:
-- ✅ No popup asking to choose account
-- ✅ Works with automated scripts
-- ✅ More secure than passwords
-- ✅ Can be revoked easily
-- ✅ Better for CI/CD
+### 1. Go to GitHub Token Settings
+Visit: **https://github.com/settings/tokens**
 
----
+Or navigate:
+- Click your profile picture (top right)
+- Click **Settings**
+- In left sidebar, click **Developer settings**
+- Click **Personal access tokens**
+- Click **Tokens (classic)**
 
-## Step 1: Create a GitHub Personal Access Token
+### 2. Generate New Token
+1. Click **"Generate new token"** button
+2. Select **"Generate new token (classic)"**
 
-1. **Go to GitHub Settings:**
-   - Visit: https://github.com/settings/tokens
-   - Or: GitHub → Your Profile → Settings → Developer settings → Personal access tokens → Tokens (classic)
+### 3. Configure Token
+- **Note**: Enter a description like "Deployment Token" or "S3VGroup Deployment"
+- **Expiration**: Choose:
+  - **90 days** (recommended for security)
+  - **1 year**
+  - **No expiration** (less secure but convenient)
+- **Select scopes**: Check the **`repo`** checkbox (this gives full control of private repositories)
 
-2. **Generate New Token:**
-   - Click "Generate new token" → "Generate new token (classic)"
-   - Give it a name: `S3VGroup Deployment`
-   - Set expiration (recommend: 90 days or custom)
+### 4. Generate and Copy
+1. Scroll down and click **"Generate token"** button
+2. **IMPORTANT**: Copy the token immediately! It looks like: `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+3. You won't be able to see it again after you leave this page
 
-3. **Select Permissions:**
-   - ✅ **repo** (Full control of private repositories)
-     - This includes: `repo:status`, `repo_deployment`, `public_repo`, `repo:invite`, `security_events`
-   - That's all you need for pushing code!
+### 5. Add to deploy-config.json
+Open `deploy-config.json` and replace `YOUR_GITHUB_TOKEN_HERE` with your actual token:
 
-4. **Generate Token:**
-   - Click "Generate token" at the bottom
-   - **⚠️ IMPORTANT:** Copy the token immediately! You won't see it again!
-   - It looks like: `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
----
-
-## Step 2: Add Token to Config
-
-1. **Open `deploy-config.json`** (not the example file)
-
-2. **Add your token:**
-   ```json
-   {
-     "git": {
-       "enabled": true,
-       "branch": "main",
-       "auto_commit": true,
-       "commit_message": "Auto deploy: {timestamp}",
-       "token": "ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-     }
-   }
-   ```
-
-3. **Save the file**
-
----
-
-## Step 3: Test It!
-
-Run:
-```bash
-deploy.bat
+```json
+"git": {
+  "token": "ghp_your_actual_token_here"
+}
 ```
-
-You should **NOT** see any popup asking to choose a GitHub account!
-
----
 
 ## Security Notes
 
-### ✅ Good Practices:
-- ✅ Token is stored in `deploy-config.json` (which is in `.gitignore`)
-- ✅ Token is never exposed in logs or error messages
-- ✅ Token is removed from remote URL after push
-- ✅ Use token with minimal required permissions
+⚠️ **Keep your token secret!**
+- Never commit the token to GitHub
+- Don't share it publicly
+- If token is exposed, revoke it immediately and create a new one
 
-### ⚠️ Important:
-- **Never commit `deploy-config.json` to Git!**
-- Keep your token secret
-- If token is exposed, revoke it immediately on GitHub
-- Rotate tokens periodically (every 90 days recommended)
+✅ **Token is already excluded from Git:**
+- `deploy-config.json` should be in `.gitignore` or excluded from commits
 
----
+## Verify Token Works
 
-## Troubleshooting
+After adding the token, test it:
+```bash
+git push origin main
+```
 
-### Still seeing popup?
-- Check that token is in `deploy-config.json` (not just example file)
-- Verify token has `repo` permissions
-- Check token hasn't expired
+If it works without prompts, your token is configured correctly!
 
-### "Authentication failed" error?
-- Token might be expired → Generate new one
-- Token might not have `repo` permission → Regenerate with correct permissions
-- Check token is copied correctly (no extra spaces)
+## Revoke Token (if needed)
 
-### "Permission denied" error?
-- Make sure token has `repo` scope enabled
-- Verify you have push access to the repository
-
----
+If you need to revoke a token:
+1. Go to: https://github.com/settings/tokens
+2. Find your token in the list
+3. Click **"Revoke"** button
 
 ## Alternative: Use SSH Instead
 
-If you prefer SSH keys instead of tokens:
+If you prefer not to use tokens, you can use SSH:
 
-1. **Set up SSH key** (if not already):
+1. **Generate SSH key** (if you don't have one):
    ```bash
    ssh-keygen -t ed25519 -C "your_email@example.com"
    ```
 
-2. **Add to GitHub:**
-   - Copy `~/.ssh/id_ed25519.pub`
-   - GitHub → Settings → SSH and GPG keys → New SSH key
+2. **Add SSH key to GitHub**:
+   - Copy your public key: `cat ~/.ssh/id_ed25519.pub`
+   - Go to: https://github.com/settings/keys
+   - Click "New SSH key"
+   - Paste your public key
 
-3. **Change remote URL:**
+3. **Change remote URL to SSH**:
    ```bash
    git remote set-url origin git@github.com:chamnabmeyinfo/s3vgroup-version2.git
    ```
 
-4. **Remove token from config** (not needed with SSH)
+4. **Test SSH connection**:
+   ```bash
+   ssh -T git@github.com
+   ```
 
----
+## Troubleshooting
 
-## Quick Reference
+**Token not working?**
+- Make sure you copied the entire token (starts with `ghp_`)
+- Check that `repo` scope is selected
+- Verify token hasn't expired
+- Check token in deploy-config.json has no extra spaces
 
-**Token Format:** `ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
-
-**Required Permission:** `repo` (Full control of private repositories)
-
-**Config Location:** `deploy-config.json` → `git.token`
-
-**Test Command:** `deploy.bat`
-
----
-
-## Need Help?
-
-If you're having issues:
-1. Check token is valid: https://github.com/settings/tokens
-2. Verify token has `repo` permission
-3. Make sure `deploy-config.json` has the token (not just example file)
-4. Check deploy log: `deploy-log.txt`
-
+**Still getting prompts?**
+- Make sure `suppress_prompts` is set to `true` in config
+- Check that environment variables are being set (see deploy-git.php)
+- Try using SSH instead (see Alternative section above)
