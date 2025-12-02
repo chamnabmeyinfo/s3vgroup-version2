@@ -10,20 +10,20 @@ if (session_status() === PHP_SESSION_NONE) {
     session_name('developer_session');
 }
 
-// Enable error reporting for debugging
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 try {
     require_once __DIR__ . '/../bootstrap/app.php';
 } catch (Exception $e) {
-    die("Bootstrap Error: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
+    // Log error instead of displaying in production
+    error_log("Bootstrap Error in developer/index.php: " . $e->getMessage());
+    die("An error occurred. Please check the logs.");
 }
 
 try {
     require_once __DIR__ . '/includes/header.php';
 } catch (Exception $e) {
-    die("Header Error: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
+    // Log error instead of displaying in production
+    error_log("Header Error in developer/index.php: " . $e->getMessage());
+    die("An error occurred. Please check the logs.");
 }
 
 use App\Services\DatabaseSyncService;

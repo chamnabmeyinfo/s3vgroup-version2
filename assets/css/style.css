@@ -36,13 +36,123 @@ html {
     transform: translateY(-5px);
 }
 
-/* Category Cards */
+/* Category Cards - Legacy */
 .category-card {
     transition: transform 0.3s ease;
 }
 
 .category-card:hover {
     transform: translateY(-5px);
+}
+
+/* Modern Category Cards - Legacy */
+.category-card-modern {
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Minimal Category Cards */
+.category-minimal {
+    transition: all 0.3s ease;
+}
+
+.category-minimal:hover {
+    transform: translateY(-4px);
+}
+
+/* Product Image Container - 1000x700 Aspect Ratio (10:7) */
+.product-card > a > div:first-child {
+    aspect-ratio: 10 / 7;
+    width: 100%;
+    position: relative;
+}
+
+/* Ensure images fit within the aspect ratio container */
+.product-card > a > div:first-child img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Fallback for browsers that don't support aspect-ratio */
+@supports not (aspect-ratio: 10 / 7) {
+    .product-card > a > div:first-child {
+        height: 0;
+        padding-bottom: 70%; /* 700/1000 = 0.7 = 70% */
+    }
+    
+    .product-card > a > div:first-child > img,
+    .product-card > a > div:first-child > div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+/* Lazy Loading Styles - Normal Display */
+img.lazy-load {
+    opacity: 1;
+    background: #e5e7eb;
+    min-height: 200px;
+    position: relative;
+    display: block;
+}
+
+img.lazy-load.loaded {
+    opacity: 1;
+}
+
+/* Ensure images are visible even while loading */
+img[data-src] {
+    min-width: 100%;
+    min-height: 200px;
+    display: block;
+}
+
+/* Simple loading placeholder */
+img.lazy-load:not(.loaded)::before {
+    display: none;
+}
+
+/* Load More Button Styles */
+#load-more-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#load-more-btn .fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Load More Popup Styles */
+#load-more-popup {
+    animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.4s ease-out;
 }
 
 /* Line Clamp Utility */

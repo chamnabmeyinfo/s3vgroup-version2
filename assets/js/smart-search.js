@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     function fetchSmartAutocomplete(query) {
-        fetch(`<?= url('api/smart-search.php') ?>?action=autocomplete&q=${encodeURIComponent(query)}`)
+        const smartSearchUrl = window.APP_CONFIG?.urls?.smartSearch || 'api/smart-search.php';
+        fetch(`${smartSearchUrl}?action=autocomplete&q=${encodeURIComponent(query)}`)
             .then(response => response.json())
             .then(data => {
                 if (data.success && data.suggestions.length > 0) {

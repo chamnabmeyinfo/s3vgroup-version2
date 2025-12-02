@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', function() {
     function performSearch(query) {
         if (query !== currentQuery) return;
         
-        fetch(`<?= url('api/search.php') ?>?q=${encodeURIComponent(query)}&type=all`)
+        const searchUrl = window.APP_CONFIG?.urls?.search || 'api/search.php';
+        fetch(`${searchUrl}?q=${encodeURIComponent(query)}&type=all`)
             .then(response => response.json())
             .then(data => {
                 if (query !== currentQuery) return;
@@ -91,7 +92,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (firstResult) {
                 window.location.href = firstResult.href;
             } else if (this.value.trim()) {
-                window.location.href = `<?= url('products.php') ?>?search=${encodeURIComponent(this.value.trim())}`;
+                const productsUrl = window.APP_CONFIG?.urls?.products || 'products.php';
+                window.location.href = `${productsUrl}?search=${encodeURIComponent(this.value.trim())}`;
             }
         }
     });
@@ -99,7 +101,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Wishlist Functions
 function addToWishlist(productId) {
-    fetch(`<?= url('api/wishlist.php') ?>?action=add&id=${productId}`, {
+    const wishlistUrl = window.APP_CONFIG?.urls?.wishlist || 'api/wishlist.php';
+    fetch(`${wishlistUrl}?action=add&id=${productId}`, {
         method: 'POST'
     })
     .then(response => response.json())
@@ -117,7 +120,8 @@ function addToWishlist(productId) {
 }
 
 function addToCompare(productId) {
-    fetch(`<?= url('api/compare.php') ?>?action=add&id=${productId}`, {
+    const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
+    fetch(`${compareUrl}?action=add&id=${productId}`, {
         method: 'POST'
     })
     .then(response => response.json())
@@ -136,7 +140,8 @@ function addToCompare(productId) {
 }
 
 function updateWishlistCount() {
-    fetch('<?= url('api/wishlist.php') ?>?action=count')
+    const wishlistUrl = window.APP_CONFIG?.urls?.wishlist || 'api/wishlist.php';
+    fetch(`${wishlistUrl}?action=count`)
         .then(response => response.json())
         .then(data => {
             const countEl = document.getElementById('wishlist-count');

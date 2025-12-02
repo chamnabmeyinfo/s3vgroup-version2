@@ -109,23 +109,24 @@ include __DIR__ . '/includes/header.php';
                         <a href="<?= url('products.php') ?>" class="btn-primary mt-4 inline-block">View All Products</a>
                     </div>
                 <?php else: ?>
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
                         <?php foreach ($products as $product): ?>
-                        <div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
+                        <div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden" data-product-id="<?= $product['id'] ?>">
                             <a href="<?= url('product.php?slug=' . escape($product['slug'])) ?>">
-                                <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden relative">
+                                <div class="w-full aspect-[10/7] bg-gray-200 flex items-center justify-center overflow-hidden relative">
                                     <?php if (!empty($product['image'])): ?>
-                                        <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
+                                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23e5e7eb' width='400' height='300'/%3E%3C/svg%3E" 
+                                             data-src="<?= asset('storage/uploads/' . escape($product['image'])) ?>"
                                              alt="<?= escape($product['name']) ?>" 
-                                             class="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+                                             class="lazy-load w-full h-full object-cover transition-transform duration-300 hover:scale-110"
                                              loading="lazy"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                         <div class="image-fallback" style="display: none;">
-                                            <i class="fas fa-image text-4xl"></i>
+                                            <i class="fas fa-image text-4xl text-gray-400"></i>
                                         </div>
                                     <?php else: ?>
                                         <div class="product-image-placeholder w-full h-full">
-                                            <i class="fas fa-image text-4xl"></i>
+                                            <i class="fas fa-image text-4xl text-gray-400"></i>
                                         </div>
                                     <?php endif; ?>
                                     <?php if ($product['is_featured']): ?>
@@ -173,25 +174,20 @@ include __DIR__ . '/includes/header.php';
                         <?php endforeach; ?>
                     </div>
                     
-                    <!-- Pagination -->
-                    <?php if ($totalPages > 1): ?>
-                    <div class="mt-8 flex justify-center space-x-2">
-                        <?php if ($filters['page'] > 1): ?>
-                            <a href="?<?= http_build_query(array_merge($_GET, ['page' => $filters['page'] - 1])) ?>" 
-                               class="px-4 py-2 border rounded hover:bg-gray-100">Previous</a>
-                        <?php endif; ?>
-                        
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
-                               class="px-4 py-2 border rounded <?= $i == $filters['page'] ? 'bg-blue-600 text-white' : 'hover:bg-gray-100' ?>">
-                                <?= $i ?>
-                            </a>
-                        <?php endfor; ?>
-                        
-                        <?php if ($filters['page'] < $totalPages): ?>
-                            <a href="?<?= http_build_query(array_merge($_GET, ['page' => $filters['page'] + 1])) ?>" 
-                               class="px-4 py-2 border rounded hover:bg-gray-100">Next</a>
-                        <?php endif; ?>
+                    <!-- Load More Button -->
+                    <?php if ($totalPages > 1 && $filters['page'] < $totalPages): ?>
+                    <div class="mt-12 text-center" id="load-more-container">
+                        <button id="load-more-btn" 
+                                data-current-page="<?= $filters['page'] ?>"
+                                data-total-pages="<?= $totalPages ?>"
+                                data-category="<?= escape($_GET['category'] ?? '') ?>"
+                                data-search="<?= escape($_GET['search'] ?? '') ?>"
+                                data-featured="<?= escape($_GET['featured'] ?? '') ?>"
+                                class="btn-primary px-8 py-3 text-lg">
+                            <i class="fas fa-spinner fa-spin hidden mr-2" id="load-more-spinner"></i>
+                            <span id="load-more-text">Load More Products</span>
+                            <span class="text-sm font-normal ml-2" id="load-more-count">(<?= $totalProducts - (count($products) * $filters['page']) ?> remaining)</span>
+                        </button>
                     </div>
                     <?php endif; ?>
                 <?php endif; ?>

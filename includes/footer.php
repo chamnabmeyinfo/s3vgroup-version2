@@ -104,6 +104,24 @@
     <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     
+    <!-- Global API URLs Config -->
+    <script>
+    // Global configuration for API URLs
+    window.APP_CONFIG = {
+        apiUrl: '<?= url("api") ?>',
+        baseUrl: '<?= url() ?>',
+        urls: {
+            search: '<?= url("api/search.php") ?>',
+            smartSearch: '<?= url("api/smart-search.php") ?>',
+            cart: '<?= url("api/cart.php") ?>',
+            wishlist: '<?= url("api/wishlist.php") ?>',
+            compare: '<?= url("api/compare.php") ?>',
+            loadMore: '<?= url("api/load-more-products.php") ?>',
+            products: '<?= url("products.php") ?>'
+        }
+    };
+    </script>
+    
     <!-- Modern Navigation & Slider Scripts -->
     <script>
     // Initialize Hero Slider
@@ -200,6 +218,7 @@
     </script>
     
     <!-- JavaScript -->
+    <script src="<?= asset('assets/js/lazy-load.js') ?>"></script>
     <script src="<?= asset('assets/js/main.js') ?>"></script>
     <script src="<?= asset('assets/js/advanced-search.js') ?>"></script>
     <script src="<?= asset('assets/js/advanced-ux.js') ?>"></script>

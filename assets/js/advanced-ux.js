@@ -47,7 +47,8 @@ function initOneClickAddToCart() {
             button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             
             // Add to cart
-            fetch(`<?= url('api/cart.php') ?>?action=add&product_id=${productId}`, {
+            const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
+            fetch(`${cartUrl}?action=add&product_id=${productId}`, {
                 method: 'POST'
             })
             .then(response => response.json())
@@ -348,7 +349,8 @@ function initLoadingStates() {
 
 // Update cart count
 function updateCartCount() {
-    fetch('<?= url('api/cart.php') ?>?action=count')
+    const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
+    fetch(`${cartUrl}?action=count`)
         .then(response => response.json())
         .then(data => {
             const cartCount = document.getElementById('cart-count');

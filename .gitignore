@@ -61,6 +61,8 @@ composer.lock
 *.temp
 *.bak
 *.backup
+*.zip
+!vendor/*.zip
 
 # OS Files
 .DS_Store

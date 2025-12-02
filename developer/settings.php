@@ -15,9 +15,61 @@ $messageType = '';
 // Load configs
 $devConfigFile = __DIR__ . '/../config/developer.php';
 $deployConfigFile = __DIR__ . '/../deploy-config.json';
+$smartImporterConfigFile = __DIR__ . '/../config/smart-importer.php';
 
 $devConfig = file_exists($devConfigFile) ? require $devConfigFile : [];
 $deployConfig = file_exists($deployConfigFile) ? json_decode(file_get_contents($deployConfigFile), true) : [];
+$smartImporterConfig = file_exists($smartImporterConfigFile) ? require $smartImporterConfigFile : [
+    'ai_provider' => 'openai',
+    'ai_api_key' => '',
+    'ai_enabled' => true
+];
+
+// Handle AI config update
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_ai_config'])) {
+    $aiProvider = $_POST['ai_provider'] ?? 'openai';
+    $aiApiKey = trim($_POST['ai_api_key'] ?? '');
+    $aiEnabled = isset($_POST['ai_enabled']);
+    
+    $configFile = __DIR__ . '/../config/smart-importer.php';
+    $configContent = "<?php
+/**
+ * Smart Product Importer Configuration
+ * Configure AI API keys and settings
+ */
+
+return [
+    // AI Provider: 'openai' or 'anthropic'
+    'ai_provider' => " . var_export($aiProvider, true) . ",
+    
+    // AI API Key (get from https://platform.openai.com/api-keys or https://console.anthropic.com/)
+    // Leave empty to disable AI features (pattern recognition will still work)
+    // You can also set this via environment variable AI_API_KEY
+    'ai_api_key' => " . var_export($aiApiKey, true) . ",
+    
+    // Default extraction method: 'auto', 'pattern', or 'ai'
+    // 'auto' = try pattern first, use AI if confidence is low
+    // 'pattern' = only use pattern recognition
+    // 'ai' = force AI extraction
+    'default_method' => 'auto',
+    
+    // Minimum confidence threshold to use AI (0-100)
+    // If pattern recognition confidence is below this, AI will be used
+    'ai_threshold' => 70,
+    
+    // Enable/disable AI features
+    'ai_enabled' => " . var_export($aiEnabled, true) . ",
+];
+";
+    
+    if (file_put_contents($configFile, $configContent)) {
+        $message = 'AI configuration updated successfully.';
+        $messageType = 'success';
+    } else {
+        $message = 'Failed to update AI configuration. Check file permissions.';
+        $messageType = 'error';
+    }
+}
 
 // Handle password change
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
@@ -187,6 +239,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- AI Configuration for Smart Import -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-purple-200 mb-6">
+        <div class="bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 p-6 text-white">
+            <h2 class="text-2xl font-bold">
+                <i class="fas fa-magic mr-2"></i>
+                AI Configuration (Smart Import)
+            </h2>
+            <p class="text-purple-100 text-sm mt-2">Configure AI API keys for smart product extraction from any website</p>
+        </div>
+        <div class="p-6">
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="update_ai_config" value="1">
+                
+                <div>
+                    <label for="ai_provider" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-robot text-purple-600 mr-1"></i> AI Provider
+                    </label>
+                    <select name="ai_provider" id="ai_provider" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <option value="openai" <?= ($smartImporterConfig['ai_provider'] ?? 'openai') === 'openai' ? 'selected' : '' ?>>OpenAI (GPT-4o-mini)</option>
+                        <option value="anthropic" <?= ($smartImporterConfig['ai_provider'] ?? '') === 'anthropic' ? 'selected' : '' ?>>Anthropic (Claude)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Choose your AI provider. OpenAI is recommended for better accuracy.
+                    </p>
+                </div>
+                
+                <div>
+                    <label for="ai_api_key" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-key text-purple-600 mr-1"></i> AI API Key
+                    </label>
+                    <input type="password" 
+                           id="ai_api_key" 
+                           name="ai_api_key" 
+                           value="<?= escape($smartImporterConfig['ai_api_key'] ?? '') ?>"
+                           placeholder="sk-..." 
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                    <p class="text-xs text-gray-500 mt-1">
+                        Get your API key from: 
+                        <a href="https://platform.openai.com/api-keys" target="_blank" class="text-blue-600 hover:underline">OpenAI</a> or 
+                        <a href="https://console.anthropic.com/" target="_blank" class="text-blue-600 hover:underline">Anthropic</a>.
+                        Leave empty to use pattern recognition only (free).
+                    </p>
+                </div>
+                
+                <div>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               class="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500" 
+                               id="ai_enabled" 
+                               name="ai_enabled" 
+                               <?= ($smartImporterConfig['ai_enabled'] ?? true) ? 'checked' : '' ?>>
+                        <span class="ml-3 text-sm font-medium text-gray-700">Enable AI features</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 ml-8">
+                        When disabled, only pattern recognition will be used (free, but less accurate).
+                    </p>
+                </div>
+                
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-blue-600 mr-2 mt-1"></i>
+                        <div class="text-sm text-blue-800">
+                            <strong>How it works:</strong>
+                            <ul class="list-disc list-inside mt-2 space-y-1">
+                                <li><strong>Pattern Recognition</strong> (Free): Extracts data using Schema.org, Open Graph, and HTML patterns</li>
+                                <li><strong>AI Extraction</strong> (Requires API key): Uses AI to intelligently analyze page structure</li>
+                                <li><strong>Hybrid Mode</strong>: Tries pattern first, uses AI if confidence is low</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full bg-gradient-to-r from-purple-500 to-pink-600 text-white py-4 rounded-lg font-bold text-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-save mr-2"></i>
+                    Save AI Configuration
+                </button>
+            </form>
         </div>
     </div>
 
