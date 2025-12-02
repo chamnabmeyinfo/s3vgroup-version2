@@ -3,13 +3,24 @@
  * Safe Git Pull Script for cPanel
  * This script handles Git pull safely by stashing local changes
  * Upload this to your cPanel root directory and run it via browser or SSH
+ * 
+ * SECURITY WARNING: 
+ * - The token below is visible in the URL - this is NOT secure for production!
+ * - For better security, use SSH instead: php cpanel-safe-pull.php
+ * - Or change this token to a long random string and keep it secret
  */
 
 // Security: Only allow execution from command line or localhost
+// For web access, require authentication token
+// ⚠️ SECURITY WARNING: Using a GitHub token in URL is NOT secure!
+// Generate a random token instead: openssl rand -hex 32
+$allowedToken = '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';
+
 if (php_sapi_name() !== 'cli' && $_SERVER['REMOTE_ADDR'] !== '127.0.0.1' && $_SERVER['REMOTE_ADDR'] !== '::1') {
     // For web access, require authentication
-    if (!isset($_GET['token']) || $_GET['token'] !== 'YOUR_SECRET_TOKEN_HERE') {
-        die('Access denied. Set a secure token in the script.');
+    if (!isset($_GET['token']) || $_GET['token'] !== $allowedToken) {
+        http_response_code(403);
+        die('Access denied. Invalid token.');
     }
 }
 
