@@ -394,13 +394,18 @@
                 }
             });
             </script>
-            <?php if (isset($message) && $message): ?>
+            <?php 
+            // Ensure message and error variables are defined
+            if (!isset($message)) $message = '';
+            if (!isset($error)) $error = '';
+            
+            if (!empty($message)): ?>
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     <?= escape($message) ?>
                 </div>
             <?php endif; ?>
             
-            <?php if (isset($error) && $error): ?>
+            <?php if (!empty($error)): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
                     <?= escape($error) ?>
                 </div>

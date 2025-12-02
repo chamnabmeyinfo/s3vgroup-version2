@@ -60,9 +60,10 @@ class Connection
     public function insert($table, $data)
     {
         $fields = array_keys($data);
+        $escapedFields = array_map(fn($field) => "`{$field}`", $fields);
         $placeholders = array_map(fn($field) => ":$field", $fields);
         
-        $sql = "INSERT INTO {$table} (" . implode(', ', $fields) . ") 
+        $sql = "INSERT INTO `{$table}` (" . implode(', ', $escapedFields) . ") 
                 VALUES (" . implode(', ', $placeholders) . ")";
         
         $this->query($sql, $data);
@@ -73,10 +74,10 @@ class Connection
     {
         $set = [];
         foreach (array_keys($data) as $field) {
-            $set[] = "$field = :$field";
+            $set[] = "`{$field}` = :$field";
         }
         
-        $sql = "UPDATE {$table} SET " . implode(', ', $set) . " WHERE $where";
+        $sql = "UPDATE `{$table}` SET " . implode(', ', $set) . " WHERE $where";
         $params = array_merge($data, $whereParams);
         
         return $this->query($sql, $params)->rowCount();
@@ -84,7 +85,7 @@ class Connection
 
     public function delete($table, $where, $params = [])
     {
-        $sql = "DELETE FROM {$table} WHERE $where";
+        $sql = "DELETE FROM `{$table}` WHERE $where";
         return $this->query($sql, $params)->rowCount();
     }
 }

@@ -118,6 +118,49 @@ $orderFilters['sort'] = $sort;
 // Get orders
 $orders = $orderModel->getAll($orderFilters);
 
+// Calculate stats for mini dashboard
+$allOrders = $orderModel->getAll([]);
+$totalOrders = count($allOrders);
+$pendingOrders = count(array_filter($allOrders, fn($o) => $o['status'] === 'pending'));
+$processingOrders = count(array_filter($allOrders, fn($o) => $o['status'] === 'processing'));
+$deliveredOrders = count(array_filter($allOrders, fn($o) => $o['status'] === 'delivered'));
+$totalRevenue = array_sum(array_map(fn($o) => $o['total'] ?? 0, array_filter($allOrders, fn($o) => $o['payment_status'] === 'paid')));
+
+$miniStats = [
+    [
+        'label' => 'Total Orders',
+        'value' => number_format($totalOrders),
+        'icon' => 'fas fa-shopping-cart',
+        'color' => 'from-purple-500 to-indigo-600',
+        'description' => 'All orders',
+        'link' => url('admin/orders.php')
+    ],
+    [
+        'label' => 'Pending',
+        'value' => number_format($pendingOrders),
+        'icon' => 'fas fa-clock',
+        'color' => 'from-yellow-500 to-amber-600',
+        'description' => 'Awaiting processing',
+        'link' => url('admin/orders.php?status=pending')
+    ],
+    [
+        'label' => 'Processing',
+        'value' => number_format($processingOrders),
+        'icon' => 'fas fa-cog',
+        'color' => 'from-blue-500 to-cyan-600',
+        'description' => 'In progress',
+        'link' => url('admin/orders.php?status=processing')
+    ],
+    [
+        'label' => 'Total Revenue',
+        'value' => '$' . number_format($totalRevenue, 2),
+        'icon' => 'fas fa-dollar-sign',
+        'color' => 'from-green-500 to-emerald-600',
+        'description' => 'From paid orders',
+        'link' => url('admin/orders.php?payment_status=paid')
+    ]
+];
+
 // Column visibility
 $selectedColumns = $_GET['columns'] ?? ['order_number', 'date', 'customer', 'items', 'total', 'status', 'payment_status', 'actions'];
 $availableColumns = [
@@ -184,6 +227,12 @@ include __DIR__ . '/includes/header.php';
             </a>
         </div>
     </div>
+
+    <!-- Mini Dashboard Stats -->
+    <?php 
+    $stats = $miniStats;
+    include __DIR__ . '/includes/mini-stats.php'; 
+    ?>
 
     <?php if ($message): ?>
     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
