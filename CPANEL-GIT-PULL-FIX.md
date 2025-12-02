@@ -1,7 +1,7 @@
-# Fix cPanel Git Pull Error
+# cPanel Git Pull Fix Guide
 
 ## Problem
-When pulling from Git to cPanel, you get this error:
+When pulling from Git on cPanel, you may encounter errors like:
 ```
 error: Your local changes to the following files would be overwritten by merge
 error: The following untracked working tree files would be overwritten by merge
@@ -10,104 +10,36 @@ error: The following untracked working tree files would be overwritten by merge
 ## Solution
 
 ### Option 1: Use the Safe Pull Script (Recommended)
+1. Upload `cpanel-safe-pull.php` to your cPanel root directory
+2. Access it via browser: `https://yourdomain.com/cpanel-safe-pull.php?token=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`
+3. Or run via SSH: `php cpanel-safe-pull.php`
 
-1. **Upload `cpanel-safe-pull.php` to your cPanel root directory**
+The script will:
+- Stash local changes
+- Backup untracked files
+- Pull latest changes
+- Restore stashed changes
 
-2. **Run it via SSH:**
-   ```bash
-   cd /home/username/public_html
-   php cpanel-safe-pull.php
-   ```
-
-3. **Or run it via browser:**
-   - Visit: `https://yourdomain.com/cpanel-safe-pull.php?token=YOUR_SECRET_TOKEN`
-   - **Important:** Change `YOUR_SECRET_TOKEN_HERE` in the script to a secure token first!
-
-### Option 2: Manual Fix via cPanel SSH
-
-1. **SSH into your cPanel server**
-
-2. **Navigate to your website root:**
-   ```bash
-   cd ~/public_html
-   ```
-
-3. **Stash local changes:**
-   ```bash
-   /usr/local/cpanel/3rdparty/bin/git stash push -m "Backup before pull"
-   ```
-
-4. **Remove untracked files that would conflict:**
-   ```bash
-   /usr/local/cpanel/3rdparty/bin/git clean -fd
-   ```
-
-5. **Pull the latest changes:**
-   ```bash
-   /usr/local/cpanel/3rdparty/bin/git pull origin main
-   ```
-
-6. **Restore stashed changes (if needed):**
-   ```bash
-   /usr/local/cpanel/3rdparty/bin/git stash pop
-   ```
-
-### Option 3: Reset and Pull (⚠️ WARNING: Loses Local Changes)
-
-**Only use this if you don't need the local changes on cPanel!**
-
+### Option 2: Manual Fix via SSH
 ```bash
-cd ~/public_html
-/usr/local/cpanel/3rdparty/bin/git reset --hard origin/main
-/usr/local/cpanel/3rdparty/bin/git clean -fd
-/usr/local/cpanel/3rdparty/bin/git pull origin main
+cd /home/username/public_html
+git stash
+git clean -fd
+git pull origin main
+git stash pop
 ```
 
-## Prevention: Always Push from Local First
-
-**Before pulling on cPanel, make sure all changes are pushed from local:**
-
-1. **On your local machine:**
-   ```bash
-   git add -A
-   git commit -m "Your commit message"
-   git push origin main
-   ```
-
-2. **Then pull on cPanel** (using one of the methods above)
-
-## Files That Need to Be Committed
-
-Based on the error, these files need to be committed and pushed:
-
-### New Files (Untracked):
-- `admin/hero-slider-edit.php`
-- `admin/hero-sliders.php`
-- `api/load-more-products.php`
-- `app/Services/SmartProductImporter.php`
-- `assets/js/lazy-load.js`
-- `database/create-hero-sliders-table.sql`
-- `includes/hero-slider.php`
-- `setup-hero-sliders-direct.php`
-- `setup-hero-sliders.php`
-- `cpanel-safe-pull.php` (the fix script)
-
-### Modified Files:
-- `admin/includes/header.php`
-- `app/Support/functions.php`
-- `assets/css/style.css`
-- `includes/hero-slider.php`
-- And others...
-
-## Quick Fix Command (Local Machine)
-
-Run this on your local machine to commit and push everything:
-
+### Option 3: Commit Local Changes First
+If you want to keep local changes:
 ```bash
-git add -A
-git commit -m "Add hero slider system and smart importer"
-git push origin main
+cd /home/username/public_html
+git add .
+git commit -m "Local server changes"
+git pull origin main
 ```
 
-Then use Option 1 or 2 on cPanel to pull safely.
-
+## Important Notes
+- Always backup before pulling
+- The safe pull script creates backups in `storage/backups/git-pull-*`
+- Untracked files are backed up before removal
+- Stashed changes are automatically restored after pull

@@ -55,11 +55,57 @@ $output[] = "";
 
 // Step 2: Stash local changes (if any)
 $output[] = "=== Step 2: Stashing Local Changes ===";
-runCommand("$gitPath stash push -m 'Auto-stash before pull: " . date('Y-m-d H:i:s') . "'", $output, $errors);
+// Check if there are changes to stash
+$hasChanges = false;
+exec("$gitPath status --porcelain 2>&1", $statusOutput, $statusCode);
+if (!empty($statusOutput)) {
+    foreach ($statusOutput as $line) {
+        if (preg_match('/^[MADRC]/', $line)) {
+            $hasChanges = true;
+            break;
+        }
+    }
+}
+
+if ($hasChanges) {
+    $output[] = "Local changes detected, stashing...";
+    runCommand("$gitPath stash push -m 'Auto-stash before pull: " . date('Y-m-d H:i:s') . "'", $output, $errors);
+} else {
+    $output[] = "No local changes to stash.";
+}
 $output[] = "";
 
-// Step 3: Remove untracked files that would conflict
-$output[] = "=== Step 3: Cleaning Untracked Files ===";
+// Step 3: Handle untracked files that would conflict
+$output[] = "=== Step 3: Handling Untracked Files ===";
+// First, check what untracked files exist
+runCommand("$gitPath status --porcelain | grep '^??'", $output, $errors);
+$output[] = "";
+
+// Backup untracked files that would be overwritten
+$output[] = "Backing up untracked files...";
+$untrackedFiles = [
+    'CPANEL-GIT-PULL-FIX.md',
+    'database/add-hero-slider-options.sql',
+    'setup-hero-slider-options.php'
+];
+
+$backupDir = 'storage/backups/git-pull-' . date('Y-m-d-H-i-s');
+if (!is_dir($backupDir)) {
+    mkdir($backupDir, 0755, true);
+}
+
+foreach ($untrackedFiles as $file) {
+    if (file_exists($file)) {
+        $backupPath = $backupDir . '/' . basename($file);
+        if (copy($file, $backupPath)) {
+            $output[] = "Backed up: $file -> $backupPath";
+        }
+    }
+}
+$output[] = "";
+
+// Now remove untracked files that would conflict
+$output[] = "Removing conflicting untracked files...";
 runCommand("$gitPath clean -fd", $output, $errors);
 $output[] = "";
 
