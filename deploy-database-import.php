@@ -31,24 +31,43 @@ function importDatabaseToCPanel($config, $log) {
     $sqlFile = null;
     
     try {
-        // Step 1: Load database config
+        // Step 1: Load database config (use remote if configured, otherwise local)
         $log->info("  [1/4] Loading database configuration...");
-        $dbConfigFile = __DIR__ . '/config/database.php';
-        if (!file_exists($dbConfigFile)) {
-            throw new Exception("Database config file not found");
+        
+        $remoteDbConfig = $config['database_remote'] ?? [];
+        $useRemote = ($remoteDbConfig['use_remote'] ?? false) && !empty($remoteDbConfig['dbname']);
+        
+        if ($useRemote) {
+            // Use remote database credentials from deploy-config.json
+            $dbHost = $remoteDbConfig['host'] ?? 'localhost';
+            $dbName = $remoteDbConfig['dbname'] ?? '';
+            $dbUser = $remoteDbConfig['username'] ?? '';
+            $dbPass = $remoteDbConfig['password'] ?? '';
+            
+            if (empty($dbName) || empty($dbUser)) {
+                throw new Exception("Remote database credentials incomplete in deploy-config.json");
+            }
+            
+            $log->info("    ✓ Using REMOTE database: {$dbName} on {$dbHost}");
+        } else {
+            // Use local database credentials from config/database.php
+            $dbConfigFile = __DIR__ . '/config/database.php';
+            if (!file_exists($dbConfigFile)) {
+                throw new Exception("Database config file not found");
+            }
+            
+            $dbConfig = require $dbConfigFile;
+            $dbHost = $dbConfig['host'] ?? 'localhost';
+            $dbName = $dbConfig['dbname'] ?? $dbConfig['database'] ?? '';
+            $dbUser = $dbConfig['username'] ?? '';
+            $dbPass = $dbConfig['password'] ?? '';
+            
+            if (empty($dbName) || empty($dbUser)) {
+                throw new Exception("Database credentials incomplete in config/database.php");
+            }
+            
+            $log->info("    ✓ Using LOCAL database: {$dbName} on {$dbHost}");
         }
-        
-        $dbConfig = require $dbConfigFile;
-        $dbHost = $dbConfig['host'] ?? 'localhost';
-        $dbName = $dbConfig['dbname'] ?? $dbConfig['database'] ?? '';
-        $dbUser = $dbConfig['username'] ?? '';
-        $dbPass = $dbConfig['password'] ?? '';
-        
-        if (empty($dbName) || empty($dbUser)) {
-            throw new Exception("Database credentials incomplete in config/database.php");
-        }
-        
-        $log->info("    ✓ Database: {$dbName} on {$dbHost}");
         
         // Step 2: Create backup before import (if enabled)
         $backupFile = null;
