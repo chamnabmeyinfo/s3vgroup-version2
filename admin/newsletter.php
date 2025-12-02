@@ -65,16 +65,16 @@ include __DIR__ . '/includes/header.php';
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-paper-plane mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-paper-plane mr-2 md:mr-3"></i>
                     Newsletter Subscribers
                 </h1>
-                <p class="text-indigo-100 text-lg">Manage your newsletter subscriber list</p>
+                <p class="text-indigo-100 text-sm md:text-lg">Manage your newsletter subscriber list</p>
             </div>
-            <a href="?export=1" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all">
+            <a href="?export=1" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all w-full sm:w-auto text-center text-sm md:text-base">
                 <i class="fas fa-download mr-2"></i>
                 Export CSV
             </a>
@@ -82,7 +82,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
         <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
             <div class="flex items-center justify-between mb-4">
                 <div class="bg-white/20 rounded-lg p-3">
@@ -124,21 +124,22 @@ include __DIR__ . '/includes/header.php';
     </div>
 
     <!-- Filter Tabs -->
-    <div class="bg-white rounded-lg shadow-md p-2 mb-6 inline-flex">
-        <a href="?status=all" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+    <div class="bg-white rounded-lg shadow-md p-2 mb-4 md:mb-6 flex flex-wrap gap-2">
+        <a href="?status=all" class="px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base <?= $statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
             <i class="fas fa-list mr-2"></i> All
         </a>
-        <a href="?status=active" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'active' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+        <a href="?status=active" class="px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base <?= $statusFilter === 'active' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
             <i class="fas fa-check-circle mr-2"></i> Active
         </a>
-        <a href="?status=unsubscribed" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'unsubscribed' ? 'bg-gray-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+        <a href="?status=unsubscribed" class="px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all text-sm md:text-base <?= $statusFilter === 'unsubscribed' ? 'bg-gray-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
             <i class="fas fa-ban mr-2"></i> Unsubscribed
         </a>
     </div>
 
     <!-- Subscribers Table -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+            <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
@@ -178,6 +179,9 @@ include __DIR__ . '/includes/header.php';
             <?php endforeach; ?>
         </tbody>
     </table>
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

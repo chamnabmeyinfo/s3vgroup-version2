@@ -30,15 +30,25 @@ $developerUsername = $_SESSION['developer_username'] ?? 'developer';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleMobileMenu()"></div>
+    
+    <nav class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg sticky top-0 z-30">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center h-16">
-                <a href="<?= url('developer/index.php') ?>" class="text-xl font-bold flex items-center">
-                    <i class="fas fa-code mr-2"></i>
-                    Developer Panel
-                </a>
-                <div class="flex items-center space-x-4">
-                    <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-3">
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded hover:bg-purple-700 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <a href="<?= url('developer/index.php') ?>" class="text-lg md:text-xl font-bold flex items-center">
+                        <i class="fas fa-code mr-2"></i>
+                        <span class="hidden sm:inline">Developer Panel</span>
+                        <span class="sm:hidden">Dev</span>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
+                    <div class="hidden md:flex items-center space-x-2">
                         <div class="bg-white/20 rounded-full p-2">
                             <i class="fas fa-user-shield"></i>
                         </div>
@@ -47,16 +57,24 @@ $developerUsername = $_SESSION['developer_username'] ?? 'developer';
                             <div class="text-xs opacity-75">Developer Access</div>
                         </div>
                     </div>
-                    <a href="<?= url('developer/logout.php') ?>" class="hover:underline bg-white/20 px-4 py-2 rounded-lg transition-all hover:bg-white/30">
-                        <i class="fas fa-sign-out-alt mr-1"></i>Logout
+                    <a href="<?= url('developer/logout.php') ?>" class="hover:underline bg-white/20 px-2 md:px-4 py-2 rounded-lg transition-all hover:bg-white/30 text-xs md:text-sm">
+                        <i class="fas fa-sign-out-alt md:mr-1"></i>
+                        <span class="hidden sm:inline">Logout</span>
                     </a>
                 </div>
             </div>
         </div>
     </nav>
     
-    <div class="flex">
-        <aside class="w-72 bg-gradient-to-b from-gray-800 to-gray-900 text-white min-h-screen shadow-2xl border-r-2 border-purple-500/20">
+    <div class="flex relative">
+        <!-- Sidebar - Hidden on mobile, shown on desktop -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-72 bg-gradient-to-b from-gray-800 to-gray-900 text-white min-h-screen shadow-2xl border-r-2 border-purple-500/20 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 lg:hidden">
+                <span class="font-bold">Menu</span>
+                <button onclick="toggleMobileMenu()" class="p-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <div class="p-6 border-b border-gray-700">
                 <div class="flex items-center space-x-3 mb-4">
                     <div class="bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg p-3">
@@ -123,6 +141,15 @@ $developerUsername = $_SESSION['developer_username'] ?? 'developer';
                 </a>
                 
                 <div class="border-t border-gray-700 my-3"></div>
+                <div class="px-4 py-2 text-xs text-gray-400 uppercase font-bold tracking-wider">Design</div>
+                
+                <a href="<?= url('developer/design-versions.php') ?>" class="flex items-center px-4 py-3 rounded-lg hover:bg-pink-600/20 hover:text-pink-300 transition-all group">
+                    <i class="fas fa-history mr-3 w-5 text-center"></i>
+                    <span>Design Versions</span>
+                    <i class="fas fa-chevron-right ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-xs"></i>
+                </a>
+                
+                <div class="border-t border-gray-700 my-3"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase font-bold tracking-wider">Settings</div>
                 
                 <a href="<?= url('developer/settings.php') ?>" class="flex items-center px-4 py-3 rounded-lg hover:bg-gray-700/50 transition-all group">
@@ -146,7 +173,15 @@ $developerUsername = $_SESSION['developer_username'] ?? 'developer';
             </nav>
         </aside>
         
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-4 md:p-6 lg:p-8 w-full lg:w-auto min-w-0">
+            <script>
+            function toggleMobileMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileMenuOverlay');
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
+            </script>
             <?php if (isset($message) && $message): ?>
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     <?= escape($message) ?>

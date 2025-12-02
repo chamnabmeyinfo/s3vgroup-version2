@@ -145,16 +145,16 @@ $defaultColumns = ['date', 'name', 'email', 'product', 'status', 'actions'];
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-yellow-600 to-amber-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-yellow-600 to-amber-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-calculator mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-calculator mr-2 md:mr-3"></i>
                     Quote Requests
                 </h1>
-                <p class="text-yellow-100 text-lg">Manage customer quote requests</p>
+                <p class="text-yellow-100 text-sm md:text-lg">Manage customer quote requests</p>
             </div>
-            <a href="<?= url('admin/quotes-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all">
+            <a href="<?= url('admin/quotes-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all w-full sm:w-auto text-center text-sm md:text-base">
                 <i class="fas fa-download mr-2"></i>
                 Export CSV
             </a>
@@ -180,7 +180,8 @@ $defaultColumns = ['date', 'name', 'email', 'product', 'status', 'actions'];
     
     <!-- Quotes Table -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+            <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
@@ -315,6 +316,8 @@ $defaultColumns = ['date', 'name', 'email', 'product', 'status', 'actions'];
                 <?php endif; ?>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 

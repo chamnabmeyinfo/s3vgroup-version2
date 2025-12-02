@@ -192,7 +192,8 @@ $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
     
     <!-- Messages Table -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+            <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
@@ -310,6 +311,8 @@ $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
                 <?php endif; ?>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 

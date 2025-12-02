@@ -53,7 +53,7 @@ include __DIR__ . '/includes/header.php';
                             <h3 class="font-bold text-lg mb-2 line-clamp-2"><?= escape($product['name']) ?></h3>
                             <p class="text-sm text-gray-600 mb-3 line-clamp-2"><?= escape($product['short_description'] ?? '') ?></p>
                             <div class="flex justify-between items-center">
-                                <span class="text-lg font-bold text-blue-600">$<?= number_format($product['price'], 2) ?></span>
+                                <span class="text-lg font-bold text-blue-600">$<?= number_format((float)($product['price'] ?? 0), 2) ?></span>
                                 <span class="btn-primary-sm">View</span>
                             </div>
                         </div>

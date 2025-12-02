@@ -61,19 +61,19 @@ if (file_exists($logFile)) {
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-rocket mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-rocket mr-2 md:mr-3"></i>
                     Deployment Management
                 </h1>
-                <p class="text-blue-100 text-lg">Deploy your code and database to production server</p>
+                <p class="text-blue-100 text-sm md:text-lg">Deploy your code and database to production server</p>
             </div>
-            <div class="bg-white/20 rounded-full px-6 py-3 backdrop-blur-sm">
+            <div class="bg-white/20 rounded-full px-4 md:px-6 py-2 md:py-3 backdrop-blur-sm">
                 <div class="flex items-center space-x-2">
                     <i class="fas fa-server"></i>
-                    <span class="font-semibold">s3vgroup.com</span>
+                    <span class="font-semibold text-sm md:text-base">s3vgroup.com</span>
                 </div>
             </div>
         </div>
@@ -89,70 +89,70 @@ if (file_exists($logFile)) {
     <?php endif; ?>
 
     <!-- Deployment Status -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-check-circle text-2xl"></i>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-4 md:p-6 text-white">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-check-circle text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $config['git']['enabled'] ?? false ? 'Enabled' : 'Disabled' ?>
                     </div>
                     <div class="text-green-100 text-xs">Git Push</div>
                 </div>
             </div>
-            <div class="text-green-100 text-sm font-medium">Git Integration</div>
+            <div class="text-green-100 text-xs md:text-sm font-medium">Git Integration</div>
         </div>
         
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-cloud text-2xl"></i>
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-4 md:p-6 text-white">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-cloud text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $config['ftp']['enabled'] ?? false ? 'Enabled' : 'Disabled' ?>
                     </div>
                     <div class="text-blue-100 text-xs">FTP Upload</div>
                 </div>
             </div>
-            <div class="text-blue-100 text-sm font-medium">FTP Integration</div>
+            <div class="text-blue-100 text-xs md:text-sm font-medium">FTP Integration</div>
         </div>
         
-        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-clock text-2xl"></i>
+        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-4 md:p-6 text-white">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-clock text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $lastDeploymentTime ? date('M d, H:i', strtotime($lastDeploymentTime)) : 'Never' ?>
                     </div>
                     <div class="text-purple-100 text-xs">Last Deploy</div>
                 </div>
             </div>
-            <div class="text-purple-100 text-sm font-medium">Last Deployment</div>
+            <div class="text-purple-100 text-xs md:text-sm font-medium">Last Deployment</div>
         </div>
     </div>
 
     <!-- Deployment Trigger -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-6 border-2 border-blue-200">
-        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-6 text-white">
-            <div class="flex items-center justify-between">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-4 md:mb-6 border-2 border-blue-200">
+        <div class="bg-gradient-to-r from-blue-500 to-indigo-600 p-4 md:p-6 text-white">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h2 class="text-2xl font-bold mb-1">
+                    <h2 class="text-xl md:text-2xl font-bold mb-1">
                         <i class="fas fa-play-circle mr-2"></i>
                         Trigger Deployment
                     </h2>
-                    <p class="text-blue-100 text-sm">Execute the full deployment process to production</p>
+                    <p class="text-blue-100 text-xs md:text-sm">Execute the full deployment process to production</p>
                 </div>
-                <div class="bg-white/20 rounded-full p-4">
-                    <i class="fas fa-rocket text-3xl"></i>
+                <div class="bg-white/20 rounded-full p-3 md:p-4">
+                    <i class="fas fa-rocket text-2xl md:text-3xl"></i>
                 </div>
             </div>
         </div>
-        <div class="p-6">
+        <div class="p-4 md:p-6">
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
                 <p class="text-sm text-gray-700 mb-3">
                     <i class="fas fa-info-circle text-blue-500 mr-2"></i>
@@ -186,7 +186,7 @@ if (file_exists($logFile)) {
     </div>
 
     <!-- Configuration Overview -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <!-- Deployment Settings -->
         <div class="bg-white rounded-xl shadow-lg p-6">
             <div class="flex items-center mb-4">

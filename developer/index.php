@@ -37,43 +37,43 @@ if (file_exists($deployLogFile)) {
 
 <div class="max-w-7xl mx-auto">
     <!-- Welcome Header -->
-    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-lg shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-code mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-code mr-2 md:mr-3"></i>
                     Developer Dashboard
                 </h1>
-                <p class="text-purple-100 text-lg">Project development tools and deployment management</p>
+                <p class="text-purple-100 text-sm md:text-lg">Project development tools and deployment management</p>
             </div>
-            <div class="bg-white/20 rounded-full p-6">
-                <i class="fas fa-user-shield text-4xl"></i>
+            <div class="bg-white/20 rounded-full p-4 md:p-6">
+                <i class="fas fa-user-shield text-2xl md:text-3xl lg:text-4xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-database text-2xl"></i>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-4 md:mb-6">
+        <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-database text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-3xl font-bold"><?= $syncStatus['local_tables'] ?? 0 ?></div>
-                    <div class="text-purple-100 text-sm">Tables</div>
+                    <div class="text-2xl md:text-3xl font-bold"><?= $syncStatus['local_tables'] ?? 0 ?></div>
+                    <div class="text-purple-100 text-xs md:text-sm">Tables</div>
                 </div>
             </div>
-            <div class="text-purple-100 text-sm font-medium">Local Database</div>
+            <div class="text-purple-100 text-xs md:text-sm font-medium">Local Database</div>
         </div>
         
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-rocket text-2xl"></i>
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-rocket text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $lastDeployment ? date('M d', strtotime($lastDeployment)) : 'Never' ?>
                     </div>
                     <div class="text-blue-100 text-xs">
@@ -81,16 +81,16 @@ if (file_exists($deployLogFile)) {
                     </div>
                 </div>
             </div>
-            <div class="text-blue-100 text-sm font-medium">Last Deployment</div>
+            <div class="text-blue-100 text-xs md:text-sm font-medium">Last Deployment</div>
         </div>
         
-        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-sync-alt text-2xl"></i>
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-sync-alt text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $syncStatus['last_sync'] ? date('M d', strtotime($syncStatus['last_sync'])) : 'Never' ?>
                     </div>
                     <div class="text-green-100 text-xs">
@@ -98,80 +98,89 @@ if (file_exists($deployLogFile)) {
                     </div>
                 </div>
             </div>
-            <div class="text-green-100 text-sm font-medium">Last Sync</div>
+            <div class="text-green-100 text-xs md:text-sm font-medium">Last Sync</div>
         </div>
         
-        <div class="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-cloud text-2xl"></i>
+        <div class="bg-gradient-to-br from-orange-500 to-red-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-transform">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-cloud text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">s3vgroup.com</div>
+                    <div class="text-base md:text-lg font-bold">s3vgroup.com</div>
                     <div class="text-orange-100 text-xs">Production</div>
                 </div>
             </div>
-            <div class="text-orange-100 text-sm font-medium">Remote Server</div>
+            <div class="text-orange-100 text-xs md:text-sm font-medium">Remote Server</div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div class="flex items-center mb-6">
-            <div class="bg-purple-100 rounded-lg p-3 mr-3">
-                <i class="fas fa-bolt text-purple-600 text-xl"></i>
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-4 md:mb-6">
+        <div class="flex items-center mb-4 md:mb-6">
+            <div class="bg-purple-100 rounded-lg p-2 md:p-3 mr-2 md:mr-3">
+                <i class="fas fa-bolt text-purple-600 text-lg md:text-xl"></i>
             </div>
-            <h2 class="text-2xl font-bold text-gray-800">Quick Actions</h2>
+            <h2 class="text-xl md:text-2xl font-bold text-gray-800">Quick Actions</h2>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <a href="<?= url('developer/database-sync.php') ?>" class="group bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
-                <div class="flex items-center justify-between mb-3">
-                    <i class="fas fa-download text-3xl"></i>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+            <a href="<?= url('developer/database-sync.php') ?>" class="group bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg p-4 md:p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <i class="fas fa-download text-2xl md:text-3xl"></i>
                     <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </div>
-                <h3 class="font-bold text-lg mb-1">Pull from Remote</h3>
-                <p class="text-green-100 text-sm">Get latest from s3vgroup.com</p>
+                <h3 class="font-bold text-base md:text-lg mb-1">Pull from Remote</h3>
+                <p class="text-green-100 text-xs md:text-sm">Get latest from s3vgroup.com</p>
             </a>
             
-            <a href="<?= url('developer/deployment.php') ?>" class="group bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
-                <div class="flex items-center justify-between mb-3">
-                    <i class="fas fa-rocket text-3xl"></i>
+            <a href="<?= url('developer/deployment.php') ?>" class="group bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg p-4 md:p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <i class="fas fa-rocket text-2xl md:text-3xl"></i>
                     <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </div>
-                <h3 class="font-bold text-lg mb-1">Deploy to Server</h3>
-                <p class="text-blue-100 text-sm">Push changes to production</p>
+                <h3 class="font-bold text-base md:text-lg mb-1">Deploy to Server</h3>
+                <p class="text-blue-100 text-xs md:text-sm">Push changes to production</p>
             </a>
             
-            <a href="<?= url('developer/database-sync.php') ?>" class="group bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
-                <div class="flex items-center justify-between mb-3">
-                    <i class="fas fa-sync-alt text-3xl"></i>
+            <a href="<?= url('developer/database-sync.php') ?>" class="group bg-gradient-to-br from-cyan-500 to-teal-600 rounded-lg p-4 md:p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <i class="fas fa-sync-alt text-2xl md:text-3xl"></i>
                     <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </div>
-                <h3 class="font-bold text-lg mb-1">Sync Database</h3>
-                <p class="text-cyan-100 text-sm">Sync local ↔ remote</p>
+                <h3 class="font-bold text-base md:text-lg mb-1">Sync Database</h3>
+                <p class="text-cyan-100 text-xs md:text-sm">Sync local ↔ remote</p>
             </a>
             
-            <a href="<?= url('developer/backup.php') ?>" class="group bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
-                <div class="flex items-center justify-between mb-3">
-                    <i class="fas fa-database text-3xl"></i>
+            <a href="<?= url('developer/backup.php') ?>" class="group bg-gradient-to-br from-orange-500 to-amber-600 rounded-lg p-4 md:p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <i class="fas fa-database text-2xl md:text-3xl"></i>
                     <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </div>
-                <h3 class="font-bold text-lg mb-1">Create Backup</h3>
-                <p class="text-orange-100 text-sm">Backup database</p>
+                <h3 class="font-bold text-base md:text-lg mb-1">Create Backup</h3>
+                <p class="text-orange-100 text-xs md:text-sm">Backup database</p>
+            </a>
+            
+            <a href="<?= url('developer/design-versions.php') ?>" class="group bg-gradient-to-br from-pink-500 to-rose-600 rounded-lg p-4 md:p-6 text-white hover:shadow-xl transform hover:scale-105 transition-all">
+                <div class="flex items-center justify-between mb-2 md:mb-3">
+                    <i class="fas fa-history text-2xl md:text-3xl"></i>
+                    <i class="fas fa-arrow-right opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                </div>
+                <h3 class="font-bold text-base md:text-lg mb-1">Design Versions</h3>
+                <p class="text-pink-100 text-xs md:text-sm">Manage design snapshots</p>
             </a>
         </div>
     </div>
 
     <!-- Developer Tools & Info -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
         <!-- Development Tools -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-6">
-                <div class="bg-purple-100 rounded-lg p-3 mr-3">
-                    <i class="fas fa-tools text-purple-600 text-xl"></i>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="flex items-center mb-4 md:mb-6">
+                <div class="bg-purple-100 rounded-lg p-2 md:p-3 mr-2 md:mr-3">
+                    <i class="fas fa-tools text-purple-600 text-lg md:text-xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800">Development Tools</h2>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">Development Tools</h2>
             </div>
             <div class="space-y-3">
                 <a href="<?= url('developer/deployment.php') ?>" class="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors group">
@@ -210,12 +219,12 @@ if (file_exists($deployLogFile)) {
         </div>
         
         <!-- System Information -->
-        <div class="bg-white rounded-xl shadow-lg p-6">
-            <div class="flex items-center mb-6">
-                <div class="bg-indigo-100 rounded-lg p-3 mr-3">
-                    <i class="fas fa-info-circle text-indigo-600 text-xl"></i>
+        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
+            <div class="flex items-center mb-4 md:mb-6">
+                <div class="bg-indigo-100 rounded-lg p-2 md:p-3 mr-2 md:mr-3">
+                    <i class="fas fa-info-circle text-indigo-600 text-lg md:text-xl"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-gray-800">System Information</h2>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">System Information</h2>
             </div>
             <div class="space-y-4">
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">

@@ -145,11 +145,11 @@ include __DIR__ . '/includes/header.php';
                                         ?>
                                         <?php if ($salePrice && $price): ?>
                                             <div>
-                                                <span class="text-lg font-bold text-blue-600">$<?= number_format($salePrice, 2) ?></span>
-                                                <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format($price, 2) ?></span>
+                                                <span class="text-lg font-bold text-blue-600">$<?= number_format((float)$salePrice, 2) ?></span>
+                                                <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format((float)$price, 2) ?></span>
                                             </div>
                                         <?php elseif ($price): ?>
-                                            <span class="text-lg font-bold text-blue-600">$<?= number_format($price, 2) ?></span>
+                                            <span class="text-lg font-bold text-blue-600">$<?= number_format((float)$price, 2) ?></span>
                                         <?php else: ?>
                                             <span class="text-lg font-bold text-gray-500">Price on Request</span>
                                         <?php endif; ?>

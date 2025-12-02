@@ -220,14 +220,14 @@ include __DIR__ . '/includes/header.php';
                     ?>
                     <?php if ($salePrice && $price): ?>
                         <div class="flex items-center gap-4">
-                            <span class="text-4xl font-bold text-blue-600">$<?= number_format($salePrice, 2) ?></span>
-                            <span class="text-2xl text-gray-400 line-through">$<?= number_format($price, 2) ?></span>
+                            <span class="text-4xl font-bold text-blue-600">$<?= number_format((float)$salePrice, 2) ?></span>
+                            <span class="text-2xl text-gray-400 line-through">$<?= number_format((float)$price, 2) ?></span>
                             <span class="bg-red-500 text-white px-2 py-1 rounded text-sm">
-                                Save <?= number_format((($price - $salePrice) / $price) * 100, 0) ?>%
+                                Save <?= number_format(((float)$price - (float)$salePrice) / (float)$price * 100, 0) ?>%
                             </span>
                         </div>
                     <?php elseif ($price): ?>
-                        <span class="text-4xl font-bold text-blue-600">$<?= number_format($price, 2) ?></span>
+                        <span class="text-4xl font-bold text-blue-600">$<?= number_format((float)$price, 2) ?></span>
                     <?php else: ?>
                         <span class="text-4xl font-bold text-gray-500">Price on Request</span>
                     <?php endif; ?>
@@ -421,7 +421,7 @@ include __DIR__ . '/includes/header.php';
                         <div class="p-4">
                             <h3 class="font-bold text-lg mb-2"><?= escape($related['name']) ?></h3>
                             <?php if (!empty($related['price']) && $related['price'] > 0): ?>
-                                <p class="text-lg font-bold text-blue-600">$<?= number_format((float)$related['price'], 2) ?></p>
+                                <p class="text-lg font-bold text-blue-600">$<?= number_format((float)($related['price'] ?? 0), 2) ?></p>
                             <?php else: ?>
                                 <p class="text-lg font-bold text-gray-500">Price on Request</p>
                             <?php endif; ?>

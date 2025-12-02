@@ -146,13 +146,13 @@ include __DIR__ . '/includes/header.php';
                             <h3 class="font-bold text-lg mb-2 line-clamp-2"><?= escape($product['name']) ?></h3>
                             <p class="text-sm text-gray-600 mb-3 line-clamp-2"><?= escape($product['short_description'] ?? '') ?></p>
                             <div class="flex justify-between items-center">
-                                <?php if ($product['sale_price']): ?>
+                                <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
                                     <div>
-                                        <span class="text-lg font-bold text-blue-600">$<?= number_format($product['sale_price'], 2) ?></span>
-                                        <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format($product['price'], 2) ?></span>
+                                        <span class="text-lg font-bold text-blue-600">$<?= number_format((float)($product['sale_price'] ?? 0), 2) ?></span>
+                                        <span class="text-sm text-gray-400 line-through ml-2">$<?= number_format((float)($product['price'] ?? 0), 2) ?></span>
                                     </div>
                                 <?php else: ?>
-                                    <span class="text-lg font-bold text-blue-600">$<?= number_format($product['price'], 2) ?></span>
+                                    <span class="text-lg font-bold text-blue-600">$<?= number_format((float)($product['price'] ?? 0), 2) ?></span>
                                 <?php endif; ?>
                                 <span class="btn-primary-sm">View Details</span>
                             </div>
@@ -204,7 +204,7 @@ include __DIR__ . '/includes/header.php';
                         </div>
                         <div class="p-4">
                             <h3 class="font-bold text-lg mb-2 line-clamp-2"><?= escape($product['name']) ?></h3>
-                            <p class="text-lg font-bold text-blue-600">$<?= number_format($product['price'], 2) ?></p>
+                            <p class="text-lg font-bold text-blue-600">$<?= number_format((float)($product['price'] ?? 0), 2) ?></p>
                         </div>
                     </a>
                 </div>

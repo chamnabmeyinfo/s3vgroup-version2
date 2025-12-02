@@ -78,19 +78,19 @@ $syncLog = $syncService->getLog();
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-purple-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-sync-alt mr-3 animate-spin-slow"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-sync-alt mr-2 md:mr-3 animate-spin-slow"></i>
                     Database Sync Management
                 </h1>
-                <p class="text-purple-100 text-lg">Smart synchronization between local and remote databases</p>
+                <p class="text-purple-100 text-sm md:text-lg">Smart synchronization between local and remote databases</p>
             </div>
-            <div class="bg-white/20 rounded-full px-6 py-3 backdrop-blur-sm">
+            <div class="bg-white/20 rounded-full px-4 md:px-6 py-2 md:py-3 backdrop-blur-sm">
                 <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                    <span class="font-semibold">Smart Sync Enabled</span>
+                    <div class="w-2 h-2 md:w-3 md:h-3 bg-green-400 rounded-full animate-pulse"></div>
+                    <span class="font-semibold text-sm md:text-base">Smart Sync Enabled</span>
                 </div>
             </div>
         </div>
@@ -106,42 +106,42 @@ $syncLog = $syncService->getLog();
     <?php endif; ?>
 
     <!-- Sync Status Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-database text-2xl"></i>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-4 md:mb-6">
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-all">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-database text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-3xl font-bold"><?= $syncStatus['local_tables'] ?? 0 ?></div>
-                    <div class="text-green-100 text-sm">Tables</div>
+                    <div class="text-2xl md:text-3xl font-bold"><?= $syncStatus['local_tables'] ?? 0 ?></div>
+                    <div class="text-green-100 text-xs md:text-sm">Tables</div>
                 </div>
             </div>
-            <div class="text-green-100 text-sm font-medium">Local Database</div>
+            <div class="text-green-100 text-xs md:text-sm font-medium">Local Database</div>
             <div class="text-green-200 text-xs mt-1">localhost:8080</div>
         </div>
         
-        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-cloud text-2xl"></i>
+        <div class="bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-all">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-cloud text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">s3vgroup.com</div>
+                    <div class="text-base md:text-lg font-bold">s3vgroup.com</div>
                     <div class="text-blue-100 text-xs">Production</div>
                 </div>
             </div>
-            <div class="text-blue-100 text-sm font-medium">Remote Database</div>
+            <div class="text-blue-100 text-xs md:text-sm font-medium">Remote Database</div>
             <div class="text-blue-200 text-xs mt-1">Priority Source</div>
         </div>
         
-        <div class="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <div class="bg-white/20 rounded-lg p-3">
-                    <i class="fas fa-clock text-2xl"></i>
+        <div class="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl shadow-lg p-4 md:p-6 text-white transform hover:scale-105 transition-all">
+            <div class="flex items-center justify-between mb-3 md:mb-4">
+                <div class="bg-white/20 rounded-lg p-2 md:p-3">
+                    <i class="fas fa-clock text-xl md:text-2xl"></i>
                 </div>
                 <div class="text-right">
-                    <div class="text-lg font-bold">
+                    <div class="text-base md:text-lg font-bold">
                         <?= $syncStatus['last_sync'] ? date('M d', strtotime($syncStatus['last_sync'])) : 'Never' ?>
                     </div>
                     <div class="text-orange-100 text-xs">
@@ -149,30 +149,30 @@ $syncLog = $syncService->getLog();
                     </div>
                 </div>
             </div>
-            <div class="text-orange-100 text-sm font-medium">Last Sync</div>
+            <div class="text-orange-100 text-xs md:text-sm font-medium">Last Sync</div>
             <div class="text-orange-200 text-xs mt-1">Sync History</div>
         </div>
     </div>
 
     <!-- Sync Actions -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
         <!-- Pull from Remote -->
         <div class="bg-white rounded-xl shadow-lg overflow-hidden border-2 border-green-200 hover:border-green-400 transition-all">
-            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-6 text-white">
-                <div class="flex items-center justify-between">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 p-4 md:p-6 text-white">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
-                        <h2 class="text-2xl font-bold mb-1">
+                        <h2 class="text-xl md:text-2xl font-bold mb-1">
                             <i class="fas fa-download mr-2"></i>
                             Pull from Remote
                         </h2>
-                        <p class="text-green-100 text-sm">Get latest data from s3vgroup.com</p>
+                        <p class="text-green-100 text-xs md:text-sm">Get latest data from s3vgroup.com</p>
                     </div>
-                    <div class="bg-white/20 rounded-full p-4">
-                        <i class="fas fa-arrow-down text-3xl"></i>
+                    <div class="bg-white/20 rounded-full p-3 md:p-4">
+                        <i class="fas fa-arrow-down text-2xl md:text-3xl"></i>
                     </div>
                 </div>
             </div>
-            <div class="p-6">
+            <div class="p-4 md:p-6">
                 <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded">
                     <p class="text-sm text-gray-700">
                         <i class="fas fa-info-circle text-blue-500 mr-2"></i>

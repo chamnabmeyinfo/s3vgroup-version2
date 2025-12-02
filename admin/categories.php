@@ -120,16 +120,16 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-tags mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-tags mr-2 md:mr-3"></i>
                     Categories Management
                 </h1>
-                <p class="text-green-100 text-lg">Organize your products into categories</p>
+                <p class="text-green-100 text-sm md:text-lg">Organize your products into categories</p>
             </div>
-            <a href="<?= url('admin/category-edit.php') ?>" class="bg-white text-green-600 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+            <a href="<?= url('admin/category-edit.php') ?>" class="bg-white text-green-600 hover:bg-green-50 px-4 md:px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl w-full sm:w-auto text-center text-sm md:text-base">
                 <i class="fas fa-plus mr-2"></i>
                 Add New Category
             </a>
@@ -175,7 +175,8 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
     
     <!-- Categories Table -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+            <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
@@ -283,6 +284,8 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                 <?php endif; ?>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 

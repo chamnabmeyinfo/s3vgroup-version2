@@ -8,33 +8,53 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-100">
-    <nav class="bg-blue-600 text-white">
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileMenuOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden" onclick="toggleMobileMenu()"></div>
+    
+    <nav class="bg-blue-600 text-white sticky top-0 z-30">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-center h-16">
-                <a href="<?= url('admin/index.php') ?>" class="text-xl font-bold">Admin Panel</a>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-3">
+                    <!-- Mobile Menu Button -->
+                    <button onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <a href="<?= url('admin/index.php') ?>" class="text-lg md:text-xl font-bold">Admin Panel</a>
+                </div>
+                <div class="flex items-center space-x-2 md:space-x-4">
                     <?php if (session('admin_username')): ?>
-                        <span>Welcome, <?= escape(session('admin_username')) ?></span>
+                        <span class="hidden sm:inline text-sm md:text-base">Welcome, <?= escape(session('admin_username')) ?></span>
                         <?php if (session('admin_role_name')): ?>
-                            <span class="text-sm opacity-75">Role: <?= escape(session('admin_role_name')) ?></span>
+                            <span class="hidden md:inline text-xs opacity-75">Role: <?= escape(session('admin_role_name')) ?></span>
                         <?php endif; ?>
-                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
-                            <i class="fas fa-code mr-1"></i> Developer
+                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-2 md:px-4 py-2 rounded-lg transition-colors text-xs md:text-sm font-semibold">
+                            <i class="fas fa-code md:mr-1"></i> <span class="hidden sm:inline">Developer</span>
                         </a>
-                        <a href="<?= url('admin/logout.php') ?>" class="hover:underline">Logout</a>
+                        <a href="<?= url('admin/logout.php') ?>" class="hover:underline text-sm md:text-base px-2">
+                            <i class="fas fa-sign-out-alt md:mr-1"></i> <span class="hidden sm:inline">Logout</span>
+                        </a>
                     <?php else: ?>
-                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
-                            <i class="fas fa-code mr-1"></i> Developer Login
+                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-2 md:px-4 py-2 rounded-lg transition-colors text-xs md:text-sm font-semibold">
+                            <i class="fas fa-code md:mr-1"></i> <span class="hidden sm:inline">Developer</span>
                         </a>
-                        <a href="<?= url('admin/login.php') ?>" class="hover:underline">Login</a>
+                        <a href="<?= url('admin/login.php') ?>" class="hover:underline text-sm md:text-base px-2">
+                            <i class="fas fa-sign-in-alt md:mr-1"></i> <span class="hidden sm:inline">Login</span>
+                        </a>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </nav>
     
-    <div class="flex">
-        <aside class="w-64 bg-gray-800 text-white min-h-screen">
+    <div class="flex relative">
+        <!-- Sidebar - Hidden on mobile, shown on desktop -->
+        <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 bg-gray-800 text-white min-h-screen transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+            <div class="flex items-center justify-between p-4 border-b border-gray-700 lg:hidden">
+                <span class="font-bold">Menu</span>
+                <button onclick="toggleMobileMenu()" class="p-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
             <nav class="p-4 space-y-2">
                 <a href="<?= url('admin/index.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-dashboard mr-2"></i> Dashboard
@@ -128,7 +148,15 @@
             </nav>
         </aside>
         
-        <main class="flex-1 p-8">
+        <main class="flex-1 p-4 md:p-6 lg:p-8 w-full lg:w-auto min-w-0">
+            <script>
+            function toggleMobileMenu() {
+                const sidebar = document.getElementById('sidebar');
+                const overlay = document.getElementById('mobileMenuOverlay');
+                sidebar.classList.toggle('-translate-x-full');
+                overlay.classList.toggle('hidden');
+            }
+            </script>
             <?php if (isset($message) && $message): ?>
                 <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     <?= escape($message) ?>

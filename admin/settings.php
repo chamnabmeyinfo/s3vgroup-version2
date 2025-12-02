@@ -54,14 +54,14 @@ include __DIR__ . '/includes/header.php';
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl shadow-xl p-8 mb-6 text-white">
+    <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-cog mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-cog mr-2 md:mr-3"></i>
                     Site Settings
                 </h1>
-                <p class="text-gray-300 text-lg">Configure your website settings</p>
+                <p class="text-gray-300 text-sm md:text-lg">Configure your website settings</p>
             </div>
         </div>
     </div>
@@ -75,8 +75,8 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-globe text-gray-400 mr-2"></i> Site Name

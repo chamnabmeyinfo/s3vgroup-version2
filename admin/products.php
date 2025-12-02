@@ -195,21 +195,21 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
 
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-8 mb-6 text-white">
-        <div class="flex items-center justify-between">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-bold mb-2">
-                    <i class="fas fa-box mr-3"></i>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-box mr-2 md:mr-3"></i>
                     Products Management
                 </h1>
-                <p class="text-blue-100 text-lg">Manage your product catalog</p>
+                <p class="text-blue-100 text-sm md:text-lg">Manage your product catalog</p>
             </div>
-            <div class="flex items-center space-x-3">
-                <a href="<?= url('admin/products-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all">
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <a href="<?= url('admin/products-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-center text-sm md:text-base">
                     <i class="fas fa-download mr-2"></i>
                     Export CSV
                 </a>
-                <a href="<?= url('admin/product-edit.php') ?>" class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                <a href="<?= url('admin/product-edit.php') ?>" class="bg-white text-blue-600 hover:bg-blue-50 px-4 md:px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl text-center text-sm md:text-base">
                     <i class="fas fa-plus mr-2"></i>
                     Add New Product
                 </a>
@@ -296,7 +296,8 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
     
     <!-- Products Table -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto -mx-4 md:mx-0">
+            <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
@@ -519,6 +520,8 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                 <?php endif; ?>
             </tbody>
         </table>
+            </div>
+        </div>
     </div>
 </div>
 
