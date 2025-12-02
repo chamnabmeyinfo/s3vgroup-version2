@@ -24,6 +24,7 @@ $log->info("One-Click Deployment Started");
 $log->info("========================================");
 
 $errors = [];
+$warnings = [];
 
 // Step 0: Cleanup (optional, if enabled in config)
 if (($config['cleanup']['enabled'] ?? false)) {
@@ -70,24 +71,27 @@ if ($config['validation']['enabled'] ?? true) {
     $log->info("\n[1/5] Pre-deployment validation skipped (disabled in config)");
 }
 
-// Step 2: Git Push
+// Step 2: Git Push (non-critical - failure is a warning, not an error)
 if ($config['git']['enabled'] ?? true) {
     $log->info("\n[2/5] Pushing to GitHub...");
     try {
         require_once __DIR__ . '/deploy-git.php';
         $gitResult = deployGit($config, $log);
         if (!$gitResult['success']) {
-            $errors[] = "Git push failed: " . $gitResult['message'];
+            // Git push is optional - treat as warning, not critical error
+            $warnings[] = "Git push failed: " . $gitResult['message'];
+            $log->warning("  ⚠️  Git push failed (non-critical): " . $gitResult['message']);
         }
     } catch (Exception $e) {
-        $errors[] = "Git error: " . $e->getMessage();
-        $log->error("Git error: " . $e->getMessage());
+        // Git errors are non-critical
+        $warnings[] = "Git error: " . $e->getMessage();
+        $log->warning("  ⚠️  Git error (non-critical): " . $e->getMessage());
     }
 } else {
     $log->info("\n[2/5] Git push skipped (disabled in config)");
 }
 
-// Step 3: FTP Upload (Smart)
+// Step 3: FTP Upload (Smart) - CRITICAL: Failure is an error
 if ($config['ftp']['enabled'] ?? true) {
     $log->info("\n[3/5] Uploading via FTP (Smart Mode)...");
     try {
@@ -159,14 +163,32 @@ if ($dbOperation === 'import') {
 $log->info("\n[5/5] Finalizing...");
 $log->info("========================================");
 
+// Show warnings if any
+if (!empty($warnings)) {
+    $log->warning("Deployment completed with warnings:");
+    foreach ($warnings as $warning) {
+        $log->warning("  ⚠️  " . $warning);
+    }
+}
+
+// Check for critical errors
 if (empty($errors)) {
     $log->info("Deployment Complete!");
+    if (!empty($warnings)) {
+        $log->info("(Some non-critical operations had warnings, but deployment succeeded)");
+    }
     $log->info("========================================");
     exit(0);
 } else {
-    $log->error("Deployment completed with errors:");
+    $log->error("Deployment completed with CRITICAL errors:");
     foreach ($errors as $error) {
-        $log->error("  - " . $error);
+        $log->error("  ✗ " . $error);
+    }
+    if (!empty($warnings)) {
+        $log->warning("\nAlso had warnings:");
+        foreach ($warnings as $warning) {
+            $log->warning("  ⚠️  " . $warning);
+        }
     }
     $log->error("========================================");
     exit(1);
