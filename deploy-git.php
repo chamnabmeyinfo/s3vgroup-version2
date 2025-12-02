@@ -7,6 +7,14 @@
 function deployGit($config, $log) {
     $result = ['success' => false, 'message' => '', 'files_pushed' => 0];
     
+    // Find Git executable
+    $gitPath = findGitExecutable();
+    if (!$gitPath) {
+        $result['message'] = 'Git executable not found. Please ensure Git is installed and in PATH.';
+        $log->error("  ✗ Git not found");
+        return $result;
+    }
+    
     // Check if git is initialized
     if (!is_dir('.git')) {
         $result['message'] = 'Not a git repository';
@@ -15,7 +23,7 @@ function deployGit($config, $log) {
     
     // Check for changes
     $log->info("  Checking for changes...");
-    exec('git status --porcelain', $output, $returnCode);
+    exec(escapeshellarg($gitPath) . ' status --porcelain', $output, $returnCode);
     
     if (empty($output) && $returnCode === 0) {
         $log->info("  ✓ No changes to commit");
@@ -32,7 +40,7 @@ function deployGit($config, $log) {
     
     // Add all changes
     $log->info("  Adding files...");
-    exec('git add -A', $output, $returnCode);
+    exec(escapeshellarg($gitPath) . ' add -A', $output, $returnCode);
     if ($returnCode !== 0) {
         $result['message'] = 'Failed to add files';
         return $result;
@@ -48,7 +56,7 @@ function deployGit($config, $log) {
     
     // Properly escape commit message for Windows/PowerShell
     $commitMessageEscaped = escapeshellarg($commitMessage);
-    exec("git commit -m " . $commitMessageEscaped . " 2>&1", $output, $returnCode);
+    exec(escapeshellarg($gitPath) . " commit -m " . $commitMessageEscaped . " 2>&1", $output, $returnCode);
     
     if ($returnCode !== 0) {
         // Check if commit failed because no changes (already committed)
@@ -82,13 +90,13 @@ function deployGit($config, $log) {
     // Try to configure credential helper (non-blocking)
     if ($config['git']['use_credential_helper'] ?? true) {
         // Try Windows Credential Manager first (most common on Windows)
-        @exec('git config --global credential.helper manager-core 2>&1', $credHelperOutput, $credHelperReturnCode);
+        @exec(escapeshellarg($gitPath) . ' config --global credential.helper manager-core 2>&1', $credHelperOutput, $credHelperReturnCode);
         if ($credHelperReturnCode !== 0) {
             // Try wincred (older Windows)
-            @exec('git config --global credential.helper wincred 2>&1', $credHelperOutput2, $credHelperReturnCode2);
+            @exec(escapeshellarg($gitPath) . ' config --global credential.helper wincred 2>&1', $credHelperOutput2, $credHelperReturnCode2);
             if ($credHelperReturnCode2 !== 0) {
                 // Fallback to store (works everywhere but less secure)
-                @exec('git config --global credential.helper store 2>&1', $credHelperOutput3, $credHelperReturnCode3);
+                @exec(escapeshellarg($gitPath) . ' config --global credential.helper store 2>&1', $credHelperOutput3, $credHelperReturnCode3);
             }
         }
     }
@@ -102,7 +110,7 @@ function deployGit($config, $log) {
     
     if ($token) {
         // Get current remote URL
-        exec('git remote get-url origin', $remoteOutput, $remoteReturnCode);
+        exec(escapeshellarg($gitPath) . ' remote get-url origin', $remoteOutput, $remoteReturnCode);
         if ($remoteReturnCode === 0 && !empty($remoteOutput)) {
             $currentUrl = trim($remoteOutput[0]);
             $originalUrl = $currentUrl; // Store original for restoration
@@ -117,7 +125,7 @@ function deployGit($config, $log) {
                     
                     // Temporarily set remote URL with token
                     $attemptedModification = true; // We attempted to modify
-                    exec("git remote set-url origin " . escapeshellarg($remoteUrl), $setUrlOutput, $setUrlReturnCode);
+                    exec(escapeshellarg($gitPath) . " remote set-url origin " . escapeshellarg($remoteUrl), $setUrlOutput, $setUrlReturnCode);
                     if ($setUrlReturnCode === 0) {
                         $urlModifiedSuccessfully = true; // Successfully modified URL
                     } else {
@@ -148,7 +156,7 @@ function deployGit($config, $log) {
     $env['GCM_INTERACTIVE'] = 'never';
     $env['GIT_ASKPASS'] = 'echo';
     
-    $pushCommand = "git push origin " . escapeshellarg($branch) . " 2>&1";
+    $pushCommand = escapeshellarg($gitPath) . " push origin " . escapeshellarg($branch) . " 2>&1";
     
     $process = @proc_open($pushCommand, $descriptorspec, $pipes, null, $env);
     
@@ -190,7 +198,7 @@ function deployGit($config, $log) {
         //    BUT NOT if we attempted modification and failed (don't touch original token if modification failed)
         if ($urlModifiedSuccessfully || ($originalHadToken && !$attemptedModification)) {
             // Try to get current URL to verify token is present
-            exec('git remote get-url origin', $checkOutput, $checkReturnCode);
+            exec(escapeshellarg($gitPath) . ' remote get-url origin', $checkOutput, $checkReturnCode);
             
             if ($checkReturnCode === 0 && !empty($checkOutput)) {
                 $currentUrl = trim($checkOutput[0]);
@@ -199,7 +207,7 @@ function deployGit($config, $log) {
                     // Remove ANY token from URL for security (our token or previously existing token)
                     // Match both http:// and https:// protocols
                     $cleanUrl = preg_replace('#(https?)://[^@]+@github\.com/#', '$1://github.com/', $currentUrl);
-                    exec("git remote set-url origin " . escapeshellarg($cleanUrl), $restoreOutput, $restoreReturnCode);
+                    exec(escapeshellarg($gitPath) . " remote set-url origin " . escapeshellarg($cleanUrl), $restoreOutput, $restoreReturnCode);
                     
                     if ($restoreReturnCode !== 0) {
                         $log->error("  ⚠️  SECURITY WARNING: Failed to remove token from git remote URL!");
@@ -217,7 +225,7 @@ function deployGit($config, $log) {
                     if ($currentUrl !== $originalUrl && strpos($originalUrl, '@') === false) {
                         // Original URL didn't have token, current doesn't either, but they differ - restore original
                         $log->warning("  ⚠️  URLs differ, restoring original URL...");
-                        exec("git remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
+                        exec(escapeshellarg($gitPath) . " remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
                         
                         if ($restoreReturnCode !== 0) {
                             $log->error("  ⚠️  SECURITY WARNING: Failed to restore original git remote URL!");
@@ -230,7 +238,7 @@ function deployGit($config, $log) {
                 // get-url failed, but we must still restore - use original URL
                 if ($originalUrl) {
                     $log->warning("  ⚠️  Could not verify current URL, restoring original...");
-                    exec("git remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
+                    exec(escapeshellarg($gitPath) . " remote set-url origin " . escapeshellarg($originalUrl), $restoreOutput, $restoreReturnCode);
                     
                     if ($restoreReturnCode !== 0) {
                         $log->error("  ⚠️  SECURITY WARNING: Failed to restore original git remote URL!");
@@ -260,5 +268,57 @@ function deployGit($config, $log) {
     $result['message'] = "Pushed {$changedFiles} file(s)";
     
     return $result;
+}
+
+/**
+ * Find Git executable path
+ * Tries common locations and PATH
+ */
+function findGitExecutable() {
+    // Common Git installation paths on Windows
+    $commonPaths = [
+        'C:\\Program Files\\Git\\cmd\\git.exe',
+        'C:\\Program Files (x86)\\Git\\cmd\\git.exe',
+        'C:\\Program Files\\Git\\bin\\git.exe',
+        'C:\\Program Files (x86)\\Git\\bin\\git.exe',
+    ];
+    
+    // Check common paths first
+    foreach ($commonPaths as $path) {
+        if (file_exists($path)) {
+            return $path;
+        }
+    }
+    
+    // Try to find git in PATH
+    $pathEnv = getenv('PATH');
+    if ($pathEnv) {
+        $paths = explode(PATH_SEPARATOR, $pathEnv);
+        foreach ($paths as $path) {
+            $gitPath = rtrim($path, '\\/') . DIRECTORY_SEPARATOR . 'git.exe';
+            if (file_exists($gitPath)) {
+                return $gitPath;
+            }
+        }
+    }
+    
+    // Try exec with 'where' command (Windows)
+    if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+        exec('where git 2>nul', $whereOutput, $whereReturnCode);
+        if ($whereReturnCode === 0 && !empty($whereOutput)) {
+            $foundPath = trim($whereOutput[0]);
+            if (file_exists($foundPath)) {
+                return $foundPath;
+            }
+        }
+    }
+    
+    // Last resort: try 'git' directly (might work if PATH is set correctly)
+    exec('git --version 2>&1', $versionOutput, $versionReturnCode);
+    if ($versionReturnCode === 0) {
+        return 'git'; // Return just 'git' if it works
+    }
+    
+    return null;
 }
 
