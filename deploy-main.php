@@ -25,9 +25,30 @@ $log->info("========================================");
 
 $errors = [];
 
-// Step 0: Pre-Deployment Validation
+// Step 0: Cleanup (optional, if enabled in config)
+if (($config['cleanup']['enabled'] ?? false)) {
+    $log->info("\n[0/5] Cleaning unnecessary files...");
+    try {
+        require_once __DIR__ . '/deploy-cleanup.php';
+        $cleanup = new DeploymentCleanup();
+        $cleanupResult = $cleanup->clean($config['cleanup'] ?? []);
+        if ($cleanupResult['files_removed'] > 0) {
+            $log->info("  ✓ Cleanup complete: " . $cleanupResult['files_removed'] . " file(s) removed, " . 
+                      round($cleanupResult['space_freed'] / 1024, 2) . " KB freed");
+        } else {
+            $log->info("  ✓ No files to clean");
+        }
+    } catch (Exception $e) {
+        $log->warning("Cleanup error: " . $e->getMessage());
+        $log->warning("Continuing deployment anyway...");
+    }
+} else {
+    $log->info("\n[0/5] Cleanup skipped (disabled in config)");
+}
+
+// Step 1: Pre-Deployment Validation
 if ($config['validation']['enabled'] ?? true) {
-    $log->info("\n[0/4] Pre-Deployment Validation...");
+    $log->info("\n[1/5] Pre-Deployment Validation...");
     try {
         require_once __DIR__ . '/deploy-validation.php';
         $validationResult = validateBeforeDeploy($config, $log);
@@ -46,12 +67,12 @@ if ($config['validation']['enabled'] ?? true) {
         $log->warning("Continuing deployment anyway...");
     }
 } else {
-    $log->info("\n[0/4] Pre-deployment validation skipped (disabled in config)");
+    $log->info("\n[1/5] Pre-deployment validation skipped (disabled in config)");
 }
 
-// Step 1: Git Push
+// Step 2: Git Push
 if ($config['git']['enabled'] ?? true) {
-    $log->info("\n[1/4] Pushing to GitHub...");
+    $log->info("\n[2/5] Pushing to GitHub...");
     try {
         require_once __DIR__ . '/deploy-git.php';
         $gitResult = deployGit($config, $log);
@@ -63,12 +84,12 @@ if ($config['git']['enabled'] ?? true) {
         $log->error("Git error: " . $e->getMessage());
     }
 } else {
-    $log->info("\n[1/4] Git push skipped (disabled in config)");
+    $log->info("\n[2/5] Git push skipped (disabled in config)");
 }
 
-// Step 2: FTP Upload (Smart)
+// Step 3: FTP Upload (Smart)
 if ($config['ftp']['enabled'] ?? true) {
-    $log->info("\n[2/4] Uploading via FTP (Smart Mode)...");
+    $log->info("\n[3/5] Uploading via FTP (Smart Mode)...");
     try {
         // Use smart FTP module (with change detection, conflict detection, backup)
         require_once __DIR__ . '/deploy-smart-ftp.php';
@@ -89,10 +110,10 @@ if ($config['ftp']['enabled'] ?? true) {
         $log->error("FTP error: " . $e->getMessage());
     }
 } else {
-    $log->info("\n[2/4] FTP upload skipped (disabled in config)");
+    $log->info("\n[3/5] FTP upload skipped (disabled in config)");
 }
 
-// Step 3: Database Operations (Optional)
+// Step 4: Database Operations (Optional)
 $dbOperation = null;
 if (($config['database_import']['enabled'] ?? false) && ($config['database_import']['auto_import'] ?? false)) {
     $dbOperation = 'import';
@@ -101,7 +122,7 @@ if (($config['database_import']['enabled'] ?? false) && ($config['database_impor
 }
 
 if ($dbOperation === 'import') {
-    $log->info("\n[3/4] Importing database directly...");
+    $log->info("\n[4/5] Importing database directly...");
     try {
         require_once __DIR__ . '/bootstrap/app.php';
         require_once __DIR__ . '/deploy-database-import.php';
@@ -116,7 +137,7 @@ if ($dbOperation === 'import') {
         $log->warning("  Continuing with deployment...");
     }
 } elseif ($dbOperation === 'upload') {
-    $log->info("\n[3/4] Uploading database to cPanel...");
+    $log->info("\n[4/5] Uploading database to cPanel...");
     try {
         require_once __DIR__ . '/bootstrap/app.php';
         require_once __DIR__ . '/deploy-database-upload.php';
@@ -131,11 +152,11 @@ if ($dbOperation === 'import') {
         $log->warning("  Continuing with deployment...");
     }
 } else {
-    $log->info("\n[3/4] Database operations skipped (disabled or not auto-enabled)");
+    $log->info("\n[4/5] Database operations skipped (disabled or not auto-enabled)");
 }
 
-// Step 4: Summary
-$log->info("\n[4/4] Finalizing...");
+// Step 5: Summary
+$log->info("\n[5/5] Finalizing...");
 $log->info("========================================");
 
 if (empty($errors)) {

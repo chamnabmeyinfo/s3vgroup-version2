@@ -39,7 +39,7 @@ if not exist "deploy-config.json" (
 echo Starting deployment...
 echo.
 
-REM Run PHP deployment script
+REM Run PHP deployment script (includes cleanup if enabled in config)
 php deploy-main.php
 
 if %errorlevel% equ 0 (
