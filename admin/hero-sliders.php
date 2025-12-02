@@ -49,7 +49,7 @@ $pageTitle = 'Hero Sliders';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="max-w-7xl mx-auto p-4 md:p-6">
+<div class="w-full p-4 md:p-6">
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -143,9 +143,15 @@ include __DIR__ . '/includes/header.php';
                                 <td class="px-4 py-3">
                                     <div class="flex items-center space-x-2">
                                         <a href="<?= url("admin/hero-slider-edit.php?id={$slider['id']}") ?>" 
-                                           class="text-blue-600 hover:text-blue-800 p-2 rounded hover:bg-blue-50 transition-all" 
+                                           class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" 
                                            title="Edit">
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit text-sm"></i>
+                                        </a>
+                                        <a href="<?= url("admin/hero-slider-duplicate.php?id={$slider['id']}") ?>" 
+                                           onclick="return confirm('Duplicate this slider?')" 
+                                           class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all" 
+                                           title="Duplicate">
+                                            <i class="fas fa-copy text-sm"></i>
                                         </a>
                                         <a href="?delete=<?= $slider['id'] ?>" 
                                            onclick="return confirm('Are you sure you want to delete this slider?')" 

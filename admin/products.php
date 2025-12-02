@@ -193,7 +193,7 @@ $sortOptions = [
 $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', 'actions'];
 ?>
 
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Header -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -301,59 +301,21 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                    <?php if (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left" data-column="checkbox">
+                    <th class="px-6 py-3 text-left" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                         <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
                     </th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('image', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="image">Image</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name">Name</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('sku', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sku">SKU</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('category', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="category">Category</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('price', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="price">Price</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('sale_price', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sale_price">Sale Price</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('stock', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="stock">Stock</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('views', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="views">Views</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('status', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="status">Status</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('featured', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="featured">Featured</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('created', $selectedColumns)): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="created">Created</th>
-                    <?php endif; ?>
-                    
-                    <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions">Actions</th>
-                    <?php endif; ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Image</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Name</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sku" style="display: <?= in_array('sku', $selectedColumns) ? '' : 'none' ?>;">SKU</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Category</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Price</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sale_price" style="display: <?= in_array('sale_price', $selectedColumns) ? '' : 'none' ?>;">Sale Price</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="stock" style="display: <?= in_array('stock', $selectedColumns) ? '' : 'none' ?>;">Stock</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="views" style="display: <?= in_array('views', $selectedColumns) ? '' : 'none' ?>;">Views</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="featured" style="display: <?= in_array('featured', $selectedColumns) ? '' : 'none' ?>;">Featured</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="created" style="display: <?= in_array('created', $selectedColumns) ? '' : 'none' ?>;">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Actions</th>
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -376,14 +338,10 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
                     <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-100">
-                        <?php if (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('image', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="image">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if (!empty($product['image'])): ?>
                                 <div class="relative group">
                                     <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
@@ -398,10 +356,7 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                                 </div>
                             <?php endif; ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4" data-column="name">
+                        <td class="px-6 py-4" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <div class="flex items-center gap-2">
                                 <div class="text-sm font-medium text-gray-900"><?= escape($product['name']) ?></div>
                                 <?php if (isset($variantCounts[$product['id']]) && $variantCounts[$product['id']] > 0): ?>
@@ -414,22 +369,13 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                                 <div class="text-xs text-gray-500 line-clamp-1"><?= escape(substr($product['short_description'], 0, 50)) ?>...</div>
                             <?php endif; ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('sku', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku" style="display: <?= in_array('sku', $selectedColumns) ? '' : 'none' ?>;">
                             <?= escape($product['sku'] ?? '-') ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('category', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="category">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?= escape($product['category_name'] ?? 'Uncategorized') ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('price', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-column="price">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
                                 <div class="text-blue-600 font-bold">$<?= number_format((float)$product['sale_price'], 2) ?></div>
                                 <?php if (!empty($product['price']) && $product['price'] > 0): ?>
@@ -441,16 +387,10 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                                 <span class="text-gray-400">-</span>
                             <?php endif; ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('sale_price', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price" style="display: <?= in_array('sale_price', $selectedColumns) ? '' : 'none' ?>;">
                             <?= (!empty($product['sale_price']) && $product['sale_price'] > 0) ? '$' . number_format((float)$product['sale_price'], 2) : '-' ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('stock', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock" style="display: <?= in_array('stock', $selectedColumns) ? '' : 'none' ?>;">
                             <span class="px-2 py-1 text-xs rounded <?= 
                                 $product['stock_status'] === 'in_stock' ? 'bg-green-100 text-green-800' : 
                                 ($product['stock_status'] === 'out_of_stock' ? 'bg-red-100 text-red-800' : 
@@ -459,40 +399,25 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                                 <?= ucwords(str_replace('_', ' ', $product['stock_status'])) ?>
                             </span>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('views', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views" style="display: <?= in_array('views', $selectedColumns) ? '' : 'none' ?>;">
                             <?= number_format($product['view_count'] ?? 0) ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('status', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="status">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <span class="px-2 py-1 text-xs rounded <?= $product['is_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
                                 <?= $product['is_active'] ? 'Active' : 'Inactive' ?>
                             </span>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('featured', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="featured">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="featured" style="display: <?= in_array('featured', $selectedColumns) ? '' : 'none' ?>;">
                             <?php if ($product['is_featured']): ?>
                                 <span class="text-yellow-500"><i class="fas fa-star"></i></span>
                             <?php else: ?>
                                 <span class="text-gray-300"><i class="far fa-star"></i></span>
                             <?php endif; ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('created', $selectedColumns)): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created" style="display: <?= in_array('created', $selectedColumns) ? '' : 'none' ?>;">
                             <?= date('M d, Y', strtotime($product['created_at'])) ?>
                         </td>
-                        <?php endif; ?>
-                        
-                        <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="actions">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <div class="flex items-center space-x-2">
                                 <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
@@ -514,7 +439,6 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                                 </a>
                             </div>
                         </td>
-                        <?php endif; ?>
                     </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>

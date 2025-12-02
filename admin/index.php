@@ -56,7 +56,7 @@ $pageTitle = 'Dashboard';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Welcome Header -->
     <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">

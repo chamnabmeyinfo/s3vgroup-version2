@@ -42,7 +42,7 @@ $pageTitle = 'Product Reviews';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Header -->
     <div class="bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex items-center justify-between">

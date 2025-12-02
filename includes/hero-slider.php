@@ -50,13 +50,51 @@ if (empty($sliders)) {
                 
                 $textAlign = $slider['text_alignment'] ?? 'center';
                 $textColor = $slider['text_color'] ?? '#ffffff';
+                
+                // Background options
+                $bgSize = $slider['background_size'] ?? 'cover';
+                $bgPosition = $slider['background_position'] ?? 'center';
+                $parallax = ($slider['parallax_effect'] ?? 0) ? 'true' : 'false';
+                
+                // Height options
+                $slideHeight = $slider['slide_height'] ?? 'auto';
+                $customHeight = $slider['custom_height'] ?? '';
+                $heightStyle = '';
+                if ($slideHeight === 'full') {
+                    $heightStyle = 'height: 100vh;';
+                } elseif ($slideHeight === 'custom' && !empty($customHeight)) {
+                    $heightStyle = 'height: ' . escape($customHeight) . ';';
+                }
+                
+                // Animation options
+                $contentAnimation = $slider['content_animation'] ?? 'fade';
+                $animationSpeed = $slider['animation_speed'] ?? 'normal';
+                
+                // Build background style
+                // Handle stretch and fill specially - they need 100% 100%
+                $bgSizeValue = $bgSize;
+                if ($bgSize === 'stretch' || $bgSize === 'fill') {
+                    $bgSizeValue = '100% 100%';
+                }
+                
+                $bgStyle = "background-image: url('" . escape($bgImage) . "'); ";
+                $bgStyle .= "background-size: " . escape($bgSizeValue) . " !important; ";
+                $bgStyle .= "background-position: " . escape($bgPosition) . " !important; ";
+                $bgStyle .= "background-repeat: no-repeat;";
+                
+                // Animation speed class (for child elements)
+                $speedClass = 'animation-speed-' . $animationSpeed;
             ?>
                 <div class="swiper-slide hero-slide" 
-                     style="background-image: url('<?= escape($bgImage) ?>');">
+                     style="<?= $bgStyle ?> <?= $heightStyle ?>"
+                     data-parallax="<?= $parallax ?>"
+                     data-slide-index="<?= $index ?>">
                     <style>
                         @media (max-width: 768px) {
-                            .hero-slide:nth-child(<?= $index + 1 ?>) {
+                            .hero-slide[data-slide-index="<?= $index ?>"] {
                                 background-image: url('<?= escape($bgImageMobile) ?>') !important;
+                                background-size: <?= escape($bgSizeValue) ?> !important;
+                                background-position: <?= escape($bgPosition) ?> !important;
                             }
                         }
                     </style>
@@ -64,29 +102,36 @@ if (empty($sliders)) {
                     <div class="container mx-auto px-4">
                         <div class="hero-slide-content max-w-4xl mx-auto py-20 md:py-32" 
                              style="text-align: <?= $textAlign ?>; color: <?= $textColor ?>;">
+                            <?php 
+                            // Animation classes based on content_animation setting
+                            $titleAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation : '';
+                            $subtitleAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-200' : '';
+                            $descAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-400' : '';
+                            $buttonAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-600' : '';
+                            ?>
                             <?php if (!empty($slider['title'])): ?>
-                                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 animate-fade-in-up" 
+                                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 <?= $titleAnimClass ?> <?= $speedClass ?>" 
                                     style="color: <?= $textColor ?>; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['title']) ?>
                                 </h1>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['subtitle'])): ?>
-                                <p class="text-lg sm:text-xl md:text-2xl mb-4 md:mb-6 animate-fade-in-up animation-delay-200" 
+                                <p class="text-lg sm:text-xl md:text-2xl mb-4 md:mb-6 <?= $subtitleAnimClass ?> <?= $speedClass ?>" 
                                    style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['subtitle']) ?>
                                 </p>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['description'])): ?>
-                                <p class="text-base sm:text-lg md:text-xl mb-6 md:mb-8 animate-fade-in-up animation-delay-400" 
+                                <p class="text-base sm:text-lg md:text-xl mb-6 md:mb-8 <?= $descAnimClass ?> <?= $speedClass ?>" 
                                    style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['description']) ?>
                                 </p>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['button_text_1']) || !empty($slider['button_text_2'])): ?>
-                                <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-<?= $textAlign === 'center' ? 'center' : ($textAlign === 'right' ? 'end' : 'start') ?> animate-fade-in-up animation-delay-600">
+                                <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-<?= $textAlign === 'center' ? 'center' : ($textAlign === 'right' ? 'end' : 'start') ?> <?= $buttonAnimClass ?> <?= $speedClass ?>">
                                     <?php if (!empty($slider['button_text_1'])): ?>
                                         <a href="<?= escape($slider['button_link_1'] ?? '#') ?>" 
                                            class="btn-primary inline-block transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
@@ -153,7 +198,57 @@ document.addEventListener('DOMContentLoaded', function() {
                 prevSlideMessage: 'Previous slide',
                 nextSlideMessage: 'Next slide',
             },
+            on: {
+                init: function() {
+                    // Trigger animations on initial load
+                    const activeSlide = this.slides[this.activeIndex];
+                    if (activeSlide) {
+                        const animatedElements = activeSlide.querySelectorAll('.animate-fade, .animate-slide-up, .animate-slide-down, .animate-zoom');
+                        animatedElements.forEach(function(el) {
+                            el.style.opacity = '0';
+                            setTimeout(function() {
+                                el.style.opacity = '1';
+                            }, 50);
+                        });
+                    }
+                },
+                slideChange: function() {
+                    // Trigger animations on slide change
+                    const activeSlide = this.slides[this.activeIndex];
+                    if (activeSlide) {
+                        const animatedElements = activeSlide.querySelectorAll('.animate-fade, .animate-slide-up, .animate-slide-down, .animate-zoom');
+                        animatedElements.forEach(function(el) {
+                            el.style.opacity = '0';
+                            setTimeout(function() {
+                                el.style.opacity = '1';
+                            }, 50);
+                        });
+                    }
+                }
+            }
         });
+        
+        // Parallax effect for slides with data-parallax="true"
+        const parallaxSlides = document.querySelectorAll('.hero-slide[data-parallax="true"]');
+        if (parallaxSlides.length > 0 && window.innerWidth > 768) {
+            let ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        const scrolled = window.pageYOffset;
+                        parallaxSlides.forEach(function(slide) {
+                            const rect = slide.getBoundingClientRect();
+                            if (rect.top < window.innerHeight && rect.bottom > 0) {
+                                const rate = scrolled * 0.3;
+                                slide.style.transform = 'translateY(' + rate + 'px)';
+                            }
+                        });
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            });
+        }
     }
 });
 </script>

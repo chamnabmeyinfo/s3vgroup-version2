@@ -36,6 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'overlay_gradient' => trim($_POST['overlay_gradient'] ?? ''),
             'text_alignment' => $_POST['text_alignment'] ?? 'center',
             'text_color' => trim($_POST['text_color'] ?? '#ffffff'),
+            'background_size' => $_POST['background_size'] ?? 'cover',
+            'background_position' => trim($_POST['background_position'] ?? 'center'),
+            'parallax_effect' => isset($_POST['parallax_effect']) ? 1 : 0,
+            'animation_speed' => $_POST['animation_speed'] ?? 'normal',
+            'slide_height' => $_POST['slide_height'] ?? 'auto',
+            'custom_height' => trim($_POST['custom_height'] ?? ''),
+            'content_animation' => $_POST['content_animation'] ?? 'fade',
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
@@ -369,7 +376,120 @@ include __DIR__ . '/includes/header.php';
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                 </div>
                 
+                <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-image text-blue-600 mr-2"></i>Background Image Options
+                    </h3>
+                </div>
+                
+                <div>
+                    <label for="background_size" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-expand-arrows-alt text-blue-600 mr-1"></i>Background Size
+                    </label>
+                    <select id="background_size" 
+                            name="background_size" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="cover" <?= ($slider['background_size'] ?? 'cover') === 'cover' ? 'selected' : '' ?>>Cover (Fill container, maintain aspect)</option>
+                        <option value="contain" <?= ($slider['background_size'] ?? '') === 'contain' ? 'selected' : '' ?>>Contain (Fit entire image)</option>
+                        <option value="fill" <?= ($slider['background_size'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fill, may distort)</option>
+                        <option value="stretch" <?= ($slider['background_size'] ?? '') === 'stretch' ? 'selected' : '' ?>>Stretch (100% width and height)</option>
+                        <option value="auto" <?= ($slider['background_size'] ?? '') === 'auto' ? 'selected' : '' ?>>Auto (Original size)</option>
+                    </select>
+                    <p class="text-xs text-gray-500 mt-1">How the background image should be sized</p>
+                </div>
+                
+                <div>
+                    <label for="background_position" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-crosshairs text-blue-600 mr-1"></i>Background Position
+                    </label>
+                    <select id="background_position" 
+                            name="background_position" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="center" <?= ($slider['background_position'] ?? 'center') === 'center' ? 'selected' : '' ?>>Center</option>
+                        <option value="top" <?= ($slider['background_position'] ?? '') === 'top' ? 'selected' : '' ?>>Top</option>
+                        <option value="bottom" <?= ($slider['background_position'] ?? '') === 'bottom' ? 'selected' : '' ?>>Bottom</option>
+                        <option value="left" <?= ($slider['background_position'] ?? '') === 'left' ? 'selected' : '' ?>>Left</option>
+                        <option value="right" <?= ($slider['background_position'] ?? '') === 'right' ? 'selected' : '' ?>>Right</option>
+                        <option value="top left" <?= ($slider['background_position'] ?? '') === 'top left' ? 'selected' : '' ?>>Top Left</option>
+                        <option value="top right" <?= ($slider['background_position'] ?? '') === 'top right' ? 'selected' : '' ?>>Top Right</option>
+                        <option value="bottom left" <?= ($slider['background_position'] ?? '') === 'bottom left' ? 'selected' : '' ?>>Bottom Left</option>
+                        <option value="bottom right" <?= ($slider['background_position'] ?? '') === 'bottom right' ? 'selected' : '' ?>>Bottom Right</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="slide_height" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-arrows-alt-v text-blue-600 mr-1"></i>Slide Height
+                    </label>
+                    <select id="slide_height" 
+                            name="slide_height" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="auto" <?= ($slider['slide_height'] ?? 'auto') === 'auto' ? 'selected' : '' ?>>Auto (Responsive)</option>
+                        <option value="full" <?= ($slider['slide_height'] ?? '') === 'full' ? 'selected' : '' ?>>Full Screen (100vh)</option>
+                        <option value="custom" <?= ($slider['slide_height'] ?? '') === 'custom' ? 'selected' : '' ?>>Custom</option>
+                    </select>
+                </div>
+                
+                <div id="custom_height_container" style="display: <?= ($slider['slide_height'] ?? 'auto') === 'custom' ? 'block' : 'none' ?>;">
+                    <label for="custom_height" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-ruler-vertical text-blue-600 mr-1"></i>Custom Height
+                    </label>
+                    <input type="text" 
+                           id="custom_height" 
+                           name="custom_height" 
+                           value="<?= escape($slider['custom_height'] ?? '') ?>" 
+                           placeholder="600px or 80vh"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <p class="text-xs text-gray-500 mt-1">Examples: 600px, 80vh, 50rem</p>
+                </div>
+                
+                <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-magic text-blue-600 mr-2"></i>Animation & Effects
+                    </h3>
+                </div>
+                
+                <div>
+                    <label for="content_animation" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-film text-blue-600 mr-1"></i>Content Animation
+                    </label>
+                    <select id="content_animation" 
+                            name="content_animation" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="none" <?= ($slider['content_animation'] ?? 'fade') === 'none' ? 'selected' : '' ?>>None</option>
+                        <option value="fade" <?= ($slider['content_animation'] ?? 'fade') === 'fade' ? 'selected' : '' ?>>Fade In</option>
+                        <option value="slide-up" <?= ($slider['content_animation'] ?? '') === 'slide-up' ? 'selected' : '' ?>>Slide Up</option>
+                        <option value="slide-down" <?= ($slider['content_animation'] ?? '') === 'slide-down' ? 'selected' : '' ?>>Slide Down</option>
+                        <option value="zoom" <?= ($slider['content_animation'] ?? '') === 'zoom' ? 'selected' : '' ?>>Zoom In</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="animation_speed" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-tachometer-alt text-blue-600 mr-1"></i>Animation Speed
+                    </label>
+                    <select id="animation_speed" 
+                            name="animation_speed" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="slow" <?= ($slider['animation_speed'] ?? 'normal') === 'slow' ? 'selected' : '' ?>>Slow</option>
+                        <option value="normal" <?= ($slider['animation_speed'] ?? 'normal') === 'normal' ? 'selected' : '' ?>>Normal</option>
+                        <option value="fast" <?= ($slider['animation_speed'] ?? '') === 'fast' ? 'selected' : '' ?>>Fast</option>
+                    </select>
+                </div>
+                
                 <div class="md:col-span-2">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="checkbox" 
+                               class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 
+                               id="parallax_effect" 
+                               name="parallax_effect" 
+                               <?= ($slider['parallax_effect'] ?? 0) ? 'checked' : '' ?>>
+                        <span class="ml-3 text-sm font-medium text-gray-700">Enable Parallax Effect</span>
+                    </label>
+                    <p class="text-xs text-gray-500 mt-1 ml-8">Creates a depth effect as user scrolls</p>
+                </div>
+                
+                <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
                     <label class="flex items-center cursor-pointer">
                         <input type="checkbox" 
                                class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500" 

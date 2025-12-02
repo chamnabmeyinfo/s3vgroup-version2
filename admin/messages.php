@@ -137,7 +137,7 @@ $sortOptions = [
 $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
 ?>
 
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Header -->
     <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl shadow-xl p-8 mb-6 text-white">
         <div class="flex items-center justify-between">

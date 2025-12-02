@@ -392,12 +392,10 @@ table tbody tr:nth-child(even) {
 .hero-slide {
     min-height: 500px;
     height: 70vh;
-    min-height: 500px;
     display: flex;
     align-items: center;
     position: relative;
-    background-size: cover;
-    background-position: center;
+    /* Background styles are set inline from database - don't override here */
     background-repeat: no-repeat;
 }
 
@@ -512,9 +510,86 @@ table tbody tr:nth-child(even) {
     }
 }
 
-.animate-fade-in-up {
-    animation: fade-in-up 0.8s ease-out forwards;
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slide-up {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slide-down {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes zoom-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Hero Slider Content Animations - Apply to any descendant */
+.hero-slide .animate-fade-in-up,
+.hero-slide-content .animate-fade-in-up,
+.hero-slide .animate-fade,
+.hero-slide-content .animate-fade,
+.hero-slide .animate-slide-up,
+.hero-slide-content .animate-slide-up,
+.hero-slide .animate-slide-down,
+.hero-slide-content .animate-slide-down,
+.hero-slide .animate-zoom,
+.hero-slide-content .animate-zoom {
     opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.hero-slide .animate-fade-in-up,
+.hero-slide-content .animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.hero-slide .animate-fade,
+.hero-slide-content .animate-fade {
+    animation: fade-in 0.8s ease-out forwards;
+}
+
+.hero-slide .animate-slide-up,
+.hero-slide-content .animate-slide-up {
+    animation: slide-up 0.8s ease-out forwards;
+}
+
+.hero-slide .animate-slide-down,
+.hero-slide-content .animate-slide-down {
+    animation: slide-down 0.8s ease-out forwards;
+}
+
+.hero-slide .animate-zoom,
+.hero-slide-content .animate-zoom {
+    animation: zoom-in 0.8s ease-out forwards;
+}
+
+.animation-delay-0 {
+    animation-delay: 0s;
 }
 
 .animation-delay-200 {
@@ -527,6 +602,46 @@ table tbody tr:nth-child(even) {
 
 .animation-delay-600 {
     animation-delay: 0.6s;
+}
+
+/* Animation Speed - Applied to animated elements */
+.hero-slide .animation-speed-slow,
+.hero-slide-content .animation-speed-slow {
+    animation-duration: 1.2s !important;
+}
+
+.hero-slide .animation-speed-normal,
+.hero-slide-content .animation-speed-normal {
+    animation-duration: 0.8s !important;
+}
+
+.hero-slide .animation-speed-fast,
+.hero-slide-content .animation-speed-fast {
+    animation-duration: 0.4s !important;
+}
+
+/* Parallax Effect */
+.hero-slide[data-parallax="true"] {
+    background-attachment: fixed;
+    will-change: transform;
+}
+
+@media (max-width: 768px) {
+    .hero-slide[data-parallax="true"] {
+        background-attachment: scroll;
+        transform: none !important;
+    }
+}
+
+/* Fix for height options */
+.hero-slide[style*="height: 100vh"] {
+    min-height: 100vh !important;
+    height: 100vh !important;
+}
+
+/* Ensure stretch/fill work correctly */
+.hero-slide[style*="background-size: 100% 100%"] {
+    background-size: 100% 100% !important;
 }
 
 /* Swiper Customization - Modern & Responsive */

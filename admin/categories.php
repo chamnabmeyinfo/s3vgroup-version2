@@ -118,7 +118,7 @@ $sortOptions = [
 $defaultColumns = ['name', 'slug', 'status', 'actions'];
 ?>
 
-<div class="max-w-7xl mx-auto">
+<div class="w-full">
     <!-- Header -->
     <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -270,6 +270,11 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                                 <a href="<?= url('admin/category-edit.php?id=' . $category['id']) ?>" 
                                    class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
                                     <i class="fas fa-edit text-sm"></i>
+                                </a>
+                                <a href="<?= url('admin/category-duplicate.php?id=' . $category['id']) ?>" 
+                                   onclick="return confirm('Duplicate this category?')" 
+                                   class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all" title="Duplicate">
+                                    <i class="fas fa-copy text-sm"></i>
                                 </a>
                                 <a href="?delete=<?= $category['id'] ?>" 
                                    onclick="return confirm('Are you sure you want to delete this category?')" 
