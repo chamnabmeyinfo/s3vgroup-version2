@@ -97,42 +97,118 @@ function getFilesToUpload($config, $log) {
     $files = [];
     $uploadConfig = $config['upload'] ?? [];
     
-    // Get ignored files from .gitignore
-    $ignoredFiles = getIgnoredFiles();
+    // Load exclude patterns from both config and deployment-exclude.txt
+    $excludePatterns = $config['exclude'] ?? [];
     
-    // Filter by category
-    foreach ($ignoredFiles as $file) {
-        $shouldUpload = false;
-        $category = getFileCategory($file);
-        
-        // Check upload rules
-        if ($category === 'image' && ($uploadConfig['images'] ?? true)) {
-            $shouldUpload = true;
-        } elseif ($category === 'config' && ($uploadConfig['configs'] ?? false)) {
-            $shouldUpload = true;
-        } elseif ($category === 'other' && ($uploadConfig['others'] ?? false)) {
-            $shouldUpload = true;
+    // Add standard excludes (always exclude these)
+    $standardExcludes = [
+        '.git',
+        '.gitignore',
+        'node_modules',
+        'vendor',
+        'composer.lock',
+        'package-lock.json',
+        'yarn.lock',
+        '.DS_Store',
+        'Thumbs.db',
+        '*.swp',
+        '*.swo',
+        '*~',
+        'deploy-log.txt',
+        'deploy-config.json', // Don't upload config with sensitive data
+        'storage/backups',
+        'storage/logs',
+        'storage/cache',
+    ];
+    
+    $excludePatterns = array_merge($excludePatterns, $standardExcludes);
+    
+    // Also read from deployment-exclude.txt if it exists
+    $excludeFile = __DIR__ . '/deployment-exclude.txt';
+    if (file_exists($excludeFile)) {
+        $excludeLines = file($excludeFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($excludeLines as $line) {
+            $line = trim($line);
+            if (!empty($line) && !in_array($line, $excludePatterns)) {
+                $excludePatterns[] = $line;
+            }
+        }
+    }
+    
+    $baseDir = __DIR__ . DIRECTORY_SEPARATOR;
+    $baseDirLength = strlen($baseDir);
+    
+    // Recursively scan ALL files in the project directory
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($baseDir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+    
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
         }
         
-        if ($shouldUpload) {
-            // Check exclude patterns
-            $excludePatterns = $config['exclude'] ?? [];
-            $excluded = false;
+        $filePath = $file->getPathname();
+        $relativePath = str_replace('\\', '/', substr($filePath, $baseDirLength));
+        
+        // Skip if file doesn't exist (shouldn't happen, but safety check)
+        if (!file_exists($filePath)) {
+            continue;
+        }
+        
+        // Check exclude patterns
+        $excluded = false;
+        $fileNormalized = str_replace('\\', '/', $relativePath);
+        
+        foreach ($excludePatterns as $pattern) {
+            $patternNormalized = str_replace('\\', '/', $pattern);
             
-            foreach ($excludePatterns as $pattern) {
-                if (fnmatch($pattern, $file)) {
+            // Check if pattern matches the file path
+            if (fnmatch($patternNormalized, $fileNormalized) || 
+                fnmatch($pattern, $relativePath) || 
+                fnmatch(str_replace('/', '\\', $pattern), $relativePath) ||
+                strpos($fileNormalized, $patternNormalized) !== false) {
+                $excluded = true;
+                break;
+            }
+            
+            // Also check if it's a directory pattern and file is inside that directory
+            if (strpos($patternNormalized, '/') !== false || strpos($patternNormalized, '\\') !== false) {
+                $patternDir = dirname($patternNormalized);
+                if ($patternDir !== '.' && strpos($fileNormalized, $patternDir) === 0) {
                     $excluded = true;
                     break;
                 }
             }
-            
-            if (!$excluded && file_exists($file)) {
-                $files[] = [
-                    'local' => $file,
-                    'remote' => $file,
-                    'permissions' => getFilePermissions($file)
-                ];
-            }
+        }
+        
+        // Skip excluded files
+        if ($excluded) {
+            continue;
+        }
+        
+        // Check upload rules based on file category
+        $category = getFileCategory($relativePath);
+        $shouldUpload = false;
+        
+        if ($category === 'image' && ($uploadConfig['images'] ?? true)) {
+            $shouldUpload = true;
+        } elseif ($category === 'config' && ($uploadConfig['configs'] ?? false)) {
+            $shouldUpload = true;
+        } elseif ($category === 'other' && ($uploadConfig['others'] ?? true)) { // Changed default to true
+            $shouldUpload = true;
+        } elseif ($category === 'code') {
+            // Always upload code files (PHP, JS, CSS, etc.)
+            $shouldUpload = true;
+        }
+        
+        if ($shouldUpload) {
+            $files[] = [
+                'local' => $filePath,
+                'remote' => $relativePath,
+                'permissions' => getFilePermissions($filePath)
+            ];
         }
     }
     
@@ -199,13 +275,27 @@ function getIgnoredFiles() {
 }
 
 function getFileCategory($file) {
-    if (strpos($file, 'storage/uploads/') !== false) {
+    // Check file extension for images
+    $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'ico', 'bmp'];
+    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    
+    if (in_array($extension, $imageExtensions)) {
         return 'image';
-    } elseif (strpos($file, 'config/') !== false) {
-        return 'config';
-    } else {
-        return 'other';
     }
+    
+    // Check for config files
+    if (strpos($file, 'config/') !== false) {
+        return 'config';
+    }
+    
+    // Check for code files
+    $codeExtensions = ['php', 'js', 'css', 'html', 'htm', 'json', 'xml', 'sql', 'md', 'txt'];
+    if (in_array($extension, $codeExtensions)) {
+        return 'code';
+    }
+    
+    // Everything else
+    return 'other';
 }
 
 function getFilePermissions($file) {

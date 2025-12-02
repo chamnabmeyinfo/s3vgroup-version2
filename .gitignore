@@ -18,22 +18,9 @@ deploy-config.json
 !deploy-config.example.json
 
 # Storage & Uploads (user-generated content)
-# Exclude everything in uploads, but allow image files for deployment
+# Images and assets are excluded from Git (uploaded via FTP for faster deployment)
 storage/uploads/*
 !storage/uploads/.gitkeep
-# Allow image files (for product images and assets)
-!storage/uploads/**/*.jpg
-!storage/uploads/**/*.jpeg
-!storage/uploads/**/*.png
-!storage/uploads/**/*.gif
-!storage/uploads/**/*.webp
-!storage/uploads/**/*.svg
-!storage/uploads/*.jpg
-!storage/uploads/*.jpeg
-!storage/uploads/*.png
-!storage/uploads/*.gif
-!storage/uploads/*.webp
-!storage/uploads/*.svg
 storage/cache/*
 !storage/cache/.gitkeep
 storage/logs/*
