@@ -419,12 +419,85 @@ table tbody tr:nth-child(even) {
     position: absolute;
     inset: 0;
     z-index: 1;
+    /* Ensure overlay is dark enough for text contrast */
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)) !important;
+}
+
+/* Additional darker overlay for better text contrast */
+.hero-slide-overlay::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1;
 }
 
 .hero-slide-content {
     position: relative;
     z-index: 2;
     width: 100%;
+}
+
+/* Text background boxes for better readability */
+.hero-slide-content h1,
+.hero-slide-content h2,
+.hero-slide-content h3 {
+    /* Strong text shadow for maximum visibility */
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.9),
+        0 0 10px rgba(0, 0, 0, 0.7),
+        0 0 20px rgba(0, 0, 0, 0.5),
+        -1px -1px 0 rgba(0, 0, 0, 0.8),
+        1px 1px 0 rgba(0, 0, 0, 0.8),
+        0 0 30px rgba(0, 0, 0, 0.4);
+    /* Add semi-transparent background for extra contrast */
+    background: rgba(0, 0, 0, 0.5);
+    padding: 1rem 2rem;
+    border-radius: 0.75rem;
+    display: inline-block;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    line-height: 1.2;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+.hero-slide-content p {
+    /* Strong text shadow for maximum visibility */
+    text-shadow: 
+        1px 1px 3px rgba(0, 0, 0, 0.9),
+        0 0 8px rgba(0, 0, 0, 0.7),
+        0 0 15px rgba(0, 0, 0, 0.5),
+        -1px -1px 0 rgba(0, 0, 0, 0.7),
+        1px 1px 0 rgba(0, 0, 0, 0.7),
+        0 0 20px rgba(0, 0, 0, 0.3);
+    /* Add semi-transparent background for extra contrast */
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    margin-bottom: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 2px 4px rgba(0, 0, 0, 0.3),
+        0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Ensure buttons stand out */
+.hero-slide-content .btn-primary,
+.hero-slide-content .btn-secondary,
+.hero-slide-content .btn-white {
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        0 4px 6px rgba(0, 0, 0, 0.3),
+        0 0 20px rgba(0, 0, 0, 0.2);
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
 /* Animation Classes */

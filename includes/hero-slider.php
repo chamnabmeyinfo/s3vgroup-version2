@@ -66,21 +66,21 @@ if (empty($sliders)) {
                              style="text-align: <?= $textAlign ?>; color: <?= $textColor ?>;">
                             <?php if (!empty($slider['title'])): ?>
                                 <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 animate-fade-in-up" 
-                                    style="color: <?= $textColor ?>;">
+                                    style="color: <?= $textColor ?>; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['title']) ?>
                                 </h1>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['subtitle'])): ?>
                                 <p class="text-lg sm:text-xl md:text-2xl mb-4 md:mb-6 animate-fade-in-up animation-delay-200" 
-                                   style="color: <?= $textColor ?>; opacity: 0.95;">
+                                   style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['subtitle']) ?>
                                 </p>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['description'])): ?>
                                 <p class="text-base sm:text-lg md:text-xl mb-6 md:mb-8 animate-fade-in-up animation-delay-400" 
-                                   style="color: <?= $textColor ?>; opacity: 0.9;">
+                                   style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
                                     <?= escape($slider['description']) ?>
                                 </p>
                             <?php endif; ?>
