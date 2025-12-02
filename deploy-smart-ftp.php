@@ -346,6 +346,20 @@ function getIgnoredFiles() {
             if ($file->isFile()) {
                 $relativePath = str_replace($baseDir, '', $file->getPathname());
                 $relativePath = str_replace('\\', '/', $relativePath);
+                
+                // Skip image files (they should be deployed)
+                $extension = strtolower(pathinfo($file->getFilename(), PATHINFO_EXTENSION));
+                $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                if (in_array($extension, $imageExtensions)) {
+                    continue;
+                }
+                
+                // Skip .gitkeep files
+                if (basename($relativePath) === '.gitkeep') {
+                    continue;
+                }
+                
+                // Only add non-image files that aren't already in the list
                 if (!in_array($relativePath, $files)) {
                     $files[] = $relativePath;
                 }
