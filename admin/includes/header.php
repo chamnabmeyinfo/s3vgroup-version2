@@ -112,6 +112,9 @@
                 <a href="<?= url('admin/tools.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-tools mr-2"></i> Optional Tools
                 </a>
+                <a href="<?= url('admin/database-upload.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-cloud-upload-alt mr-2"></i> Database Upload
+                </a>
                 <a href="<?= url('admin/settings.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-cog mr-2"></i> Settings
                 </a>

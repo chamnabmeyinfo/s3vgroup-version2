@@ -92,8 +92,50 @@ if ($config['ftp']['enabled'] ?? true) {
     $log->info("\n[2/4] FTP upload skipped (disabled in config)");
 }
 
-// Step 3: Summary
-$log->info("\n[3/4] Finalizing...");
+// Step 3: Database Operations (Optional)
+$dbOperation = null;
+if (($config['database_import']['enabled'] ?? false) && ($config['database_import']['auto_import'] ?? false)) {
+    $dbOperation = 'import';
+} elseif (($config['database_upload']['enabled'] ?? false) && ($config['database_upload']['auto_upload'] ?? false)) {
+    $dbOperation = 'upload';
+}
+
+if ($dbOperation === 'import') {
+    $log->info("\n[3/4] Importing database directly...");
+    try {
+        require_once __DIR__ . '/bootstrap/app.php';
+        require_once __DIR__ . '/deploy-database-import.php';
+        $importResult = importDatabaseToCPanel($config, $log);
+        if ($importResult['success']) {
+            $log->info("  ✓ Database import completed");
+        } else {
+            $log->warning("  ⚠️  Database import failed: " . $importResult['message']);
+        }
+    } catch (Exception $e) {
+        $log->warning("  ⚠️  Database import error: " . $e->getMessage());
+        $log->warning("  Continuing with deployment...");
+    }
+} elseif ($dbOperation === 'upload') {
+    $log->info("\n[3/4] Uploading database to cPanel...");
+    try {
+        require_once __DIR__ . '/bootstrap/app.php';
+        require_once __DIR__ . '/deploy-database-upload.php';
+        $uploadResult = uploadDatabaseToCPanel($config, $log);
+        if ($uploadResult['success']) {
+            $log->info("  ✓ Database upload completed");
+        } else {
+            $log->warning("  ⚠️  Database upload failed: " . $uploadResult['message']);
+        }
+    } catch (Exception $e) {
+        $log->warning("  ⚠️  Database upload error: " . $e->getMessage());
+        $log->warning("  Continuing with deployment...");
+    }
+} else {
+    $log->info("\n[3/4] Database operations skipped (disabled or not auto-enabled)");
+}
+
+// Step 4: Summary
+$log->info("\n[4/4] Finalizing...");
 $log->info("========================================");
 
 if (empty($errors)) {
