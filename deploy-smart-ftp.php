@@ -251,6 +251,21 @@ function getFilesToUpload($config, $log) {
     $files = [];
     $uploadConfig = $config['upload'] ?? [];
     
+    // Load exclude patterns from both config and deployment-exclude.txt
+    $excludePatterns = $config['exclude'] ?? [];
+    
+    // Also read from deployment-exclude.txt if it exists
+    $excludeFile = __DIR__ . '/deployment-exclude.txt';
+    if (file_exists($excludeFile)) {
+        $excludeLines = file($excludeFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        foreach ($excludeLines as $line) {
+            $line = trim($line);
+            if (!empty($line) && !in_array($line, $excludePatterns)) {
+                $excludePatterns[] = $line;
+            }
+        }
+    }
+    
     // Get ignored files from .gitignore
     $ignoredFiles = getIgnoredFiles();
     
@@ -269,12 +284,16 @@ function getFilesToUpload($config, $log) {
         }
         
         if ($shouldUpload) {
-            // Check exclude patterns
-            $excludePatterns = $config['exclude'] ?? [];
+            // Check exclude patterns (normalize path separators for comparison)
+            $fileNormalized = str_replace('\\', '/', $file);
             $excluded = false;
             
             foreach ($excludePatterns as $pattern) {
-                if (fnmatch($pattern, $file)) {
+                $patternNormalized = str_replace('\\', '/', $pattern);
+                // Try both forward and backward slashes
+                if (fnmatch($patternNormalized, $fileNormalized) || 
+                    fnmatch($pattern, $file) || 
+                    fnmatch(str_replace('/', '\\', $pattern), $file)) {
                     $excluded = true;
                     break;
                 }

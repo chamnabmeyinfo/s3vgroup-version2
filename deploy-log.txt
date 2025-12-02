@@ -145,3 +145,192 @@ Validation passed with warnings. Continuing deployment...
 [2025-12-02 10:33:55] [INFO]   Checking for changes...
 [2025-12-02 10:33:55] [INFO]   Found 1 changed file(s)
 [2025-12-02 10:33:55] [INFO]   Adding files...
+[2025-12-02 10:33:55] [INFO]   ✓ Files added
+[2025-12-02 10:33:55] [INFO]   Committing changes...
+[2025-12-02 10:33:56] [INFO]   ✓ Committed
+[2025-12-02 10:33:56] [INFO]   Pushing to GitHub...
+[2025-12-02 10:34:04] [INFO]   ✓ Pushed to origin/main
+[2025-12-02 10:34:04] [INFO] 
+[2/4] Uploading via FTP (Smart Mode)...
+[2025-12-02 10:34:04] [INFO]   Connecting to FTP server...
+[2025-12-02 10:34:04] [INFO]   ✓ Connected
+[2025-12-02 10:34:05] [INFO]   Found 372 file(s) to check
+[2025-12-02 10:34:05] [INFO]   Analyzing files (change detection)...
+[2025-12-02 10:34:44] [INFO]   Analysis complete:
+[2025-12-02 10:34:44] [INFO]     - New/changed: 1
+[2025-12-02 10:34:44] [INFO]     - Unchanged (skipped): 344
+[2025-12-02 10:34:44] [INFO]     - Conflicts: 27
+[2025-12-02 10:34:44] [WARNING]   ⚠️  Conflicts detected!
+[2025-12-02 10:34:44] [WARNING]     - config/app.php
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-11-30 17:38:36 (750 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:09 (750 bytes)
+[2025-12-02 10:34:44] [WARNING]     - config/under-construction.php
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:57:28 (197 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:05 (197 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575052_9103.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:15 (78839 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:08 (78839 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575055_9140_1.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:18 (93141 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:11 (93141 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575058_6522_2.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:21 (83928 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:13 (83928 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575061_1716_3.png
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:22 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:15 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575062_8605.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:25 (131070 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:18 (131070 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575065_6967_1.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:27 (85219 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:21 (85219 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575067_8083_2.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:31 (137891 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:24 (137891 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575071_8138_3.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:33 (139349 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:27 (139349 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575073_1436_4.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:36 (138107 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:30 (138107 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575076_5998.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:38 (80087 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:32 (80087 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575078_3668_1.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:41 (85133 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:35 (85133 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575081_3813_2.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:43 (72677 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:38 (72677 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575083_3785_3.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:45 (67908 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:40 (67908 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575085_3011_4.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:48 (76042 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:43 (76042 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575088_7866.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:52 (283927 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:46 (283927 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575092_2462_1.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:55 (297103 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:49 (297103 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575095_4645_2.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:58 (305455 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:53 (305455 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575098_1956_3.png
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:44:59 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:55 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575099_6836.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:45:02 (254150 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:05:58 (254150 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575102_5561_1.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:45:05 (311033 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:02 (311033 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575105_7999_2.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:45:08 (276987 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:05 (276987 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/unforklift_1764575108_6324_3.png
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-12-01 08:45:09 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:07 (5852 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-11-29 22:47:55 (27227 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:11 (27227 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/yale-msw025-stacker.jpg
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-11-29 22:48:23 (24242 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:13 (24242 bytes)
+[2025-12-02 10:34:44] [WARNING]     - storage/uploads/.gitkeep
+[2025-12-02 10:34:44] [WARNING]       Local: 2025-11-30 09:37:00 (93 bytes)
+[2025-12-02 10:34:44] [WARNING]       Remote: 2025-12-01 09:06:15 (93 bytes)
+[2025-12-02 10:34:44] [INFO]   Creating backups for conflicted files...
+[2025-12-02 10:34:45] [INFO]     ✓ Backed up: config/app.php
+[2025-12-02 10:34:46] [INFO]     ✓ Backed up: config/under-construction.php
+[2025-12-02 10:34:46] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575052_9103.jpg
+[2025-12-02 10:34:47] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575055_9140_1.jpg
+[2025-12-02 10:34:48] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575058_6522_2.jpg
+[2025-12-02 10:34:49] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575061_1716_3.png
+[2025-12-02 10:34:50] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575062_8605.jpg
+[2025-12-02 10:34:51] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575065_6967_1.jpg
+[2025-12-02 10:34:52] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575067_8083_2.jpg
+[2025-12-02 10:34:52] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575071_8138_3.jpg
+[2025-12-02 10:34:53] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575073_1436_4.jpg
+[2025-12-02 10:34:54] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575076_5998.jpg
+[2025-12-02 10:34:55] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575078_3668_1.jpg
+[2025-12-02 10:34:56] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575081_3813_2.jpg
+[2025-12-02 10:34:57] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575083_3785_3.jpg
+[2025-12-02 10:34:58] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575085_3011_4.jpg
+[2025-12-02 10:34:59] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575088_7866.jpg
+[2025-12-02 10:35:00] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575092_2462_1.jpg
+[2025-12-02 10:35:01] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575095_4645_2.jpg
+[2025-12-02 10:35:02] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575098_1956_3.png
+[2025-12-02 10:35:03] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575099_6836.jpg
+[2025-12-02 10:35:04] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575102_5561_1.jpg
+[2025-12-02 10:35:05] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575105_7999_2.jpg
+[2025-12-02 10:35:06] [INFO]     ✓ Backed up: storage/uploads/unforklift_1764575108_6324_3.png
+[2025-12-02 10:35:07] [INFO]     ✓ Backed up: storage/uploads/yale-erp25vt-electric-forklift.jpg
+[2025-12-02 10:35:07] [INFO]     ✓ Backed up: storage/uploads/yale-msw025-stacker.jpg
+[2025-12-02 10:35:08] [INFO]     ✓ Backed up: storage/uploads/.gitkeep
+[2025-12-02 10:35:08] [INFO]   Uploading 28 file(s)...
+[2025-12-02 10:35:08] [INFO]   [4%] Uploading: config/database.php (changed (size))...
+[2025-12-02 10:35:09] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:09] [INFO]   [7%] Uploading: config/app.php (conflict (backed up))...
+[2025-12-02 10:35:09] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:09] [INFO]   [11%] Uploading: config/under-construction.php (conflict (backed up))...
+[2025-12-02 10:35:09] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:09] [INFO]   [14%] Uploading: storage/uploads/unforklift_1764575052_9103.jpg (conflict (backed up))...
+[2025-12-02 10:35:10] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:10] [INFO]   [18%] Uploading: storage/uploads/unforklift_1764575055_9140_1.jpg (conflict (backed up))...
+[2025-12-02 10:35:10] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:11] [INFO]   [21%] Uploading: storage/uploads/unforklift_1764575058_6522_2.jpg (conflict (backed up))...
+[2025-12-02 10:35:11] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:11] [INFO]   [25%] Uploading: storage/uploads/unforklift_1764575061_1716_3.png (conflict (backed up))...
+[2025-12-02 10:35:11] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:12] [INFO]   [29%] Uploading: storage/uploads/unforklift_1764575062_8605.jpg (conflict (backed up))...
+[2025-12-02 10:35:12] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:12] [INFO]   [32%] Uploading: storage/uploads/unforklift_1764575065_6967_1.jpg (conflict (backed up))...
+[2025-12-02 10:35:13] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:13] [INFO]   [36%] Uploading: storage/uploads/unforklift_1764575067_8083_2.jpg (conflict (backed up))...
+[2025-12-02 10:35:13] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:13] [INFO]   [39%] Uploading: storage/uploads/unforklift_1764575071_8138_3.jpg (conflict (backed up))...
+[2025-12-02 10:35:14] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:14] [INFO]   [43%] Uploading: storage/uploads/unforklift_1764575073_1436_4.jpg (conflict (backed up))...
+[2025-12-02 10:35:14] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:15] [INFO]   [46%] Uploading: storage/uploads/unforklift_1764575076_5998.jpg (conflict (backed up))...
+[2025-12-02 10:35:15] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:15] [INFO]   [50%] Uploading: storage/uploads/unforklift_1764575078_3668_1.jpg (conflict (backed up))...
+[2025-12-02 10:35:16] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:16] [INFO]   [54%] Uploading: storage/uploads/unforklift_1764575081_3813_2.jpg (conflict (backed up))...
+[2025-12-02 10:35:16] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:16] [INFO]   [57%] Uploading: storage/uploads/unforklift_1764575083_3785_3.jpg (conflict (backed up))...
+[2025-12-02 10:35:17] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:17] [INFO]   [61%] Uploading: storage/uploads/unforklift_1764575085_3011_4.jpg (conflict (backed up))...
+[2025-12-02 10:35:17] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:17] [INFO]   [64%] Uploading: storage/uploads/unforklift_1764575088_7866.jpg (conflict (backed up))...
+[2025-12-02 10:35:18] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:18] [INFO]   [68%] Uploading: storage/uploads/unforklift_1764575092_2462_1.jpg (conflict (backed up))...
+[2025-12-02 10:35:19] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:19] [INFO]   [71%] Uploading: storage/uploads/unforklift_1764575095_4645_2.jpg (conflict (backed up))...
+[2025-12-02 10:35:19] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:19] [INFO]   [75%] Uploading: storage/uploads/unforklift_1764575098_1956_3.png (conflict (backed up))...
+[2025-12-02 10:35:20] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:20] [INFO]   [79%] Uploading: storage/uploads/unforklift_1764575099_6836.jpg (conflict (backed up))...
+[2025-12-02 10:35:20] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:21] [INFO]   [82%] Uploading: storage/uploads/unforklift_1764575102_5561_1.jpg (conflict (backed up))...
+[2025-12-02 10:35:21] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:21] [INFO]   [86%] Uploading: storage/uploads/unforklift_1764575105_7999_2.jpg (conflict (backed up))...
+[2025-12-02 10:35:22] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:22] [INFO]   [89%] Uploading: storage/uploads/unforklift_1764575108_6324_3.png (conflict (backed up))...
+[2025-12-02 10:35:22] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:23] [INFO]   [93%] Uploading: storage/uploads/yale-erp25vt-electric-forklift.jpg (conflict (backed up))...
+[2025-12-02 10:35:23] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:23] [INFO]   [96%] Uploading: storage/uploads/yale-msw025-stacker.jpg (conflict (backed up))...
+[2025-12-02 10:35:23] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:24] [INFO]   [100%] Uploading: storage/uploads/.gitkeep (conflict (backed up))...
+[2025-12-02 10:35:24] [INFO]     ✓ Uploaded
+[2025-12-02 10:35:24] [INFO]   💡 Smart: Skipped 344 unchanged file(s)
+[2025-12-02 10:35:24] [INFO]   💡 Smart: Handled 27 conflict(s)
+[2025-12-02 10:35:24] [INFO] 
+[3/4] Finalizing...
+[2025-12-02 10:35:24] [INFO] ========================================
+[2025-12-02 10:35:24] [INFO] Deployment Complete!
+[2025-12-02 10:35:24] [INFO] ========================================
