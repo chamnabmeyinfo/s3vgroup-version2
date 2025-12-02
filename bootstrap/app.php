@@ -3,8 +3,9 @@
 // Start session
 // Note: Session name should be set BEFORE this file is included if you want a custom name
 // Developer pages set session_name('developer_session') before including this file
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+// Skip session start if headers already sent (e.g., during deployment)
+if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    @session_start();
 }
 
 // Load helper functions
