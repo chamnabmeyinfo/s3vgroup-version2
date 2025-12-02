@@ -133,10 +133,50 @@ function addToCompare(productId) {
                 btn.classList.add('bg-blue-500', 'text-white');
                 btn.classList.remove('border-blue-300', 'text-blue-600');
             }
+            // Update compare count in header
+            updateCompareCount();
         } else {
             showNotification(data.message || 'Error adding to comparison', 'error');
         }
+    })
+    .catch(error => {
+        console.error('Error adding to compare:', error);
+        showNotification('Error adding to comparison', 'error');
     });
+}
+
+function updateCompareCount() {
+    const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
+    fetch(`${compareUrl}?action=get`)
+        .then(response => response.json())
+        .then(data => {
+            const count = Array.isArray(data.compare) ? data.compare.length : 0;
+            
+            // Update desktop compare count
+            const countEl = document.getElementById('compare-count');
+            if (countEl) {
+                if (count > 0) {
+                    countEl.textContent = count;
+                    countEl.classList.remove('hidden');
+                } else {
+                    countEl.classList.add('hidden');
+                }
+            }
+            
+            // Update mobile compare count
+            const countElMobile = document.getElementById('compare-count-mobile');
+            if (countElMobile) {
+                if (count > 0) {
+                    countElMobile.textContent = count;
+                    countElMobile.classList.remove('hidden');
+                } else {
+                    countElMobile.classList.add('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating compare count:', error);
+        });
 }
 
 function updateWishlistCount() {
@@ -159,5 +199,10 @@ function updateWishlistCount() {
 // Initialize wishlist count on page load
 if (typeof updateWishlistCount === 'function') {
     document.addEventListener('DOMContentLoaded', updateWishlistCount);
+}
+
+// Initialize compare count on page load
+if (typeof updateCompareCount === 'function') {
+    document.addEventListener('DOMContentLoaded', updateCompareCount);
 }
 

@@ -41,6 +41,10 @@ switch ($action) {
         echo json_encode(['success' => true]);
         break;
         
+    case 'get':
+        echo json_encode(['compare' => $_SESSION['compare'] ?? []]);
+        break;
+        
     default:
         echo json_encode(['compare' => $_SESSION['compare'] ?? []]);
 }

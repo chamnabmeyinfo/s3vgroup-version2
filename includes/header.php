@@ -77,6 +77,7 @@ $navCategories = $categoryModel->getAll(true);
                     
                     <a href="<?= url('compare.php') ?>" class="nav-link-modern px-4 py-2 rounded-lg transition-all relative">
                         <i class="fas fa-balance-scale mr-2"></i>Compare
+                        <span id="compare-count" class="hidden absolute -top-1 -right-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center animate-pulse">0</span>
                     </a>
                     
                     <a href="<?= url('wishlist.php') ?>" class="nav-link-modern px-4 py-2 rounded-lg transition-all relative">
@@ -172,8 +173,9 @@ $navCategories = $categoryModel->getAll(true);
                     </div>
                 </div>
                 
-                <a href="<?= url('compare.php') ?>" class="mobile-menu-item block px-4 py-3 rounded-lg hover:bg-blue-50 transition-all">
+                <a href="<?= url('compare.php') ?>" class="mobile-menu-item block px-4 py-3 rounded-lg hover:bg-blue-50 transition-all relative">
                     <i class="fas fa-balance-scale mr-3 text-blue-600"></i>Compare
+                    <span id="compare-count-mobile" class="hidden absolute top-2 right-4 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">0</span>
                 </a>
                 <a href="<?= url('wishlist.php') ?>" class="mobile-menu-item block px-4 py-3 rounded-lg hover:bg-blue-50 transition-all">
                     <i class="fas fa-heart mr-3 text-blue-600"></i>Wishlist

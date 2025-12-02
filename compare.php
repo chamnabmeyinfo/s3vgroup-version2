@@ -3,9 +3,22 @@ require_once __DIR__ . '/bootstrap/app.php';
 
 use App\Models\Product;
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 $productModel = new Product();
-$compareIds = $_GET['ids'] ?? '';
-$ids = array_filter(array_map('intval', explode(',', $compareIds)));
+
+// Get compare IDs from session (primary) or URL params (fallback for compatibility)
+$ids = [];
+if (!empty($_SESSION['compare']) && is_array($_SESSION['compare'])) {
+    $ids = array_filter(array_map('intval', $_SESSION['compare']));
+} else {
+    // Fallback to URL params for backward compatibility
+    $compareIds = $_GET['ids'] ?? '';
+    $ids = array_filter(array_map('intval', explode(',', $compareIds)));
+}
 
 $products = [];
 foreach ($ids as $id) {
@@ -47,7 +60,7 @@ include __DIR__ . '/includes/header.php';
                                              class="h-32 w-32 object-cover mx-auto mb-2 rounded">
                                     <?php endif; ?>
                                     <h3 class="font-bold text-lg"><?= escape($product['name']) ?></h3>
-                                    <p class="text-2xl font-bold text-blue-600 mt-2">$<?= number_format($product['price'], 2) ?></p>
+                                    <p class="text-2xl font-bold text-blue-600 mt-2">$<?= number_format((float)($product['price'] ?? 0), 2) ?></p>
                                     <a href="<?= url('product.php?slug=' . escape($product['slug'])) ?>" 
                                        class="btn-primary-sm mt-2 inline-block">View Details</a>
                                 </div>
@@ -66,9 +79,9 @@ include __DIR__ . '/includes/header.php';
                             <td class="px-6 py-4 font-semibold">Price</td>
                             <?php foreach ($products as $product): ?>
                             <td class="px-6 py-4">
-                                <span class="text-lg font-bold">$<?= number_format($product['price'], 2) ?></span>
-                                <?php if ($product['sale_price']): ?>
-                                    <div class="text-sm text-green-600">Sale: $<?= number_format($product['sale_price'], 2) ?></div>
+                                <span class="text-lg font-bold">$<?= number_format((float)($product['price'] ?? 0), 2) ?></span>
+                                <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
+                                    <div class="text-sm text-green-600">Sale: $<?= number_format((float)($product['sale_price'] ?? 0), 2) ?></div>
                                 <?php endif; ?>
                             </td>
                             <?php endforeach; ?>
@@ -99,7 +112,7 @@ include __DIR__ . '/includes/header.php';
                         <tr>
                             <td class="px-6 py-4 font-semibold">Weight</td>
                             <?php foreach ($products as $product): ?>
-                            <td class="px-6 py-4"><?= $product['weight'] ? number_format($product['weight'], 2) . ' lbs' : 'N/A' ?></td>
+                            <td class="px-6 py-4"><?= !empty($product['weight']) && $product['weight'] > 0 ? number_format((float)($product['weight'] ?? 0), 2) . ' lbs' : 'N/A' ?></td>
                             <?php endforeach; ?>
                         </tr>
                         <?php endif; ?>
@@ -128,6 +141,9 @@ include __DIR__ . '/includes/header.php';
                                     <a href="<?= url('product.php?slug=' . escape($product['slug'])) ?>" class="btn-secondary text-center text-sm">
                                         View Details
                                     </a>
+                                    <button onclick="removeFromCompare(<?= $product['id'] ?>)" class="btn-secondary text-center text-sm text-red-600 hover:bg-red-50">
+                                        <i class="fas fa-times mr-1"></i>Remove
+                                    </button>
                                 </div>
                             </td>
                             <?php endforeach; ?>
@@ -147,20 +163,67 @@ include __DIR__ . '/includes/header.php';
 
 <script>
 function clearComparison() {
-    localStorage.removeItem('compareProducts');
-    window.location.href = '<?= url('compare.php') ?>';
+    const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
+    fetch(`${compareUrl}?action=clear`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = '<?= url('compare.php') ?>';
+        }
+    })
+    .catch(error => {
+        console.error('Error clearing comparison:', error);
+        window.location.href = '<?= url('compare.php') ?>';
+    });
 }
 
-// Load compare count on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const compareIds = localStorage.getItem('compareProducts');
-    if (compareIds) {
-        const ids = JSON.parse(compareIds);
-        if (ids.length > 0 && window.location.pathname.includes('compare.php') && !window.location.search.includes('ids=')) {
-            window.location.href = '<?= url('compare.php') ?>?ids=' + ids.join(',');
+function removeFromCompare(productId) {
+    const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
+    fetch(`${compareUrl}?action=remove&id=${productId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload page to update the comparison table
+            window.location.reload();
+        } else {
+            alert('Error removing product from comparison');
         }
-    }
+    })
+    .catch(error => {
+        console.error('Error removing from comparison:', error);
+        alert('Error removing product from comparison');
+    });
+}
+
+// Update compare count on page load
+document.addEventListener('DOMContentLoaded', function() {
+    updateCompareCount();
 });
+
+function updateCompareCount() {
+    const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
+    fetch(`${compareUrl}?action=get`)
+        .then(response => response.json())
+        .then(data => {
+            const countEl = document.getElementById('compare-count');
+            if (countEl && data.compare) {
+                const count = Array.isArray(data.compare) ? data.compare.length : 0;
+                if (count > 0) {
+                    countEl.textContent = count;
+                    countEl.classList.remove('hidden');
+                } else {
+                    countEl.classList.add('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating compare count:', error);
+        });
+}
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
