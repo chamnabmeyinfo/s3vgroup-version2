@@ -41,6 +41,7 @@ $productName = $_GET['product'] ?? '';
 
 $pageTitle = 'Contact Us - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/message.php';
 ?>
 
 <main class="py-12">
@@ -49,20 +50,11 @@ include __DIR__ . '/includes/header.php';
             <h1 class="text-4xl font-bold text-center mb-4">Contact Us</h1>
             <p class="text-center text-gray-600 mb-12">We're here to help! Get in touch with our team.</p>
             
+            <?= displayMessage($message, $error) ?>
+            
             <div class="grid md:grid-cols-2 gap-12">
                 <!-- Contact Form -->
                 <div>
-                    <?php if ($message): ?>
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                            <?= escape($message) ?>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <?php if ($error): ?>
-                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                            <?= escape($error) ?>
-                        </div>
-                    <?php endif; ?>
                     
                     <form method="POST" class="space-y-4">
                         <div>

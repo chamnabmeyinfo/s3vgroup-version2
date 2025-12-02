@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Customer Login - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/message.php';
 ?>
 
 <main class="py-12">
@@ -55,11 +56,7 @@ include __DIR__ . '/includes/header.php';
         <div class="bg-white rounded-lg shadow-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Customer Login</h1>
             
-            <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <?= escape($error) ?>
-                </div>
-            <?php endif; ?>
+            <?= displayMessage('', $error) ?>
             
             <form method="POST" class="space-y-4">
                 <div>

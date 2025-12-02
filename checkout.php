@@ -81,6 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Checkout - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/message.php';
 ?>
 
 <main class="py-8">
@@ -88,10 +89,19 @@ include __DIR__ . '/includes/header.php';
         <h1 class="text-3xl font-bold mb-6">Checkout</h1>
         
         <?php if ($message): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                <?= escape($message) ?>
-                <p class="mt-2">We will contact you shortly to confirm your order and arrange payment.</p>
-                <a href="<?= url('products.php') ?>" class="btn-primary mt-4 inline-block">Continue Shopping</a>
+            <div class="message-alert bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-lg shadow-lg p-4 mb-6 transform transition-all duration-500 ease-out">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex items-start gap-3 flex-1">
+                        <div class="flex-shrink-0 mt-0.5">
+                            <i class="fas fa-check-circle text-2xl text-green-600 animate-pulse"></i>
+                        </div>
+                        <div class="flex-1 text-green-800">
+                            <p class="font-semibold text-base leading-relaxed"><?= escape($message) ?></p>
+                            <p class="mt-2 text-sm">We will contact you shortly to confirm your order and arrange payment.</p>
+                            <a href="<?= url('products.php') ?>" class="btn-primary mt-4 inline-block">Continue Shopping</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         <?php else: ?>
             
@@ -101,11 +111,7 @@ include __DIR__ . '/includes/header.php';
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-bold mb-4">Shipping Information</h2>
                         
-                        <?php if ($error): ?>
-                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                                <?= escape($error) ?>
-                            </div>
-                        <?php endif; ?>
+                        <?= displayMessage('', $error) ?>
                         
                         <div class="space-y-4">
                             <div class="grid md:grid-cols-2 gap-4">

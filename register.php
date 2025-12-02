@@ -53,6 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Create Account - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/message.php';
 ?>
 
 <main class="py-12">
@@ -60,17 +61,7 @@ include __DIR__ . '/includes/header.php';
         <div class="bg-white rounded-lg shadow-lg p-8">
             <h1 class="text-3xl font-bold mb-6 text-center">Create Account</h1>
             
-            <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-                    <?= escape($error) ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($success): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    <?= escape($success) ?>
-                </div>
-            <?php endif; ?>
+            <?= displayMessage($success, $error) ?>
             
             <form method="POST" class="space-y-4">
                 <div class="grid md:grid-cols-2 gap-4">

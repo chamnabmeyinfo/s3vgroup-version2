@@ -47,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pageTitle = 'Request a Quote - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/includes/message.php';
 ?>
 
 <main class="py-12">
@@ -55,17 +56,7 @@ include __DIR__ . '/includes/header.php';
             <h1 class="text-4xl font-bold text-center mb-4">Request a Quote</h1>
             <p class="text-center text-gray-600 mb-12">Get competitive pricing for our equipment</p>
             
-            <?php if ($message): ?>
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                    <?= escape($message) ?>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($error): ?>
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                    <?= escape($error) ?>
-                </div>
-            <?php endif; ?>
+            <?= displayMessage($message, $error) ?>
             
             <?php if ($selectedProduct): ?>
                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">

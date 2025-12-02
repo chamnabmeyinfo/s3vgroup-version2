@@ -118,6 +118,7 @@ $availableColumns = [
 
 $pageTitle = 'Quote Requests';
 include __DIR__ . '/includes/header.php';
+include __DIR__ . '/../includes/message.php';
 
 // Setup filter component
 $filterId = 'quotes-filter';
@@ -160,23 +161,7 @@ $defaultColumns = ['date', 'name', 'email', 'product', 'status', 'actions'];
         </div>
     </div>
 
-    <?php if ($message): ?>
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2 text-xl"></i>
-            <span class="font-semibold"><?= escape($message) ?></span>
-        </div>
-    </div>
-    <?php endif; ?>
-    
-    <?php if ($error): ?>
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
-            <span class="font-semibold"><?= escape($error) ?></span>
-        </div>
-    </div>
-    <?php endif; ?>
+    <?= displayMessage($message, $error) ?>
     
     <!-- Advanced Filters -->
     <?php include __DIR__ . '/includes/advanced-filters.php'; ?>
