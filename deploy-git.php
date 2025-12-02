@@ -144,46 +144,95 @@ function deployGit($config, $log) {
     }
     
     // Push with token in URL (if configured)
-    // Use proc_open for better environment variable control on Windows
-    $descriptorspec = [
-        0 => ['pipe', 'r'],  // stdin
-        1 => ['pipe', 'w'],  // stdout
-        2 => ['pipe', 'w']   // stderr
-    ];
+    // Use retry logic for network errors (common on Windows)
+    $maxRetries = 3;
+    $retryDelay = 2; // seconds
+    $returnCode = 1;
+    $output = [];
+    $lastError = '';
+    $attempt = 0; // Track which attempt succeeded
     
-    $env = $_ENV;
-    $env['GIT_TERMINAL_PROMPT'] = '0';
-    $env['GCM_INTERACTIVE'] = 'never';
-    $env['GIT_ASKPASS'] = 'echo';
-    
-    $pushCommand = escapeshellarg($gitPath) . " push origin " . escapeshellarg($branch) . " 2>&1";
-    
-    $process = @proc_open($pushCommand, $descriptorspec, $pipes, null, $env);
-    
-    if (is_resource($process)) {
-        // Close stdin
-        fclose($pipes[0]);
-        
-        // Read output
-        $output = [];
-        $outputStr = stream_get_contents($pipes[1]);
-        $errorStr = stream_get_contents($pipes[2]);
-        
-        if ($outputStr) {
-            $output = explode("\n", trim($outputStr));
-        }
-        if ($errorStr) {
-            $output = array_merge($output, explode("\n", trim($errorStr)));
+    for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+        if ($attempt > 1) {
+            $log->info("  Retry attempt {$attempt}/{$maxRetries} (waiting {$retryDelay}s)...");
+            sleep($retryDelay);
+            // Increase delay for subsequent retries
+            $retryDelay += 1;
         }
         
-        fclose($pipes[1]);
-        fclose($pipes[2]);
+        // Use proc_open for better environment variable control on Windows
+        $descriptorspec = [
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout
+            2 => ['pipe', 'w']   // stderr
+        ];
         
-        // Get return code
-        $returnCode = proc_close($process);
-    } else {
-        // Fallback to exec if proc_open fails
-        exec($pushCommand, $output, $returnCode);
+        $env = $_ENV;
+        $env['GIT_TERMINAL_PROMPT'] = '0';
+        $env['GCM_INTERACTIVE'] = 'never';
+        $env['GIT_ASKPASS'] = 'echo';
+        // Add timeout for network operations
+        $env['GIT_HTTP_LOW_SPEED_LIMIT'] = '1000';
+        $env['GIT_HTTP_LOW_SPEED_TIME'] = '30';
+        
+        $pushCommand = escapeshellarg($gitPath) . " push origin " . escapeshellarg($branch) . " 2>&1";
+        
+        $process = @proc_open($pushCommand, $descriptorspec, $pipes, null, $env);
+        
+        if (is_resource($process)) {
+            // Close stdin
+            fclose($pipes[0]);
+            
+            // Read output
+            $output = [];
+            $outputStr = stream_get_contents($pipes[1]);
+            $errorStr = stream_get_contents($pipes[2]);
+            
+            if ($outputStr) {
+                $output = explode("\n", trim($outputStr));
+            }
+            if ($errorStr) {
+                $output = array_merge($output, explode("\n", trim($errorStr)));
+            }
+            
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            
+            // Get return code
+            $returnCode = proc_close($process);
+        } else {
+            // Fallback to exec if proc_open fails
+            exec($pushCommand, $output, $returnCode);
+        }
+        
+        // Check if it's a network error that we should retry
+        $outputStr = implode("\n", $output);
+        $isNetworkError = (
+            strpos($outputStr, 'getaddrinfo') !== false ||
+            strpos($outputStr, 'unable to access') !== false ||
+            strpos($outputStr, 'Connection timed out') !== false ||
+            strpos($outputStr, 'Failed to connect') !== false ||
+            strpos($outputStr, 'Name or service not known') !== false ||
+            strpos($outputStr, 'Network is unreachable') !== false
+        );
+        
+        if ($returnCode === 0) {
+            // Success!
+            break;
+        } elseif ($isNetworkError && $attempt < $maxRetries) {
+            // Network error - will retry
+            $lastError = $outputStr;
+            continue;
+        } else {
+            // Other error or max retries reached
+            $lastError = $outputStr;
+            break;
+        }
+    }
+    
+    // Use last error if we have one
+    if (!empty($lastError) && empty($output)) {
+        $output = explode("\n", $lastError);
     }
     
     // Restore/clean remote URL if token was used (CRITICAL for security)
@@ -257,12 +306,29 @@ function deployGit($config, $log) {
         $errorMsg = implode("\n", $output);
         // Don't expose token in error messages (match both http:// and https://)
         $errorMsg = preg_replace('#(https?)://[^@]+@github\.com/#', '$1://github.com/', $errorMsg);
-        $result['message'] = 'Failed to push: ' . $errorMsg;
-        $log->error("  ✗ Push failed");
+        
+        // Check if it's a network error
+        $isNetworkError = (
+            strpos($errorMsg, 'getaddrinfo') !== false ||
+            strpos($errorMsg, 'unable to access') !== false ||
+            strpos($errorMsg, 'Connection timed out') !== false
+        );
+        
+        if ($isNetworkError) {
+            $result['message'] = 'Network error: Unable to connect to GitHub. Please check your internet connection and try again.';
+            $log->warning("  ⚠️  Push failed due to network error (tried {$maxRetries} times)");
+        } else {
+            $result['message'] = 'Failed to push: ' . $errorMsg;
+            $log->error("  ✗ Push failed");
+        }
         return $result;
     }
     
-    $log->info("  ✓ Pushed to origin/{$branch}");
+    if ($attempt > 1) {
+        $log->info("  ✓ Pushed to origin/{$branch} (succeeded on attempt {$attempt})");
+    } else {
+        $log->info("  ✓ Pushed to origin/{$branch}");
+    }
     $result['success'] = true;
     $result['files_pushed'] = $changedFiles;
     $result['message'] = "Pushed {$changedFiles} file(s)";
