@@ -197,6 +197,18 @@ function deployFTP($config, $log) {
         }
     }
     
+    // Cleanup orphaned files (images/assets not in database and not in local)
+    if (($config['cleanup_orphaned'] ?? true)) {
+        $log->info("  Cleaning up orphaned files...");
+        $cleanupResult = cleanupOrphanedFiles($ftp, $remotePath, $config, $log);
+        if ($cleanupResult['deleted'] > 0) {
+            $log->info("  ✓ Removed {$cleanupResult['deleted']} orphaned file(s)");
+        } else {
+            $log->info("  ✓ No orphaned files found");
+        }
+        $result['files_deleted'] = $cleanupResult['deleted'] ?? 0;
+    }
+    
     ftp_close($ftp);
     
     // Final summary
@@ -212,6 +224,9 @@ function deployFTP($config, $log) {
         $result['message'] = "Uploaded {$uploaded} file(s)";
         if ($saved > 0) {
             $result['message'] .= ", skipped {$saved} unchanged";
+        }
+        if (isset($result['files_deleted']) && $result['files_deleted'] > 0) {
+            $result['message'] .= ", removed {$result['files_deleted']} orphaned";
         }
     }
     
@@ -465,6 +480,246 @@ function getFilePermissions($file) {
             return 0644;
         }
     }
+}
+
+/**
+ * Cleanup orphaned files (images/assets not in database and not in local files)
+ */
+function cleanupOrphanedFiles($ftp, $remotePath, $config, $log) {
+    $result = ['deleted' => 0, 'errors' => 0];
+    
+    try {
+        // Get all image references from database
+        $dbImages = getDatabaseImageReferences($config);
+        
+        // Get all local files
+        $localFiles = getLocalFilesList($config);
+        
+        // Get remote files in storage/uploads directory
+        $remoteUploadsDir = $remotePath . '/storage/uploads';
+        $remoteFilesList = listRemoteFiles($ftp, $remoteUploadsDir, '');
+        
+        // Find orphaned files (not in database, not in local)
+        $orphanedFiles = [];
+        foreach ($remoteFilesList as $remoteFile) {
+            // Skip .gitkeep files
+            if (basename($remoteFile) === '.gitkeep') {
+                continue;
+            }
+            
+            $relativePath = 'storage/uploads/' . $remoteFile;
+            $fullRemotePath = $remoteUploadsDir . '/' . $remoteFile;
+            
+            // Check if file is in database
+            $inDatabase = false;
+            foreach ($dbImages as $dbImage) {
+                if (basename($dbImage) === basename($remoteFile) || 
+                    $dbImage === $relativePath || 
+                    strpos($dbImage, basename($remoteFile)) !== false) {
+                    $inDatabase = true;
+                    break;
+                }
+            }
+            
+            // Check if file exists locally
+            $inLocal = false;
+            $localPath = __DIR__ . '/' . $relativePath;
+            if (file_exists($localPath)) {
+                $inLocal = true;
+            } else {
+                // Also check in local files list
+                foreach ($localFiles as $localFile) {
+                    if (strpos($localFile, $remoteFile) !== false || basename($localFile) === basename($remoteFile)) {
+                        $inLocal = true;
+                        break;
+                    }
+                }
+            }
+            
+            // If not in database and not in local, mark as orphaned
+            if (!$inDatabase && !$inLocal) {
+                $orphanedFiles[] = [
+                    'remote' => $fullRemotePath,
+                    'relative' => $relativePath,
+                    'filename' => $remoteFile
+                ];
+            }
+        }
+        
+        // Delete orphaned files
+        foreach ($orphanedFiles as $orphaned) {
+            if (@ftp_delete($ftp, $orphaned['remote'])) {
+                $result['deleted']++;
+                $log->info("    ✓ Deleted orphaned: {$orphaned['filename']}");
+            } else {
+                $result['errors']++;
+                $log->warning("    ⚠️  Failed to delete: {$orphaned['filename']}");
+            }
+        }
+        
+    } catch (Exception $e) {
+        $log->warning("  ⚠️  Cleanup error: " . $e->getMessage());
+    }
+    
+    return $result;
+}
+
+/**
+ * Get all image references from database
+ */
+function getDatabaseImageReferences($config) {
+    $images = [];
+    
+    try {
+        require_once __DIR__ . '/bootstrap/app.php';
+        $db = db();
+        
+        // Get images from categories
+        $categories = $db->fetchAll("SELECT image FROM categories WHERE image IS NOT NULL AND image != ''");
+        foreach ($categories as $cat) {
+            if (!empty($cat['image'])) {
+                $images[] = $cat['image'];
+            }
+        }
+        
+        // Get images from products
+        $products = $db->fetchAll("SELECT image, gallery FROM products WHERE (image IS NOT NULL AND image != '') OR (gallery IS NOT NULL AND gallery != '')");
+        foreach ($products as $product) {
+            if (!empty($product['image'])) {
+                $images[] = $product['image'];
+            }
+            // Parse gallery (JSON or comma-separated)
+            if (!empty($product['gallery'])) {
+                $gallery = json_decode($product['gallery'], true);
+                if (is_array($gallery)) {
+                    $images = array_merge($images, $gallery);
+                } else {
+                    // Try comma-separated
+                    $galleryItems = explode(',', $product['gallery']);
+                    foreach ($galleryItems as $item) {
+                        $item = trim($item);
+                        if (!empty($item)) {
+                            $images[] = $item;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Get images from product_variants (if table exists)
+        try {
+            $variants = $db->fetchAll("SELECT image FROM product_variants WHERE image IS NOT NULL AND image != ''");
+            foreach ($variants as $variant) {
+                if (!empty($variant['image'])) {
+                    $images[] = $variant['image'];
+                }
+            }
+        } catch (Exception $e) {
+            // Table might not exist, ignore
+        }
+        
+        // Get images from product_variant_images (if table exists)
+        try {
+            $variantImages = $db->fetchAll("SELECT image FROM product_variant_images WHERE image IS NOT NULL AND image != ''");
+            foreach ($variantImages as $img) {
+                if (!empty($img['image'])) {
+                    $images[] = $img['image'];
+                }
+            }
+        } catch (Exception $e) {
+            // Table might not exist, ignore
+        }
+        
+        // Normalize image paths (remove URLs, keep only filename or relative path)
+        $normalizedImages = [];
+        foreach ($images as $img) {
+            // Remove full URLs
+            $img = preg_replace('#https?://[^/]+/#', '', $img);
+            // Remove leading slashes
+            $img = ltrim($img, '/');
+            // Get just filename if it's a full path
+            if (strpos($img, 'storage/uploads/') !== false) {
+                $img = basename($img);
+            }
+            if (!empty($img)) {
+                $normalizedImages[] = $img;
+            }
+        }
+        
+        return array_unique($normalizedImages);
+        
+    } catch (Exception $e) {
+        // Database connection failed, return empty array
+        return [];
+    }
+}
+
+/**
+ * Get list of all local files (for comparison)
+ */
+function getLocalFilesList($config) {
+    $files = [];
+    $baseDir = __DIR__ . DIRECTORY_SEPARATOR;
+    $baseDirLength = strlen($baseDir);
+    
+    // Scan storage/uploads directory
+    $uploadsDir = __DIR__ . '/storage/uploads/';
+    if (is_dir($uploadsDir)) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($uploadsDir, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::SELF_FIRST
+        );
+        
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $relativePath = str_replace('\\', '/', substr($file->getPathname(), $baseDirLength));
+                $files[] = $relativePath;
+            }
+        }
+    }
+    
+    return $files;
+}
+
+/**
+ * List all files in remote directory recursively
+ */
+function listRemoteFiles($ftp, $remoteDir, $basePath = '') {
+    $files = [];
+    
+    // Try to list directory (use rawlist for better directory detection)
+    $list = @ftp_rawlist($ftp, $remoteDir);
+    if ($list === false) {
+        return $files;
+    }
+    
+    foreach ($list as $line) {
+        // Parse FTP rawlist output
+        $parts = preg_split('/\s+/', $line, 9);
+        if (count($parts) < 9) continue;
+        
+        $filename = $parts[8];
+        if ($filename === '.' || $filename === '..') continue;
+        
+        $fullPath = rtrim($remoteDir, '/') . '/' . $filename;
+        $isDir = (substr($parts[0], 0, 1) === 'd');
+        
+        if ($isDir) {
+            // Recurse into directory
+            $newBasePath = !empty($basePath) ? $basePath . '/' . $filename : $filename;
+            $subFiles = listRemoteFiles($ftp, $fullPath, $newBasePath);
+            $files = array_merge($files, $subFiles);
+        } else {
+            // It's a file
+            if (!empty($basePath)) {
+                $files[] = $basePath . '/' . $filename;
+            } else {
+                $files[] = $filename;
+            }
+        }
+    }
+    
+    return $files;
 }
 
 function createRemoteDirectory($ftp, $dir) {
