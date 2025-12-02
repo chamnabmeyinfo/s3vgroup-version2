@@ -41,7 +41,7 @@ $hasMore = $filters['page'] < $totalPages;
 ob_start();
 foreach ($products as $product):
 ?>
-<div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden" data-product-id="<?= $product['id'] ?>">
+<div class="product-card product-item bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden" data-product-id="<?= $product['id'] ?>">
     <a href="<?= url('product.php?slug=' . escape($product['slug'])) ?>">
         <div class="w-full aspect-[10/7] bg-gray-200 flex items-center justify-center overflow-hidden relative">
             <?php if (!empty($product['image'])): ?>

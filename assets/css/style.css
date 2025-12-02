@@ -36,12 +36,21 @@ html {
     transform: translateY(-5px);
 }
 
-/* Product Layout Styles */
+/* Product Layout Styles - Instant Changes */
+.products-container {
+    transition: none !important;
+}
+
+.products-container.list-view {
+    display: block !important;
+}
+
 .products-container.list-view .product-item {
     display: flex !important;
     flex-direction: row;
     gap: 1.5rem;
     padding: 1rem;
+    transition: none !important;
 }
 
 .products-container.list-view .product-item > a {

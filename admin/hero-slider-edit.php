@@ -200,6 +200,19 @@ include __DIR__ . '/includes/header.php';
                            placeholder="https://example.com/image.jpg"
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                     <p class="text-xs text-gray-500 mt-1">Or upload an image below</p>
+                    
+                    <?php if (!empty($slider['image'])): ?>
+                        <div class="mt-3">
+                            <label class="block text-xs font-semibold text-gray-700 mb-2">Current Image Preview:</label>
+                            <img src="<?= escape(image_url($slider['image'])) ?>" 
+                                 alt="Preview" 
+                                 class="max-w-full h-48 object-cover rounded-lg border-2 border-gray-300"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none;" class="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Image not found
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div>
@@ -210,7 +223,12 @@ include __DIR__ . '/includes/header.php';
                            id="image_file" 
                            name="image_file" 
                            accept="image/*"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                           onchange="previewImage(this, 'desktop-preview')">
+                    <div id="desktop-preview" class="mt-3 hidden">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2">Upload Preview:</label>
+                        <img id="desktop-preview-img" src="" alt="Preview" class="max-w-full h-48 object-cover rounded-lg border-2 border-gray-300">
+                    </div>
                 </div>
                 
                 <div>
@@ -223,6 +241,19 @@ include __DIR__ . '/includes/header.php';
                            value="<?= escape($slider['image_mobile'] ?? '') ?>" 
                            placeholder="https://example.com/image-mobile.jpg"
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    
+                    <?php if (!empty($slider['image_mobile'])): ?>
+                        <div class="mt-3">
+                            <label class="block text-xs font-semibold text-gray-700 mb-2">Current Mobile Image Preview:</label>
+                            <img src="<?= escape(image_url($slider['image_mobile'])) ?>" 
+                                 alt="Mobile Preview" 
+                                 class="max-w-full h-48 object-cover rounded-lg border-2 border-gray-300"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <div style="display: none;" class="p-4 bg-gray-100 rounded-lg text-center text-gray-500">
+                                <i class="fas fa-exclamation-triangle mr-2"></i>Image not found
+                            </div>
+                        </div>
+                    <?php endif; ?>
                 </div>
                 
                 <div>
@@ -233,7 +264,12 @@ include __DIR__ . '/includes/header.php';
                            id="image_mobile_file" 
                            name="image_mobile_file" 
                            accept="image/*"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                           onchange="previewImage(this, 'mobile-preview')">
+                    <div id="mobile-preview" class="mt-3 hidden">
+                        <label class="block text-xs font-semibold text-gray-700 mb-2">Upload Preview:</label>
+                        <img id="mobile-preview-img" src="" alt="Mobile Preview" class="max-w-full h-48 object-cover rounded-lg border-2 border-gray-300">
+                    </div>
                 </div>
                 
                 <div>
@@ -356,6 +392,26 @@ include __DIR__ . '/includes/header.php';
         </form>
     </div>
 </div>
+
+<script>
+function previewImage(input, previewId) {
+    const preview = document.getElementById(previewId);
+    const previewImg = document.getElementById(previewId + '-img');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.remove('hidden');
+        };
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.classList.add('hidden');
+    }
+}
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 

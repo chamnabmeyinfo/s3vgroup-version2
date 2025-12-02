@@ -44,6 +44,32 @@ if (!function_exists('url')) {
     }
 }
 
+if (!function_exists('image_url')) {
+    /**
+     * Convert image path to full URL
+     * Handles relative paths, absolute paths, and full URLs
+     */
+    function image_url($path)
+    {
+        if (empty($path)) {
+            return '';
+        }
+        
+        // If it's already a full URL (http:// or https://), return as is
+        if (preg_match('/^https?:\/\//', $path)) {
+            return $path;
+        }
+        
+        // If it starts with /, it's an absolute path from root
+        if (strpos($path, '/') === 0) {
+            return url(ltrim($path, '/'));
+        }
+        
+        // Otherwise, treat as relative path from root
+        return url($path);
+    }
+}
+
 if (!function_exists('escape')) {
     function escape($string)
     {
@@ -83,4 +109,3 @@ if (!function_exists('session')) {
         return $value;
     }
 }
-

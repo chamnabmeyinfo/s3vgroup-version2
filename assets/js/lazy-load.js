@@ -215,6 +215,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             }, index * 50);
                         });
                         
+                        // Reapply layout to newly loaded products
+                        if (typeof setLayout === 'function') {
+                            const savedLayout = localStorage.getItem('productLayout') || 'grid';
+                            setTimeout(() => {
+                                setLayout(savedLayout);
+                            }, 100);
+                        }
+                        
                         // Load all new images immediately after DOM update
                         // Use multiple animation frames to ensure DOM is ready
                         requestAnimationFrame(() => {
@@ -292,11 +300,45 @@ document.addEventListener('DOMContentLoaded', function() {
                                         }
                                     });
                                     
-                                    // Initialize lazy loading for any future images
-                                    initLazyLoading();
-                                }, 300);
-                            });
+                                // Initialize lazy loading for any future images
+                                initLazyLoading();
+                            }, 300);
                         });
+                        
+                        // Reapply layout to newly loaded products after a short delay
+                        setTimeout(() => {
+                            // Check if setLayout function exists (from products.php)
+                            if (typeof window.setLayout === 'function') {
+                                const savedLayout = localStorage.getItem('productLayout') || 'grid';
+                                window.setLayout(savedLayout);
+                            } else {
+                                // Fallback: manually apply layout classes
+                                const savedLayout = localStorage.getItem('productLayout') || 'grid';
+                                const container = document.getElementById('products-grid');
+                                const allItems = container.querySelectorAll('.product-item');
+                                
+                                // Remove all layout classes
+                                container.classList.remove('grid', 'list-view', 'compact-view', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-3', 'lg:grid-cols-4', 'gap-6', 'gap-4', 'space-y-4');
+                                allItems.forEach(item => {
+                                    item.classList.remove('grid-item', 'list-item', 'compact-item', 'flex');
+                                });
+                                
+                                // Apply layout
+                                if (savedLayout === 'grid') {
+                                    container.classList.add('grid', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+                                    allItems.forEach(item => item.classList.add('grid-item'));
+                                } else if (savedLayout === 'list') {
+                                    container.classList.add('list-view', 'space-y-4');
+                                    allItems.forEach(item => {
+                                        item.classList.add('list-item', 'flex', 'gap-4');
+                                    });
+                                } else if (savedLayout === 'compact') {
+                                    container.classList.add('grid', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4', 'compact-view');
+                                    allItems.forEach(item => item.classList.add('compact-item'));
+                                }
+                            }
+                        }, 350);
+                    });
                     }
                     
                     // Update button state
@@ -378,13 +420,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
-                    <div class="flex gap-3">
-                        <button onclick="confirmLoadMore()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-105">
-                            <i class="fas fa-arrow-down mr-2"></i>Load More
-                        </button>
-                        <button onclick="closeLoadMorePopup()" class="px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
-                            Not Now
-                        </button>
+                    <div class="space-y-3">
+                        <div class="flex gap-3">
+                            <button onclick="confirmLoadMore()" class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all transform hover:scale-105">
+                                <i class="fas fa-arrow-down mr-2"></i>Load More
+                            </button>
+                            <button onclick="closeLoadMorePopup()" class="px-6 py-3 rounded-lg font-semibold border-2 border-gray-300 text-gray-700 hover:bg-gray-50 transition-all">
+                                Not Now
+                            </button>
+                        </div>
+                        <label class="flex items-center text-sm text-gray-600 cursor-pointer">
+                            <input type="checkbox" id="remember-load-more" checked class="mr-2">
+                            <span>Remember my choice (auto-load next time)</span>
+                        </label>
                     </div>
                 </div>
             `;
@@ -424,15 +472,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 popup.classList.add('hidden');
                 popupShown = false;
             }
+            
+            // Check if user wants to remember "Not Now" preference
+            const rememberCheckbox = document.getElementById('remember-load-more');
+            if (rememberCheckbox && rememberCheckbox.checked) {
+                // User wants to remember - but "Not Now" means don't auto-load
+                // So we'll set it to false or remove it
+                localStorage.removeItem('autoLoadMore');
+            }
         };
         
         // Confirm load more
         window.confirmLoadMore = function() {
+            // Check if user wants to remember preference
+            const rememberCheckbox = document.getElementById('remember-load-more');
+            if (rememberCheckbox && rememberCheckbox.checked) {
+                // Save preference to auto-load in future
+                localStorage.setItem('autoLoadMore', 'true');
+            }
             closeLoadMorePopup();
             if (!isLoading) {
                 loadMoreProducts();
             }
         };
+        
+        // Check if user previously chose to auto-load
+        const shouldAutoLoad = localStorage.getItem('autoLoadMore') === 'true';
         
         // Detect when footer is reached
         window.addEventListener('scroll', function() {
@@ -451,10 +516,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!footerCheckTimeout) {
                     footerCheckTimeout = setTimeout(() => {
                         if (!popupShown && !isLoading) {
-                            showLoadMorePopup();
+                            // Check if user has auto-load enabled
+                            const autoLoadEnabled = localStorage.getItem('autoLoadMore') === 'true';
+                            
+                            if (autoLoadEnabled) {
+                                // Auto-load without showing popup
+                                loadMoreProducts();
+                            } else {
+                                // Show popup to ask user
+                                showLoadMorePopup();
+                            }
                         }
                         footerCheckTimeout = null;
-                    }, 500); // Show popup 0.5 seconds after reaching footer
+                    }, 500); // Wait 0.5 seconds after reaching footer
                 }
             } else {
                 // Footer not in view, clear timeout

@@ -313,17 +313,19 @@ include __DIR__ . '/includes/header.php';
 </main>
 
 <script>
-// Layout Management
+// Layout Management - Make it globally accessible
 let currentLayout = localStorage.getItem('productLayout') || 'grid';
-setLayout(currentLayout);
 
-function setLayout(layout) {
+// Make setLayout globally accessible - define it first
+window.setLayout = function(layout) {
     currentLayout = layout;
     localStorage.setItem('productLayout', layout);
     const container = document.getElementById('products-grid');
-    const items = document.querySelectorAll('.product-item');
+    if (!container) return;
     
-    // Update active button
+    const items = container.querySelectorAll('.product-item');
+    
+    // Update active button immediately (synchronous)
     document.querySelectorAll('.layout-btn').forEach(btn => {
         btn.classList.remove('bg-blue-600', 'text-white');
         btn.classList.add('text-gray-600', 'hover:bg-gray-100');
@@ -334,13 +336,16 @@ function setLayout(layout) {
         activeBtn.classList.add('bg-blue-600', 'text-white');
     }
     
-    // Remove all layout classes
+    // Remove all layout classes immediately (synchronous)
     container.classList.remove('grid', 'list-view', 'compact-view', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-3', 'lg:grid-cols-4', 'gap-6', 'gap-4', 'space-y-4');
     items.forEach(item => {
         item.classList.remove('grid-item', 'list-item', 'compact-item', 'flex');
     });
     
-    // Apply new layout
+    // Force reflow to ensure classes are removed before adding new ones
+    void container.offsetHeight;
+    
+    // Apply new layout immediately (synchronous)
     if (layout === 'grid') {
         container.classList.add('grid', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
         items.forEach(item => item.classList.add('grid-item'));
@@ -353,6 +358,18 @@ function setLayout(layout) {
         container.classList.add('grid', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4', 'compact-view');
         items.forEach(item => item.classList.add('compact-item'));
     }
+    
+    // Force another reflow to ensure new classes are applied
+    void container.offsetHeight;
+}
+
+// Initialize layout after function is defined
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setLayout(currentLayout);
+    });
+} else {
+    setLayout(currentLayout);
 }
 
 // Filter Management

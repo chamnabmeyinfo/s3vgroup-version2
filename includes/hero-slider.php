@@ -45,8 +45,8 @@ if (empty($sliders)) {
                     ? "background: {$slider['overlay_gradient']};" 
                     : "background: linear-gradient(135deg, {$slider['overlay_color']}, rgba(17, 24, 39, 0.8));";
                 
-                $bgImage = !empty($slider['image']) ? $slider['image'] : 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920';
-                $bgImageMobile = !empty($slider['image_mobile']) ? $slider['image_mobile'] : $bgImage;
+                $bgImage = !empty($slider['image']) ? image_url($slider['image']) : 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920';
+                $bgImageMobile = !empty($slider['image_mobile']) ? image_url($slider['image_mobile']) : $bgImage;
                 
                 $textAlign = $slider['text_alignment'] ?? 'center';
                 $textColor = $slider['text_color'] ?? '#ffffff';
