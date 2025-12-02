@@ -402,7 +402,7 @@ include __DIR__ . '/includes/header.php';
                 <?php foreach ($relatedProducts as $related): ?>
                 <div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
                     <a href="<?= url('product.php?slug=' . escape($related['slug'])) ?>">
-                        <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden relative">
+                        <div class="w-full aspect-[10/7] bg-gray-200 flex items-center justify-center overflow-hidden relative">
                             <?php if (!empty($related['image'])): ?>
                                 <img src="<?= asset('storage/uploads/' . escape($related['image'])) ?>" 
                                      alt="<?= escape($related['name']) ?>" 

@@ -32,6 +32,35 @@ if (!empty($_GET['featured'])) {
     $filters['featured'] = true;
 }
 
+// Advanced filters
+if (!empty($_GET['min_price'])) {
+    $filters['min_price'] = (float)$_GET['min_price'];
+}
+
+if (!empty($_GET['max_price'])) {
+    $filters['max_price'] = (float)$_GET['max_price'];
+}
+
+if (!empty($_GET['sort'])) {
+    $filters['sort'] = $_GET['sort'];
+}
+
+if (!empty($_GET['in_stock'])) {
+    $filters['in_stock'] = true;
+}
+
+// Get price range for filter
+$allProductsForRange = $productModel->getAll([]);
+$prices = [];
+foreach ($allProductsForRange as $p) {
+    $price = !empty($p['sale_price']) ? (float)$p['sale_price'] : (!empty($p['price']) ? (float)$p['price'] : null);
+    if ($price !== null) {
+        $prices[] = $price;
+    }
+}
+$minPriceRange = !empty($prices) ? min($prices) : 0;
+$maxPriceRange = !empty($prices) ? max($prices) : 10000;
+
 $products = $productModel->getAll($filters);
 $totalProducts = $productModel->count($filters);
 $totalPages = ceil($totalProducts / $filters['limit']);
@@ -49,58 +78,145 @@ include __DIR__ . '/includes/header.php';
             <!-- Sidebar Filters -->
             <aside class="md:w-64 flex-shrink-0">
                 <div class="bg-white rounded-lg shadow-md p-6 sticky top-20">
-                    <h3 class="text-xl font-bold mb-4">Filter Products</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold">Filter Products</h3>
+                        <button onclick="clearFilters()" class="text-sm text-blue-600 hover:underline">Clear</button>
+                    </div>
                     
-                    <!-- Search -->
-                    <form method="GET" class="mb-6">
-                        <input type="text" name="search" 
-                               value="<?= escape($_GET['search'] ?? '') ?>" 
-                               placeholder="Search products..."
-                               class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        <button type="submit" class="btn-primary-sm w-full mt-2">Search</button>
+                    <form method="GET" id="filter-form" class="space-y-6">
+                        <!-- Preserve existing params -->
+                        <input type="hidden" name="page" value="1">
+                        
+                        <!-- Search -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Search</label>
+                            <input type="text" name="search" 
+                                   value="<?= escape($_GET['search'] ?? '') ?>" 
+                                   placeholder="Search products..."
+                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   onkeyup="debounceFilter()">
+                        </div>
+                        
+                        <!-- Price Range -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Price Range</label>
+                            <div class="flex gap-2">
+                                <input type="number" name="min_price" 
+                                       value="<?= escape($_GET['min_price'] ?? '') ?>" 
+                                       placeholder="Min"
+                                       min="0"
+                                       step="0.01"
+                                       class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                       onchange="applyFilters()">
+                                <input type="number" name="max_price" 
+                                       value="<?= escape($_GET['max_price'] ?? '') ?>" 
+                                       placeholder="Max"
+                                       min="0"
+                                       step="0.01"
+                                       class="w-full px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                                       onchange="applyFilters()">
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">
+                                Range: $<?= number_format($minPriceRange, 2) ?> - $<?= number_format($maxPriceRange, 2) ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Categories -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Categories</label>
+                            <div class="max-h-48 overflow-y-auto space-y-2">
+                                <label class="flex items-center">
+                                    <input type="radio" name="category" value="" 
+                                           <?= empty($_GET['category']) ? 'checked' : '' ?>
+                                           onchange="applyFilters()"
+                                           class="mr-2">
+                                    <span class="text-sm">All Categories</span>
+                                </label>
+                                <?php foreach ($categories as $cat): ?>
+                                <label class="flex items-center">
+                                    <input type="radio" name="category" value="<?= escape($cat['slug']) ?>" 
+                                           <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'checked' : '' ?>
+                                           onchange="applyFilters()"
+                                           class="mr-2">
+                                    <span class="text-sm"><?= escape($cat['name']) ?></span>
+                                </label>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        
+                        <!-- Stock Status -->
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Availability</label>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="in_stock" value="1" 
+                                       <?= !empty($_GET['in_stock']) ? 'checked' : '' ?>
+                                       onchange="applyFilters()"
+                                       class="mr-2">
+                                <span class="text-sm">In Stock Only</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Featured -->
+                        <div>
+                            <label class="flex items-center">
+                                <input type="checkbox" name="featured" value="1" 
+                                       <?= !empty($_GET['featured']) ? 'checked' : '' ?>
+                                       onchange="applyFilters()"
+                                       class="mr-2">
+                                <span class="text-sm font-semibold">
+                                    <i class="fas fa-star text-yellow-500 mr-1"></i> Featured Only
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary-sm w-full hidden" id="filter-submit">Apply Filters</button>
                     </form>
-                    
-                    <!-- Categories -->
-                    <div class="mb-6">
-                        <h4 class="font-bold mb-3">Categories</h4>
-                        <ul class="space-y-2">
-                            <li>
-                                <a href="<?= url('products.php') ?>" 
-                                   class="text-gray-600 hover:text-blue-600 <?= empty($_GET['category']) ? 'font-bold text-blue-600' : '' ?>">
-                                    All Categories
-                                </a>
-                            </li>
-                            <?php foreach ($categories as $cat): ?>
-                            <li>
-                                <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                                   class="text-gray-600 hover:text-blue-600 <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'font-bold text-blue-600' : '' ?>">
-                                    <?= escape($cat['name']) ?>
-                                </a>
-                            </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    
-                    <!-- Featured -->
-                    <div>
-                        <a href="<?= url('products.php?featured=1') ?>" 
-                           class="text-blue-600 hover:underline font-semibold">
-                            <i class="fas fa-star mr-2"></i> Featured Products
-                        </a>
-                    </div>
                 </div>
             </aside>
             
             <!-- Products Grid -->
             <div class="flex-1">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold">
-                        <?= isset($categoryName) ? escape($categoryName) : 'All Products' ?>
-                        <?php if (!empty($_GET['search'])): ?>
-                            <span class="text-gray-500 text-xl"> - Search: <?= escape($_GET['search']) ?></span>
-                        <?php endif; ?>
-                    </h1>
-                    <p class="text-gray-600"><?= $totalProducts ?> products found</p>
+                <!-- Header with Layout Switcher and Sort -->
+                <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 class="text-2xl md:text-3xl font-bold">
+                                <?= isset($categoryName) ? escape($categoryName) : 'All Products' ?>
+                                <?php if (!empty($_GET['search'])): ?>
+                                    <span class="text-gray-500 text-lg md:text-xl"> - Search: <?= escape($_GET['search']) ?></span>
+                                <?php endif; ?>
+                            </h1>
+                            <p class="text-gray-600 text-sm mt-1"><?= $totalProducts ?> products found</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-4">
+                            <!-- Sort Dropdown -->
+                            <div class="flex items-center gap-2">
+                                <label class="text-sm text-gray-600">Sort:</label>
+                                <select id="sort-select" onchange="applyFilters()" class="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500">
+                                    <option value="name" <?= ($_GET['sort'] ?? 'name') === 'name' ? 'selected' : '' ?>>Name A-Z</option>
+                                    <option value="name_desc" <?= ($_GET['sort'] ?? '') === 'name_desc' ? 'selected' : '' ?>>Name Z-A</option>
+                                    <option value="price_asc" <?= ($_GET['sort'] ?? '') === 'price_asc' ? 'selected' : '' ?>>Price: Low to High</option>
+                                    <option value="price_desc" <?= ($_GET['sort'] ?? '') === 'price_desc' ? 'selected' : '' ?>>Price: High to Low</option>
+                                    <option value="newest" <?= ($_GET['sort'] ?? '') === 'newest' ? 'selected' : '' ?>>Newest First</option>
+                                    <option value="featured" <?= ($_GET['sort'] ?? '') === 'featured' ? 'selected' : '' ?>>Featured First</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Layout Switcher -->
+                            <div class="flex items-center gap-2 border rounded-lg p-1">
+                                <button onclick="setLayout('grid')" id="layout-grid" class="layout-btn px-3 py-2 rounded text-sm font-medium transition-all" title="Grid View">
+                                    <i class="fas fa-th"></i>
+                                </button>
+                                <button onclick="setLayout('list')" id="layout-list" class="layout-btn px-3 py-2 rounded text-sm font-medium transition-all" title="List View">
+                                    <i class="fas fa-list"></i>
+                                </button>
+                                <button onclick="setLayout('compact')" id="layout-compact" class="layout-btn px-3 py-2 rounded text-sm font-medium transition-all" title="Compact View">
+                                    <i class="fas fa-th-large"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <?php if (empty($products)): ?>
@@ -109,9 +225,9 @@ include __DIR__ . '/includes/header.php';
                         <a href="<?= url('products.php') ?>" class="btn-primary mt-4 inline-block">View All Products</a>
                     </div>
                 <?php else: ?>
-                    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid">
+                    <div class="products-container grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="products-grid" data-layout="grid">
                         <?php foreach ($products as $product): ?>
-                        <div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden" data-product-id="<?= $product['id'] ?>">
+                        <div class="product-card product-item bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden" data-product-id="<?= $product['id'] ?>">
                             <a href="<?= url('product.php?slug=' . escape($product['slug'])) ?>">
                                 <div class="w-full aspect-[10/7] bg-gray-200 flex items-center justify-center overflow-hidden relative">
                                     <?php if (!empty($product['image'])): ?>
@@ -197,6 +313,65 @@ include __DIR__ . '/includes/header.php';
 </main>
 
 <script>
+// Layout Management
+let currentLayout = localStorage.getItem('productLayout') || 'grid';
+setLayout(currentLayout);
+
+function setLayout(layout) {
+    currentLayout = layout;
+    localStorage.setItem('productLayout', layout);
+    const container = document.getElementById('products-grid');
+    const items = document.querySelectorAll('.product-item');
+    
+    // Update active button
+    document.querySelectorAll('.layout-btn').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('text-gray-600', 'hover:bg-gray-100');
+    });
+    const activeBtn = document.getElementById('layout-' + layout);
+    if (activeBtn) {
+        activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-100');
+        activeBtn.classList.add('bg-blue-600', 'text-white');
+    }
+    
+    // Remove all layout classes
+    container.classList.remove('grid', 'list-view', 'compact-view', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-3', 'lg:grid-cols-4', 'gap-6', 'gap-4', 'space-y-4');
+    items.forEach(item => {
+        item.classList.remove('grid-item', 'list-item', 'compact-item', 'flex');
+    });
+    
+    // Apply new layout
+    if (layout === 'grid') {
+        container.classList.add('grid', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+        items.forEach(item => item.classList.add('grid-item'));
+    } else if (layout === 'list') {
+        container.classList.add('list-view', 'space-y-4');
+        items.forEach(item => {
+            item.classList.add('list-item', 'flex', 'gap-4');
+        });
+    } else if (layout === 'compact') {
+        container.classList.add('grid', 'sm:grid-cols-2', 'md:grid-cols-3', 'lg:grid-cols-4', 'gap-4', 'compact-view');
+        items.forEach(item => item.classList.add('compact-item'));
+    }
+}
+
+// Filter Management
+let filterTimeout;
+function debounceFilter() {
+    clearTimeout(filterTimeout);
+    filterTimeout = setTimeout(() => {
+        applyFilters();
+    }, 500);
+}
+
+function applyFilters() {
+    document.getElementById('filter-form').submit();
+}
+
+function clearFilters() {
+    window.location.href = '<?= url('products.php') ?>';
+}
+
 function quickAddToCart(productId) {
     fetch('<?= url('api/cart.php') ?>?action=add&product_id=' + productId, {
         method: 'POST'

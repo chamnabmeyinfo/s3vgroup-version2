@@ -37,16 +37,57 @@ class Product
             $params['search'] = "%{$filters['search']}%";
         }
 
+        // Price filtering
+        if (isset($filters['min_price']) && $filters['min_price'] > 0) {
+            $where[] = "COALESCE(p.sale_price, p.price, 0) >= :min_price";
+            $params['min_price'] = $filters['min_price'];
+        }
+
+        if (isset($filters['max_price']) && $filters['max_price'] > 0) {
+            $where[] = "COALESCE(p.sale_price, p.price, 0) <= :max_price";
+            $params['max_price'] = $filters['max_price'];
+        }
+
+        // Stock status filtering
+        if (!empty($filters['in_stock'])) {
+            $where[] = "p.stock_status = 'in_stock'";
+        }
+
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
         $limit = (int)($filters['limit'] ?? 12);
         $page = (int)($filters['page'] ?? 1);
         $offset = ($page - 1) * $limit;
 
+        // Sorting
+        $orderBy = "p.is_featured DESC, p.created_at DESC";
+        if (!empty($filters['sort'])) {
+            switch ($filters['sort']) {
+                case 'name':
+                    $orderBy = "p.name ASC";
+                    break;
+                case 'name_desc':
+                    $orderBy = "p.name DESC";
+                    break;
+                case 'price_asc':
+                    $orderBy = "COALESCE(p.sale_price, p.price, 0) ASC";
+                    break;
+                case 'price_desc':
+                    $orderBy = "COALESCE(p.sale_price, p.price, 0) DESC";
+                    break;
+                case 'newest':
+                    $orderBy = "p.created_at DESC";
+                    break;
+                case 'featured':
+                    $orderBy = "p.is_featured DESC, p.created_at DESC";
+                    break;
+            }
+        }
+
         $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug
                 FROM products p
                 LEFT JOIN categories c ON p.category_id = c.id
                 $whereClause
-                ORDER BY p.is_featured DESC, p.created_at DESC
+                ORDER BY $orderBy
                 LIMIT $limit OFFSET $offset";
 
         return $this->db->fetchAll($sql, $params);
@@ -99,8 +140,28 @@ class Product
         }
 
         if (!empty($filters['search'])) {
-            $where[] = "(name LIKE :search OR description LIKE :search)";
+            $where[] = "(name LIKE :search OR description LIKE :search OR short_description LIKE :search)";
             $params['search'] = "%{$filters['search']}%";
+        }
+
+        if (!empty($filters['featured'])) {
+            $where[] = "is_featured = 1";
+        }
+
+        // Price filtering
+        if (isset($filters['min_price']) && $filters['min_price'] > 0) {
+            $where[] = "COALESCE(sale_price, price, 0) >= :min_price";
+            $params['min_price'] = $filters['min_price'];
+        }
+
+        if (isset($filters['max_price']) && $filters['max_price'] > 0) {
+            $where[] = "COALESCE(sale_price, price, 0) <= :max_price";
+            $params['max_price'] = $filters['max_price'];
+        }
+
+        // Stock status filtering
+        if (!empty($filters['in_stock'])) {
+            $where[] = "stock_status = 'in_stock'";
         }
 
         $whereClause = implode(' AND ', $where);

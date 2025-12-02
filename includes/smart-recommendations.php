@@ -31,7 +31,7 @@ function loadSmartRecommendations() {
                 grid.innerHTML = data.products.map(product => `
                     <div class="product-card bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden">
                         <a href="${product.url}">
-                            <div class="h-48 bg-gray-200 flex items-center justify-center overflow-hidden relative">
+                            <div class="w-full aspect-[10/7] bg-gray-200 flex items-center justify-center overflow-hidden relative">
                                 ${product.image ? 
                                     `<img src="<?= asset('storage/uploads/') ?>${product.image}" alt="${product.name}" class="w-full h-full object-cover">` :
                                     `<span class="text-gray-400">No Image</span>`

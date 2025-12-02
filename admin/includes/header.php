@@ -92,6 +92,9 @@
                 <a href="<?= url('admin/images.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-images mr-2"></i> Images
                 </a>
+                <a href="<?= url('admin/hero-sliders.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
+                    <i class="fas fa-sliders-h mr-2"></i> Hero Sliders
+                </a>
                 <div class="border-t border-gray-700 my-2"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase">User Management</div>
                 <?php 

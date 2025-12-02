@@ -36,6 +36,93 @@ html {
     transform: translateY(-5px);
 }
 
+/* Product Layout Styles */
+.products-container.list-view .product-item {
+    display: flex !important;
+    flex-direction: row;
+    gap: 1.5rem;
+    padding: 1rem;
+}
+
+.products-container.list-view .product-item > a {
+    display: flex !important;
+    width: 100%;
+    gap: 1.5rem;
+    align-items: stretch;
+}
+
+.products-container.list-view .product-item > a > div:first-child {
+    width: 250px;
+    min-width: 250px;
+    max-width: 250px;
+    flex-shrink: 0;
+    aspect-ratio: 10/7;
+}
+
+.products-container.list-view .product-item > a > div:last-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+}
+
+.products-container.list-view .product-item h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.products-container.list-view .product-item .line-clamp-2 {
+    -webkit-line-clamp: 3;
+}
+
+.products-container.compact-view .product-item {
+    padding: 0.75rem;
+}
+
+.products-container.compact-view .product-item > a > div:first-child {
+    aspect-ratio: 10/7;
+}
+
+.products-container.compact-view .product-item .p-4 {
+    padding: 0.75rem;
+}
+
+.products-container.compact-view .product-item h3 {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+}
+
+.products-container.compact-view .product-item p {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Layout Switcher Buttons */
+.layout-btn {
+    transition: all 0.2s ease;
+}
+
+.layout-btn:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+}
+
+.layout-btn.bg-blue-600 {
+    background-color: #2563eb;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .products-container.list-view .product-item > a {
+        flex-direction: column;
+    }
+    
+    .products-container.list-view .product-item > a > div:first-child {
+        width: 100%;
+        min-width: 100%;
+    }
+}
+
 /* Category Cards - Legacy */
 .category-card {
     transition: transform 0.3s ease;
@@ -61,14 +148,16 @@ html {
 }
 
 /* Product Image Container - 1000x700 Aspect Ratio (10:7) */
-.product-card > a > div:first-child {
+.product-card > a > div:first-child,
+.product-card a > div:first-child {
     aspect-ratio: 10 / 7;
     width: 100%;
     position: relative;
 }
 
 /* Ensure images fit within the aspect ratio container */
-.product-card > a > div:first-child img {
+.product-card > a > div:first-child img,
+.product-card a > div:first-child img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -76,13 +165,16 @@ html {
 
 /* Fallback for browsers that don't support aspect-ratio */
 @supports not (aspect-ratio: 10 / 7) {
-    .product-card > a > div:first-child {
+    .product-card > a > div:first-child,
+    .product-card a > div:first-child {
         height: 0;
         padding-bottom: 70%; /* 700/1000 = 0.7 = 70% */
     }
     
     .product-card > a > div:first-child > img,
-    .product-card > a > div:first-child > div {
+    .product-card > a > div:first-child > div,
+    .product-card a > div:first-child > img,
+    .product-card a > div:first-child > div {
         position: absolute;
         top: 0;
         left: 0;
@@ -281,66 +373,159 @@ table tbody tr:nth-child(even) {
     @apply text-gray-700 font-medium transition-all duration-200;
 }
 
-/* Hero Slider Styles */
+/* Hero Slider Styles - Advanced Modern Design */
 .hero-slider {
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .hero-slide {
-    min-height: 600px;
+    min-height: 500px;
+    height: 70vh;
+    min-height: 500px;
     display: flex;
     align-items: center;
     position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-.hero-slide::before {
-    content: '';
+@media (max-width: 768px) {
+    .hero-slide {
+        min-height: 400px;
+        height: 60vh;
+    }
+}
+
+@media (max-width: 640px) {
+    .hero-slide {
+        min-height: 350px;
+        height: 50vh;
+    }
+}
+
+.hero-slide-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(17, 24, 39, 0.8) 100%);
     z-index: 1;
 }
 
 .hero-slide-content {
     position: relative;
     z-index: 2;
+    width: 100%;
 }
 
-/* Swiper Customization */
+/* Animation Classes */
+@keyframes fade-in-up {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fade-in-up 0.8s ease-out forwards;
+    opacity: 0;
+}
+
+.animation-delay-200 {
+    animation-delay: 0.2s;
+}
+
+.animation-delay-400 {
+    animation-delay: 0.4s;
+}
+
+.animation-delay-600 {
+    animation-delay: 0.6s;
+}
+
+/* Swiper Customization - Modern & Responsive */
 .swiper-pagination-bullet {
     width: 12px !important;
     height: 12px !important;
     background: rgba(255, 255, 255, 0.5) !important;
     opacity: 1 !important;
+    transition: all 0.3s ease !important;
 }
 
 .swiper-pagination-bullet-active {
     background: #fff !important;
     width: 32px !important;
     border-radius: 6px !important;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.hero-pagination {
+    bottom: 20px !important;
+}
+
+@media (max-width: 768px) {
+    .hero-pagination {
+        bottom: 10px !important;
+    }
+    
+    .swiper-pagination-bullet {
+        width: 10px !important;
+        height: 10px !important;
+    }
+    
+    .swiper-pagination-bullet-active {
+        width: 24px !important;
+    }
 }
 
 .swiper-button-next,
 .swiper-button-prev {
     color: white !important;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15) !important;
     width: 50px !important;
     height: 50px !important;
-    border-radius: 50%;
+    border-radius: 50% !important;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    transition: all 0.3s ease !important;
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .swiper-button-next:hover,
 .swiper-button-prev:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.25) !important;
     transform: scale(1.1);
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 .swiper-button-next::after,
 .swiper-button-prev::after {
     font-size: 20px !important;
+    font-weight: bold;
+}
+
+@media (max-width: 768px) {
+    .swiper-button-next,
+    .swiper-button-prev {
+        width: 40px !important;
+        height: 40px !important;
+    }
+    
+    .swiper-button-next::after,
+    .swiper-button-prev::after {
+        font-size: 16px !important;
+    }
+}
+
+/* Hide navigation on very small screens */
+@media (max-width: 480px) {
+    .swiper-button-next,
+    .swiper-button-prev {
+        display: none !important;
+    }
 }
 
 /* Smooth Scroll */
