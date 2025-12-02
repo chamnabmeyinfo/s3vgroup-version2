@@ -42,23 +42,38 @@ $pageTitle = 'Product Reviews';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h1 class="text-3xl font-bold mb-6">Product Reviews</h1>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-orange-600 to-amber-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-star mr-3"></i>
+                    Product Reviews
+                </h1>
+                <p class="text-orange-100 text-lg">Manage and moderate customer reviews</p>
+            </div>
+        </div>
+    </div>
 
-<div class="mb-6 flex space-x-4">
-    <a href="?filter=all" class="px-4 py-2 rounded <?= $filter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-        All Reviews
-    </a>
-    <a href="?filter=pending" class="px-4 py-2 rounded <?= $filter === 'pending' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-        Pending Approval
-    </a>
-    <a href="?filter=approved" class="px-4 py-2 rounded <?= $filter === 'approved' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-        Approved
-    </a>
-</div>
+    <!-- Filter Tabs -->
+    <div class="bg-white rounded-lg shadow-md p-2 mb-6 inline-flex">
+        <a href="?filter=all" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $filter === 'all' ? 'bg-blue-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-list mr-2"></i> All Reviews
+        </a>
+        <a href="?filter=pending" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $filter === 'pending' ? 'bg-yellow-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-clock mr-2"></i> Pending Approval
+        </a>
+        <a href="?filter=approved" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $filter === 'approved' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-check-circle mr-2"></i> Approved
+        </a>
+    </div>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <!-- Reviews Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Product</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reviewer</th>

@@ -137,33 +137,64 @@ $sortOptions = [
 $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
 ?>
 
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Contact Messages</h1>
-    </div>
-    
-    <?php if ($successMessage): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?= escape($successMessage) ?>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-red-600 to-pink-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-envelope mr-3"></i>
+                    Contact Messages
+                </h1>
+                <p class="text-red-100 text-lg">Manage customer inquiries and messages</p>
+            </div>
+            <div class="bg-white/20 rounded-full px-6 py-3 backdrop-blur-sm">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-inbox"></i>
+                    <span class="font-semibold"><?= count($messages) ?> Messages</span>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <?php if ($successMessage): ?>
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($successMessage) ?></span>
+        </div>
+    </div>
     <?php endif; ?>
     
     <?php if ($message): ?>
-        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <?= escape($message) ?>
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($message) ?></span>
         </div>
+    </div>
     <?php endif; ?>
     
     <!-- Advanced Filters -->
     <?php include __DIR__ . '/includes/advanced-filters.php'; ?>
     
-    <div class="mb-4 text-gray-600">
-        Showing <?= count($messages) ?> message(s)
+    <!-- Stats Bar -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <div>
+                    <span class="text-sm text-gray-600">Total Messages:</span>
+                    <span class="ml-2 font-bold text-gray-900"><?= count($messages) ?></span>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <!-- Messages Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
                     <?php if (in_array('date', $selectedColumns) || empty($_GET['columns'])): ?>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="date">Date</th>

@@ -52,43 +52,81 @@ $pageTitle = 'Site Settings';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h1 class="text-3xl font-bold mb-6">Site Settings</h1>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-cog mr-3"></i>
+                    Site Settings
+                </h1>
+                <p class="text-gray-300 text-lg">Configure your website settings</p>
+            </div>
+        </div>
+    </div>
 
-<form method="POST" class="bg-white rounded-lg shadow p-6 space-y-6 max-w-2xl">
-    <div>
-        <label class="block text-sm font-medium mb-2">Site Name</label>
-        <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
-               class="w-full px-4 py-2 border rounded-lg">
+    <?php if ($message): ?>
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($message) ?></span>
+        </div>
     </div>
+    <?php endif; ?>
+
+    <form method="POST" class="bg-white rounded-xl shadow-lg p-8 space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-globe text-gray-400 mr-2"></i> Site Name
+                </label>
+                <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-envelope text-gray-400 mr-2"></i> Site Email
+                </label>
+                <input type="email" name="site_email" value="<?= escape($settings['site_email']) ?>"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-phone text-gray-400 mr-2"></i> Site Phone
+                </label>
+                <input type="text" name="site_phone" value="<?= escape($settings['site_phone']) ?>"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-map-marker-alt text-gray-400 mr-2"></i> Site Address
+                </label>
+                <textarea name="site_address" rows="3" 
+                          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['site_address']) ?></textarea>
+            </div>
+        </div>
     
-    <div>
-        <label class="block text-sm font-medium mb-2">Site Email</label>
-        <input type="email" name="site_email" value="<?= escape($settings['site_email']) ?>"
-               class="w-full px-4 py-2 border rounded-lg">
-    </div>
-    
-    <div>
-        <label class="block text-sm font-medium mb-2">Site Phone</label>
-        <input type="text" name="site_phone" value="<?= escape($settings['site_phone']) ?>"
-               class="w-full px-4 py-2 border rounded-lg">
-    </div>
-    
-    <div>
-        <label class="block text-sm font-medium mb-2">Site Address</label>
-        <textarea name="site_address" rows="3" class="w-full px-4 py-2 border rounded-lg"><?= escape($settings['site_address']) ?></textarea>
-    </div>
-    
-    <div>
-        <label class="block text-sm font-medium mb-2">Footer Text</label>
-        <textarea name="footer_text" rows="2" class="w-full px-4 py-2 border rounded-lg"><?= escape($settings['footer_text']) ?></textarea>
-    </div>
-    
-    <div class="flex space-x-4">
-        <button type="submit" name="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-            Save Settings
-        </button>
-    </div>
-</form>
+            <div class="col-span-2">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-file-alt text-gray-400 mr-2"></i> Footer Text
+                </label>
+                <textarea name="footer_text" rows="2" 
+                          class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['footer_text']) ?></textarea>
+            </div>
+        </div>
+        
+        <div class="pt-4 border-t border-gray-200">
+            <button type="submit" name="submit" class="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-gray-800 hover:to-gray-950 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="fas fa-save mr-2"></i>
+                Save Settings
+            </button>
+        </div>
+    </form>
+</div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 

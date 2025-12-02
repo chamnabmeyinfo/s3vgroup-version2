@@ -63,44 +63,84 @@ $pageTitle = 'Newsletter Subscribers';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<h1 class="text-3xl font-bold mb-6">Newsletter Subscribers</h1>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-paper-plane mr-3"></i>
+                    Newsletter Subscribers
+                </h1>
+                <p class="text-indigo-100 text-lg">Manage your newsletter subscriber list</p>
+            </div>
+            <a href="?export=1" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all">
+                <i class="fas fa-download mr-2"></i>
+                Export CSV
+            </a>
+        </div>
+    </div>
 
-<!-- Stats -->
-<div class="grid md:grid-cols-3 gap-6 mb-6">
-    <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-gray-600">Total Subscribers</p>
-        <p class="text-3xl font-bold"><?= $stats['total'] ?></p>
+    <!-- Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div class="bg-white/20 rounded-lg p-3">
+                    <i class="fas fa-users text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold"><?= $stats['total'] ?></div>
+                    <div class="text-blue-100 text-sm">Total</div>
+                </div>
+            </div>
+            <div class="text-blue-100 text-sm font-medium">Subscribers</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div class="bg-white/20 rounded-lg p-3">
+                    <i class="fas fa-check-circle text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold"><?= $stats['active'] ?></div>
+                    <div class="text-green-100 text-sm">Active</div>
+                </div>
+            </div>
+            <div class="text-green-100 text-sm font-medium">Active Subscribers</div>
+        </div>
+        
+        <div class="bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl shadow-lg p-6 text-white">
+            <div class="flex items-center justify-between mb-4">
+                <div class="bg-white/20 rounded-lg p-3">
+                    <i class="fas fa-ban text-2xl"></i>
+                </div>
+                <div class="text-right">
+                    <div class="text-3xl font-bold"><?= $stats['unsubscribed'] ?></div>
+                    <div class="text-gray-100 text-sm">Unsubscribed</div>
+                </div>
+            </div>
+            <div class="text-gray-100 text-sm font-medium">Unsubscribed</div>
+        </div>
     </div>
-    <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-gray-600">Active</p>
-        <p class="text-3xl font-bold text-green-600"><?= $stats['active'] ?></p>
-    </div>
-    <div class="bg-white rounded-lg shadow p-6">
-        <p class="text-gray-600">Unsubscribed</p>
-        <p class="text-3xl font-bold text-gray-600"><?= $stats['unsubscribed'] ?></p>
-    </div>
-</div>
 
-<div class="mb-6 flex justify-between items-center">
-    <div class="flex space-x-4">
-        <a href="?status=all" class="px-4 py-2 rounded <?= $statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-            All
+    <!-- Filter Tabs -->
+    <div class="bg-white rounded-lg shadow-md p-2 mb-6 inline-flex">
+        <a href="?status=all" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'all' ? 'bg-indigo-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-list mr-2"></i> All
         </a>
-        <a href="?status=active" class="px-4 py-2 rounded <?= $statusFilter === 'active' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-            Active
+        <a href="?status=active" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'active' ? 'bg-green-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-check-circle mr-2"></i> Active
         </a>
-        <a href="?status=unsubscribed" class="px-4 py-2 rounded <?= $statusFilter === 'unsubscribed' ? 'bg-blue-600 text-white' : 'bg-gray-200' ?>">
-            Unsubscribed
+        <a href="?status=unsubscribed" class="px-6 py-3 rounded-lg font-semibold transition-all <?= $statusFilter === 'unsubscribed' ? 'bg-gray-600 text-white shadow-lg' : 'text-gray-600 hover:bg-gray-100' ?>">
+            <i class="fas fa-ban mr-2"></i> Unsubscribed
         </a>
     </div>
-    <a href="?export=1" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
-        <i class="fas fa-download mr-2"></i> Export CSV
-    </a>
-</div>
 
-<div class="bg-white rounded-lg shadow overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
+    <!-- Subscribers Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>

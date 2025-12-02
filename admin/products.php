@@ -193,23 +193,46 @@ $sortOptions = [
 $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', 'actions'];
 ?>
 
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Products</h1>
-        <div class="flex gap-2">
-            <a href="<?= url('admin/product-edit.php') ?>" class="btn-primary">
-                <i class="fas fa-plus mr-2"></i> Add New Product
-            </a>
-            <a href="<?= url('admin/products-export.php') ?>" class="btn-secondary">
-                <i class="fas fa-download mr-2"></i> Export CSV
-            </a>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-box mr-3"></i>
+                    Products Management
+                </h1>
+                <p class="text-blue-100 text-lg">Manage your product catalog</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <a href="<?= url('admin/products-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all">
+                    <i class="fas fa-download mr-2"></i>
+                    Export CSV
+                </a>
+                <a href="<?= url('admin/product-edit.php') ?>" class="bg-white text-blue-600 hover:bg-blue-50 px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                    <i class="fas fa-plus mr-2"></i>
+                    Add New Product
+                </a>
+            </div>
         </div>
     </div>
-    
+
     <?php if ($message): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?= escape($message) ?>
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($message) ?></span>
         </div>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($error): ?>
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($error) ?></span>
+        </div>
+    </div>
     <?php endif; ?>
     
     <!-- Advanced Filters -->
@@ -238,10 +261,25 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
     </div>
     <?php endif; ?>
     
-    <div class="mb-4 flex justify-between items-center">
-        <div class="text-gray-600">
-            Showing <?= count($products) ?> of <?= count($allProducts) ?> products
-        </div>
+    <!-- Stats Bar -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center space-x-6">
+                <div>
+                    <span class="text-sm text-gray-600">Total Products:</span>
+                    <span class="ml-2 font-bold text-gray-900"><?= count($allProducts) ?></span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Showing:</span>
+                    <span class="ml-2 font-bold text-blue-600"><?= count($products) ?></span>
+                </div>
+                <?php if (count($products) < count($allProducts)): ?>
+                <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                    <i class="fas fa-filter mr-1"></i>
+                    Filtered
+                </div>
+                <?php endif; ?>
+            </div>
         <div id="bulkActions" class="hidden flex gap-2">
             <select id="bulkActionSelect" class="px-4 py-2 border rounded-lg">
                 <option value="">Bulk Actions</option>
@@ -256,9 +294,11 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
         </div>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <!-- Products Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
                     <?php if (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])): ?>
                     <th class="px-6 py-3 text-left" data-column="checkbox">
@@ -318,24 +358,43 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($products)): ?>
                     <tr>
-                        <td colspan="15" class="px-6 py-4 text-center text-gray-500">No products found.</td>
+                        <td colspan="15" class="px-6 py-12 text-center">
+                            <div class="flex flex-col items-center">
+                                <div class="bg-gray-100 rounded-full p-6 mb-4">
+                                    <i class="fas fa-box text-4xl text-gray-400"></i>
+                                </div>
+                                <h3 class="text-lg font-semibold text-gray-700 mb-2">No Products Found</h3>
+                                <p class="text-gray-500 mb-4">Try adjusting your filters or add a new product.</p>
+                                <a href="<?= url('admin/product-edit.php') ?>" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
+                                    <i class="fas fa-plus mr-2"></i>
+                                    Add New Product
+                                </a>
+                            </div>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
-                    <tr>
+                    <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-100">
                         <?php if (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])): ?>
                         <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox">
-                            <input type="checkbox" class="product-checkbox" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
+                            <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
                         </td>
                         <?php endif; ?>
                         
                         <?php if (in_array('image', $selectedColumns) || empty($_GET['columns'])): ?>
                         <td class="px-6 py-4 whitespace-nowrap" data-column="image">
                             <?php if (!empty($product['image'])): ?>
-                                <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
-                                     alt="" class="h-12 w-12 object-cover rounded">
+                                <div class="relative group">
+                                    <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
+                                         alt="" class="h-14 w-14 object-cover rounded-lg border-2 border-gray-200 group-hover:border-blue-400 transition-all shadow-sm">
+                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <i class="fas fa-eye text-white text-xs"></i>
+                                    </div>
+                                </div>
                             <?php else: ?>
-                                <span class="text-gray-400 text-xs">No Image</span>
+                                <div class="h-14 w-14 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+                                    <i class="fas fa-image text-gray-400 text-sm"></i>
+                                </div>
                             <?php endif; ?>
                         </td>
                         <?php endif; ?>
@@ -432,25 +491,27 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                         <?php endif; ?>
                         
                         <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2" data-column="actions">
-                            <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
-                               class="text-blue-600 hover:text-blue-900" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="<?= url('admin/product-duplicate.php?id=' . $product['id']) ?>" 
-                               onclick="return confirm('Duplicate this product?')" 
-                               class="text-purple-600 hover:text-purple-900" title="Duplicate">
-                                <i class="fas fa-copy"></i>
-                            </a>
-                            <a href="?toggle_featured=<?= $product['id'] ?>" 
-                               class="text-yellow-600 hover:text-yellow-900" title="Toggle Featured">
-                                <i class="fas fa-star"></i>
-                            </a>
-                            <a href="?delete=<?= $product['id'] ?>" 
-                               onclick="return confirm('Are you sure?')" 
-                               class="text-red-600 hover:text-red-900" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="actions">
+                            <div class="flex items-center space-x-2">
+                                <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
+                                   class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </a>
+                                <a href="<?= url('admin/product-duplicate.php?id=' . $product['id']) ?>" 
+                                   onclick="return confirm('Duplicate this product?')" 
+                                   class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all" title="Duplicate">
+                                    <i class="fas fa-copy text-sm"></i>
+                                </a>
+                                <a href="?toggle_featured=<?= $product['id'] ?>" 
+                                   class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-lg transition-all" title="Toggle Featured">
+                                    <i class="fas fa-star text-sm"></i>
+                                </a>
+                                <a href="?delete=<?= $product['id'] ?>" 
+                                   onclick="return confirm('Are you sure you want to delete this product?')" 
+                                   class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all" title="Delete">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </a>
+                            </div>
                         </td>
                         <?php endif; ?>
                     </tr>

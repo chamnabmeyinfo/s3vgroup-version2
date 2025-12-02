@@ -26,9 +26,35 @@ $log->info("========================================");
 $errors = [];
 $warnings = [];
 
-// Step 0: Cleanup (optional, if enabled in config)
+// Step 0: Pull Database from Remote (if enabled)
+if (($config['database_sync']['auto_pull_before_deploy'] ?? true) && 
+    ($config['database_remote']['use_remote'] ?? false)) {
+    $log->info("\n[0/6] Pulling database from remote (priority: remote server)...");
+    try {
+        require_once __DIR__ . '/bootstrap/app.php';
+        require_once __DIR__ . '/app/Services/DatabaseSyncService.php';
+        $syncService = new \App\Services\DatabaseSyncService();
+        $pullResult = $syncService->pullFromRemote($config['database_remote'] ?? [], [
+            'backup_before_pull' => true,
+            'merge_strategy' => 'remote_priority',
+        ]);
+        if ($pullResult['success']) {
+            $log->info("  ✓ Database pulled from remote: " . $pullResult['message']);
+        } else {
+            $log->warning("  ⚠️  Database pull failed: " . $pullResult['message']);
+            $log->warning("  Continuing with deployment...");
+        }
+    } catch (Exception $e) {
+        $log->warning("  ⚠️  Database pull error: " . $e->getMessage());
+        $log->warning("  Continuing with deployment...");
+    }
+} else {
+    $log->info("\n[0/6] Database pull skipped (disabled or remote not configured)");
+}
+
+// Step 1: Cleanup (optional, if enabled in config)
 if (($config['cleanup']['enabled'] ?? false)) {
-    $log->info("\n[0/5] Cleaning unnecessary files...");
+    $log->info("\n[1/6] Cleaning unnecessary files...");
     try {
         require_once __DIR__ . '/deploy-cleanup.php';
         $cleanup = new DeploymentCleanup();
@@ -44,12 +70,12 @@ if (($config['cleanup']['enabled'] ?? false)) {
         $log->warning("Continuing deployment anyway...");
     }
 } else {
-    $log->info("\n[0/5] Cleanup skipped (disabled in config)");
+    $log->info("\n[1/6] Cleanup skipped (disabled in config)");
 }
 
-// Step 1: Pre-Deployment Validation
+// Step 2: Pre-Deployment Validation
 if ($config['validation']['enabled'] ?? true) {
-    $log->info("\n[1/5] Pre-Deployment Validation...");
+    $log->info("\n[2/6] Pre-Deployment Validation...");
     try {
         require_once __DIR__ . '/deploy-validation.php';
         $validationResult = validateBeforeDeploy($config, $log);
@@ -68,12 +94,12 @@ if ($config['validation']['enabled'] ?? true) {
         $log->warning("Continuing deployment anyway...");
     }
 } else {
-    $log->info("\n[1/5] Pre-deployment validation skipped (disabled in config)");
+    $log->info("\n[2/6] Pre-deployment validation skipped (disabled in config)");
 }
 
-// Step 2: Git Push (non-critical - failure is a warning, not an error)
+// Step 3: Git Push (non-critical - failure is a warning, not an error)
 if ($config['git']['enabled'] ?? true) {
-    $log->info("\n[2/5] Pushing to GitHub...");
+    $log->info("\n[3/6] Pushing to GitHub...");
     try {
         require_once __DIR__ . '/deploy-git.php';
         $gitResult = deployGit($config, $log);
@@ -88,12 +114,12 @@ if ($config['git']['enabled'] ?? true) {
         $log->warning("  ⚠️  Git error (non-critical): " . $e->getMessage());
     }
 } else {
-    $log->info("\n[2/5] Git push skipped (disabled in config)");
+    $log->info("\n[3/6] Git push skipped (disabled in config)");
 }
 
-// Step 3: FTP Upload (Smart) - CRITICAL: Failure is an error
+// Step 4: FTP Upload (Smart) - CRITICAL: Failure is an error
 if ($config['ftp']['enabled'] ?? true) {
-    $log->info("\n[3/5] Uploading via FTP (Smart Mode)...");
+    $log->info("\n[4/6] Uploading via FTP (Smart Mode)...");
     try {
         // Use smart FTP module (with change detection, conflict detection, backup)
         require_once __DIR__ . '/deploy-smart-ftp.php';
@@ -114,10 +140,10 @@ if ($config['ftp']['enabled'] ?? true) {
         $log->error("FTP error: " . $e->getMessage());
     }
 } else {
-    $log->info("\n[3/5] FTP upload skipped (disabled in config)");
+    $log->info("\n[4/6] FTP upload skipped (disabled in config)");
 }
 
-// Step 4: Database Operations (Optional)
+// Step 5: Database Operations (Optional)
 $dbOperation = null;
 if (($config['database_import']['enabled'] ?? false) && ($config['database_import']['auto_import'] ?? false)) {
     $dbOperation = 'import';
@@ -177,11 +203,11 @@ if ($dbOperation === 'import') {
         $log->warning("  Continuing with deployment...");
     }
 } else {
-    $log->info("\n[4/5] Database operations skipped (disabled or not auto-enabled)");
+    $log->info("\n[5/6] Database operations skipped (disabled or not auto-enabled)");
 }
 
-// Step 5: Summary
-$log->info("\n[5/5] Finalizing...");
+// Step 6: Summary
+$log->info("\n[6/6] Finalizing...");
 $log->info("========================================");
 
 // Show warnings if any

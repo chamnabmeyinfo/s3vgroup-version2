@@ -2,6 +2,14 @@
 
 A comprehensive, modern e-commerce platform for selling forklifts and factory equipment with advanced features, role management, and analytics.
 
+## 👨‍💻 For Developers
+
+**New to the Developer Panel?** Check out the complete guide: **[DEVELOPER-GUIDE.md](DEVELOPER-GUIDE.md)**
+
+- **Developer Panel Login:** `localhost:8080/developer/login.php`
+- **Default Credentials:** Username: `developer`, Password: `dev@2024!Secure`
+- **Features:** Database sync, deployment, backup management, and more!
+
 ## 🚀 Features
 
 ### Frontend

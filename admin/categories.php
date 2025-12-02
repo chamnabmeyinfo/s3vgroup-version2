@@ -118,30 +118,66 @@ $sortOptions = [
 $defaultColumns = ['name', 'slug', 'status', 'actions'];
 ?>
 
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Categories</h1>
-        <a href="<?= url('admin/category-edit.php') ?>" class="btn-primary">
-            <i class="fas fa-plus mr-2"></i> Add New Category
-        </a>
-    </div>
-    
-    <?php if ($message): ?>
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            <?= escape($message) ?>
+<div class="max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-green-600 to-emerald-600 rounded-xl shadow-xl p-8 mb-6 text-white">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold mb-2">
+                    <i class="fas fa-tags mr-3"></i>
+                    Categories Management
+                </h1>
+                <p class="text-green-100 text-lg">Organize your products into categories</p>
+            </div>
+            <a href="<?= url('admin/category-edit.php') ?>" class="bg-white text-green-600 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl">
+                <i class="fas fa-plus mr-2"></i>
+                Add New Category
+            </a>
         </div>
+    </div>
+
+    <?php if ($message): ?>
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($message) ?></span>
+        </div>
+    </div>
+    <?php endif; ?>
+    
+    <?php if ($error): ?>
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($error) ?></span>
+        </div>
+    </div>
     <?php endif; ?>
     
     <!-- Advanced Filters -->
     <?php include __DIR__ . '/includes/advanced-filters.php'; ?>
     
-    <div class="mb-4 text-gray-600">
-        Showing <?= count($categories) ?> of <?= count($allCategories) ?> categories
+    <!-- Stats Bar -->
+    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-6">
+                <div>
+                    <span class="text-sm text-gray-600">Total Categories:</span>
+                    <span class="ml-2 font-bold text-gray-900"><?= count($allCategories) ?></span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Showing:</span>
+                    <span class="ml-2 font-bold text-green-600"><?= count($categories) ?></span>
+                </div>
+            </div>
+        </div>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
+    <!-- Categories Table -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
                     <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name">Name</th>
@@ -228,16 +264,18 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                         <?php endif; ?>
                         
                         <?php if (in_array('actions', $selectedColumns) || empty($_GET['columns'])): ?>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2" data-column="actions">
-                            <a href="<?= url('admin/category-edit.php?id=' . $category['id']) ?>" 
-                               class="text-blue-600 hover:text-blue-900" title="Edit">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="?delete=<?= $category['id'] ?>" 
-                               onclick="return confirm('Are you sure?')" 
-                               class="text-red-600 hover:text-red-900" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </a>
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="actions">
+                            <div class="flex items-center space-x-2">
+                                <a href="<?= url('admin/category-edit.php?id=' . $category['id']) ?>" 
+                                   class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
+                                    <i class="fas fa-edit text-sm"></i>
+                                </a>
+                                <a href="?delete=<?= $category['id'] ?>" 
+                                   onclick="return confirm('Are you sure you want to delete this category?')" 
+                                   class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all" title="Delete">
+                                    <i class="fas fa-trash text-sm"></i>
+                                </a>
+                            </div>
                         </td>
                         <?php endif; ?>
                     </tr>

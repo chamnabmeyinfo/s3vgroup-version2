@@ -18,8 +18,14 @@
                         <?php if (session('admin_role_name')): ?>
                             <span class="text-sm opacity-75">Role: <?= escape(session('admin_role_name')) ?></span>
                         <?php endif; ?>
+                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
+                            <i class="fas fa-code mr-1"></i> Developer
+                        </a>
                         <a href="<?= url('admin/logout.php') ?>" class="hover:underline">Logout</a>
                     <?php else: ?>
+                        <a href="<?= url('developer/login.php') ?>" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold">
+                            <i class="fas fa-code mr-1"></i> Developer Login
+                        </a>
                         <a href="<?= url('admin/login.php') ?>" class="hover:underline">Login</a>
                     <?php endif; ?>
                 </div>
@@ -35,9 +41,6 @@
                 </a>
                 <a href="<?= url('admin/products.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-box mr-2"></i> Products
-                </a>
-                <a href="<?= url('admin/import-unforklift.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-download mr-2"></i> Import from UN Forklift
                 </a>
                 <a href="<?= url('admin/categories.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-tags mr-2"></i> Categories
@@ -62,9 +65,6 @@
                 </a>
                 <a href="<?= url('admin/advanced-analytics.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-chart-bar mr-2"></i> Advanced Analytics
-                </a>
-                <a href="<?= url('admin/backup.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-database mr-2"></i> Backup
                 </a>
                 <a href="<?= url('admin/logs.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-file-alt mr-2"></i> System Logs
@@ -112,9 +112,6 @@
                 <a href="<?= url('admin/tools.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-tools mr-2"></i> Optional Tools
                 </a>
-                <a href="<?= url('admin/database-upload.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
-                    <i class="fas fa-cloud-upload-alt mr-2"></i> Database Upload
-                </a>
                 <a href="<?= url('admin/settings.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-cog mr-2"></i> Settings
                 </a>
@@ -123,6 +120,10 @@
                 </a>
                 <a href="<?= url() ?>" target="_blank" class="block px-4 py-2 rounded hover:bg-gray-700">
                     <i class="fas fa-external-link-alt mr-2"></i> View Website
+                </a>
+                <div class="border-t border-gray-700 my-2"></div>
+                <a href="<?= url('developer/login.php') ?>" class="block px-4 py-2 rounded hover:bg-gray-700 bg-purple-900/30 border border-purple-500/30">
+                    <i class="fas fa-code mr-2"></i> Developer Panel
                 </a>
             </nav>
         </aside>
