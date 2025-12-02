@@ -13,10 +13,20 @@ class DatabaseSyncService {
     private $db;
     private $backupService;
     private $syncLog = [];
+    private $logFile;
     
     public function __construct() {
-        $this->db = Connection::getInstance();
-        $this->backupService = new BackupService();
+        try {
+            $this->db = Connection::getInstance();
+            $this->backupService = new BackupService();
+            $this->logFile = __DIR__ . '/../../storage/logs/database_sync.log';
+            if (!is_dir(dirname($this->logFile))) {
+                @mkdir(dirname($this->logFile), 0755, true);
+            }
+        } catch (\Exception $e) {
+            // Silently handle initialization errors
+            error_log('DatabaseSyncService initialization error: ' . $e->getMessage());
+        }
     }
     
     /**
@@ -267,9 +277,20 @@ class DatabaseSyncService {
      * Get list of tables in local database
      */
     private function getTableList() {
-        $tables = $this->db->fetchAll("SHOW TABLES");
-        $tableColumn = array_key_first(reset($tables));
-        return array_column($tables, $tableColumn);
+        try {
+            if (!$this->db) {
+                return [];
+            }
+            $tables = $this->db->fetchAll("SHOW TABLES");
+            if (empty($tables)) {
+                return [];
+            }
+            $tableColumn = array_key_first(reset($tables));
+            return array_column($tables, $tableColumn);
+        } catch (\Exception $e) {
+            error_log("DatabaseSyncService::getTableList error: " . $e->getMessage());
+            return [];
+        }
     }
     
     /**
@@ -353,11 +374,28 @@ class DatabaseSyncService {
      * Get sync status
      */
     public function getSyncStatus($remoteConfig) {
-        return [
-            'last_sync' => $this->getLastSyncTime(),
-            'local_tables' => count($this->getTableList()),
-            'sync_enabled' => true,
-        ];
+        try {
+            return [
+                'last_sync' => $this->getLastSyncTime(),
+                'local_tables' => count($this->getTableList()),
+                'remote_tables' => 0,
+                'sync_enabled' => true,
+                'needs_pull' => false,
+                'needs_push' => false,
+                'differences' => []
+            ];
+        } catch (\Exception $e) {
+            error_log("DatabaseSyncService::getSyncStatus error: " . $e->getMessage());
+            return [
+                'last_sync' => null,
+                'local_tables' => 0,
+                'remote_tables' => 0,
+                'sync_enabled' => false,
+                'needs_pull' => false,
+                'needs_push' => false,
+                'differences' => []
+            ];
+        }
     }
     
     /**

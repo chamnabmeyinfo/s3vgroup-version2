@@ -30,83 +30,25 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <main>
-    <!-- Hero Slider Section -->
-    <section class="hero-slider relative">
-        <div class="swiper heroSwiper">
-            <div class="swiper-wrapper">
-                <!-- Slide 1 -->
-                <div class="swiper-slide hero-slide" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920') center/cover;">
-                    <div class="container mx-auto px-4">
-                        <div class="hero-slide-content max-w-4xl mx-auto text-center text-white py-20 md:py-32">
-                            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
-                                Premium Forklifts & Industrial Equipment
-                            </h1>
-                            <p class="text-xl md:text-2xl mb-8 text-blue-100">
-                                Quality equipment for your warehouse and factory needs. Trusted by industry leaders worldwide.
-                            </p>
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a href="<?= url('products.php') ?>" class="btn-primary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-box mr-2"></i>Browse Products
-                                </a>
-                                <a href="<?= url('quote.php') ?>" class="btn-secondary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-calculator mr-2"></i>Get a Quote
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Slide 2 -->
-                <div class="swiper-slide hero-slide" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=1920') center/cover;">
-                    <div class="container mx-auto px-4">
-                        <div class="hero-slide-content max-w-4xl mx-auto text-center text-white py-20 md:py-32">
-                            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
-                                Industrial Solutions for Every Need
-                            </h1>
-                            <p class="text-xl md:text-2xl mb-8 text-blue-100">
-                                From forklifts to pallet trucks, we have the equipment to power your operations.
-                            </p>
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a href="<?= url('products.php') ?>" class="btn-primary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-shopping-bag mr-2"></i>Shop Now
-                                </a>
-                                <a href="<?= url('contact.php') ?>" class="btn-secondary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-phone mr-2"></i>Contact Us
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Slide 3 -->
-                <div class="swiper-slide hero-slide" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.8)), url('https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1920') center/cover;">
-                    <div class="container mx-auto px-4">
-                        <div class="hero-slide-content max-w-4xl mx-auto text-center text-white py-20 md:py-32">
-                            <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
-                                Expert Service & Support
-                            </h1>
-                            <p class="text-xl md:text-2xl mb-8 text-blue-100">
-                                Our team of experts is here to help you find the perfect equipment for your business.
-                            </p>
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                <a href="<?= url('products.php') ?>" class="btn-primary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-search mr-2"></i>Explore Products
-                                </a>
-                                <a href="<?= url('quote.php') ?>" class="btn-secondary inline-block transform hover:scale-105 transition-transform">
-                                    <i class="fas fa-file-alt mr-2"></i>Request Quote
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Hero Section -->
+    <section class="hero bg-gradient-to-br from-blue-900 via-blue-800 to-gray-900 text-white py-20 md:py-32">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in">
+                    Premium Forklifts & Industrial Equipment
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 text-blue-100">
+                    Quality equipment for your warehouse and factory needs. Trusted by industry leaders worldwide.
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="<?= url('products.php') ?>" class="btn-primary inline-block">
+                        Browse Products
+                    </a>
+                    <a href="<?= url('contact.php') ?>" class="btn-secondary inline-block">
+                        Get a Quote
+                    </a>
                 </div>
             </div>
-            
-            <!-- Navigation -->
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
-            
-            <!-- Pagination -->
-            <div class="swiper-pagination"></div>
         </div>
     </section>
 

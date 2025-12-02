@@ -5,14 +5,32 @@
  */
 
 // Ensure we're using developer session (completely separate from admin)
+// Set session name BEFORE starting session
 if (session_status() === PHP_SESSION_NONE) {
     session_name('developer_session');
     session_start();
+} else {
+    // If session is already started, we need to close it and restart with correct name
+    if (session_name() !== 'developer_session') {
+        session_write_close();
+        session_name('developer_session');
+        session_start();
+    }
 }
 
 // Check if developer is logged in
 if (!isset($_SESSION['developer_logged_in']) || $_SESSION['developer_logged_in'] !== true) {
-    header('Location: ' . url('developer/login.php'));
+    // Make sure bootstrap is loaded before using url()
+    if (!function_exists('url')) {
+        require_once __DIR__ . '/../../bootstrap/app.php';
+    }
+    // Use absolute URL if url() function is not available
+    if (function_exists('url')) {
+        header('Location: ' . url('developer/login.php'));
+    } else {
+        // Fallback to relative URL
+        header('Location: /developer/login.php');
+    }
     exit;
 }
 

@@ -4,8 +4,27 @@
  * Main dashboard for developer tools
  */
 
-require_once __DIR__ . '/../bootstrap/app.php';
-require_once __DIR__ . '/includes/header.php';
+// Set developer session name BEFORE loading bootstrap
+// Session name must be set before session_start() is called
+if (session_status() === PHP_SESSION_NONE) {
+    session_name('developer_session');
+}
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+try {
+    require_once __DIR__ . '/../bootstrap/app.php';
+} catch (Exception $e) {
+    die("Bootstrap Error: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
+}
+
+try {
+    require_once __DIR__ . '/includes/header.php';
+} catch (Exception $e) {
+    die("Header Error: " . $e->getMessage() . "<br>File: " . $e->getFile() . "<br>Line: " . $e->getLine());
+}
 
 use App\Services\DatabaseSyncService;
 
@@ -19,8 +38,20 @@ if (file_exists($configFile)) {
 }
 
 // Get sync status
-$syncService = new DatabaseSyncService();
-$syncStatus = $syncService->getSyncStatus($config['database_remote'] ?? []);
+try {
+    $syncService = new DatabaseSyncService();
+    $syncStatus = $syncService->getSyncStatus($config['database_remote'] ?? []);
+} catch (Exception $e) {
+    // If DatabaseSyncService fails, use default values
+    $syncStatus = [
+        'local_tables' => 0,
+        'remote_tables' => 0,
+        'last_sync' => null,
+        'needs_pull' => false,
+        'needs_push' => false,
+        'differences' => []
+    ];
+}
 
 // Get deployment status
 $deployLogFile = __DIR__ . '/../deploy-log.txt';
