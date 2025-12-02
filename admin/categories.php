@@ -95,6 +95,58 @@ $availableColumns = [
     'actions' => 'Actions'
 ];
 
+// Calculate stats for mini dashboard
+$totalCategories = count($allCategories);
+$activeCategories = count(array_filter($allCategories, fn($c) => $c['is_active'] == 1));
+$inactiveCategories = $totalCategories - $activeCategories;
+
+// Count products per category
+$categoriesWithProducts = 0;
+foreach ($allCategories as $cat) {
+    $productCount = db()->fetchOne(
+        "SELECT COUNT(*) as count FROM products WHERE category_id = :id",
+        ['id' => $cat['id']]
+    )['count'] ?? 0;
+    if ($productCount > 0) {
+        $categoriesWithProducts++;
+    }
+}
+
+$miniStats = [
+    [
+        'label' => 'Total Categories',
+        'value' => number_format($totalCategories),
+        'icon' => 'fas fa-tags',
+        'color' => 'from-green-500 to-emerald-600',
+        'description' => 'All categories',
+        'link' => url('admin/categories.php')
+    ],
+    [
+        'label' => 'Active Categories',
+        'value' => number_format($activeCategories),
+        'icon' => 'fas fa-check-circle',
+        'color' => 'from-blue-500 to-cyan-600',
+        'description' => 'Currently active',
+        'link' => url('admin/categories.php?status=active')
+    ],
+    [
+        'label' => 'With Products',
+        'value' => number_format($categoriesWithProducts),
+        'icon' => 'fas fa-box',
+        'color' => 'from-purple-500 to-indigo-600',
+        'description' => 'Have products assigned',
+        'link' => url('admin/categories.php')
+    ],
+    [
+        'label' => 'Inactive',
+        'value' => number_format($inactiveCategories),
+        'icon' => 'fas fa-ban',
+        'color' => 'from-gray-500 to-gray-600',
+        'description' => 'Currently inactive',
+        'link' => url('admin/categories.php?status=inactive')
+    ]
+];
+
 $pageTitle = 'Categories';
 include __DIR__ . '/includes/header.php';
 

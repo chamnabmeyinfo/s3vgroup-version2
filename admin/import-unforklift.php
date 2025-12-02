@@ -320,14 +320,14 @@ include __DIR__ . '/includes/header.php';
         <div class="col-12">
             <h1 class="h3 mb-4">Import Products from UN Forklift</h1>
             
-            <?php if ($message): ?>
+            <?php if (!empty($message)): ?>
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <?php echo htmlspecialchars($message); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
             
-            <?php if ($error): ?>
+            <?php if (!empty($error)): ?>
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     <?php echo htmlspecialchars($error); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>

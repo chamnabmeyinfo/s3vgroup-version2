@@ -2,6 +2,8 @@
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
+use App\Services\ColorExtractor;
+
 $message = '';
 $error = '';
 
@@ -46,6 +48,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'value' => $logoPath,
                         'type' => 'image'
                     ]);
+                }
+                
+                // Extract colors from logo
+                try {
+                    $colorExtractor = new ColorExtractor();
+                    $colorPalette = $colorExtractor->getColorPalette($filepath);
+                    
+                    // Save color palette to settings
+                    $colorKeys = ['logo_primary_color', 'logo_secondary_color', 'logo_accent_color', 'logo_tertiary_color', 'logo_quaternary_color'];
+                    $colorValues = array_values($colorPalette);
+                    
+                    foreach ($colorKeys as $index => $key) {
+                        $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
+                        if ($existing) {
+                            db()->update('settings', ['value' => $colorValues[$index]], '`key` = :key', ['key' => $key]);
+                        } else {
+                            db()->insert('settings', [
+                                'key' => $key,
+                                'value' => $colorValues[$index],
+                                'type' => 'color'
+                            ]);
+                        }
+                    }
+                    
+                    // Save full palette as JSON for easy access
+                    $paletteJson = json_encode($colorPalette);
+                    $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => 'logo_color_palette']);
+                    if ($existing) {
+                        db()->update('settings', ['value' => $paletteJson], '`key` = :key', ['key' => 'logo_color_palette']);
+                    } else {
+                        db()->insert('settings', [
+                            'key' => 'logo_color_palette',
+                            'value' => $paletteJson,
+                            'type' => 'json'
+                        ]);
+                    }
+                    
+                    $message = 'Logo uploaded and colors extracted successfully.';
+                } catch (Exception $e) {
+                    $message = 'Logo uploaded, but color extraction failed: ' . $e->getMessage();
                 }
             } else {
                 $error = 'Failed to upload logo.';
@@ -115,7 +157,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
         <div class="flex items-center">
             <i class="fas fa-check-circle mr-2 text-xl"></i>
@@ -124,7 +166,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
         <div class="flex items-center">
             <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
@@ -139,6 +181,46 @@ include __DIR__ . '/includes/header.php';
             <label class="block text-sm font-semibold text-gray-700 mb-4">
                 <i class="fas fa-image text-blue-600 mr-2"></i> Company Logo
             </label>
+            
+            <!-- Extracted Colors Display -->
+            <?php 
+            $colorPalette = null;
+            if (!empty($settings['logo_color_palette'])) {
+                $colorPalette = json_decode($settings['logo_color_palette'], true);
+            } elseif (!empty($settings['logo_primary_color'])) {
+                $colorPalette = [
+                    'primary' => $settings['logo_primary_color'] ?? '#2563eb',
+                    'secondary' => $settings['logo_secondary_color'] ?? '#1e40af',
+                    'accent' => $settings['logo_accent_color'] ?? '#3b82f6',
+                    'tertiary' => $settings['logo_tertiary_color'] ?? '#60a5fa',
+                    'quaternary' => $settings['logo_quaternary_color'] ?? '#93c5fd',
+                ];
+            }
+            ?>
+            
+            <?php if ($colorPalette): ?>
+            <div class="mb-4 p-4 bg-white rounded-lg border border-gray-200">
+                <h4 class="text-sm font-semibold text-gray-700 mb-3">
+                    <i class="fas fa-palette text-purple-600 mr-2"></i> Extracted Color Palette
+                </h4>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+                    <?php foreach ($colorPalette as $name => $color): ?>
+                    <div class="text-center">
+                        <div class="w-full h-16 rounded-lg shadow-md mb-2 border-2 border-gray-200" style="background-color: <?= escape($color) ?>"></div>
+                        <p class="text-xs font-medium text-gray-600 capitalize"><?= escape($name) ?></p>
+                        <p class="text-xs text-gray-500 font-mono"><?= escape($color) ?></p>
+                        <button type="button" onclick="copyColor('<?= escape($color) ?>')" class="mt-1 text-xs text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-copy"></i> Copy
+                        </button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <p class="text-xs text-gray-500 mt-3">
+                    <i class="fas fa-info-circle mr-1"></i> These colors are automatically extracted from your logo and applied throughout the website.
+                </p>
+            </div>
+            <?php endif; ?>
+            
             <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
                 <div class="flex-shrink-0">
                     <?php 
@@ -165,7 +247,7 @@ include __DIR__ . '/includes/header.php';
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-white">
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle mr-1"></i>
-                        Recommended: PNG or SVG with transparent background. Max size: 5MB
+                        Recommended: PNG or SVG with transparent background. Max size: 5MB. Colors will be automatically extracted.
                     </p>
                 </div>
             </div>
@@ -223,6 +305,21 @@ include __DIR__ . '/includes/header.php';
     </form>
 
     <script>
+    function copyColor(color) {
+        navigator.clipboard.writeText(color).then(function() {
+            alert('Color code copied: ' + color);
+        }).catch(function() {
+            // Fallback for older browsers
+            const textarea = document.createElement('textarea');
+            textarea.value = color;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('Color code copied: ' + color);
+        });
+    }
+    
     function previewLogo(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();

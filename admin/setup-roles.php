@@ -243,13 +243,13 @@ include __DIR__ . '/includes/header.php';
 <div class="p-6">
     <h1 class="text-3xl font-bold mb-6">Role Management Setup</h1>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
             <?= $message ?>
         </div>
     <?php endif; ?>
     
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             <?= $error ?>
         </div>

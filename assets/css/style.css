@@ -7,24 +7,72 @@ html {
 
 /* Button Styles */
 .btn-primary {
-    @apply bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors duration-200 inline-block;
+    background-color: var(--logo-primary, #2563eb) !important;
+    color: white !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.btn-primary:hover {
+    background-color: var(--logo-secondary, #1e40af) !important;
 }
 
 .btn-secondary {
-    @apply bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition-colors duration-200 inline-block;
+    background-color: white !important;
+    color: var(--logo-primary, #2563eb) !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    border: 2px solid var(--logo-primary, #2563eb) !important;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background-color: color-mix(in srgb, var(--logo-primary, #2563eb) 10%, white) !important;
 }
 
 .btn-white {
-    @apply bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors duration-200 inline-block;
+    background-color: white !important;
+    color: var(--logo-primary, #2563eb) !important;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.btn-white:hover {
+    background-color: #f3f4f6 !important;
 }
 
 .btn-primary-sm {
-    @apply bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-700 transition-colors duration-200 inline-block;
+    background-color: var(--logo-primary, #2563eb) !important;
+    color: white !important;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.btn-primary-sm:hover {
+    background-color: var(--logo-secondary, #1e40af) !important;
 }
 
 /* Navigation Links */
 .nav-link {
-    @apply text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200;
+    color: #374151 !important;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--logo-primary, #2563eb) !important;
 }
 
 /* Product Cards */
@@ -332,20 +380,47 @@ img {
     max-width: 1200px;
 }
 
-/* Mobile Menu Animation */
+/* Mobile Menu Animation - Ultra Modern with Glassmorphism */
 #mobile-menu {
-    max-height: 0;
-    overflow: hidden;
-    transition: max-height 0.3s ease-out;
+    transform: translateY(-100%);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
 }
 
 #mobile-menu.show {
-    max-height: 500px;
+    transform: translateY(0);
+}
+
+/* Enhanced mobile menu item animations */
+#mobile-menu.show .mobile-menu-item-ultra {
+    animation: slideInLeft 0.5s ease-out forwards;
+    opacity: 0;
+}
+
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(1) { animation-delay: 0.1s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(2) { animation-delay: 0.15s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(3) { animation-delay: 0.2s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(4) { animation-delay: 0.25s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(5) { animation-delay: 0.3s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(6) { animation-delay: 0.35s; }
+#mobile-menu.show .mobile-menu-item-ultra:nth-child(7) { animation-delay: 0.4s; }
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 50%, #111827 100%);
+    background: linear-gradient(135deg, var(--logo-secondary, #1e40af) 0%, var(--logo-primary, #2563eb) 50%, #111827 100%);
 }
 
 /* Table Styles */
@@ -357,9 +432,75 @@ table tbody tr:nth-child(even) {
     @apply bg-gray-50;
 }
 
-/* Modern Navigation Styles */
+/* Ultra Modern Navigation Styles with Glassmorphism */
+.nav-link-ultra {
+    @apply text-gray-700 hover:text-blue-600 font-semibold transition-all duration-300 relative px-4 py-2.5 rounded-xl;
+    position: relative;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.nav-link-indicator {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #2563eb, #4f46e5, #7c3aed);
+    border-radius: 2px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(-50%);
+    opacity: 0;
+}
+
+.nav-link-ultra:hover .nav-link-indicator {
+    width: 70%;
+    opacity: 1;
+}
+
+.nav-link-ultra:hover {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.mobile-menu-item-ultra {
+    @apply text-gray-800 font-semibold transition-all duration-300 flex items-center;
+    padding: 0.875rem 1.25rem;
+    border-radius: 0.75rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.mobile-menu-item-ultra:hover {
+    transform: translateX(4px);
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobile-menu-item-ultra i {
+    transition: transform 0.3s ease;
+}
+
+/* Legacy support */
 .nav-link-modern {
-    @apply text-gray-700 hover:text-blue-600 font-medium transition-all duration-200 relative;
+    color: #374151 !important;
+    font-weight: 500;
+    transition: all 0.2s;
+    position: relative;
+}
+
+.nav-link:hover {
+    color: var(--logo-primary, #2563eb) !important;
 }
 
 .nav-link-modern::after {

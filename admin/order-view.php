@@ -67,7 +67,7 @@ include __DIR__ . '/includes/header.php';
         </a>
     </div>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
         <?= escape($message) ?>
     </div>

@@ -82,6 +82,10 @@ include __DIR__ . '/includes/header.php';
                     <i class="fas fa-redo"></i>
                     <span class="hidden sm:inline">Reset</span>
                 </button>
+                <a href="<?= url('developer/login.php') ?>" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <i class="fas fa-code"></i>
+                    <span class="hidden sm:inline">Developer</span>
+                </a>
             </div>
         </div>
     </div>
@@ -110,22 +114,24 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white h-full flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-white/20 rounded-lg p-3">
-                            <i class="fas fa-box text-2xl"></i>
+                <a href="<?= url('admin/products.php') ?>" class="block h-full">
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-4 md:p-6 text-white h-full flex flex-col justify-between transform transition-all duration-300 hover:scale-105">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <div class="bg-white/20 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                                <i class="fas fa-box text-xl md:text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl md:text-3xl font-bold"><?= number_format($stats['total_products']) ?></div>
+                                <div class="text-blue-100 text-xs md:text-sm">Active</div>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold"><?= $stats['total_products'] ?></div>
-                            <div class="text-blue-100 text-sm">Active</div>
+                        <div class="text-blue-100 text-xs md:text-sm font-medium mb-1">Products</div>
+                        <div class="text-blue-200 text-xs"><?= $stats['featured_products'] ?> featured • <?= $stats['total_products_all'] ?> total</div>
+                        <div class="mt-3 md:mt-4 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 px-3 md:px-4 py-2 rounded-lg transition-all text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </div>
                     </div>
-                    <div class="text-blue-100 text-sm font-medium mb-1">Products</div>
-                    <div class="text-blue-200 text-xs"><?= $stats['featured_products'] ?> featured • <?= $stats['total_products_all'] ?> total</div>
-                    <a href="<?= url('admin/products.php') ?>" class="mt-4 inline-block text-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -150,21 +156,23 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white h-full flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-white/20 rounded-lg p-3">
-                            <i class="fas fa-tags text-2xl"></i>
+                <a href="<?= url('admin/categories.php') ?>" class="block h-full">
+                    <div class="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg p-4 md:p-6 text-white h-full flex flex-col justify-between transform transition-all duration-300 hover:scale-105">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <div class="bg-white/20 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                                <i class="fas fa-tags text-xl md:text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl md:text-3xl font-bold"><?= number_format($stats['total_categories']) ?></div>
+                                <div class="text-green-100 text-xs md:text-sm">Categories</div>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold"><?= $stats['total_categories'] ?></div>
-                            <div class="text-green-100 text-sm">Categories</div>
+                        <div class="text-green-100 text-xs md:text-sm font-medium">Product Categories</div>
+                        <div class="mt-3 md:mt-4 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 px-3 md:px-4 py-2 rounded-lg transition-all text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </div>
                     </div>
-                    <div class="text-green-100 text-sm font-medium">Product Categories</div>
-                    <a href="<?= url('admin/categories.php') ?>" class="mt-4 inline-block text-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -181,22 +189,24 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl shadow-lg p-6 text-white h-full flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-white/20 rounded-lg p-3">
-                            <i class="fas fa-calculator text-2xl"></i>
+                <a href="<?= url('admin/quotes.php') ?>" class="block h-full">
+                    <div class="bg-gradient-to-br from-yellow-500 to-amber-600 rounded-xl shadow-lg p-4 md:p-6 text-white h-full flex flex-col justify-between transform transition-all duration-300 hover:scale-105">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <div class="bg-white/20 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                                <i class="fas fa-calculator text-xl md:text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl md:text-3xl font-bold"><?= number_format($stats['pending_quotes']) ?></div>
+                                <div class="text-yellow-100 text-xs md:text-sm">Pending</div>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold"><?= $stats['pending_quotes'] ?></div>
-                            <div class="text-yellow-100 text-sm">Pending</div>
+                        <div class="text-yellow-100 text-xs md:text-sm font-medium mb-1">Quote Requests</div>
+                        <div class="text-yellow-200 text-xs"><?= $stats['quotes_today'] ?> today • <?= $stats['total_quotes'] ?> total</div>
+                        <div class="mt-3 md:mt-4 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 px-3 md:px-4 py-2 rounded-lg transition-all text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </div>
                     </div>
-                    <div class="text-yellow-100 text-sm font-medium mb-1">Quote Requests</div>
-                    <div class="text-yellow-200 text-xs"><?= $stats['quotes_today'] ?> today • <?= $stats['total_quotes'] ?> total</div>
-                    <a href="<?= url('admin/quotes.php') ?>" class="mt-4 inline-block text-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                </a>
             </div>
         </div>
 
@@ -214,22 +224,24 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-6 text-white h-full flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-white/20 rounded-lg p-3">
-                            <i class="fas fa-shopping-cart text-2xl"></i>
+                <a href="<?= url('admin/orders.php') ?>" class="block h-full">
+                    <div class="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl shadow-lg p-4 md:p-6 text-white h-full flex flex-col justify-between transform transition-all duration-300 hover:scale-105">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <div class="bg-white/20 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                                <i class="fas fa-shopping-cart text-xl md:text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl md:text-3xl font-bold"><?= number_format($stats['pending_orders']) ?></div>
+                                <div class="text-purple-100 text-xs md:text-sm">Pending</div>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold"><?= $stats['pending_orders'] ?></div>
-                            <div class="text-purple-100 text-sm">Pending</div>
+                        <div class="text-purple-100 text-xs md:text-sm font-medium mb-1">Orders</div>
+                        <div class="text-purple-200 text-xs"><?= $stats['orders_today'] ?> today • <?= $stats['total_orders'] ?> total</div>
+                        <div class="mt-3 md:mt-4 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 px-3 md:px-4 py-2 rounded-lg transition-all text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </div>
                     </div>
-                    <div class="text-purple-100 text-sm font-medium mb-1">Orders</div>
-                    <div class="text-purple-200 text-xs"><?= $stats['orders_today'] ?> today • <?= $stats['total_orders'] ?> total</div>
-                    <a href="<?= url('admin/orders.php') ?>" class="mt-4 inline-block text-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                </a>
             </div>
         </div>
         <?php else: ?>
@@ -246,22 +258,24 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-br from-red-500 to-pink-600 rounded-xl shadow-lg p-6 text-white h-full flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="bg-white/20 rounded-lg p-3">
-                            <i class="fas fa-envelope text-2xl"></i>
+                <a href="<?= url('admin/messages.php') ?>" class="block h-full">
+                    <div class="bg-gradient-to-br from-red-500 to-pink-600 rounded-xl shadow-lg p-4 md:p-6 text-white h-full flex flex-col justify-between transform transition-all duration-300 hover:scale-105">
+                        <div class="flex items-center justify-between mb-3 md:mb-4">
+                            <div class="bg-white/20 rounded-lg p-2 md:p-3 backdrop-blur-sm">
+                                <i class="fas fa-envelope text-xl md:text-2xl"></i>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-2xl md:text-3xl font-bold"><?= number_format($stats['unread_messages']) ?></div>
+                                <div class="text-red-100 text-xs md:text-sm">Unread</div>
+                            </div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold"><?= $stats['unread_messages'] ?></div>
-                            <div class="text-red-100 text-sm">Unread</div>
+                        <div class="text-red-100 text-xs md:text-sm font-medium mb-1">Messages</div>
+                        <div class="text-red-200 text-xs"><?= $stats['messages_today'] ?> today • <?= $stats['total_messages'] ?> total</div>
+                        <div class="mt-3 md:mt-4 inline-flex items-center justify-center bg-white/20 hover:bg-white/30 px-3 md:px-4 py-2 rounded-lg transition-all text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1 text-xs"></i>
                         </div>
                     </div>
-                    <div class="text-red-100 text-sm font-medium mb-1">Messages</div>
-                    <div class="text-red-200 text-xs"><?= $stats['messages_today'] ?> today • <?= $stats['total_messages'] ?> total</div>
-                    <a href="<?= url('admin/messages.php') ?>" class="mt-4 inline-block text-center bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-sm">
-                        View All <i class="fas fa-arrow-right ml-1"></i>
-                    </a>
-                </div>
+                </a>
             </div>
         </div>
         <?php endif; ?>
@@ -280,14 +294,14 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <div class="widget-content">
-                <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 rounded-xl shadow-xl p-6 text-white h-full flex flex-col sm:flex-row items-center justify-between">
+                <div class="bg-gradient-to-r from-green-500 via-emerald-500 to-green-600 rounded-xl shadow-xl p-4 md:p-6 text-white h-full flex flex-col sm:flex-row items-center justify-between transform transition-all duration-300 hover:scale-105">
                     <div>
-                        <p class="text-green-100 text-sm mb-2 font-medium">Total Revenue</p>
-                        <p class="text-4xl font-bold mb-2">$<?= number_format($stats['orders_revenue'], 2) ?></p>
-                        <p class="text-green-100 text-sm">From paid orders</p>
+                        <p class="text-green-100 text-xs md:text-sm mb-2 font-medium">Total Revenue</p>
+                        <p class="text-2xl md:text-4xl font-bold mb-2">$<?= number_format($stats['orders_revenue'], 2) ?></p>
+                        <p class="text-green-100 text-xs md:text-sm">From paid orders</p>
                     </div>
-                    <div class="bg-white/20 rounded-full p-6 backdrop-blur-sm">
-                        <i class="fas fa-dollar-sign text-5xl"></i>
+                    <div class="bg-white/20 rounded-full p-4 md:p-6 backdrop-blur-sm">
+                        <i class="fas fa-dollar-sign text-3xl md:text-5xl"></i>
                     </div>
                 </div>
             </div>
@@ -907,14 +921,171 @@ document.addEventListener('DOMContentLoaded', function() {
     transform: rotate(2deg);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .dashboard-grid {
-        grid-template-columns: 1fr;
+/* Enhanced Widget Interactions */
+.dashboard-widget {
+    cursor: pointer;
+    transform: translateY(0);
+}
+
+.dashboard-widget:not(.edit-mode):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-widget:not(.edit-mode):active {
+    transform: translateY(-2px);
+}
+
+.widget-content a {
+    transition: all 0.3s ease;
+}
+
+.widget-content a:hover {
+    transform: translateX(4px);
+}
+
+/* Pulse animation for stats */
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+    }
+}
+
+.dashboard-widget[data-widget-id*="stat"]:hover .widget-content > div {
+    animation: pulse-glow 2s infinite;
+}
+
+/* Loading skeleton */
+.widget-loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+/* Touch-friendly controls */
+@media (hover: none) and (pointer: coarse) {
+    .dashboard-widget {
+        min-height: 250px;
     }
     
+    .widget-btn-remove {
+        padding: 0.5rem;
+        font-size: 1rem;
+    }
+    
+    .resize-handle {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .resize-handle-corner {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Responsive Grid Improvements */
+@media (max-width: 640px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .dashboard-widget {
+        min-height: 180px;
+    }
+    
+    .widget-content {
+        padding: 0.75rem;
+    }
+    
+    .widget-content .text-3xl {
+        font-size: 1.75rem;
+    }
+    
+    .widget-content .text-4xl {
+        font-size: 2rem;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+    }
+}
+
+@media (min-width: 1025px) {
+    .dashboard-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+}
+
+/* Enhanced Edit Mode */
+.dashboard-widget.edit-mode {
+    border: 2px dashed #3b82f6;
+    cursor: move;
+    z-index: 10;
+    transition: all 0.2s ease;
+}
+
+.dashboard-widget.edit-mode:hover {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.dashboard-widget.edit-mode.dragging {
+    opacity: 0.8;
+    z-index: 1000;
+    transform: rotate(2deg) scale(1.02);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+}
+
+.dashboard-widget.edit-mode.resizing {
+    border-color: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* Smooth transitions */
+.dashboard-widget,
+.widget-content,
+.widget-header {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Improved widget cards */
+.widget-content > div {
+    transition: all 0.3s ease;
+}
+
+.widget-content > div:hover {
+    transform: scale(1.02);
+}
+
+/* Better mobile touch targets */
+@media (max-width: 768px) {
     .dashboard-widget.edit-mode {
-        border-width: 1px;
+        border-width: 2px;
+    }
+    
+    .widget-header {
+        padding: 1rem;
+    }
+    
+    .widget-title {
+        font-size: 1rem;
     }
 }
 </style>

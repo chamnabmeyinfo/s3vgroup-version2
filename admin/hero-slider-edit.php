@@ -141,7 +141,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-4 md:mb-6">
         <div class="flex items-center">
             <i class="fas fa-check-circle mr-2 text-xl"></i>
@@ -150,7 +150,7 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
     
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-4 md:mb-6">
         <div class="flex items-center">
             <i class="fas fa-exclamation-circle mr-2 text-xl"></i>

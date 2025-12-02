@@ -152,6 +152,50 @@ $availableColumns = [
     'actions' => 'Actions'
 ];
 
+// Calculate stats for mini dashboard
+$totalProducts = count($allProducts);
+$activeProducts = count(array_filter($allProducts, fn($p) => $p['is_active'] == 1));
+$inactiveProducts = $totalProducts - $activeProducts;
+$featuredProducts = count(array_filter($allProducts, fn($p) => $p['is_featured'] == 1));
+$lowStockProducts = count(array_filter($allProducts, function($p) {
+    return isset($p['stock_quantity']) && $p['stock_quantity'] < 10 && $p['stock_quantity'] > 0;
+}));
+
+$miniStats = [
+    [
+        'label' => 'Total Products',
+        'value' => number_format($totalProducts),
+        'icon' => 'fas fa-box',
+        'color' => 'from-blue-500 to-blue-600',
+        'description' => 'All products in catalog',
+        'link' => url('admin/products.php')
+    ],
+    [
+        'label' => 'Active Products',
+        'value' => number_format($activeProducts),
+        'icon' => 'fas fa-check-circle',
+        'color' => 'from-green-500 to-emerald-600',
+        'description' => 'Currently active',
+        'link' => url('admin/products.php?status=active')
+    ],
+    [
+        'label' => 'Featured Products',
+        'value' => number_format($featuredProducts),
+        'icon' => 'fas fa-star',
+        'color' => 'from-yellow-500 to-amber-600',
+        'description' => 'Featured items',
+        'link' => url('admin/products.php?featured=yes')
+    ],
+    [
+        'label' => 'Low Stock',
+        'value' => number_format($lowStockProducts),
+        'icon' => 'fas fa-exclamation-triangle',
+        'color' => 'from-red-500 to-pink-600',
+        'description' => 'Need restocking',
+        'link' => url('admin/products.php')
+    ]
+];
+
 $pageTitle = 'Products';
 include __DIR__ . '/includes/header.php';
 

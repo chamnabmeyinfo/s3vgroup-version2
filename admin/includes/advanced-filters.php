@@ -18,6 +18,7 @@ if (!empty($_GET['featured']) && ($_GET['featured'] ?? '') !== 'all') $activeFil
 if (!empty($_GET['category'])) $activeFiltersCount++;
 if (!empty($_GET['type']) && ($_GET['type'] ?? '') !== 'all') $activeFiltersCount++;
 if (!empty($_GET['size']) && ($_GET['size'] ?? '') !== 'all') $activeFiltersCount++;
+if (!empty($_GET['optimization']) && ($_GET['optimization'] ?? '') !== 'all') $activeFiltersCount++;
 if (!empty($_GET['date_from']) || !empty($_GET['date_to'])) $activeFiltersCount++;
 if (!empty($_GET['price_min']) || !empty($_GET['price_max'])) $activeFiltersCount++;
 ?>
@@ -35,7 +36,7 @@ if (!empty($_GET['price_min']) || !empty($_GET['price_max'])) $activeFiltersCoun
                         <?= $activeFiltersCount ?>
                     </span>
                 <?php endif; ?>
-                <i class="fas fa-chevron-down text-xs transition-transform duration-200" id="toggle-icon-<?= $filterId ?>"></i>
+                <i class="fas fa-chevron-<?= $hasActiveFilters ? 'up' : 'down' ?> text-xs transition-transform duration-200" id="toggle-icon-<?= $filterId ?>" style="<?= $hasActiveFilters ? 'transform: rotate(180deg);' : '' ?>"></i>
             </button>
             
             <div class="flex items-center gap-2">
@@ -62,7 +63,12 @@ if (!empty($_GET['price_min']) || !empty($_GET['price_max'])) $activeFiltersCoun
         </div>
         
         <!-- Filter Content (Collapsible) -->
-        <div id="filter-content-<?= $filterId ?>" class="filter-content hidden border-t border-gray-200 bg-gray-50">
+        <?php 
+        // Check if there are active filters - if so, show the panel by default
+        $hasActiveFilters = $activeFiltersCount > 0;
+        $panelClass = $hasActiveFilters ? '' : 'hidden';
+        ?>
+        <div id="filter-content-<?= $filterId ?>" class="filter-content <?= $panelClass ?> border-t border-gray-200 bg-gray-50">
             <form method="GET" id="filter-form-<?= $filterId ?>" class="p-4 md:p-6">
                 
                 <!-- Quick Filters Row -->
@@ -301,15 +307,21 @@ function toggleFilterPanel(filterId) {
     const content = document.getElementById('filter-content-' + filterId);
     const icon = document.getElementById('toggle-icon-' + filterId);
     
+    const isHidden = content.classList.contains('hidden');
     content.classList.toggle('hidden');
+    
     if (content.classList.contains('hidden')) {
         icon.classList.remove('fa-chevron-up');
         icon.classList.add('fa-chevron-down');
         icon.style.transform = 'rotate(0deg)';
+        // Save state to localStorage
+        localStorage.setItem('filter_panel_open_' + filterId, 'false');
     } else {
         icon.classList.remove('fa-chevron-down');
         icon.classList.add('fa-chevron-up');
         icon.style.transform = 'rotate(180deg)';
+        // Save state to localStorage
+        localStorage.setItem('filter_panel_open_' + filterId, 'true');
     }
 }
 
@@ -326,6 +338,11 @@ function toggleColumnSection(filterId) {
 }
 
 function applyFilters(filterId) {
+    // Keep panel open by saving state before submit
+    const content = document.getElementById('filter-content-' + filterId);
+    if (!content.classList.contains('hidden')) {
+        localStorage.setItem('filter_panel_open_' + filterId, 'true');
+    }
     document.getElementById('filter-form-' + filterId).submit();
 }
 
@@ -366,9 +383,29 @@ function deselectAllColumns(filterId) {
     });
 }
 
-// Restore column visibility from localStorage
+// Restore column visibility and filter panel state from localStorage
 document.addEventListener('DOMContentLoaded', function() {
-    const saved = localStorage.getItem('visible_columns_<?= $filterId ?>');
+    const filterId = '<?= $filterId ?>';
+    
+    // Restore filter panel state
+    const panelState = localStorage.getItem('filter_panel_open_' + filterId);
+    const hasActiveFilters = <?= $activeFiltersCount > 0 ? 'true' : 'false' ?>;
+    
+    // Open panel if there are active filters OR if it was previously open
+    if (hasActiveFilters || panelState === 'true') {
+        const content = document.getElementById('filter-content-' + filterId);
+        const icon = document.getElementById('toggle-icon-' + filterId);
+        
+        if (content && icon) {
+            content.classList.remove('hidden');
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+            icon.style.transform = 'rotate(180deg)';
+        }
+    }
+    
+    // Restore column visibility
+    const saved = localStorage.getItem('visible_columns_' + filterId);
     if (saved) {
         const visibleColumns = JSON.parse(saved);
         document.querySelectorAll('.column-toggle').forEach(cb => {

@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </h2>
             </div>
             <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST">
-                <?php if ($error): ?>
+                <?php if (!empty($error)): ?>
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                         <?= escape($error) ?>
                     </div>

@@ -166,7 +166,7 @@ $defaultColumns = ['date', 'name', 'email', 'subject', 'status', 'actions'];
     </div>
     <?php endif; ?>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
         <div class="flex items-center">
             <i class="fas fa-exclamation-circle mr-2 text-xl"></i>

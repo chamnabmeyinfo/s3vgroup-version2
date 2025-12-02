@@ -3,9 +3,146 @@ require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
 use App\Models\Product;
+use App\Services\ImageOptimizer;
 
+$imageOptimizer = new ImageOptimizer();
 $message = '';
 $error = '';
+$optimizationResults = [];
+$orphanedImages = [];
+
+// Handle bulk optimization
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_optimize'])) {
+    if (!empty($_POST['selected_images'])) {
+        $optimized = 0;
+        $failed = 0;
+        $totalSavings = 0;
+        
+        $quality = (int)($_POST['quality'] ?? 85);
+        $maxWidth = !empty($_POST['max_width']) ? (int)$_POST['max_width'] : null;
+        $maxHeight = !empty($_POST['max_height']) ? (int)$_POST['max_height'] : null;
+        
+        foreach ($_POST['selected_images'] as $filename) {
+            try {
+                $result = $imageOptimizer->compress($filename, $quality, $maxWidth, $maxHeight);
+                $optimized++;
+                $totalSavings += $result['savings'];
+                $optimizationResults[] = $result;
+            } catch (Exception $e) {
+                $failed++;
+                $optimizationResults[] = [
+                    'success' => false,
+                    'filename' => $filename,
+                    'error' => $e->getMessage()
+                ];
+            }
+        }
+        
+        $message = "Optimized {$optimized} image(s). ";
+        if ($totalSavings > 0) {
+            $message .= "Saved " . number_format($totalSavings / 1024, 2) . " KB total.";
+        }
+        if ($failed > 0) {
+            $message .= " {$failed} failed.";
+        }
+    }
+}
+
+// Handle bulk conversion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_convert'])) {
+    if (!empty($_POST['selected_images'])) {
+        $converted = 0;
+        $failed = 0;
+        $targetFormat = $_POST['target_format'] ?? 'webp';
+        $quality = (int)($_POST['convert_quality'] ?? 85);
+        
+        foreach ($_POST['selected_images'] as $filename) {
+            try {
+                $result = $imageOptimizer->convert($filename, $targetFormat, $quality);
+                $converted++;
+                // Delete original if conversion successful
+                $originalPath = __DIR__ . '/../storage/uploads/' . basename($filename);
+                if (file_exists($originalPath) && $result['success']) {
+                    @unlink($originalPath);
+                }
+            } catch (Exception $e) {
+                $failed++;
+            }
+        }
+        
+        $message = "Converted {$converted} image(s) to {$targetFormat}.";
+        if ($failed > 0) {
+            $message .= " {$failed} failed.";
+        }
+    }
+}
+
+// Handle cleanup orphaned images
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cleanup_orphaned'])) {
+    // Get all used images from database
+    $usedImages = [];
+    $productModel = new Product();
+    $allProducts = $productModel->getAll(['include_inactive' => true]);
+    
+    foreach ($allProducts as $product) {
+        if (!empty($product['image'])) {
+            $usedImages[] = $product['image'];
+        }
+        if (!empty($product['gallery'])) {
+            $gallery = json_decode($product['gallery'], true) ?? [];
+            $usedImages = array_merge($usedImages, $gallery);
+        }
+    }
+    
+    // Check hero sliders
+    try {
+        $heroSliders = db()->fetchAll("SELECT desktop_image, mobile_image FROM hero_sliders");
+        foreach ($heroSliders as $slider) {
+            if (!empty($slider['desktop_image'])) $usedImages[] = $slider['desktop_image'];
+            if (!empty($slider['mobile_image'])) $usedImages[] = $slider['mobile_image'];
+        }
+    } catch (Exception $e) {
+        // Hero sliders table might not exist
+    }
+    
+    $orphaned = $imageOptimizer->findOrphanedImages($usedImages);
+    
+    if (!empty($_POST['delete_orphaned'])) {
+        $deleted = 0;
+        $failed = 0;
+        
+        // Get files to delete from POST data or use the found orphaned list
+        $filesToDelete = [];
+        if (!empty($_POST['orphaned_files'])) {
+            $filesToDelete = $_POST['orphaned_files'];
+        } elseif (!empty($orphaned)) {
+            foreach ($orphaned as $img) {
+                $filesToDelete[] = $img['filename'];
+            }
+        }
+        
+        foreach ($filesToDelete as $filename) {
+            $filepath = __DIR__ . '/../storage/uploads/' . basename($filename);
+            if (file_exists($filepath) && unlink($filepath)) {
+                $deleted++;
+            } else {
+                $failed++;
+            }
+        }
+        $message = "Cleaned up {$deleted} orphaned image(s).";
+        if ($failed > 0) {
+            $message .= " {$failed} failed.";
+        }
+        $orphanedImages = []; // Clear after deletion
+    } else {
+        $orphanedImages = $orphaned; // Store for display
+        if (count($orphaned) > 0) {
+            $message = "Found " . count($orphaned) . " orphaned image(s). Use the delete button below to remove them.";
+        } else {
+            $message = "No orphaned images found. All images are in use.";
+        }
+    }
+}
 
 // Handle bulk delete
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete'])) {
@@ -92,6 +229,8 @@ if (is_dir($uploadDir)) {
     $search = trim($_GET['search'] ?? '');
     $typeFilter = $_GET['type'] ?? 'all';
     $sizeFilter = $_GET['size'] ?? 'all';
+    $optimizationFilter = $_GET['optimization_status'] ?? 'all';
+    $usageFilter = $_GET['usage_status'] ?? 'all';
     $dateFrom = $_GET['date_from'] ?? '';
     $dateTo = $_GET['date_to'] ?? '';
     $sort = $_GET['sort'] ?? 'date_desc';
@@ -125,6 +264,28 @@ if (is_dir($uploadDir)) {
                 return $img['size'] >= $range[0] && $img['size'] < $range[1];
             });
         }
+    }
+    
+    // Filter by optimization status
+    if ($optimizationFilter === 'needs_optimization') {
+        $images = array_filter($images, function($img) {
+            return !empty($img['needs_optimization']);
+        });
+    } elseif ($optimizationFilter === 'optimized') {
+        $images = array_filter($images, function($img) {
+            return empty($img['needs_optimization']);
+        });
+    }
+    
+    // Filter by usage status
+    if ($usageFilter === 'used') {
+        $images = array_filter($images, function($img) {
+            return !empty($img['used_in']);
+        });
+    } elseif ($usageFilter === 'orphaned') {
+        $images = array_filter($images, function($img) {
+            return empty($img['used_in']);
+        });
     }
     
     // Filter by date
@@ -194,10 +355,22 @@ foreach ($allProducts as $product) {
     }
 }
 
-// Add usage info to images
+// Add usage info and optimization analysis to images
 foreach ($images as &$image) {
     $image['usage'] = $imageUsage[$image['filename']] ?? [];
     $image['usage_count'] = count($image['usage']);
+    
+    // Get optimization analysis
+    try {
+        $analysis = $imageOptimizer->analyze($image['filename']);
+        $image['needs_optimization'] = $analysis['needs_optimization'];
+        $image['optimization_reasons'] = $analysis['optimization_reasons'];
+        $image['size_category'] = $analysis['size_category'];
+    } catch (Exception $e) {
+        $image['needs_optimization'] = false;
+        $image['optimization_reasons'] = [];
+        $image['size_category'] = 'unknown';
+    }
 }
 
 // Column visibility
@@ -242,6 +415,13 @@ $filters = [
             'large' => 'Large (500KB - 2MB)',
             'xlarge' => 'Extra Large (> 2MB)'
         ]
+    ],
+    'optimization' => [
+        'options' => [
+            'all' => 'All Images',
+            'needs_optimization' => 'Needs Optimization',
+            'optimized' => 'Already Optimized'
+        ]
     ]
 ];
 
@@ -255,27 +435,99 @@ $sortOptions = [
 ];
 ?>
 
-<div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Image Management</h1>
-        <div class="flex gap-2">
-            <button onclick="toggleViewMode()" class="btn-secondary" id="viewModeBtn">
-                <i class="fas fa-th-large mr-2" id="viewIcon"></i> <span id="viewText">Grid View</span>
-            </button>
+<div class="w-full">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
+                    <i class="fas fa-images mr-2 md:mr-3"></i>
+                    Advanced Image Management
+                </h1>
+                <p class="text-indigo-100 text-sm md:text-lg">Manage, optimize, and compress your images</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleViewMode()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all" id="viewModeBtn">
+                    <i class="fas fa-th-large mr-2" id="viewIcon"></i> <span id="viewText" class="hidden sm:inline">Grid View</span>
+                </button>
+            </div>
         </div>
     </div>
-    
-    <?php if ($message): ?>
-    <div class="mb-4 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
-        <?= escape($message) ?>
+
+    <?php if (!empty($message)): ?>
+    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($message) ?></span>
+        </div>
     </div>
     <?php endif; ?>
     
-    <?php if ($error): ?>
-    <div class="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
-        <?= escape($error) ?>
+    <?php if (!empty($error)): ?>
+    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
+        <div class="flex items-center">
+            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
+            <span class="font-semibold"><?= escape($error) ?></span>
+        </div>
     </div>
     <?php endif; ?>
+
+    <!-- Advanced Tools Section -->
+    <div class="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-lg p-4 md:p-6 mb-6 border border-purple-200">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-gray-800">
+            <i class="fas fa-magic mr-2 text-purple-600"></i>
+            Advanced Image Tools
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Bulk Optimize -->
+            <div class="bg-white rounded-lg p-4 shadow-md">
+                <h3 class="font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-compress mr-2 text-blue-600"></i> Bulk Optimize
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">Compress and resize selected images</p>
+                <button onclick="showOptimizeModal()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all text-sm font-medium">
+                    <i class="fas fa-compress mr-2"></i> Optimize Images
+                </button>
+            </div>
+            
+            <!-- Format Conversion -->
+            <div class="bg-white rounded-lg p-4 shadow-md">
+                <h3 class="font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-exchange-alt mr-2 text-green-600"></i> Convert Format
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">Convert images to WebP, JPG, PNG</p>
+                <button onclick="showConvertModal()" class="w-full bg-gradient-to-r from-green-500 to-green-600 text-white px-4 py-2 rounded-lg hover:from-green-600 hover:to-green-700 transition-all text-sm font-medium">
+                    <i class="fas fa-exchange-alt mr-2"></i> Convert Images
+                </button>
+            </div>
+            
+            <!-- Cleanup Orphaned -->
+            <div class="bg-white rounded-lg p-4 shadow-md">
+                <h3 class="font-semibold mb-3 text-gray-700">
+                    <i class="fas fa-broom mr-2 text-red-600"></i> Cleanup
+                </h3>
+                <p class="text-sm text-gray-600 mb-3">Find and remove unused images</p>
+                <form method="POST" onsubmit="return confirm('This will scan for orphaned images. Continue?')">
+                    <input type="hidden" name="cleanup_orphaned" value="1">
+                    <button type="submit" class="w-full bg-gradient-to-r from-red-500 to-red-600 text-white px-4 py-2 rounded-lg hover:from-red-600 hover:to-red-700 transition-all text-sm font-medium mb-2">
+                        <i class="fas fa-search mr-2"></i> Find Orphaned
+                    </button>
+                </form>
+                <?php if (!empty($orphanedImages)): ?>
+                    <form method="POST" onsubmit="return confirm('This will permanently delete <?= count($orphanedImages) ?> orphaned image(s). This action cannot be undone. Continue?')">
+                        <input type="hidden" name="cleanup_orphaned" value="1">
+                        <input type="hidden" name="delete_orphaned" value="1">
+                        <?php foreach ($orphanedImages as $img): ?>
+                            <input type="hidden" name="orphaned_files[]" value="<?= escape($img['filename']) ?>">
+                        <?php endforeach; ?>
+                        <button type="submit" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg hover:from-red-700 hover:to-red-800 transition-all text-sm font-medium shadow-lg">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete <?= count($orphanedImages) ?> Orphaned Image(s)
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
     
     <!-- Upload Area -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -316,13 +568,22 @@ $sortOptions = [
             <span class="text-blue-800 font-semibold">
                 <span id="selectedCount">0</span> image(s) selected
             </span>
-            <div class="flex gap-2">
+            <div class="flex flex-wrap gap-2">
                 <button type="submit" name="bulk_delete" 
                         onclick="return confirm('Are you sure you want to delete selected images?')"
-                        class="btn-secondary bg-red-600 hover:bg-red-700 text-white">
+                        class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-all">
                     <i class="fas fa-trash mr-2"></i> Delete Selected
                 </button>
-                <button type="button" onclick="clearSelection()" class="btn-secondary">
+                <button type="button" onclick="showOptimizeModal()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                    <i class="fas fa-compress mr-2"></i> Optimize
+                </button>
+                <button type="button" onclick="showConvertModal()" 
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all">
+                    <i class="fas fa-exchange-alt mr-2"></i> Convert
+                </button>
+                <button type="button" onclick="clearSelection()" 
+                        class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all">
                     Clear Selection
                 </button>
             </div>
@@ -767,8 +1028,149 @@ function deleteImage(filename) {
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         closeImageModal();
+        closeOptimizeModal();
+        closeConvertModal();
     }
 });
+
+// Optimization Modal
+function showOptimizeModal() {
+    const checkboxes = document.querySelectorAll('.image-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one image to optimize.');
+        return;
+    }
+    
+    document.getElementById('optimizeModal').classList.remove('hidden');
+}
+
+function closeOptimizeModal() {
+    document.getElementById('optimizeModal').classList.add('hidden');
+}
+
+// Convert Modal
+function showConvertModal() {
+    const checkboxes = document.querySelectorAll('.image-checkbox:checked');
+    if (checkboxes.length === 0) {
+        alert('Please select at least one image to convert.');
+        return;
+    }
+    
+    document.getElementById('convertModal').classList.remove('hidden');
+}
+
+function closeConvertModal() {
+    document.getElementById('convertModal').classList.add('hidden');
+}
 </script>
+
+<!-- Optimization Modal -->
+<div id="optimizeModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onclick="closeOptimizeModal()">
+    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-auto" onclick="event.stopPropagation()">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold">Optimize Images</h3>
+            <button onclick="closeOptimizeModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form method="POST" class="p-6">
+            <input type="hidden" name="bulk_optimize" value="1">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Quality (1-100)</label>
+                    <input type="range" name="quality" min="50" max="100" value="85" class="w-full" oninput="document.getElementById('qualityValue').textContent = this.value">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Lower (Smaller)</span>
+                        <span id="qualityValue" class="font-semibold">85</span>
+                        <span>Higher (Better)</span>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Max Width (px)</label>
+                        <input type="number" name="max_width" placeholder="Optional" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Max Height (px)</label>
+                        <input type="number" name="max_height" placeholder="Optional" class="w-full px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <p class="text-sm text-blue-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Note:</strong> Original images will be backed up automatically. Optimization will reduce file size while maintaining visual quality.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all">
+                        <i class="fas fa-compress mr-2"></i> Optimize Selected
+                    </button>
+                    <button type="button" onclick="closeOptimizeModal()" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Convert Modal -->
+<div id="convertModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4" onclick="closeConvertModal()">
+    <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-auto" onclick="event.stopPropagation()">
+        <div class="p-6 border-b flex justify-between items-center">
+            <h3 class="text-xl font-bold">Convert Image Format</h3>
+            <button onclick="closeConvertModal()" class="text-gray-500 hover:text-gray-700">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+        <form method="POST" class="p-6">
+            <input type="hidden" name="bulk_convert" value="1">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Target Format</label>
+                    <select name="target_format" class="w-full px-3 py-2 border rounded-lg">
+                        <option value="webp">WebP (Best compression)</option>
+                        <option value="jpg">JPG (Universal)</option>
+                        <option value="png">PNG (Transparency)</option>
+                        <option value="gif">GIF (Animation)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Quality (1-100)</label>
+                    <input type="range" name="convert_quality" min="50" max="100" value="85" class="w-full" oninput="document.getElementById('convertQualityValue').textContent = this.value">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Lower</span>
+                        <span id="convertQualityValue" class="font-semibold">85</span>
+                        <span>Higher</span>
+                    </div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Warning:</strong> Original images will be deleted after successful conversion. Make sure you have backups if needed.
+                    </p>
+                </div>
+                <div class="flex gap-3">
+                    <button type="submit" class="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-green-600 hover:to-green-700 transition-all">
+                        <i class="fas fa-exchange-alt mr-2"></i> Convert Selected
+                    </button>
+                    <button type="button" onclick="closeConvertModal()" class="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.image-card {
+    transition: all 0.3s ease;
+}
+.image-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+</style>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

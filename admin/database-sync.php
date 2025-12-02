@@ -98,7 +98,7 @@ $syncLog = $syncService->getLog();
                 </div>
             </div>
 
-            <?php if ($message): ?>
+            <?php if (!empty($message)): ?>
             <div class="alert alert-<?= $messageType === 'success' ? 'success' : ($messageType === 'error' ? 'danger' : 'info') ?> alert-dismissible fade show">
                 <?= escape($message) ?>
                 <button type="button" class="close" data-dismiss="alert">

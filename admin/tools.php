@@ -159,7 +159,7 @@ include __DIR__ . '/includes/header.php';
         </a>
     </div>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="mb-6 p-4 rounded-lg <?= $messageType === 'success' ? 'bg-green-100 text-green-800 border border-green-300' : 'bg-red-100 text-red-800 border border-red-300' ?>">
         <i class="fas fa-<?= $messageType === 'success' ? 'check-circle' : 'exclamation-circle' ?> mr-2"></i>
         <?= escape($message) ?>

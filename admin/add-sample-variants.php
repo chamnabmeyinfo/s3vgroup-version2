@@ -389,13 +389,13 @@ if ($tablesExist) {
         <p class="text-gray-600 mt-2">This will add realistic sample variants to your products.</p>
     </div>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded">
         <?= escape($message) ?>
     </div>
     <?php endif; ?>
     
-    <?php if ($error): ?>
+    <?php if (!empty($error)): ?>
     <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
         <?= $error ?>
     </div>

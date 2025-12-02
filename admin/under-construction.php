@@ -56,7 +56,7 @@ include __DIR__ . '/includes/header.php';
         <h1 class="text-3xl font-bold">Under Construction Control</h1>
     </div>
     
-    <?php if ($message): ?>
+    <?php if (!empty($message)): ?>
     <div class="mb-6 p-4 rounded-lg <?= $messageType === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
         <?= escape($message) ?>
     </div>
