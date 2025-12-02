@@ -36,6 +36,11 @@ fix-*.php
 verify-*.php
 check-*.php
 
+# Developer Notes
+developer/chamnab notepad/
+developer/*/note
+developer/*/notes/
+
 # IDE & Editor Files
 .vscode/
 .idea/
