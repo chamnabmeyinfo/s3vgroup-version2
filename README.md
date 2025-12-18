@@ -4,15 +4,13 @@ A comprehensive, modern e-commerce platform for selling forklifts and factory eq
 
 ## 👨‍💻 For Developers
 
-**New to the Developer Panel?** Check out the complete guide: **[DEVELOPER-GUIDE.md](DEVELOPER-GUIDE.md)**
-
-- **Developer Panel Login:** `localhost:8080/developer/login.php`
-- **Default Credentials:** Username: `developer`, Password: `dev@2024!Secure`
-- **Features:** Database sync, deployment, backup management, and more!
+- **Admin Panel:** Access the admin panel for managing products, orders, and settings
+- **API Endpoints:** RESTful API available at `/api/` for integration
 
 ## 🚀 Features
 
 ### Frontend
+
 - ✅ Modern, responsive design
 - ✅ Advanced product search and filtering
 - ✅ Product comparison tool
@@ -32,6 +30,7 @@ A comprehensive, modern e-commerce platform for selling forklifts and factory eq
 - ✅ Live chat widget
 
 ### Admin Panel
+
 - ✅ Advanced analytics dashboard
 - ✅ Product management (CRUD)
 - ✅ Category management
@@ -56,12 +55,14 @@ A comprehensive, modern e-commerce platform for selling forklifts and factory eq
 - ✅ RESTful API endpoints
 
 ### Smart Features
+
 - ✅ AI-powered search
 - ✅ Intelligent product recommendations
 - ✅ Personalized content
 - ✅ Automated insights
 
 ### Advanced Backend
+
 - ✅ Advanced analytics engine
 - ✅ RESTful API system
 - ✅ Automated backup system
@@ -81,44 +82,41 @@ A comprehensive, modern e-commerce platform for selling forklifts and factory eq
 ### Quick Setup
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/chamnabmeyinfo/s3vgroup-version2.git
    cd s3vgroup-version2
    ```
 
 2. **Configure Database:**
+
    - Copy `config/database.php.example` to `config/database.php` (if exists)
    - Or edit `config/database.php` with your database credentials
 
-3. **Run Setup:**
-   - Visit `http://localhost:8080/setup.php` in your browser
-   - Follow the setup wizard
+3. **Configure Application:**
 
-4. **Setup Role Management (Optional):**
-   - Login to admin panel: `http://localhost:8080/admin/login.php`
-   - Default credentials: `admin` / `admin`
-   - Visit `http://localhost:8080/admin/setup-roles.php`
-   - Click "Run Setup"
+   - Edit `config/database.php` with your database credentials
+   - Edit `config/app.php` with your base URL
 
-5. **Add Sample Data (Optional):**
-   ```bash
-   php database/sample-data.php
-   php database/create-product-images.php
-   ```
+4. **Import Database:**
+   - Import the database schema and features (see Manual Setup below)
 
 ### Manual Setup
 
 1. **Create Database:**
+
    ```sql
    CREATE DATABASE forklift_equipment;
    ```
 
 2. **Import Schema:**
+
    ```bash
    mysql -u root -p forklift_equipment < database/schema.sql
    ```
 
 3. **Import Additional Features:**
+
    ```bash
    mysql -u root -p forklift_equipment < database/more-features.sql
    mysql -u root -p forklift_equipment < database/even-more-features.sql
@@ -126,6 +124,7 @@ A comprehensive, modern e-commerce platform for selling forklifts and factory eq
    ```
 
 4. **Setup Role Management:**
+
    ```bash
    mysql -u root -p forklift_equipment < database/role-management.sql
    ```
@@ -160,17 +159,14 @@ s3vgroup/
 ## 🔐 Default Credentials
 
 **Admin Panel:**
+
 - Username: `admin`
 - Password: `admin`
 - **⚠️ Change this immediately after first login!**
 
 ## 📚 Documentation
 
-- [Setup Guide](SETUP.md) - Detailed setup instructions
-- [Quick Start](QUICK-START.md) - Quick setup guide
-- [Complete Features](COMPLETE.md) - Full feature list
-- [Role Management](ROLE-MANAGEMENT-COMPLETE.md) - Role system documentation
-- [Advanced Filters](ADVANCED-FILTERS-COMPLETE.md) - Filter system docs
+For detailed documentation, please refer to the Git repository or contact the development team.
 
 ## 🌐 URLs
 
@@ -210,7 +206,7 @@ This project is proprietary software. All rights reserved.
 
 ## 🐛 Troubleshooting
 
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues and solutions.
+For troubleshooting assistance, please contact the development team.
 
 ## 📧 Support
 
