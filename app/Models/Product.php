@@ -64,7 +64,8 @@ class Product
         }
 
         $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        $limit = (int)($filters['limit'] ?? 12);
+        // Use limit from filters, default to 20 for admin, 12 for frontend
+        $limit = isset($filters['limit']) ? (int)$filters['limit'] : (isset($filters['include_inactive']) ? 20 : 12);
         $page = (int)($filters['page'] ?? 1);
         $offset = ($page - 1) * $limit;
 

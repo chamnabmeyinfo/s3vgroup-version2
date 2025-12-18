@@ -124,7 +124,7 @@ try {
 
 // Pagination settings
 $page = (int)($_GET['page'] ?? 1);
-$limit = 20; // Products per page
+$limit = 50; // Products per page (increased for better visibility)
 $filterParams['page'] = $page;
 $filterParams['limit'] = $limit;
 
@@ -160,6 +160,66 @@ if ($dateFrom || $dateTo) {
         return true;
     });
     $products = array_values($products); // Re-index array
+}
+
+// Calculate total count for filtered results (for pagination and display)
+// This is calculated early so we can use it in the stats bar
+$totalCount = $totalProducts; // Default to all products
+try {
+    $where = [];
+    $params = [];
+    
+    if ($search) {
+        $where[] = "(p.name LIKE :search OR p.description LIKE :search OR p.short_description LIKE :search)";
+        $params['search'] = "%{$search}%";
+    }
+    
+    if ($categoryFilter) {
+        $cat = $categoryModel->getBySlug($categoryFilter);
+        if ($cat) {
+            $where[] = "p.category_id = :category_id";
+            $params['category_id'] = $cat['id'];
+        }
+    }
+    
+    if ($statusFilter === 'active') {
+        $where[] = "p.is_active = 1";
+    } elseif ($statusFilter === 'inactive') {
+        $where[] = "p.is_active = 0";
+    }
+    
+    if ($featuredFilter === 'yes') {
+        $where[] = "p.is_featured = 1";
+    } elseif ($featuredFilter === 'no') {
+        $where[] = "p.is_featured = 0";
+    }
+    
+    if ($priceMin !== null) {
+        $where[] = "COALESCE(p.sale_price, p.price, 0) >= :min_price";
+        $params['min_price'] = $priceMin;
+    }
+    
+    if ($priceMax !== null) {
+        $where[] = "COALESCE(p.sale_price, p.price, 0) <= :max_price";
+        $params['max_price'] = $priceMax;
+    }
+    
+    if ($dateFrom) {
+        $where[] = "DATE(p.created_at) >= :date_from";
+        $params['date_from'] = $dateFrom;
+    }
+    
+    if ($dateTo) {
+        $where[] = "DATE(p.created_at) <= :date_to";
+        $params['date_to'] = $dateTo;
+    }
+    
+    $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+    $countResult = db()->fetchOne("SELECT COUNT(*) as count FROM products p $whereClause", $params);
+    $totalCount = (int)($countResult['count'] ?? $totalProducts);
+} catch (Exception $e) {
+    // Fallback to total products if count query fails
+    $totalCount = $totalProducts;
 }
 
 // Get all categories for filter
@@ -375,6 +435,7 @@ $defaultColumns = array_keys($availableColumns);
                 <div>
                     <span class="text-sm text-gray-600">Showing:</span>
                     <span class="ml-2 font-bold text-blue-600" id="showingCount"><?= count($products) ?></span>
+                    <span class="text-sm text-gray-500">of <?= number_format($totalCount) ?></span>
                 </div>
                 <?php if ($search || $categoryFilter || $statusFilter || $featuredFilter || $dateFrom || $dateTo || $priceMin !== null || $priceMax !== null): ?>
                 <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -566,72 +627,12 @@ $defaultColumns = array_keys($availableColumns);
         
         <!-- Pagination Controls -->
         <?php
-        // Calculate total pages for filtered results
-        try {
-            $where = [];
-            $params = [];
-            
-            if ($search) {
-                $where[] = "(p.name LIKE :search OR p.description LIKE :search OR p.short_description LIKE :search)";
-                $params['search'] = "%{$search}%";
-            }
-            
-            if ($categoryFilter) {
-                $cat = $categoryModel->getBySlug($categoryFilter);
-                if ($cat) {
-                    $where[] = "p.category_id = :category_id";
-                    $params['category_id'] = $cat['id'];
-                }
-            }
-            
-            if ($statusFilter === 'active') {
-                $where[] = "p.is_active = 1";
-            } elseif ($statusFilter === 'inactive') {
-                $where[] = "p.is_active = 0";
-            }
-            
-            if ($featuredFilter === 'yes') {
-                $where[] = "p.is_featured = 1";
-            } elseif ($featuredFilter === 'no') {
-                $where[] = "p.is_featured = 0";
-            }
-            
-            if ($priceMin !== null) {
-                $where[] = "COALESCE(p.sale_price, p.price, 0) >= :min_price";
-                $params['min_price'] = $priceMin;
-            }
-            
-            if ($priceMax !== null) {
-                $where[] = "COALESCE(p.sale_price, p.price, 0) <= :max_price";
-                $params['max_price'] = $priceMax;
-            }
-            
-            if ($dateFrom) {
-                $where[] = "DATE(p.created_at) >= :date_from";
-                $params['date_from'] = $dateFrom;
-            }
-            
-            if ($dateTo) {
-                $where[] = "DATE(p.created_at) <= :date_to";
-                $params['date_to'] = $dateTo;
-            }
-            
-            $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-            $countResult = db()->fetchOne("SELECT COUNT(*) as count FROM products p $whereClause", $params);
-            $totalCount = (int)($countResult['count'] ?? 0);
-            $totalPages = max(1, (int)ceil($totalCount / $limit));
-        } catch (Exception $e) {
-            // Fallback: if we have a full page of results, assume there are more
-            $totalCount = count($products);
-            if ($totalCount >= $limit) {
-                $totalCount = $totalCount + 1; // At least one more page
-            }
-            $totalPages = max(1, (int)ceil($totalCount / $limit));
-        }
+        // Calculate total pages (totalCount is already calculated above)
+        $totalPages = max(1, (int)ceil($totalCount / $limit));
         
-        // Show pagination if there are more products than the limit OR if we're not on page 1
-        // This ensures pagination shows even when filters reduce results below limit
-        if ($totalCount > $limit || $page > 1):
+        // Always show pagination if totalCount > 0 and (totalCount > limit OR page > 1)
+        // This ensures pagination is visible when there are multiple pages
+        if ($totalCount > 0 && ($totalCount > $limit || $page > 1)):
         ?>
         <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4 mt-4">
             <div class="flex items-center text-sm text-gray-700 flex-wrap gap-2">
