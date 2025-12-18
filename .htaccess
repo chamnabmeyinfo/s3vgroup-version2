@@ -17,6 +17,13 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     RewriteEngine On
     RewriteBase /
     
+    # Redirect root domain to www
+    # Only redirect if not already on www and not accessing admin/API subdirectories
+    RewriteCond %{HTTP_HOST} ^s3vtgroup\.com\.kh$ [NC]
+    RewriteCond %{REQUEST_URI} !^/admin [NC]
+    RewriteCond %{REQUEST_URI} !^/api [NC]
+    RewriteRule ^(.*)$ https://www.s3vtgroup.com.kh/$1 [R=301,L]
+    
     # Redirect to remove .php extension (optional)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
@@ -28,6 +35,8 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "SAMEORIGIN"
     Header set X-XSS-Protection "1; mode=block"
+    # Content Security Policy (adjust as needed for your site)
+    # Header set Content-Security-Policy "default-src 'self' https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:;"
 </IfModule>
 
 # Prevent Directory Listing

@@ -39,7 +39,8 @@ try {
     }
     
     // Insert email (will fail silently if duplicate due to UNIQUE constraint)
-    $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+    // Use get_real_ip() helper function if available (works with Cloudflare)
+    $ipAddress = function_exists('get_real_ip') ? get_real_ip() : ($_SERVER['REMOTE_ADDR'] ?? null);
     $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
     
     try {

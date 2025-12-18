@@ -30,7 +30,7 @@ class Logger {
             'level' => strtoupper($level),
             'message' => $message,
             'context' => $context,
-            'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown',
+            'ip' => function_exists('get_real_ip') ? get_real_ip() : ($_SERVER['REMOTE_ADDR'] ?? 'unknown'),
             'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
             'request_uri' => $_SERVER['REQUEST_URI'] ?? 'unknown'
         ];
