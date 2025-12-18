@@ -1,3 +1,17 @@
+# PHP Handler Configuration (Required for WHM/cPanel)
+# Note: Let cPanel handle PHP configuration - don't override it here
+# The AddHandler below is a safe fallback that works on most servers
+
+# Standard PHP handler (works on most cPanel servers)
+# This lets cPanel's PHP handler take precedence
+<IfModule mod_php.c>
+    AddType application/x-httpd-php .php .php5 .phtml
+</IfModule>
+
+# Fallback handler (only if mod_php is not available)
+# This is the safest option - let cPanel configure the actual handler
+AddHandler application/x-httpd-php .php .php5 .phtml
+
 # Enable Rewrite Engine
 <IfModule mod_rewrite.c>
     RewriteEngine On

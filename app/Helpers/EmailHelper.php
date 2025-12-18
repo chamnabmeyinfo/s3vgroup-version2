@@ -75,5 +75,28 @@ class EmailHelper {
         
         return self::queue($orderData['email'], $subject, $body);
     }
+    
+    /**
+     * Send password reset email
+     */
+    public static function sendPasswordReset($to, $body) {
+        $subject = "Password Reset Request - " . config('app.name', 'Admin Panel');
+        
+        // Try to queue email first
+        if (self::queue($to, $subject, $body)) {
+            return true;
+        }
+        
+        // Fallback: Try to send directly via PHP mail() if queue fails
+        try {
+            $headers = "MIME-Version: 1.0\r\n";
+            $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+            $headers .= "From: " . config('app.name', 'Admin Panel') . " <noreply@" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . ">\r\n";
+            
+            return mail($to, $subject, $body, $headers);
+        } catch (Exception $e) {
+            return false;
+        }
+    }
 }
 

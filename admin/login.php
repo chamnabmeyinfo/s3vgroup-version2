@@ -116,6 +116,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         Sign in
                     </button>
                 </div>
+                
+                <div class="text-center">
+                    <a href="<?= url('admin/forgot-password.php') ?>" class="text-sm text-blue-600 hover:text-blue-800">
+                        Forgot Password?
+                    </a>
+                </div>
             </form>
             <p class="text-center text-sm text-gray-600">
                 Default: admin / admin

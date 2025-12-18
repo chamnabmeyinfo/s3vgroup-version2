@@ -3,6 +3,7 @@ require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
 use App\Models\Role;
+use App\Helpers\EmailHelper;
 
 requirePermission('view_users');
 
@@ -39,6 +40,74 @@ if (!empty($_GET['toggle_active']) && hasPermission('edit_users')) {
             );
             $message = 'User status updated successfully.';
         }
+    }
+}
+
+// Handle send password reset
+if (!empty($_GET['send_reset']) && hasPermission('edit_users')) {
+    $userId = (int)$_GET['send_reset'];
+    
+    try {
+        $user = db()->fetchOne("SELECT * FROM admin_users WHERE id = :id", ['id' => $userId]);
+        
+        if ($user && !empty($user['email'])) {
+            // Generate secure token
+            $token = bin2hex(random_bytes(32));
+            $expiresAt = date('Y-m-d H:i:s', strtotime('+1 hour'));
+            
+            // Invalidate any existing tokens for this user
+            try {
+                db()->query(
+                    "UPDATE password_reset_tokens SET used = 1 WHERE user_id = :user_id AND used = 0",
+                    ['user_id' => $user['id']]
+                );
+            } catch (\Exception $e) {
+                // Table might not exist yet
+            }
+            
+            // Create new token
+            try {
+                db()->insert('password_reset_tokens', [
+                    'user_id' => $user['id'],
+                    'token' => $token,
+                    'expires_at' => $expiresAt,
+                    'used' => 0
+                ]);
+                
+                // Send password reset email
+                $resetUrl = url('admin/reset-password.php?token=' . $token);
+                $siteName = config('app.name', 'Admin Panel');
+                
+                $emailBody = "
+                <h2>Password Reset Request</h2>
+                <p>Hello {$user['name']},</p>
+                <p>A password reset has been initiated for your {$siteName} account.</p>
+                <p>Click the link below to reset your password:</p>
+                <p><a href=\"{$resetUrl}\" style=\"display:inline-block;padding:10px 20px;background:#3b82f6;color:#fff;text-decoration:none;border-radius:5px;\">Reset Password</a></p>
+                <p>Or copy and paste this URL into your browser:</p>
+                <p style=\"word-break:break-all;\">{$resetUrl}</p>
+                <p><strong>This link will expire in 1 hour.</strong></p>
+                <p>If you did not request this password reset, please contact your administrator immediately.</p>
+                <p>Best regards,<br>{$siteName} Team</p>
+                ";
+                
+                if (EmailHelper::sendPasswordReset($user['email'], $emailBody)) {
+                    $message = 'Password reset email has been sent to ' . escape($user['email']) . '.';
+                } else {
+                    $error = 'Failed to send email. Please try again later.';
+                }
+            } catch (\Exception $e) {
+                if (strpos($e->getMessage(), "doesn't exist") !== false) {
+                    $error = 'Password reset feature is not set up. Please run the database migration first.';
+                } else {
+                    $error = 'Error creating reset token: ' . $e->getMessage();
+                }
+            }
+        } else {
+            $error = 'User not found or email address is missing.';
+        }
+    } catch (\Exception $e) {
+        $error = 'Error: ' . $e->getMessage();
     }
 }
 
@@ -129,6 +198,13 @@ include __DIR__ . '/includes/header.php';
                         <a href="<?= url('admin/user-edit.php?id=' . $user['id']) ?>" 
                            class="text-blue-600 hover:text-blue-900" title="Edit">
                             <i class="fas fa-edit"></i>
+                        </a>
+                        <?php endif; ?>
+                        <?php if (hasPermission('edit_users') && !empty($user['email'])): ?>
+                        <a href="?send_reset=<?= $user['id'] ?>" 
+                           onclick="return confirm('Send password reset email to <?= escape($user['email']) ?>?')" 
+                           class="text-purple-600 hover:text-purple-900" title="Send Password Reset">
+                            <i class="fas fa-key"></i>
                         </a>
                         <?php endif; ?>
                         <?php if (hasPermission('edit_users') && !$isCurrentUser): ?>
