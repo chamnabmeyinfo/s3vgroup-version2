@@ -77,20 +77,49 @@ if ($featuredFilter === 'yes') {
     $filterParams['is_featured'] = 1;
 }
 
-// Get accurate statistics from database (not from filtered arrays)
+// Get accurate statistics from database - COUNT ALL PRODUCTS (not filtered/paginated)
 try {
-    $totalProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products")['count'];
-    $activeProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_active = 1")['count'];
+    // Total products (all products in database)
+    $totalProductsResult = db()->fetchOne("SELECT COUNT(*) as count FROM products");
+    $totalProducts = (int)($totalProductsResult['count'] ?? 0);
+    
+    // Active products
+    $activeProductsResult = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_active = 1");
+    $activeProducts = (int)($activeProductsResult['count'] ?? 0);
+    
+    // Inactive products
     $inactiveProducts = $totalProducts - $activeProducts;
-    $featuredProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_featured = 1")['count'];
-    $lowStockProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE stock_quantity < 10 AND stock_quantity > 0")['count'];
+    
+    // Featured products
+    $featuredProductsResult = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_featured = 1");
+    $featuredProducts = (int)($featuredProductsResult['count'] ?? 0);
+    
+    // Low stock products (stock_quantity < 10 and > 0)
+    try {
+        $lowStockResult = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE stock_quantity < 10 AND stock_quantity > 0");
+        $lowStockProducts = (int)($lowStockResult['count'] ?? 0);
+    } catch (Exception $e) {
+        $lowStockProducts = 0;
+    }
+    
 } catch (Exception $e) {
-    // Fallback if query fails
-    $totalProducts = 0;
-    $activeProducts = 0;
-    $inactiveProducts = 0;
-    $featuredProducts = 0;
-    $lowStockProducts = 0;
+    // Fallback if query fails - try to get from all products
+    try {
+        $allProductsForCount = $productModel->getAll(['include_inactive' => true, 'limit' => 999999]);
+        $totalProducts = count($allProductsForCount);
+        $activeProducts = count(array_filter($allProductsForCount, fn($p) => $p['is_active'] == 1));
+        $inactiveProducts = $totalProducts - $activeProducts;
+        $featuredProducts = count(array_filter($allProductsForCount, fn($p) => $p['is_featured'] == 1));
+        $lowStockProducts = count(array_filter($allProductsForCount, function($p) {
+            return (isset($p['stock_quantity']) && $p['stock_quantity'] < 10 && $p['stock_quantity'] > 0);
+        }));
+    } catch (Exception $e2) {
+        $totalProducts = 0;
+        $activeProducts = 0;
+        $inactiveProducts = 0;
+        $featuredProducts = 0;
+        $lowStockProducts = 0;
+    }
 }
 
 // Pagination settings
@@ -583,16 +612,22 @@ $defaultColumns = array_keys($availableColumns);
             }
             
             $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-            $totalCount = db()->fetchOne("SELECT COUNT(*) as count FROM products p $whereClause", $params)['count'];
-            $totalPages = ceil($totalCount / $limit);
+            $countResult = db()->fetchOne("SELECT COUNT(*) as count FROM products p $whereClause", $params);
+            $totalCount = (int)($countResult['count'] ?? 0);
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
         } catch (Exception $e) {
+            // Fallback: if we have a full page of results, assume there are more
             $totalCount = count($products);
-            $totalPages = 1;
+            if ($totalCount >= $limit) {
+                $totalCount = $totalCount + 1; // At least one more page
+            }
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
         }
         
-        if ($totalPages > 1):
+        // Always show pagination if there are more products than the limit
+        if ($totalCount > $limit):
         ?>
-        <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+        <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4 mt-4">
             <div class="flex items-center text-sm text-gray-700 flex-wrap gap-2">
                 <span>Page</span>
                 <span class="font-semibold"><?= $page ?></span>
