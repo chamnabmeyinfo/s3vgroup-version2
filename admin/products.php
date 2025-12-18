@@ -77,11 +77,43 @@ if ($featuredFilter === 'yes') {
     $filterParams['is_featured'] = 1;
 }
 
-// Get all products
-$allProducts = $productModel->getAll($filterParams);
+// Get accurate statistics from database (not from filtered arrays)
+try {
+    $totalProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products")['count'];
+    $activeProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_active = 1")['count'];
+    $inactiveProducts = $totalProducts - $activeProducts;
+    $featuredProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE is_featured = 1")['count'];
+    $lowStockProducts = db()->fetchOne("SELECT COUNT(*) as count FROM products WHERE stock_quantity < 10 AND stock_quantity > 0")['count'];
+} catch (Exception $e) {
+    // Fallback if query fails
+    $totalProducts = 0;
+    $activeProducts = 0;
+    $inactiveProducts = 0;
+    $featuredProducts = 0;
+    $lowStockProducts = 0;
+}
 
-// Apply additional filters
-$products = $allProducts;
+// Pagination settings
+$page = (int)($_GET['page'] ?? 1);
+$limit = 20; // Products per page
+$filterParams['page'] = $page;
+$filterParams['limit'] = $limit;
+
+// Map sort parameter for Product model
+$sortMap = [
+    'name_asc' => 'name',
+    'name_desc' => 'name_desc',
+    'price_asc' => 'price_asc',
+    'price_desc' => 'price_desc',
+    'date_desc' => 'newest',
+    'date_asc' => 'newest'
+];
+$filterParams['sort'] = $sortMap[$sort] ?? 'name';
+
+// Get products with pagination
+$products = $productModel->getAll($filterParams);
+
+// Apply additional filters that can't be done in SQL
 if ($priceMin !== null || $priceMax !== null || $dateFrom || $dateTo) {
     $products = array_filter($products, function($p) use ($priceMin, $priceMax, $dateFrom, $dateTo) {
         $price = $p['sale_price'] ?? $p['price'];
@@ -94,28 +126,7 @@ if ($priceMin !== null || $priceMax !== null || $dateFrom || $dateTo) {
         
         return true;
     });
-}
-
-// Sort products
-switch ($sort) {
-    case 'name_asc':
-        usort($products, fn($a, $b) => strcmp($a['name'], $b['name']));
-        break;
-    case 'name_desc':
-        usort($products, fn($a, $b) => strcmp($b['name'], $a['name']));
-        break;
-    case 'price_asc':
-        usort($products, fn($a, $b) => ($a['sale_price'] ?? $a['price']) <=> ($b['sale_price'] ?? $b['price']));
-        break;
-    case 'price_desc':
-        usort($products, fn($a, $b) => ($b['sale_price'] ?? $b['price']) <=> ($a['sale_price'] ?? $a['price']));
-        break;
-    case 'date_desc':
-        usort($products, fn($a, $b) => strtotime($b['created_at']) - strtotime($a['created_at']));
-        break;
-    case 'date_asc':
-        usort($products, fn($a, $b) => strtotime($a['created_at']) - strtotime($b['created_at']));
-        break;
+    $products = array_values($products); // Re-index array
 }
 
 // Get all categories for filter
@@ -152,14 +163,7 @@ $availableColumns = [
     'actions' => 'Actions'
 ];
 
-// Calculate stats for mini dashboard
-$totalProducts = count($allProducts);
-$activeProducts = count(array_filter($allProducts, fn($p) => $p['is_active'] == 1));
-$inactiveProducts = $totalProducts - $activeProducts;
-$featuredProducts = count(array_filter($allProducts, fn($p) => $p['is_featured'] == 1));
-$lowStockProducts = count(array_filter($allProducts, function($p) {
-    return isset($p['stock_quantity']) && $p['stock_quantity'] < 10 && $p['stock_quantity'] > 0;
-}));
+// Statistics are now calculated from database queries above (more accurate)
 
 $miniStats = [
     [
@@ -317,11 +321,11 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
             <div class="flex items-center space-x-6">
                 <div>
                     <span class="text-sm text-gray-600">Total Products:</span>
-                    <span class="ml-2 font-bold text-gray-900"><?= count($allProducts) ?></span>
+                    <span class="ml-2 font-bold text-gray-900" id="totalProductsCount"><?= $totalProducts ?></span>
                 </div>
                 <div>
                     <span class="text-sm text-gray-600">Showing:</span>
-                    <span class="ml-2 font-bold text-blue-600"><?= count($products) ?></span>
+                    <span class="ml-2 font-bold text-blue-600" id="showingCount"><?= count($products) ?></span>
                 </div>
                 <?php if (count($products) < count($allProducts)): ?>
                 <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
@@ -368,8 +372,8 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Actions</th>
                 </tr>
             </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-                <?php if (empty($products)): ?>
+            <tbody id="productsTableBody" class="bg-white divide-y divide-gray-200">
+                <?php if (empty($products) && $page == 1): ?>
                     <tr>
                         <td colspan="15" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center">
@@ -387,7 +391,7 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
                     </tr>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
-                    <tr class="hover:bg-blue-50/50 transition-colors border-b border-gray-100">
+                    <tr class="product-row hover:bg-blue-50/50 transition-colors border-b border-gray-100" data-product-id="<?= $product['id'] ?>">
                         <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
                         </td>
@@ -496,10 +500,256 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
         </table>
             </div>
         </div>
+        
+        <!-- Loading indicator for infinite scroll -->
+        <div id="loadingIndicator" class="hidden text-center py-8">
+            <div class="inline-flex items-center space-x-2 text-gray-600">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>Loading more products...</span>
+            </div>
+        </div>
+        
+        <!-- End of list indicator -->
+        <div id="endOfList" class="hidden text-center py-4 text-gray-500 text-sm">
+            <i class="fas fa-check-circle mr-2"></i>
+            All products loaded
+        </div>
     </div>
 </div>
 
 <script>
+// Infinite scroll variables
+let currentPage = <?= $page ?>;
+let isLoading = false;
+let hasMore = <?= (count($products) >= $limit) ? 'true' : 'false' ?>;
+const productsPerPage = <?= $limit ?>;
+
+// Get current filter parameters
+function getFilterParams() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return {
+        search: urlParams.get('search') || '',
+        category: urlParams.get('category') || '',
+        status: urlParams.get('status') || '',
+        featured: urlParams.get('featured') || '',
+        sort: urlParams.get('sort') || 'name_asc',
+        date_from: urlParams.get('date_from') || '',
+        date_to: urlParams.get('date_to') || '',
+        price_min: urlParams.get('price_min') || '',
+        price_max: urlParams.get('price_max') || ''
+    };
+}
+
+// Load more products
+function loadMoreProducts() {
+    if (isLoading || !hasMore) return;
+    
+    isLoading = true;
+    currentPage++;
+    
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    const endOfList = document.getElementById('endOfList');
+    
+    loadingIndicator.classList.remove('hidden');
+    
+    const params = getFilterParams();
+    params.page = currentPage;
+    params.limit = productsPerPage;
+    
+    const queryString = new URLSearchParams(params).toString();
+    
+    fetch('<?= url('admin/api/products-load.php') ?>?' + queryString)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.products.length > 0) {
+                appendProducts(data.products);
+                hasMore = data.pagination.has_more;
+                
+                // Update showing count
+                const showingCount = document.getElementById('showingCount');
+                const currentCount = parseInt(showingCount.textContent) || 0;
+                showingCount.textContent = currentCount + data.products.length;
+            } else {
+                hasMore = false;
+            }
+            
+            if (!hasMore) {
+                endOfList.classList.remove('hidden');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading products:', error);
+            hasMore = false;
+        })
+        .finally(() => {
+            isLoading = false;
+            loadingIndicator.classList.add('hidden');
+        });
+}
+
+// Append products to table
+function appendProducts(products) {
+    const tbody = document.getElementById('productsTableBody');
+    const selectedColumns = <?= json_encode($selectedColumns) ?>;
+    
+    products.forEach(product => {
+        const row = createProductRow(product, selectedColumns);
+        tbody.appendChild(row);
+    });
+}
+
+// Create product row HTML
+function createProductRow(product, selectedColumns) {
+    const tr = document.createElement('tr');
+    tr.className = 'product-row hover:bg-blue-50/50 transition-colors border-b border-gray-100';
+    tr.setAttribute('data-product-id', product.id);
+    
+    const variantBadge = product.variant_count > 0 
+        ? `<span class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full" title="${product.variant_count} variant(s)">
+            <i class="fas fa-layer-group mr-1"></i>${product.variant_count}
+           </span>`
+        : '';
+    
+    const imageHtml = product.image 
+        ? `<div class="relative group">
+             <img src="<?= asset('storage/uploads/') ?>${escapeHtml(product.image)}" 
+                  alt="" class="h-14 w-14 object-cover rounded-lg border-2 border-gray-200 group-hover:border-blue-400 transition-all shadow-sm">
+             <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
+                 <i class="fas fa-eye text-white text-xs"></i>
+             </div>
+           </div>`
+        : `<div class="h-14 w-14 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
+             <i class="fas fa-image text-gray-400 text-sm"></i>
+           </div>`;
+    
+    const priceHtml = product.sale_price > 0
+        ? `<div class="text-blue-600 font-bold">$${formatNumber(product.sale_price)}</div>
+           ${product.price > 0 ? `<div class="text-xs text-gray-400 line-through">$${formatNumber(product.price)}</div>` : ''}`
+        : (product.price > 0 
+            ? `<div class="font-semibold">$${formatNumber(product.price)}</div>`
+            : `<span class="text-gray-400">-</span>`);
+    
+    const stockStatusClass = product.stock_status === 'in_stock' 
+        ? 'bg-green-100 text-green-800'
+        : (product.stock_status === 'out_of_stock' 
+            ? 'bg-red-100 text-red-800'
+            : 'bg-yellow-100 text-yellow-800');
+    
+    const stockStatusText = product.stock_status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    const createdDate = new Date(product.created_at).toLocaleDateString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: 'numeric' 
+    });
+    
+    tr.innerHTML = `
+        <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox" style="display: ${shouldShowColumn('checkbox', selectedColumns) ? '' : 'none'};">
+            <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="${product.id}" onchange="updateBulkActions()">
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap" data-column="image" style="display: ${shouldShowColumn('image', selectedColumns) ? '' : 'none'};">
+            ${imageHtml}
+        </td>
+        <td class="px-6 py-4" data-column="name" style="display: ${shouldShowColumn('name', selectedColumns) ? '' : 'none'};">
+            <div class="flex items-center gap-2">
+                <div class="text-sm font-medium text-gray-900">${escapeHtml(product.name)}</div>
+                ${variantBadge}
+            </div>
+            ${product.short_description ? `<div class="text-xs text-gray-500 line-clamp-1">${escapeHtml(product.short_description.substring(0, 50))}...</div>` : ''}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku" style="display: ${shouldShowColumn('sku', selectedColumns) ? '' : 'none'};">
+            ${escapeHtml(product.sku || '-')}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="category" style="display: ${shouldShowColumn('category', selectedColumns) ? '' : 'none'};">
+            ${escapeHtml(product.category_name || 'Uncategorized')}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-column="price" style="display: ${shouldShowColumn('price', selectedColumns) ? '' : 'none'};">
+            ${priceHtml}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price" style="display: ${shouldShowColumn('sale_price', selectedColumns) ? '' : 'none'};">
+            ${product.sale_price > 0 ? '$' + formatNumber(product.sale_price) : '-'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock" style="display: ${shouldShowColumn('stock', selectedColumns) ? '' : 'none'};">
+            <span class="px-2 py-1 text-xs rounded ${stockStatusClass}">${stockStatusText}</span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views" style="display: ${shouldShowColumn('views', selectedColumns) ? '' : 'none'};">
+            ${formatNumber(product.view_count || 0)}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap" data-column="status" style="display: ${shouldShowColumn('status', selectedColumns) ? '' : 'none'};">
+            <span class="px-2 py-1 text-xs rounded ${product.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                ${product.is_active ? 'Active' : 'Inactive'}
+            </span>
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap" data-column="featured" style="display: ${shouldShowColumn('featured', selectedColumns) ? '' : 'none'};">
+            ${product.is_featured 
+                ? '<span class="text-yellow-500"><i class="fas fa-star"></i></span>'
+                : '<span class="text-gray-300"><i class="far fa-star"></i></span>'}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created" style="display: ${shouldShowColumn('created', selectedColumns) ? '' : 'none'};">
+            ${createdDate}
+        </td>
+        <td class="px-6 py-4 whitespace-nowrap" data-column="actions" style="display: ${shouldShowColumn('actions', selectedColumns) ? '' : 'none'};">
+            <div class="flex items-center space-x-2">
+                <a href="<?= url('admin/product-edit.php?id=') ?>${product.id}" 
+                   class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
+                    <i class="fas fa-edit text-sm"></i>
+                </a>
+                <a href="<?= url('admin/product-duplicate.php?id=') ?>${product.id}" 
+                   onclick="return confirm('Duplicate this product?')" 
+                   class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all" title="Duplicate">
+                    <i class="fas fa-copy text-sm"></i>
+                </a>
+                <a href="?toggle_featured=${product.id}" 
+                   class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-lg transition-all" title="Toggle Featured">
+                    <i class="fas fa-star text-sm"></i>
+                </a>
+                <a href="?delete=${product.id}" 
+                   onclick="return confirm('Are you sure you want to delete this product?')" 
+                   class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all" title="Delete">
+                    <i class="fas fa-trash text-sm"></i>
+                </a>
+            </div>
+        </td>
+    `;
+    
+    return tr;
+}
+
+// Helper functions
+function shouldShowColumn(column, selectedColumns) {
+    return selectedColumns.includes(column) || selectedColumns.length === 0;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function formatNumber(num) {
+    return parseFloat(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+// Infinite scroll detection
+window.addEventListener('scroll', () => {
+    if (window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 1000) {
+        loadMoreProducts();
+    }
+});
+
+// Reset on filter change
+document.addEventListener('DOMContentLoaded', () => {
+    // Reset pagination when filters change
+    const filterForm = document.getElementById('filter-form-products-filter');
+    if (filterForm) {
+        filterForm.addEventListener('submit', () => {
+            currentPage = 1;
+            hasMore = true;
+            document.getElementById('endOfList').classList.add('hidden');
+        });
+    }
+});
+
 function toggleAll(checkbox) {
     const checkboxes = document.querySelectorAll('.product-checkbox');
     checkboxes.forEach(cb => cb.checked = checkbox.checked);
