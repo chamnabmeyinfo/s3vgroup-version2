@@ -22,13 +22,23 @@ class Product
         if (!isset($filters['include_inactive']) || !$filters['include_inactive']) {
             $where[] = "p.is_active = 1";
         }
+        
+        // Handle is_active filter explicitly (for admin filtering)
+        if (isset($filters['is_active'])) {
+            $where[] = "p.is_active = :is_active";
+            $params['is_active'] = (int)$filters['is_active'];
+        }
 
         if (!empty($filters['category_id'])) {
             $where[] = "p.category_id = :category_id";
             $params['category_id'] = $filters['category_id'];
         }
 
-        if (!empty($filters['featured'])) {
+        if (!empty($filters['is_featured'])) {
+            $where[] = "p.is_featured = :is_featured";
+            $params['is_featured'] = (int)$filters['is_featured'];
+        } elseif (!empty($filters['featured'])) {
+            // Legacy support for 'featured' filter
             $where[] = "p.is_featured = 1";
         }
 

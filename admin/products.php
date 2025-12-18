@@ -139,20 +139,24 @@ $sortMap = [
 ];
 $filterParams['sort'] = $sortMap[$sort] ?? 'name';
 
+// Add price and date filters to filterParams for SQL query (more efficient)
+if ($priceMin !== null) {
+    $filterParams['min_price'] = $priceMin;
+}
+if ($priceMax !== null) {
+    $filterParams['max_price'] = $priceMax;
+}
+
 // Get products with pagination
 $products = $productModel->getAll($filterParams);
 
-// Apply additional filters that can't be done in SQL
-if ($priceMin !== null || $priceMax !== null || $dateFrom || $dateTo) {
-    $products = array_filter($products, function($p) use ($priceMin, $priceMax, $dateFrom, $dateTo) {
-        $price = $p['sale_price'] ?? $p['price'];
-        if ($priceMin !== null && $price < $priceMin) return false;
-        if ($priceMax !== null && $price > $priceMax) return false;
-        
+// Apply date filters that can't be done efficiently in SQL (if needed)
+// Note: Price filters are now handled in SQL for better performance
+if ($dateFrom || $dateTo) {
+    $products = array_filter($products, function($p) use ($dateFrom, $dateTo) {
         $createdAt = strtotime($p['created_at']);
         if ($dateFrom && $createdAt < strtotime($dateFrom)) return false;
         if ($dateTo && $createdAt > strtotime($dateTo . ' 23:59:59')) return false;
-        
         return true;
     });
     $products = array_values($products); // Re-index array
@@ -192,7 +196,8 @@ $availableColumns = [
 ];
 
 // Default to all columns if no columns specified
-$selectedColumns = !empty($_GET['columns']) ? $_GET['columns'] : array_keys($availableColumns);
+// If columns parameter is empty or not set, show all columns by default
+$selectedColumns = !empty($_GET['columns']) && is_array($_GET['columns']) ? $_GET['columns'] : array_keys($availableColumns);
 
 // Statistics are now calculated from database queries above (more accurate)
 
@@ -404,15 +409,15 @@ $defaultColumns = array_keys($availableColumns);
                     </th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Image</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sku" style="display: <?= in_array('sku', $selectedColumns) ? '' : 'none' ?>;">SKU</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">SKU</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Category</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sale_price" style="display: <?= in_array('sale_price', $selectedColumns) ? '' : 'none' ?>;">Sale Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="stock" style="display: <?= in_array('stock', $selectedColumns) ? '' : 'none' ?>;">Stock</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="views" style="display: <?= in_array('views', $selectedColumns) ? '' : 'none' ?>;">Views</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Sale Price</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Stock</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Views</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="featured" style="display: <?= in_array('featured', $selectedColumns) ? '' : 'none' ?>;">Featured</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="created" style="display: <?= in_array('created', $selectedColumns) ? '' : 'none' ?>;">Created</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Featured</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Created</th>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Actions</th>
                 </tr>
             </thead>
@@ -467,7 +472,7 @@ $defaultColumns = array_keys($availableColumns);
                                 <div class="text-xs text-gray-500 line-clamp-1"><?= escape(substr($product['short_description'], 0, 50)) ?>...</div>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku" style="display: <?= in_array('sku', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?= escape($product['sku'] ?? '-') ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
@@ -485,10 +490,10 @@ $defaultColumns = array_keys($availableColumns);
                                 <span class="text-gray-400">-</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price" style="display: <?= in_array('sale_price', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?= (!empty($product['sale_price']) && $product['sale_price'] > 0) ? '$' . number_format((float)$product['sale_price'], 2) : '-' ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock" style="display: <?= in_array('stock', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <span class="px-2 py-1 text-xs rounded <?= 
                                 $product['stock_status'] === 'in_stock' ? 'bg-green-100 text-green-800' : 
                                 ($product['stock_status'] === 'out_of_stock' ? 'bg-red-100 text-red-800' : 
@@ -497,7 +502,7 @@ $defaultColumns = array_keys($availableColumns);
                                 <?= ucwords(str_replace('_', ' ', $product['stock_status'])) ?>
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views" style="display: <?= in_array('views', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?= number_format($product['view_count'] ?? 0) ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
@@ -505,14 +510,14 @@ $defaultColumns = array_keys($availableColumns);
                                 <?= $product['is_active'] ? 'Active' : 'Inactive' ?>
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="featured" style="display: <?= in_array('featured', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if ($product['is_featured']): ?>
                                 <span class="text-yellow-500"><i class="fas fa-star"></i></span>
                             <?php else: ?>
                                 <span class="text-gray-300"><i class="far fa-star"></i></span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created" style="display: <?= in_array('created', $selectedColumns) ? '' : 'none' ?>;">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?= date('M d, Y', strtotime($product['created_at'])) ?>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
@@ -624,8 +629,9 @@ $defaultColumns = array_keys($availableColumns);
             $totalPages = max(1, (int)ceil($totalCount / $limit));
         }
         
-        // Always show pagination if there are more products than the limit
-        if ($totalCount > $limit):
+        // Show pagination if there are more products than the limit OR if we're not on page 1
+        // This ensures pagination shows even when filters reduce results below limit
+        if ($totalCount > $limit || $page > 1):
         ?>
         <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4 mt-4">
             <div class="flex items-center text-sm text-gray-700 flex-wrap gap-2">
