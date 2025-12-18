@@ -1,4 +1,9 @@
 <?php
+// Prevent caching - force fresh data on every request
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
 
@@ -58,6 +63,8 @@ $priceMin = !empty($_GET['price_min']) ? (float)$_GET['price_min'] : null;
 $priceMax = !empty($_GET['price_max']) ? (float)$_GET['price_max'] : null;
 
 // Build filter conditions
+// IMPORTANT: include_inactive = true means show ALL products (active and inactive)
+// Only filter by active status if user explicitly selects a status filter
 $filterParams = ['include_inactive' => true];
 if ($search) {
     $filterParams['search'] = $search;
@@ -68,11 +75,18 @@ if ($categoryFilter) {
         $filterParams['category_id'] = $cat['id'];
     }
 }
+// Only apply is_active filter if user explicitly selected a status filter
+// Otherwise, show all products (active and inactive)
 if ($statusFilter === 'active') {
     $filterParams['is_active'] = 1;
+    // Remove include_inactive when filtering by active status
+    unset($filterParams['include_inactive']);
 } elseif ($statusFilter === 'inactive') {
     $filterParams['is_active'] = 0;
+    // Remove include_inactive when filtering by inactive status
+    unset($filterParams['include_inactive']);
 }
+// If no status filter, keep include_inactive = true to show ALL products
 if ($featuredFilter === 'yes') {
     $filterParams['is_featured'] = 1;
 }

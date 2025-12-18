@@ -19,15 +19,17 @@ class Product
         $params = [];
         
         // Only filter by active if not explicitly set to false (for admin)
-        if (!isset($filters['include_inactive']) || !$filters['include_inactive']) {
-            $where[] = "p.is_active = 1";
-        }
-        
-        // Handle is_active filter explicitly (for admin filtering)
+        // If include_inactive is true, show ALL products (active and inactive)
+        // If is_active is explicitly set, use that filter instead
         if (isset($filters['is_active'])) {
+            // Explicit is_active filter takes precedence
             $where[] = "p.is_active = :is_active";
             $params['is_active'] = (int)$filters['is_active'];
+        } elseif (!isset($filters['include_inactive']) || !$filters['include_inactive']) {
+            // Default: only show active products (for frontend)
+            $where[] = "p.is_active = 1";
         }
+        // If include_inactive is true and is_active is not set, show ALL products (no filter)
 
         if (!empty($filters['category_id'])) {
             $where[] = "p.category_id = :category_id";
