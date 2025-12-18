@@ -29,6 +29,8 @@ $priceMin = !empty($_GET['price_min']) ? (float)$_GET['price_min'] : null;
 $priceMax = !empty($_GET['price_max']) ? (float)$_GET['price_max'] : null;
 
 // Build filter parameters
+// IMPORTANT: include_inactive = true means show ALL products (active and inactive)
+// Only filter by active status if user explicitly selects a status filter
 $filterParams = [
     'include_inactive' => true,
     'page' => $page,
@@ -46,11 +48,16 @@ if ($categoryFilter) {
     }
 }
 
+// Only apply is_active filter if user explicitly selected a status filter
+// Otherwise, show all products (active and inactive)
 if ($statusFilter === 'active') {
     $filterParams['is_active'] = 1;
+    unset($filterParams['include_inactive']);
 } elseif ($statusFilter === 'inactive') {
     $filterParams['is_active'] = 0;
+    unset($filterParams['include_inactive']);
 }
+// If no status filter, keep include_inactive = true to show ALL products
 
 if ($featuredFilter === 'yes') {
     $filterParams['is_featured'] = 1;
@@ -69,20 +76,24 @@ $sortMap = [
 ];
 $filterParams['sort'] = $sortMap[$sort] ?? 'name';
 
+// Add price filters to filterParams for SQL query (more efficient)
+if ($priceMin !== null) {
+    $filterParams['min_price'] = $priceMin;
+}
+if ($priceMax !== null) {
+    $filterParams['max_price'] = $priceMax;
+}
+
 // Get products with pagination
 $products = $productModel->getAll($filterParams);
 
-// Apply additional filters that can't be done in SQL
-if ($priceMin !== null || $priceMax !== null || $dateFrom || $dateTo) {
-    $products = array_filter($products, function($p) use ($priceMin, $priceMax, $dateFrom, $dateTo) {
-        $price = $p['sale_price'] ?? $p['price'];
-        if ($priceMin !== null && $price < $priceMin) return false;
-        if ($priceMax !== null && $price > $priceMax) return false;
-        
+// Apply date filters that can't be done efficiently in SQL (if needed)
+// Note: Price filters are now handled in SQL for better performance
+if ($dateFrom || $dateTo) {
+    $products = array_filter($products, function($p) use ($dateFrom, $dateTo) {
         $createdAt = strtotime($p['created_at']);
         if ($dateFrom && $createdAt < strtotime($dateFrom)) return false;
         if ($dateTo && $createdAt > strtotime($dateTo . ' 23:59:59')) return false;
-        
         return true;
     });
     $products = array_values($products); // Re-index array

@@ -734,8 +734,10 @@ $defaultColumns = array_keys($availableColumns);
 // Infinite scroll variables
 let currentPage = <?= $page ?>;
 let isLoading = false;
-let hasMore = <?= (count($products) >= $limit) ? 'true' : 'false' ?>;
+// Check if there are more products to load
+let hasMore = <?= ($totalCount > ($page * $limit)) ? 'true' : 'false' ?>;
 const productsPerPage = <?= $limit ?>;
+const totalProductsCount = <?= $totalCount ?>;
 
 // Get current filter parameters
 function getFilterParams() {
@@ -755,15 +757,21 @@ function getFilterParams() {
 
 // Load more products
 function loadMoreProducts() {
-    if (isLoading || !hasMore) return;
+    if (isLoading || !hasMore) {
+        return;
+    }
     
     isLoading = true;
     currentPage++;
     
     const loadingIndicator = document.getElementById('loadingIndicator');
     const endOfList = document.getElementById('endOfList');
+    const tbody = document.getElementById('productsTableBody');
     
-    loadingIndicator.classList.remove('hidden');
+    // Show loading indicator
+    if (loadingIndicator) {
+        loadingIndicator.classList.remove('hidden');
+    }
     
     const params = getFilterParams();
     params.page = currentPage;
@@ -772,31 +780,52 @@ function loadMoreProducts() {
     const queryString = new URLSearchParams(params).toString();
     
     fetch('<?= url('admin/api/products-load.php') ?>?' + queryString)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            if (data.success && data.products.length > 0) {
+            if (data.success && data.products && data.products.length > 0) {
                 appendProducts(data.products);
                 hasMore = data.pagination.has_more;
                 
                 // Update showing count
                 const showingCount = document.getElementById('showingCount');
-                const currentCount = parseInt(showingCount.textContent) || 0;
-                showingCount.textContent = currentCount + data.products.length;
+                if (showingCount) {
+                    const currentCount = parseInt(showingCount.textContent.replace(/,/g, '')) || 0;
+                    const newCount = currentCount + data.products.length;
+                    showingCount.textContent = newCount.toLocaleString();
+                }
+                
+                // Update total count display if it exists
+                const totalCountElement = showingCount?.nextElementSibling;
+                if (totalCountElement && totalCountElement.textContent.includes('of')) {
+                    totalCountElement.textContent = `of ${data.pagination.total.toLocaleString()}`;
+                }
             } else {
                 hasMore = false;
             }
             
-            if (!hasMore) {
+            if (!hasMore && endOfList) {
                 endOfList.classList.remove('hidden');
             }
         })
         .catch(error => {
             console.error('Error loading products:', error);
             hasMore = false;
+            // Show error message
+            if (endOfList) {
+                endOfList.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>Error loading products. Please refresh the page.';
+                endOfList.classList.remove('hidden');
+            }
         })
         .finally(() => {
             isLoading = false;
-            loadingIndicator.classList.add('hidden');
+            if (loadingIndicator) {
+                loadingIndicator.classList.add('hidden');
+            }
         });
 }
 
@@ -943,12 +972,23 @@ function formatNumber(num) {
     return parseFloat(num).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-// Infinite scroll detection
-window.addEventListener('scroll', () => {
-    if (window.innerHeight + window.scrollY >= document.documentElement.offsetHeight - 1000) {
-        loadMoreProducts();
-    }
-});
+// Infinite scroll detection - improved with throttling
+let scrollTimeout;
+function handleScroll() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+        // Check if user scrolled near bottom (within 500px)
+        const scrollPosition = window.innerHeight + window.scrollY;
+        const pageHeight = document.documentElement.offsetHeight;
+        const threshold = 500; // Load when 500px from bottom
+        
+        if (scrollPosition >= pageHeight - threshold && !isLoading && hasMore) {
+            loadMoreProducts();
+        }
+    }, 100); // Throttle to check every 100ms
+}
+
+window.addEventListener('scroll', handleScroll, { passive: true });
 
 // Reset on filter change
 document.addEventListener('DOMContentLoaded', () => {
