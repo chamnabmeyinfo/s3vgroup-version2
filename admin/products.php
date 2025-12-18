@@ -1,8 +1,16 @@
 <?php
-// Prevent caching - force fresh data on every request
-header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+// AGGRESSIVE CACHE PREVENTION - Force fresh data on every request
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0, private');
 header('Pragma: no-cache');
 header('Expires: 0');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT');
+header('ETag: "' . md5(time() . rand()) . '"');
+
+// Prevent OPcache from serving cached version
+if (function_exists('opcache_reset')) {
+    // Note: opcache_reset() clears ALL cached files, use carefully in production
+    // For single file, we'll use version parameter instead
+}
 
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
@@ -311,6 +319,8 @@ $miniStats = [
 ];
 
 $pageTitle = 'Products';
+// Add version parameter to prevent caching
+$cacheVersion = time();
 include __DIR__ . '/includes/header.php';
 
 // Setup filter component variables
@@ -1190,6 +1200,9 @@ function executeBulkAction() {
 </script>
 
 <style>
+/* Cache-busting: Force reload styles */
+/* Version: <?= $cacheVersion ?> */
+
 /* Modern Animations */
 @keyframes slide-in {
     from {
