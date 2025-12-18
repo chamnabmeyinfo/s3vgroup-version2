@@ -145,8 +145,7 @@ try {
     // Variants table might not exist
 }
 
-// Column visibility
-$selectedColumns = $_GET['columns'] ?? ['checkbox', 'image', 'name', 'category', 'price', 'status', 'actions'];
+// Column visibility - Enable all columns by default
 $availableColumns = [
     'checkbox' => 'Checkbox',
     'image' => 'Image',
@@ -162,6 +161,9 @@ $availableColumns = [
     'created' => 'Created Date',
     'actions' => 'Actions'
 ];
+
+// Default to all columns if no columns specified
+$selectedColumns = !empty($_GET['columns']) ? $_GET['columns'] : array_keys($availableColumns);
 
 // Statistics are now calculated from database queries above (more accurate)
 
@@ -238,7 +240,8 @@ $sortOptions = [
     'date_desc' => 'Newest First',
     'date_asc' => 'Oldest First'
 ];
-$defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', 'actions'];
+// Default columns - all columns enabled by default
+$defaultColumns = array_keys($availableColumns);
 ?>
 
 <div class="w-full">
@@ -318,16 +321,28 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
     <!-- Stats Bar -->
     <div class="bg-white rounded-lg shadow-md p-4 mb-6">
         <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center space-x-6">
+            <div class="flex items-center space-x-6 flex-wrap">
                 <div>
                     <span class="text-sm text-gray-600">Total Products:</span>
-                    <span class="ml-2 font-bold text-gray-900" id="totalProductsCount"><?= $totalProducts ?></span>
+                    <span class="ml-2 font-bold text-gray-900" id="totalProductsCount"><?= number_format($totalProducts) ?></span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Active:</span>
+                    <span class="ml-2 font-bold text-green-600"><?= number_format($activeProducts) ?></span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Featured:</span>
+                    <span class="ml-2 font-bold text-yellow-600"><?= number_format($featuredProducts) ?></span>
+                </div>
+                <div>
+                    <span class="text-sm text-gray-600">Low Stock:</span>
+                    <span class="ml-2 font-bold text-red-600"><?= number_format($lowStockProducts) ?></span>
                 </div>
                 <div>
                     <span class="text-sm text-gray-600">Showing:</span>
                     <span class="ml-2 font-bold text-blue-600" id="showingCount"><?= count($products) ?></span>
                 </div>
-                <?php if (count($products) < count($allProducts)): ?>
+                <?php if ($search || $categoryFilter || $statusFilter || $featuredFilter || $dateFrom || $dateTo || $priceMin !== null || $priceMax !== null): ?>
                 <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                     <i class="fas fa-filter mr-1"></i>
                     Filtered
@@ -514,6 +529,148 @@ $defaultColumns = ['checkbox', 'image', 'name', 'category', 'price', 'status', '
             <i class="fas fa-check-circle mr-2"></i>
             All products loaded
         </div>
+        
+        <!-- Pagination Controls -->
+        <?php
+        // Calculate total pages for filtered results
+        try {
+            $where = [];
+            $params = [];
+            
+            if ($search) {
+                $where[] = "(p.name LIKE :search OR p.description LIKE :search OR p.short_description LIKE :search)";
+                $params['search'] = "%{$search}%";
+            }
+            
+            if ($categoryFilter) {
+                $cat = $categoryModel->getBySlug($categoryFilter);
+                if ($cat) {
+                    $where[] = "p.category_id = :category_id";
+                    $params['category_id'] = $cat['id'];
+                }
+            }
+            
+            if ($statusFilter === 'active') {
+                $where[] = "p.is_active = 1";
+            } elseif ($statusFilter === 'inactive') {
+                $where[] = "p.is_active = 0";
+            }
+            
+            if ($featuredFilter === 'yes') {
+                $where[] = "p.is_featured = 1";
+            } elseif ($featuredFilter === 'no') {
+                $where[] = "p.is_featured = 0";
+            }
+            
+            if ($priceMin !== null) {
+                $where[] = "COALESCE(p.sale_price, p.price, 0) >= :min_price";
+                $params['min_price'] = $priceMin;
+            }
+            
+            if ($priceMax !== null) {
+                $where[] = "COALESCE(p.sale_price, p.price, 0) <= :max_price";
+                $params['max_price'] = $priceMax;
+            }
+            
+            if ($dateFrom) {
+                $where[] = "DATE(p.created_at) >= :date_from";
+                $params['date_from'] = $dateFrom;
+            }
+            
+            if ($dateTo) {
+                $where[] = "DATE(p.created_at) <= :date_to";
+                $params['date_to'] = $dateTo;
+            }
+            
+            $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+            $totalCount = db()->fetchOne("SELECT COUNT(*) as count FROM products p $whereClause", $params)['count'];
+            $totalPages = ceil($totalCount / $limit);
+        } catch (Exception $e) {
+            $totalCount = count($products);
+            $totalPages = 1;
+        }
+        
+        if ($totalPages > 1):
+        ?>
+        <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center text-sm text-gray-700 flex-wrap gap-2">
+                <span>Page</span>
+                <span class="font-semibold"><?= $page ?></span>
+                <span>of</span>
+                <span class="font-semibold"><?= $totalPages ?></span>
+                <span class="text-gray-500">(<?= number_format($totalCount) ?> total products)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <?php if ($page > 1): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" 
+                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="First Page">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" 
+                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Previous Page">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-angle-double-left"></i>
+                    </span>
+                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-angle-left"></i>
+                    </span>
+                <?php endif; ?>
+                
+                <!-- Page Numbers -->
+                <div class="flex items-center gap-1">
+                    <?php
+                    $startPage = max(1, $page - 2);
+                    $endPage = min($totalPages, $page + 2);
+                    
+                    if ($startPage > 1): ?>
+                        <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" 
+                           class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">1</a>
+                        <?php if ($startPage > 2): ?>
+                            <span class="px-2 text-gray-400">...</span>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                    
+                    <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
+                        <?php if ($i == $page): ?>
+                            <span class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-semibold"><?= $i ?></span>
+                        <?php else: ?>
+                            <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
+                               class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"><?= $i ?></a>
+                        <?php endif; ?>
+                    <?php endfor; ?>
+                    
+                    <?php if ($endPage < $totalPages): ?>
+                        <?php if ($endPage < $totalPages - 1): ?>
+                            <span class="px-2 text-gray-400">...</span>
+                        <?php endif; ?>
+                        <a href="?<?= http_build_query(array_merge($_GET, ['page' => $totalPages])) ?>" 
+                           class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"><?= $totalPages ?></a>
+                    <?php endif; ?>
+                </div>
+                
+                <?php if ($page < $totalPages): ?>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" 
+                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Next Page">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="?<?= http_build_query(array_merge($_GET, ['page' => $totalPages])) ?>" 
+                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Last Page">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                <?php else: ?>
+                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-angle-right"></i>
+                    </span>
+                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                        <i class="fas fa-angle-double-right"></i>
+                    </span>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 </div>
 
