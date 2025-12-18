@@ -352,26 +352,59 @@ $sortOptions = [
 $defaultColumns = array_keys($availableColumns);
 ?>
 
-<div class="w-full">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
-                    <i class="fas fa-box mr-2 md:mr-3"></i>
-                    Products Management
-                </h1>
-                <p class="text-blue-100 text-sm md:text-lg">Manage your product catalog</p>
-            </div>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
-                <a href="<?= url('admin/products-export.php') ?>" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg transition-all text-center text-sm md:text-base">
-                    <i class="fas fa-download mr-2"></i>
-                    Export CSV
-                </a>
-                <a href="<?= url('admin/product-edit.php') ?>" class="bg-white text-blue-600 hover:bg-blue-50 px-4 md:px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl text-center text-sm md:text-base">
-                    <i class="fas fa-plus mr-2"></i>
-                    Add New Product
-                </a>
+<div class="w-full space-y-6">
+    <!-- Modern Header with Glassmorphism Effect -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-blue-600 to-purple-600 rounded-2xl shadow-2xl">
+        <!-- Animated Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px;"></div>
+        </div>
+        
+        <div class="relative p-6 md:p-8 lg:p-10 text-white">
+            <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                            <i class="fas fa-box text-2xl md:text-3xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                                Products Management
+                            </h1>
+                            <p class="text-blue-100 text-base md:text-lg">Manage and organize your product catalog efficiently</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats in Header -->
+                    <div class="flex flex-wrap items-center gap-4 mt-4 pt-4 border-t border-white/20">
+                        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                            <i class="fas fa-cube text-sm"></i>
+                            <span class="text-sm font-medium"><?= number_format($totalProducts) ?> Total</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                            <i class="fas fa-check-circle text-sm"></i>
+                            <span class="text-sm font-medium"><?= number_format($activeProducts) ?> Active</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                            <i class="fas fa-star text-sm"></i>
+                            <span class="text-sm font-medium"><?= number_format($featuredProducts) ?> Featured</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                    <a href="<?= url('admin/products-export.php') ?>" 
+                       class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-5 py-3 rounded-xl transition-all duration-300 text-center font-medium hover:scale-105 hover:shadow-lg">
+                        <i class="fas fa-download mr-2 group-hover:scale-110 transition-transform"></i>
+                        Export CSV
+                    </a>
+                    <a href="<?= url('admin/product-edit.php') ?>" 
+                       class="group bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-2xl text-center hover:scale-105 transform">
+                        <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i>
+                        Add New Product
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -383,18 +416,22 @@ $defaultColumns = array_keys($availableColumns);
     ?>
 
     <?php if (!empty($message)): ?>
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2 text-xl"></i>
+    <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 text-green-800 p-4 rounded-lg shadow-md mb-6 animate-slide-in">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-green-500 rounded-full">
+                <i class="fas fa-check-circle text-white"></i>
+            </div>
             <span class="font-semibold"><?= escape($message) ?></span>
         </div>
     </div>
     <?php endif; ?>
     
     <?php if (!empty($error)): ?>
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
+    <div class="bg-gradient-to-r from-red-50 to-pink-50 border-l-4 border-red-500 text-red-800 p-4 rounded-lg shadow-md mb-6 animate-slide-in">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-red-500 rounded-full">
+                <i class="fas fa-exclamation-circle text-white"></i>
+            </div>
             <span class="font-semibold"><?= escape($error) ?></span>
         </div>
     </div>
@@ -426,193 +463,273 @@ $defaultColumns = array_keys($availableColumns);
     </div>
     <?php endif; ?>
     
-    <!-- Stats Bar -->
-    <div class="bg-white rounded-lg shadow-md p-4 mb-6">
-        <div class="flex items-center justify-between flex-wrap gap-4">
-            <div class="flex items-center space-x-6 flex-wrap">
-                <div>
-                    <span class="text-sm text-gray-600">Total Products:</span>
-                    <span class="ml-2 font-bold text-gray-900" id="totalProductsCount"><?= number_format($totalProducts) ?></span>
+    <!-- Modern Stats Bar with Better Design -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-5">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <!-- Stats Display -->
+            <div class="flex flex-wrap items-center gap-4 lg:gap-6">
+                <div class="flex items-center gap-2">
+                    <div class="p-2 bg-blue-50 rounded-lg">
+                        <i class="fas fa-cube text-blue-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
+                        <div class="text-lg font-bold text-gray-900" id="totalProductsCount"><?= number_format($totalProducts) ?></div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-sm text-gray-600">Active:</span>
-                    <span class="ml-2 font-bold text-green-600"><?= number_format($activeProducts) ?></span>
+                
+                <div class="flex items-center gap-2">
+                    <div class="p-2 bg-green-50 rounded-lg">
+                        <i class="fas fa-check-circle text-green-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Active</div>
+                        <div class="text-lg font-bold text-green-600"><?= number_format($activeProducts) ?></div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-sm text-gray-600">Featured:</span>
-                    <span class="ml-2 font-bold text-yellow-600"><?= number_format($featuredProducts) ?></span>
+                
+                <div class="flex items-center gap-2">
+                    <div class="p-2 bg-yellow-50 rounded-lg">
+                        <i class="fas fa-star text-yellow-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Featured</div>
+                        <div class="text-lg font-bold text-yellow-600"><?= number_format($featuredProducts) ?></div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-sm text-gray-600">Low Stock:</span>
-                    <span class="ml-2 font-bold text-red-600"><?= number_format($lowStockProducts) ?></span>
+                
+                <div class="flex items-center gap-2">
+                    <div class="p-2 bg-red-50 rounded-lg">
+                        <i class="fas fa-exclamation-triangle text-red-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Low Stock</div>
+                        <div class="text-lg font-bold text-red-600"><?= number_format($lowStockProducts) ?></div>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-sm text-gray-600">Showing:</span>
-                    <span class="ml-2 font-bold text-blue-600" id="showingCount"><?= count($products) ?></span>
-                    <span class="text-sm text-gray-500">of <?= number_format($totalCount) ?></span>
+                
+                <div class="hidden md:flex items-center gap-2 pl-4 border-l border-gray-200">
+                    <div class="p-2 bg-indigo-50 rounded-lg">
+                        <i class="fas fa-eye text-indigo-600"></i>
+                    </div>
+                    <div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Showing</div>
+                        <div class="text-lg font-bold text-indigo-600">
+                            <span id="showingCount"><?= count($products) ?></span>
+                            <span class="text-sm font-normal text-gray-500">/ <?= number_format($totalCount) ?></span>
+                        </div>
+                    </div>
                 </div>
+                
                 <?php if ($search || $categoryFilter || $statusFilter || $featuredFilter || $dateFrom || $dateTo || $priceMin !== null || $priceMax !== null): ?>
-                <div class="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                    <i class="fas fa-filter mr-1"></i>
-                    Filtered
+                <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-4 py-2 rounded-lg">
+                    <i class="fas fa-filter text-indigo-600"></i>
+                    <span class="text-sm font-medium text-indigo-700">Filters Active</span>
                 </div>
                 <?php endif; ?>
             </div>
-        <div id="bulkActions" class="hidden flex gap-2">
-            <select id="bulkActionSelect" class="px-4 py-2 border rounded-lg">
-                <option value="">Bulk Actions</option>
-                <option value="activate">Activate</option>
-                <option value="deactivate">Deactivate</option>
-                <option value="feature">Mark as Featured</option>
-                <option value="unfeature">Unmark as Featured</option>
-                <option value="delete">Delete</option>
-            </select>
-            <button onclick="executeBulkAction()" class="btn-primary">Apply</button>
-            <button onclick="clearSelection()" class="btn-secondary">Clear</button>
+            
+            <!-- Bulk Actions -->
+            <div id="bulkActions" class="hidden flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                <select id="bulkActionSelect" class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+                    <option value="">Bulk Actions</option>
+                    <option value="activate">Activate</option>
+                    <option value="deactivate">Deactivate</option>
+                    <option value="feature">Mark as Featured</option>
+                    <option value="unfeature">Unmark as Featured</option>
+                    <option value="delete">Delete</option>
+                </select>
+                <button onclick="executeBulkAction()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">
+                    Apply
+                </button>
+                <button onclick="clearSelection()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-5 py-2 rounded-lg font-medium transition-colors">
+                    Clear
+                </button>
+            </div>
         </div>
     </div>
     
-    <!-- Products Table -->
-    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-        <div class="overflow-x-auto -mx-4 md:mx-0">
+    <!-- Products Table with Modern Design -->
+    <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
             <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                <thead class="bg-gradient-to-r from-gray-50 via-gray-50 to-gray-100 border-b-2 border-gray-200">
                 <tr>
-                    <th class="px-6 py-3 text-left" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <input type="checkbox" id="selectAll" onchange="toggleAll(this)">
+                    <th class="px-4 py-4 text-left" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <input type="checkbox" id="selectAll" onchange="toggleAll(this)" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
                     </th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Image</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Name</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">SKU</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Category</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Sale Price</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Stock</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Views</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Status</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Featured</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Created</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">Actions</th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-image mr-1 text-gray-400"></i>Image
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-tag mr-1 text-gray-400"></i>Product Name
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-barcode mr-1 text-gray-400"></i>SKU
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-folder mr-1 text-gray-400"></i>Category
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-dollar-sign mr-1 text-gray-400"></i>Price
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-tag mr-1 text-gray-400"></i>Sale Price
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-warehouse mr-1 text-gray-400"></i>Stock
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-eye mr-1 text-gray-400"></i>Views
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-toggle-on mr-1 text-gray-400"></i>Status
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-star mr-1 text-gray-400"></i>Featured
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-calendar mr-1 text-gray-400"></i>Created
+                    </th>
+                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <i class="fas fa-cog mr-1 text-gray-400"></i>Actions
+                    </th>
                 </tr>
             </thead>
-            <tbody id="productsTableBody" class="bg-white divide-y divide-gray-200">
+            <tbody id="productsTableBody" class="bg-white divide-y divide-gray-100">
                 <?php if (empty($products) && $page == 1): ?>
                     <tr>
-                        <td colspan="15" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center">
-                                <div class="bg-gray-100 rounded-full p-6 mb-4">
-                                    <i class="fas fa-box text-4xl text-gray-400"></i>
+                        <td colspan="15" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center max-w-md mx-auto">
+                                <div class="relative mb-6">
+                                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full blur-xl opacity-20"></div>
+                                    <div class="relative bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full p-8">
+                                        <i class="fas fa-box-open text-5xl text-indigo-600"></i>
+                                    </div>
                                 </div>
-                                <h3 class="text-lg font-semibold text-gray-700 mb-2">No Products Found</h3>
-                                <p class="text-gray-500 mb-4">Try adjusting your filters or add a new product.</p>
-                                <a href="<?= url('admin/product-edit.php') ?>" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    Add New Product
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">No Products Found</h3>
+                                <p class="text-gray-600 mb-6 text-center">Try adjusting your filters or add a new product to get started.</p>
+                                <a href="<?= url('admin/product-edit.php') ?>" 
+                                   class="group bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3 rounded-xl font-semibold hover:from-indigo-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                                    <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i>
+                                    Add Your First Product
                                 </a>
                             </div>
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
-                    <tr class="product-row hover:bg-blue-50/50 transition-colors border-b border-gray-100" data-product-id="<?= $product['id'] ?>">
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <input type="checkbox" class="product-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
+                    <tr class="product-row hover:bg-gradient-to-r hover:from-indigo-50/50 hover:to-purple-50/50 transition-all duration-200 border-b border-gray-100 group" data-product-id="<?= $product['id'] ?>">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <input type="checkbox" class="product-checkbox w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer" value="<?= $product['id'] ?>" onchange="updateBulkActions()">
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if (!empty($product['image'])): ?>
-                                <div class="relative group">
+                                <div class="relative group-img">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-indigo-400 to-purple-400 rounded-xl blur opacity-0 group-img-hover:opacity-20 transition-opacity"></div>
                                     <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
-                                         alt="" class="h-14 w-14 object-cover rounded-lg border-2 border-gray-200 group-hover:border-blue-400 transition-all shadow-sm">
-                                    <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                        <i class="fas fa-eye text-white text-xs"></i>
-                                    </div>
+                                         alt="" class="relative h-16 w-16 object-cover rounded-xl border-2 border-gray-200 group-hover:border-indigo-400 transition-all shadow-md group-hover:shadow-lg transform group-hover:scale-105">
                                 </div>
                             <?php else: ?>
-                                <div class="h-14 w-14 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center">
-                                    <i class="fas fa-image text-gray-400 text-sm"></i>
+                                <div class="h-16 w-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center group-hover:border-indigo-300 transition-colors">
+                                    <i class="fas fa-image text-gray-400 group-hover:text-indigo-400 transition-colors"></i>
                                 </div>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <div class="flex items-center gap-2">
-                                <div class="text-sm font-medium text-gray-900"><?= escape($product['name']) ?></div>
+                        <td class="px-4 py-4" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <div class="flex items-center gap-2 mb-1">
+                                <div class="text-sm font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors"><?= escape($product['name']) ?></div>
                                 <?php if (isset($variantCounts[$product['id']]) && $variantCounts[$product['id']] > 0): ?>
-                                    <span class="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full" title="<?= $variantCounts[$product['id']] ?> variant(s)">
+                                    <span class="px-2 py-0.5 text-xs bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full font-medium border border-purple-200" title="<?= $variantCounts[$product['id']] ?> variant(s)">
                                         <i class="fas fa-layer-group mr-1"></i><?= $variantCounts[$product['id']] ?>
                                     </span>
                                 <?php endif; ?>
                             </div>
                             <?php if (!empty($product['short_description'])): ?>
-                                <div class="text-xs text-gray-500 line-clamp-1"><?= escape(substr($product['short_description'], 0, 50)) ?>...</div>
+                                <div class="text-xs text-gray-500 line-clamp-1"><?= escape(substr($product['short_description'], 0, 60)) ?>...</div>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <?= escape($product['sku'] ?? '-') ?>
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <span class="text-sm font-mono text-gray-600 bg-gray-50 px-2 py-1 rounded"><?= escape($product['sku'] ?? '-') ?></span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <?= escape($product['category_name'] ?? 'Uncategorized') ?>
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <span class="text-sm text-gray-700 font-medium"><?= escape($product['category_name'] ?? 'Uncategorized') ?></span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
-                                <div class="text-blue-600 font-bold">$<?= number_format((float)$product['sale_price'], 2) ?></div>
+                                <div class="text-indigo-600 font-bold text-base">$<?= number_format((float)$product['sale_price'], 2) ?></div>
                                 <?php if (!empty($product['price']) && $product['price'] > 0): ?>
                                     <div class="text-xs text-gray-400 line-through">$<?= number_format((float)$product['price'], 2) ?></div>
                                 <?php endif; ?>
                             <?php elseif (!empty($product['price']) && $product['price'] > 0): ?>
-                                <div class="font-semibold">$<?= number_format((float)$product['price'], 2) ?></div>
+                                <div class="font-semibold text-gray-900">$<?= number_format((float)$product['price'], 2) ?></div>
                             <?php else: ?>
-                                <span class="text-gray-400">-</span>
+                                <span class="text-gray-400 text-sm">-</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <?= (!empty($product['sale_price']) && $product['sale_price'] > 0) ? '$' . number_format((float)$product['sale_price'], 2) : '-' ?>
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <?php if (!empty($product['sale_price']) && $product['sale_price'] > 0): ?>
+                                <span class="text-sm font-semibold text-indigo-600">$<?= number_format((float)$product['sale_price'], 2) ?></span>
+                            <?php else: ?>
+                                <span class="text-gray-400 text-sm">-</span>
+                            <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <span class="px-2 py-1 text-xs rounded <?= 
-                                $product['stock_status'] === 'in_stock' ? 'bg-green-100 text-green-800' : 
-                                ($product['stock_status'] === 'out_of_stock' ? 'bg-red-100 text-red-800' : 
-                                'bg-yellow-100 text-yellow-800') 
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full <?= 
+                                $product['stock_status'] === 'in_stock' ? 'bg-green-100 text-green-700 border border-green-200' : 
+                                ($product['stock_status'] === 'out_of_stock' ? 'bg-red-100 text-red-700 border border-red-200' : 
+                                'bg-yellow-100 text-yellow-700 border border-yellow-200') 
                             ?>">
                                 <?= ucwords(str_replace('_', ' ', $product['stock_status'])) ?>
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <?= number_format($product['view_count'] ?? 0) ?>
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <div class="flex items-center gap-1 text-sm text-gray-600">
+                                <i class="fas fa-eye text-gray-400"></i>
+                                <span class="font-medium"><?= number_format($product['view_count'] ?? 0) ?></span>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <span class="px-2 py-1 text-xs rounded <?= $product['is_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full <?= $product['is_active'] ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200' ?>">
                                 <?= $product['is_active'] ? 'Active' : 'Inactive' ?>
                             </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
                             <?php if ($product['is_featured']): ?>
-                                <span class="text-yellow-500"><i class="fas fa-star"></i></span>
+                                <span class="text-yellow-500 text-lg"><i class="fas fa-star"></i></span>
                             <?php else: ?>
-                                <span class="text-gray-300"><i class="far fa-star"></i></span>
+                                <span class="text-gray-300 text-lg"><i class="far fa-star"></i></span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <?= date('M d, Y', strtotime($product['created_at'])) ?>
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <div class="text-sm text-gray-600">
+                                <div class="font-medium"><?= date('M d, Y', strtotime($product['created_at'])) ?></div>
+                                <div class="text-xs text-gray-400"><?= date('g:i A', strtotime($product['created_at'])) ?></div>
+                            </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                            <div class="flex items-center space-x-2">
+                        <td class="px-4 py-4 whitespace-nowrap" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                            <div class="flex items-center gap-1.5">
                                 <a href="<?= url('admin/product-edit.php?id=' . $product['id']) ?>" 
-                                   class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit">
+                                   class="group/btn bg-blue-50 hover:bg-blue-100 text-blue-600 p-2.5 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md" 
+                                   title="Edit">
                                     <i class="fas fa-edit text-sm"></i>
                                 </a>
                                 <a href="<?= url('admin/product-duplicate.php?id=' . $product['id']) ?>" 
                                    onclick="return confirm('Duplicate this product?')" 
-                                   class="bg-purple-100 hover:bg-purple-200 text-purple-700 p-2 rounded-lg transition-all" title="Duplicate">
+                                   class="group/btn bg-purple-50 hover:bg-purple-100 text-purple-600 p-2.5 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md" 
+                                   title="Duplicate">
                                     <i class="fas fa-copy text-sm"></i>
                                 </a>
                                 <a href="?toggle_featured=<?= $product['id'] ?>" 
-                                   class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 p-2 rounded-lg transition-all" title="Toggle Featured">
+                                   class="group/btn bg-yellow-50 hover:bg-yellow-100 text-yellow-600 p-2.5 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md" 
+                                   title="Toggle Featured">
                                     <i class="fas fa-star text-sm"></i>
                                 </a>
                                 <a href="?delete=<?= $product['id'] ?>" 
                                    onclick="return confirm('Are you sure you want to delete this product?')" 
-                                   class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all" title="Delete">
+                                   class="group/btn bg-red-50 hover:bg-red-100 text-red-600 p-2.5 rounded-lg transition-all duration-200 hover:scale-110 shadow-sm hover:shadow-md" 
+                                   title="Delete">
                                     <i class="fas fa-trash text-sm"></i>
                                 </a>
                             </div>
@@ -625,21 +742,28 @@ $defaultColumns = array_keys($availableColumns);
             </div>
         </div>
         
-        <!-- Loading indicator for infinite scroll -->
-        <div id="loadingIndicator" class="hidden text-center py-8">
-            <div class="inline-flex items-center space-x-2 text-gray-600">
-                <i class="fas fa-spinner fa-spin"></i>
-                <span>Loading more products...</span>
+        <!-- Modern Loading indicator for infinite scroll -->
+        <div id="loadingIndicator" class="hidden text-center py-10">
+            <div class="inline-flex flex-col items-center space-y-3">
+                <div class="relative">
+                    <div class="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                </div>
+                <div class="flex items-center gap-2 text-indigo-600 font-medium">
+                    <i class="fas fa-box-open"></i>
+                    <span>Loading more products...</span>
+                </div>
             </div>
         </div>
         
-        <!-- End of list indicator -->
-        <div id="endOfList" class="hidden text-center py-4 text-gray-500 text-sm">
-            <i class="fas fa-check-circle mr-2"></i>
-            All products loaded
+        <!-- Modern End of list indicator -->
+        <div id="endOfList" class="hidden text-center py-6">
+            <div class="inline-flex items-center gap-2 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 px-6 py-3 rounded-full">
+                <i class="fas fa-check-circle text-green-600"></i>
+                <span class="text-green-700 font-medium">All products loaded</span>
+            </div>
         </div>
         
-        <!-- Pagination Controls -->
+        <!-- Modern Pagination Controls -->
         <?php
         // Calculate total pages (totalCount is already calculated above)
         $totalPages = max(1, (int)ceil($totalCount / $limit));
@@ -648,29 +772,35 @@ $defaultColumns = array_keys($availableColumns);
         // This ensures pagination is visible when there are multiple pages
         if ($totalCount > 0 && ($totalCount > $limit || $page > 1)):
         ?>
-        <div class="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between flex-wrap gap-4 mt-4">
-            <div class="flex items-center text-sm text-gray-700 flex-wrap gap-2">
-                <span>Page</span>
-                <span class="font-semibold"><?= $page ?></span>
-                <span>of</span>
-                <span class="font-semibold"><?= $totalPages ?></span>
-                <span class="text-gray-500">(<?= number_format($totalCount) ?> total products)</span>
+        <div class="bg-gradient-to-r from-gray-50 to-white border-t-2 border-gray-200 px-6 py-4 flex items-center justify-between flex-wrap gap-4">
+            <div class="flex items-center text-sm text-gray-700 flex-wrap gap-3">
+                <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                    <i class="fas fa-file-alt text-indigo-500"></i>
+                    <span class="font-medium">Page</span>
+                    <span class="font-bold text-indigo-600"><?= $page ?></span>
+                    <span class="text-gray-400">of</span>
+                    <span class="font-bold text-gray-900"><?= $totalPages ?></span>
+                </div>
+                <div class="text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                    <i class="fas fa-cube mr-1 text-gray-400"></i>
+                    <span class="font-medium"><?= number_format($totalCount) ?></span> total
+                </div>
             </div>
             <div class="flex items-center gap-2">
                 <?php if ($page > 1): ?>
                     <a href="?<?= http_build_query(array_merge($_GET, ['page' => 1])) ?>" 
-                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="First Page">
+                       class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200" title="First Page">
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                     <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" 
-                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Previous Page">
+                       class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200" title="Previous Page">
                         <i class="fas fa-angle-left"></i>
                     </a>
                 <?php else: ?>
-                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    <span class="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50">
                         <i class="fas fa-angle-double-left"></i>
                     </span>
-                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    <span class="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50">
                         <i class="fas fa-angle-left"></i>
                     </span>
                 <?php endif; ?>
@@ -691,10 +821,10 @@ $defaultColumns = array_keys($availableColumns);
                     
                     <?php for ($i = $startPage; $i <= $endPage; $i++): ?>
                         <?php if ($i == $page): ?>
-                            <span class="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg font-semibold"><?= $i ?></span>
+                            <span class="px-4 py-2 text-sm bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg font-bold shadow-md"><?= $i ?></span>
                         <?php else: ?>
                             <a href="?<?= http_build_query(array_merge($_GET, ['page' => $i])) ?>" 
-                               class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"><?= $i ?></a>
+                               class="px-4 py-2 text-sm border border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200 font-medium"><?= $i ?></a>
                         <?php endif; ?>
                     <?php endfor; ?>
                     
@@ -709,18 +839,18 @@ $defaultColumns = array_keys($availableColumns);
                 
                 <?php if ($page < $totalPages): ?>
                     <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" 
-                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Next Page">
+                       class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200" title="Next Page">
                         <i class="fas fa-angle-right"></i>
                     </a>
                     <a href="?<?= http_build_query(array_merge($_GET, ['page' => $totalPages])) ?>" 
-                       class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors" title="Last Page">
+                       class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200" title="Last Page">
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 <?php else: ?>
-                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    <span class="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50">
                         <i class="fas fa-angle-right"></i>
                     </span>
-                    <span class="px-3 py-1.5 text-sm border border-gray-300 rounded-lg text-gray-400 cursor-not-allowed">
+                    <span class="px-3 py-2 text-sm border border-gray-200 rounded-lg text-gray-300 cursor-not-allowed bg-gray-50">
                         <i class="fas fa-angle-double-right"></i>
                     </span>
                 <?php endif; ?>
@@ -1058,5 +1188,64 @@ function executeBulkAction() {
     });
 }
 </script>
+
+<style>
+/* Modern Animations */
+@keyframes slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.3s ease-out;
+}
+
+/* Enhanced hover effects */
+.product-row {
+    transition: all 0.2s ease;
+}
+
+.product-row:hover {
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
+}
+
+/* Glassmorphism effect for header */
+.backdrop-blur-sm {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Smooth transitions */
+* {
+    transition-property: color, background-color, border-color, transform, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom scrollbar for table */
+.overflow-x-auto::-webkit-scrollbar {
+    height: 8px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+    background: linear-gradient(to right, #6366f1, #8b5cf6);
+    border-radius: 4px;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+</style>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
