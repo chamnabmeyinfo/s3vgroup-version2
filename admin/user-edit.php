@@ -40,7 +40,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $password = $_POST['password'] ?? '';
     $roleId = !empty($_POST['role_id']) ? (int)$_POST['role_id'] : null;
-    $isActive = isset($_POST['is_active']) ? 1 : 0;
+    
+    // Handle is_active: if editing own account, always keep it active (disabled checkbox doesn't submit)
+    if ($isEdit && $userId == $currentUserId) {
+        $isActive = 1; // Always active for own account
+    } else {
+        $isActive = isset($_POST['is_active']) ? 1 : 0;
+    }
     
     if (empty($username) || empty($email)) {
         $error = 'Username and email are required.';
@@ -64,16 +70,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($existing) {
                     $error = 'Username or email already exists.';
                 } else {
-                    // Don't allow deactivating own account
-                    if ($userId == $currentUserId && !$isActive) {
-                        $error = 'You cannot deactivate your own account.';
-                    } else {
-                        if (!empty($password)) {
+                    // Validate and update password if provided
+                    if (!empty($password)) {
+                        // Validate password length
+                        if (strlen($password) < 6) {
+                            $error = 'Password must be at least 6 characters long.';
+                        } else {
                             $updateData['password'] = password_hash($password, PASSWORD_DEFAULT);
                         }
-                        
+                    }
+                    
+                    // Only proceed if no error occurred
+                    if (empty($error)) {
                         db()->update('admin_users', $updateData, 'id = :id', ['id' => $userId]);
                         $message = 'User updated successfully.';
+                        
+                        // If password was changed for own account, suggest re-login
+                        if ($userId == $currentUserId && !empty($password)) {
+                            $message .= ' Password changed successfully. You may need to log in again.';
+                        }
                     }
                 }
             } else {
