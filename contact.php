@@ -44,61 +44,82 @@ include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';
 ?>
 
-<main class="py-12">
+<main class="py-12 md:py-16 bg-gradient-to-br from-gray-50 to-white">
     <div class="container mx-auto px-4">
-        <div class="max-w-4xl mx-auto">
-            <h1 class="text-4xl font-bold text-center mb-4">Contact Us</h1>
-            <p class="text-center text-gray-600 mb-12">We're here to help! Get in touch with our team.</p>
+        <div class="max-w-6xl mx-auto">
+            <!-- Header Section -->
+            <div class="text-center mb-12 md:mb-16">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Contact Us
+                </h1>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                    We're here to help! Get in touch with our team and let's discuss how we can assist you.
+                </p>
+            </div>
             
             <?= displayMessage($message, $error) ?>
             
-            <div class="grid md:grid-cols-2 gap-12">
-                <!-- Contact Form -->
-                <div>
+            <div class="grid lg:grid-cols-2 gap-8 md:gap-12">
+                <!-- Contact Form - Modern Design -->
+                <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-100">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold mb-2">Send us a Message</h2>
+                        <p class="text-gray-600">Fill out the form below and we'll get back to you as soon as possible.</p>
+                    </div>
                     
-                    <form method="POST" class="space-y-4">
-                        <div>
-                            <label for="name" class="block text-sm font-medium mb-2">Name *</label>
+                    <form method="POST" class="space-y-5">
+                        <div class="form-group">
+                            <label for="name" class="block text-sm font-semibold mb-2 text-gray-700">
+                                <i class="fas fa-user mr-2 text-blue-600"></i>Full Name *
+                            </label>
                             <input type="text" id="name" name="name" required
                                    value="<?= escape($_POST['name'] ?? '') ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white">
                         </div>
                         
-                        <div>
-                            <label for="email" class="block text-sm font-medium mb-2">Email *</label>
+                        <div class="form-group">
+                            <label for="email" class="block text-sm font-semibold mb-2 text-gray-700">
+                                <i class="fas fa-envelope mr-2 text-blue-600"></i>Email Address *
+                            </label>
                             <input type="email" id="email" name="email" required
                                    value="<?= escape($_POST['email'] ?? '') ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white">
                         </div>
                         
-                        <div>
-                            <label for="phone" class="block text-sm font-medium mb-2">Phone</label>
+                        <div class="form-group">
+                            <label for="phone" class="block text-sm font-semibold mb-2 text-gray-700">
+                                <i class="fas fa-phone mr-2 text-blue-600"></i>Phone Number
+                            </label>
                             <input type="tel" id="phone" name="phone"
                                    value="<?= escape($_POST['phone'] ?? '') ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white">
                         </div>
                         
-                        <div>
-                            <label for="subject" class="block text-sm font-medium mb-2">Subject</label>
+                        <div class="form-group">
+                            <label for="subject" class="block text-sm font-semibold mb-2 text-gray-700">
+                                <i class="fas fa-tag mr-2 text-blue-600"></i>Subject
+                            </label>
                             <input type="text" id="subject" name="subject"
                                    value="<?= escape($_POST['subject'] ?? $productName) ?>"
-                                   class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white">
                         </div>
                         
-                        <div>
-                            <label for="message" class="block text-sm font-medium mb-2">Message *</label>
+                        <div class="form-group">
+                            <label for="message" class="block text-sm font-semibold mb-2 text-gray-700">
+                                <i class="fas fa-comment-alt mr-2 text-blue-600"></i>Message *
+                            </label>
                             <textarea id="message" name="message" rows="6" required
-                                      class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"><?= escape($_POST['message'] ?? '') ?></textarea>
+                                      class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50 focus:bg-white resize-none"><?= escape($_POST['message'] ?? '') ?></textarea>
                         </div>
                         
-                        <button type="submit" class="btn-primary w-full">
-                            Send Message
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-6 py-4 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                            <i class="fas fa-paper-plane mr-2"></i>Send Message
                         </button>
                     </form>
                 </div>
                 
-                <!-- Contact Information -->
-                <div>
+                <!-- Contact Information - Modern Cards -->
+                <div class="space-y-6">
                     <?php
                     use App\Models\Setting;
                     $settingModel = new Setting();
@@ -106,30 +127,78 @@ include __DIR__ . '/includes/message.php';
                     $siteEmail = $settingModel->get('site_email', 'info@example.com');
                     $siteAddress = $settingModel->get('site_address', '123 Industrial Way, City, State 12345');
                     ?>
-                    <div class="bg-gray-50 rounded-lg p-6 mb-6">
-                        <h3 class="text-xl font-bold mb-4">Get in Touch</h3>
-                        <div class="space-y-4">
-                            <div>
-                                <i class="fas fa-phone text-blue-600 mr-3"></i>
-                                <span><?= escape($sitePhone) ?></span>
+                    
+                    <!-- Contact Info Card -->
+                    <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl shadow-xl p-6 md:p-8 text-white">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-address-card mr-3"></i>Get in Touch
+                        </h3>
+                        <div class="space-y-5">
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-white/30 transition-all duration-300 flex-shrink-0">
+                                    <i class="fas fa-phone text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold mb-1">Phone</p>
+                                    <a href="tel:<?= escape($sitePhone) ?>" class="text-blue-100 hover:text-white transition-colors">
+                                        <?= escape($sitePhone) ?>
+                                    </a>
+                                </div>
                             </div>
-                            <div>
-                                <i class="fas fa-envelope text-blue-600 mr-3"></i>
-                                <span><?= escape($siteEmail) ?></span>
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-white/30 transition-all duration-300 flex-shrink-0">
+                                    <i class="fas fa-envelope text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold mb-1">Email</p>
+                                    <a href="mailto:<?= escape($siteEmail) ?>" class="text-blue-100 hover:text-white transition-colors break-all">
+                                        <?= escape($siteEmail) ?>
+                                    </a>
+                                </div>
                             </div>
-                            <div>
-                                <i class="fas fa-map-marker-alt text-blue-600 mr-3"></i>
-                                <span><?= nl2br(escape($siteAddress)) ?></span>
+                            <div class="flex items-start group">
+                                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4 group-hover:bg-white/30 transition-all duration-300 flex-shrink-0">
+                                    <i class="fas fa-map-marker-alt text-xl"></i>
+                                </div>
+                                <div>
+                                    <p class="font-semibold mb-1">Address</p>
+                                    <p class="text-blue-100"><?= nl2br(escape($siteAddress)) ?></p>
+                                </div>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-blue-600 text-white rounded-lg p-6">
-                        <h3 class="text-xl font-bold mb-4">Business Hours</h3>
-                        <div class="space-y-2">
-                            <p><strong>Monday - Friday:</strong> 8:00 AM - 6:00 PM</p>
-                            <p><strong>Saturday:</strong> 9:00 AM - 4:00 PM</p>
-                            <p><strong>Sunday:</strong> Closed</p>
+                    <!-- Business Hours Card -->
+                    <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8 border border-gray-100">
+                        <h3 class="text-2xl font-bold mb-6 flex items-center text-gray-800">
+                            <i class="fas fa-clock mr-3 text-blue-600"></i>Business Hours
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="font-semibold text-gray-700">Monday - Friday</span>
+                                <span class="text-blue-600 font-bold">8:00 AM - 6:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+                                <span class="font-semibold text-gray-700">Saturday</span>
+                                <span class="text-blue-600 font-bold">9:00 AM - 4:00 PM</span>
+                            </div>
+                            <div class="flex justify-between items-center py-3">
+                                <span class="font-semibold text-gray-700">Sunday</span>
+                                <span class="text-red-500 font-bold">Closed</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-2xl shadow-lg p-6 border border-indigo-100">
+                        <h3 class="text-xl font-bold mb-4 text-gray-800">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <a href="<?= url('quote.php') ?>" class="block w-full bg-white hover:bg-blue-600 text-gray-800 hover:text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl transform hover:scale-105 text-center">
+                                <i class="fas fa-calculator mr-2"></i>Request a Quote
+                            </a>
+                            <a href="<?= url('products.php') ?>" class="block w-full bg-white hover:bg-indigo-600 text-gray-800 hover:text-white px-4 py-3 rounded-xl font-semibold transition-all duration-300 shadow-md hover:shadow-xl transform hover:scale-105 text-center">
+                                <i class="fas fa-box mr-2"></i>Browse Products
+                            </a>
                         </div>
                     </div>
                 </div>

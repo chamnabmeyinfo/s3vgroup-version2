@@ -35,36 +35,38 @@ include __DIR__ . '/includes/header.php';
     <!-- Hero Slider Section (Dynamic) -->
     <?php include __DIR__ . '/includes/hero-slider.php'; ?>
 
-    <!-- Features Section -->
-    <section class="py-16 bg-gray-50">
+    <!-- Features Section - Modern Design -->
+    <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
         <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-3 gap-8">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
+            <div class="text-center mb-12 md:mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Why Choose Us
+                </h2>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto">
+                    We're committed to providing the best service and quality equipment for your business needs
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 md:gap-12">
+                <div class="group text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                    <div class="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-check-circle text-white text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Quality Assured</h3>
-                    <p class="text-gray-600">All equipment is thoroughly inspected and certified</p>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-800 group-hover:text-blue-600 transition-colors">Quality Assured</h3>
+                    <p class="text-gray-600 leading-relaxed">All equipment is thoroughly inspected and certified to meet the highest industry standards</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                <div class="group text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                    <div class="w-20 h-20 bg-gradient-to-br from-green-500 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-shipping-fast text-white text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Fast Delivery</h3>
-                    <p class="text-gray-600">Quick shipping and reliable delivery service</p>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-800 group-hover:text-green-600 transition-colors">Fast Delivery</h3>
+                    <p class="text-gray-600 leading-relaxed">Quick shipping and reliable delivery service to get your equipment when you need it</p>
                 </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                        </svg>
+                <div class="group text-center bg-white rounded-2xl p-8 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100">
+                    <div class="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-6 transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg">
+                        <i class="fas fa-headset text-white text-3xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-2">Expert Support</h3>
-                    <p class="text-gray-600">24/7 customer support and maintenance services</p>
+                    <h3 class="text-2xl font-bold mb-3 text-gray-800 group-hover:text-purple-600 transition-colors">Expert Support</h3>
+                    <p class="text-gray-600 leading-relaxed">24/7 customer support and maintenance services from our experienced team</p>
                 </div>
             </div>
         </div>
@@ -262,14 +264,32 @@ include __DIR__ . '/includes/header.php';
     endif; 
     ?>
 
-    <!-- CTA Section -->
-    <section class="py-16 bg-blue-600 text-white">
-        <div class="container mx-auto px-4 text-center">
-            <h2 class="text-3xl font-bold mb-4">Need Help Choosing the Right Equipment?</h2>
-            <p class="text-xl mb-8 text-blue-100">Our experts are ready to assist you</p>
-            <a href="<?= url('contact.php') ?>" class="btn-white inline-block">
-                Contact Us Today
-            </a>
+    <!-- CTA Section - Modern Design -->
+    <section class="py-16 md:py-20 bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-700 text-white relative overflow-hidden">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+            <div class="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl"></div>
+        </div>
+        <div class="container mx-auto px-4 text-center relative z-10">
+            <div class="max-w-3xl mx-auto">
+                <div class="mb-6">
+                    <i class="fas fa-question-circle text-6xl md:text-7xl mb-6 opacity-80"></i>
+                </div>
+                <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
+                    Need Help Choosing the Right Equipment?
+                </h2>
+                <p class="text-xl md:text-2xl mb-10 text-blue-100 leading-relaxed">
+                    Our expert team is ready to assist you in finding the perfect solution for your business needs
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="<?= url('contact.php') ?>" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold hover:bg-gray-100 transform hover:scale-105 transition-all duration-300 shadow-2xl hover:shadow-3xl inline-flex items-center justify-center">
+                        <i class="fas fa-envelope mr-2"></i>Contact Us Today
+                    </a>
+                    <a href="<?= url('quote.php') ?>" class="bg-blue-500/20 backdrop-blur-sm border-2 border-white/30 text-white px-8 py-4 rounded-xl font-bold hover:bg-blue-500/30 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl inline-flex items-center justify-center">
+                        <i class="fas fa-calculator mr-2"></i>Get a Free Quote
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 </main>

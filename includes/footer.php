@@ -8,61 +8,143 @@
     $siteAddress = $settingModel->get('site_address', '123 Industrial Way');
     $footerText = $settingModel->get('footer_text', '© ' . date('Y') . ' ' . $siteName . '. All rights reserved.');
     ?>
-    <footer class="bg-gray-900 text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <h3 class="text-xl font-bold mb-4"><?= escape($siteName) ?></h3>
-                    <p class="text-gray-400">Premium industrial equipment for your business needs.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Quick Links</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="<?= url() ?>" class="hover:text-white">Home</a></li>
-                        <li><a href="<?= url('products.php') ?>" class="hover:text-white">Products</a></li>
-                        <li><a href="<?= url('blog.php') ?>" class="hover:text-white">Blog</a></li>
-                        <li><a href="<?= url('faq.php') ?>" class="hover:text-white">FAQ</a></li>
-                        <li><a href="<?= url('testimonials.php') ?>" class="hover:text-white">Testimonials</a></li>
-                        <li><a href="<?= url('contact.php') ?>" class="hover:text-white">Contact</a></li>
-                        <li><a href="<?= url('quote.php') ?>" class="hover:text-white">Get Quote</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Categories</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><a href="<?= url('products.php?category=forklifts') ?>" class="hover:text-white">Forklifts</a></li>
-                        <li><a href="<?= url('products.php?category=pallet-trucks') ?>" class="hover:text-white">Pallet Trucks</a></li>
-                        <li><a href="<?= url('products.php?category=stackers') ?>" class="hover:text-white">Stackers</a></li>
-                        <li><a href="<?= url('products.php?category=reach-trucks') ?>" class="hover:text-white">Reach Trucks</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold mb-4">Contact</h4>
-                    <ul class="space-y-2 text-gray-400">
-                        <li><i class="fas fa-phone mr-2"></i> <?= escape($sitePhone) ?></li>
-                        <li><i class="fas fa-envelope mr-2"></i> <?= escape($siteEmail) ?></li>
-                        <li><i class="fas fa-map-marker-alt mr-2"></i> <?= escape($siteAddress) ?></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="border-t border-gray-800 pt-8">
-                <div class="grid md:grid-cols-2 gap-8 items-center">
-                    <div>
-                        <p class="text-gray-400"><?= nl2br(escape($footerText)) ?></p>
+    <footer class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 md:py-16 relative overflow-hidden">
+        <!-- Decorative Elements -->
+        <div class="absolute top-0 left-0 w-full h-full opacity-5">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
+                <!-- Company Info -->
+                <div class="lg:col-span-1">
+                    <h3 class="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                        <?= escape($siteName) ?>
+                    </h3>
+                    <p class="text-gray-400 mb-6 leading-relaxed">
+                        Premium industrial equipment for your business needs. Quality, reliability, and expert support.
+                    </p>
+                    <!-- Social Links -->
+                    <div class="flex gap-3">
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-400 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-pink-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-700 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
                     </div>
-                    <div>
-                        <h4 class="font-bold mb-4">Subscribe to Newsletter</h4>
-                        <form id="newsletter-form" class="flex gap-2">
+                </div>
+                
+                <!-- Quick Links -->
+                <div>
+                    <h4 class="font-bold text-lg mb-6 flex items-center">
+                        <i class="fas fa-link mr-2 text-blue-400"></i>Quick Links
+                    </h4>
+                    <ul class="space-y-3">
+                        <li><a href="<?= url() ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Home
+                        </a></li>
+                        <li><a href="<?= url('products.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Products
+                        </a></li>
+                        <li><a href="<?= url('blog.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Blog
+                        </a></li>
+                        <li><a href="<?= url('faq.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>FAQ
+                        </a></li>
+                        <li><a href="<?= url('testimonials.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Testimonials
+                        </a></li>
+                        <li><a href="<?= url('contact.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Contact
+                        </a></li>
+                        <li><a href="<?= url('quote.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Get Quote
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Categories -->
+                <div>
+                    <h4 class="font-bold text-lg mb-6 flex items-center">
+                        <i class="fas fa-th-large mr-2 text-blue-400"></i>Categories
+                    </h4>
+                    <ul class="space-y-3">
+                        <li><a href="<?= url('products.php?category=forklifts') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Forklifts
+                        </a></li>
+                        <li><a href="<?= url('products.php?category=pallet-trucks') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Pallet Trucks
+                        </a></li>
+                        <li><a href="<?= url('products.php?category=stackers') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Stackers
+                        </a></li>
+                        <li><a href="<?= url('products.php?category=reach-trucks') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Reach Trucks
+                        </a></li>
+                    </ul>
+                </div>
+                
+                <!-- Contact & Newsletter -->
+                <div>
+                    <h4 class="font-bold text-lg mb-6 flex items-center">
+                        <i class="fas fa-envelope mr-2 text-blue-400"></i>Stay Connected
+                    </h4>
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-start group">
+                            <i class="fas fa-phone text-blue-400 mr-3 mt-1"></i>
+                            <a href="tel:<?= escape($sitePhone) ?>" class="text-gray-400 hover:text-white transition-colors">
+                                <?= escape($sitePhone) ?>
+                            </a>
+                        </div>
+                        <div class="flex items-start group">
+                            <i class="fas fa-envelope text-blue-400 mr-3 mt-1"></i>
+                            <a href="mailto:<?= escape($siteEmail) ?>" class="text-gray-400 hover:text-white transition-colors break-all">
+                                <?= escape($siteEmail) ?>
+                            </a>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-map-marker-alt text-blue-400 mr-3 mt-1"></i>
+                            <span class="text-gray-400"><?= escape($siteAddress) ?></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Newsletter -->
+                    <div class="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                        <h5 class="font-semibold mb-3 text-sm">Newsletter</h5>
+                        <form id="newsletter-form" class="space-y-2">
                             <input type="email" 
                                    id="newsletter-email" 
-                                   placeholder="Your email address" 
+                                   placeholder="Your email" 
                                    required
-                                   class="flex-1 px-4 py-2 rounded-lg text-gray-900">
-                            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
-                                Subscribe
+                                   class="w-full px-3 py-2 rounded-lg text-gray-900 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-sm font-semibold transform hover:scale-105">
+                                <i class="fas fa-paper-plane mr-2"></i>Subscribe
                             </button>
                         </form>
-                        <p id="newsletter-message" class="text-sm mt-2 hidden"></p>
+                        <p id="newsletter-message" class="text-xs mt-2 hidden"></p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bottom Bar -->
+            <div class="border-t border-gray-700/50 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <p class="text-gray-400 text-sm"><?= nl2br(escape($footerText)) ?></p>
+                    </div>
+                    <div class="flex gap-6 text-sm text-gray-400">
+                        <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                        <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                        <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
                     </div>
                 </div>
             </div>
