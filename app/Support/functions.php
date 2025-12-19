@@ -31,7 +31,16 @@ if (!function_exists('db')) {
 if (!function_exists('asset')) {
     function asset($path)
     {
-        $baseUrl = config('app.url', 'http://localhost:8080');
+        // Try to get base URL from config
+        $baseUrl = config('app.url', null);
+        
+        // If not in config, auto-detect from current request
+        if (empty($baseUrl)) {
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $baseUrl = $protocol . $host;
+        }
+        
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 }
@@ -39,7 +48,16 @@ if (!function_exists('asset')) {
 if (!function_exists('url')) {
     function url($path = '')
     {
-        $baseUrl = config('app.url', 'http://localhost:8080');
+        // Try to get base URL from config
+        $baseUrl = config('app.url', null);
+        
+        // If not in config, auto-detect from current request
+        if (empty($baseUrl)) {
+            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $baseUrl = $protocol . $host;
+        }
+        
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 }
