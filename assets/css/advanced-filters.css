@@ -75,7 +75,7 @@
     color: #2563eb;
 }
 
-/* Filters Content */
+/* Filters Content - Collapsed by default, especially on mobile */
 .advanced-filters-content {
     max-height: 0;
     overflow: hidden;
@@ -87,6 +87,21 @@
     border-top: none;
     border-radius: 0 0 0.75rem 0.75rem;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* Ensure collapsed state on mobile by default */
+@media (max-width: 640px) {
+    .advanced-filters-content {
+        max-height: 0 !important;
+        opacity: 0 !important;
+        padding: 0 1.25rem !important;
+    }
+    
+    .advanced-filters-content.expanded {
+        max-height: 2000px !important;
+        opacity: 1 !important;
+        padding: 1.25rem 1.125rem !important;
+    }
 }
 
 .advanced-filters-content.expanded {

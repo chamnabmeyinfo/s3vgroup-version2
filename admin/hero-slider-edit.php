@@ -19,6 +19,26 @@ if (!empty($_GET['id'])) {
     }
 }
 
+// Check if advanced columns exist
+function columnExists($db, $table, $column) {
+    try {
+        $result = $db->fetchOne(
+            "SELECT COUNT(*) as count FROM INFORMATION_SCHEMA.COLUMNS 
+             WHERE table_schema = DATABASE() 
+             AND table_name = :table 
+             AND column_name = :column",
+            ['table' => $table, 'column' => $column]
+        );
+        return (int)$result['count'] > 0;
+    } catch (\Exception $e) {
+        return false;
+    }
+}
+
+$hasVideoUrl = columnExists($db, 'hero_sliders', 'video_url');
+$hasAutoplayDelay = columnExists($db, 'hero_sliders', 'autoplay_delay');
+$hasButtonStyles = columnExists($db, 'hero_sliders', 'button_style_1');
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
@@ -28,10 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'description' => trim($_POST['description'] ?? ''),
             'image' => trim($_POST['image'] ?? ''),
             'image_mobile' => trim($_POST['image_mobile'] ?? ''),
-            'button_text_1' => trim($_POST['button_text_1'] ?? ''),
-            'button_link_1' => trim($_POST['button_link_1'] ?? ''),
-            'button_text_2' => trim($_POST['button_text_2'] ?? ''),
-            'button_link_2' => trim($_POST['button_link_2'] ?? ''),
             'overlay_color' => trim($_POST['overlay_color'] ?? 'rgba(30, 58, 138, 0.9)'),
             'overlay_gradient' => trim($_POST['overlay_gradient'] ?? ''),
             'text_alignment' => $_POST['text_alignment'] ?? 'center',
@@ -46,6 +62,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
             'is_active' => isset($_POST['is_active']) ? 1 : 0,
         ];
+        
+        // Add advanced columns only if they exist
+        if ($hasVideoUrl) {
+            $data['video_url'] = trim($_POST['video_url'] ?? '');
+            $data['video_mobile_url'] = trim($_POST['video_mobile_url'] ?? '');
+        }
+        if ($hasAutoplayDelay) {
+            $data['autoplay_delay'] = (int)($_POST['autoplay_delay'] ?? 5000);
+        }
+        if ($hasButtonStyles) {
+            $data['button_style_1'] = $_POST['button_style_1'] ?? 'primary';
+            $data['button_style_2'] = $_POST['button_style_2'] ?? 'secondary';
+        }
         
         // Validate
         if (empty($data['title'])) {
@@ -279,6 +308,56 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 
+                <?php if ($hasVideoUrl): ?>
+                <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">
+                        <i class="fas fa-video text-blue-600 mr-2"></i>Video Background (Optional)
+                    </h3>
+                    <p class="text-sm text-gray-600 mb-4">Video will override image if provided. Use MP4 format for best compatibility.</p>
+                </div>
+                
+                <div>
+                    <label for="video_url" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-video text-blue-600 mr-1"></i>Video URL (Desktop)
+                    </label>
+                    <input type="url" 
+                           id="video_url" 
+                           name="video_url" 
+                           value="<?= escape($slider['video_url'] ?? '') ?>" 
+                           placeholder="https://example.com/video.mp4"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <p class="text-xs text-gray-500 mt-1">MP4 format recommended. Video will loop automatically.</p>
+                </div>
+                
+                <div>
+                    <label for="video_mobile_url" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-mobile-alt text-blue-600 mr-1"></i>Video URL (Mobile)
+                    </label>
+                    <input type="url" 
+                           id="video_mobile_url" 
+                           name="video_mobile_url" 
+                           value="<?= escape($slider['video_mobile_url'] ?? '') ?>" 
+                           placeholder="https://example.com/video-mobile.mp4"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <p class="text-xs text-gray-500 mt-1">Optional. Falls back to desktop video if not provided.</p>
+                </div>
+                <?php else: ?>
+                <div class="md:col-span-2 border-t border-gray-200 pt-4 mt-4">
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 mr-3"></i>
+                            <div>
+                                <h4 class="font-bold text-yellow-800">Video Background Feature Not Available</h4>
+                                <p class="text-yellow-700 text-sm mt-1">Run the database migration to enable video backgrounds.</p>
+                                <a href="<?= url('admin/setup-hero-slider-advanced.php') ?>" class="text-yellow-800 font-semibold text-sm hover:underline mt-2 inline-block">
+                                    <i class="fas fa-database mr-1"></i>Setup Advanced Options
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
                 <div>
                     <label for="button_text_1" class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-hand-pointer text-blue-600 mr-1"></i>Button 1 Text
@@ -303,6 +382,22 @@ include __DIR__ . '/includes/header.php';
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                 </div>
                 
+                <?php if ($hasButtonStyles): ?>
+                <div>
+                    <label for="button_style_1" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-palette text-blue-600 mr-1"></i>Button 1 Style
+                    </label>
+                    <select id="button_style_1" 
+                            name="button_style_1" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="primary" <?= ($slider['button_style_1'] ?? 'primary') === 'primary' ? 'selected' : '' ?>>Primary (White Background)</option>
+                        <option value="secondary" <?= ($slider['button_style_1'] ?? '') === 'secondary' ? 'selected' : '' ?>>Secondary (Transparent)</option>
+                        <option value="outline" <?= ($slider['button_style_1'] ?? '') === 'outline' ? 'selected' : '' ?>>Outline (Bordered)</option>
+                        <option value="ghost" <?= ($slider['button_style_1'] ?? '') === 'ghost' ? 'selected' : '' ?>>Ghost (Minimal)</option>
+                    </select>
+                </div>
+                <?php endif; ?>
+                
                 <div>
                     <label for="button_text_2" class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-hand-pointer text-blue-600 mr-1"></i>Button 2 Text
@@ -326,6 +421,22 @@ include __DIR__ . '/includes/header.php';
                            placeholder="/quote.php"
                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                 </div>
+                
+                <?php if ($hasButtonStyles): ?>
+                <div>
+                    <label for="button_style_2" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-palette text-blue-600 mr-1"></i>Button 2 Style
+                    </label>
+                    <select id="button_style_2" 
+                            name="button_style_2" 
+                            class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="primary" <?= ($slider['button_style_2'] ?? 'secondary') === 'primary' ? 'selected' : '' ?>>Primary (White Background)</option>
+                        <option value="secondary" <?= ($slider['button_style_2'] ?? 'secondary') === 'secondary' ? 'selected' : '' ?>>Secondary (Transparent)</option>
+                        <option value="outline" <?= ($slider['button_style_2'] ?? '') === 'outline' ? 'selected' : '' ?>>Outline (Bordered)</option>
+                        <option value="ghost" <?= ($slider['button_style_2'] ?? '') === 'ghost' ? 'selected' : '' ?>>Ghost (Minimal)</option>
+                    </select>
+                </div>
+                <?php endif; ?>
                 
                 <div>
                     <label for="text_alignment" class="block text-sm font-semibold text-gray-700 mb-2">
@@ -476,6 +587,23 @@ include __DIR__ . '/includes/header.php';
                         <option value="fast" <?= ($slider['animation_speed'] ?? '') === 'fast' ? 'selected' : '' ?>>Fast</option>
                     </select>
                 </div>
+                
+                <?php if ($hasAutoplayDelay): ?>
+                <div>
+                    <label for="autoplay_delay" class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-clock text-blue-600 mr-1"></i>Autoplay Delay (ms)
+                    </label>
+                    <input type="number" 
+                           id="autoplay_delay" 
+                           name="autoplay_delay" 
+                           value="<?= escape($slider['autoplay_delay'] ?? 5000) ?>" 
+                           min="1000"
+                           max="30000"
+                           step="500"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <p class="text-xs text-gray-500 mt-1">Time in milliseconds before next slide (1000-30000). Default: 5000ms (5 seconds)</p>
+                </div>
+                <?php endif; ?>
                 
                 <div class="md:col-span-2">
                     <label class="flex items-center cursor-pointer">

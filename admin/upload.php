@@ -121,6 +121,61 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             continue;
         }
         
+        // Security: Sanitize SVG files to prevent XSS
+        if ($mimeType === 'image/svg+xml') {
+            $svgContent = file_get_contents($file['tmp_name']);
+            // Remove potentially dangerous SVG content
+            $dangerousPatterns = [
+                '/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/is',
+                '/javascript:/i',
+                '/onerror\s*=/i',
+                '/onload\s*=/i',
+                '/onclick\s*=/i',
+                '/onmouseover\s*=/i',
+                '/<iframe/i',
+                '/<embed/i',
+                '/<object/i',
+            ];
+            
+            foreach ($dangerousPatterns as $pattern) {
+                if (preg_match($pattern, $svgContent)) {
+                    $errors[] = $file['name'] . ': SVG file contains potentially dangerous content.';
+                    continue 2; // Skip to next file
+                }
+            }
+        }
+        
+        // Security: Validate file extension matches MIME type
+        $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+        if (!in_array($extension, $allowedExtensions)) {
+            $errors[] = $file['name'] . ': Invalid file extension.';
+            continue;
+        }
+        
+        // Security: Additional validation - check file signature (magic bytes)
+        $fileSignature = file_get_contents($file['tmp_name'], false, null, 0, 12);
+        $validSignatures = [
+            'image/jpeg' => ["\xFF\xD8\xFF"],
+            'image/png' => ["\x89\x50\x4E\x47"],
+            'image/gif' => ["\x47\x49\x46\x38"],
+            'image/webp' => ["RIFF"],
+        ];
+        
+        if (isset($validSignatures[$mimeType])) {
+            $valid = false;
+            foreach ($validSignatures[$mimeType] as $signature) {
+                if (strpos($fileSignature, $signature) === 0) {
+                    $valid = true;
+                    break;
+                }
+            }
+            if (!$valid && $mimeType !== 'image/svg+xml') { // SVG doesn't have fixed signature
+                $errors[] = $file['name'] . ': File signature does not match declared type.';
+                continue;
+            }
+        }
+        
         // Validate file size (5MB max)
         if ($file['size'] > 5 * 1024 * 1024) {
             $errors[] = $file['name'] . ': File too large. Maximum size is 5MB.';

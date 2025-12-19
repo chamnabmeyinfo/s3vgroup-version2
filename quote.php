@@ -13,6 +13,9 @@ if (!empty($_GET['product_id'])) {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $name = trim($_POST['name'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
@@ -66,6 +69,7 @@ include __DIR__ . '/includes/message.php';
             <?php endif; ?>
             
             <form method="POST" class="bg-white rounded-lg shadow-md p-8 space-y-6">
+                <?= csrf_field() ?>
                 <input type="hidden" name="product_id" value="<?= $selectedProduct['id'] ?? '' ?>">
                 
                 <div class="grid md:grid-cols-2 gap-6">

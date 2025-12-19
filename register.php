@@ -9,6 +9,9 @@ $error = '';
 $success = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -21,9 +24,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Email and password are required.';
     } elseif ($password !== $confirmPassword) {
         $error = 'Passwords do not match.';
-    } elseif (strlen($password) < 6) {
-        $error = 'Password must be at least 6 characters.';
     } else {
+        // Security: Validate password strength
+        $passwordValidation = validate_password($password);
+        if (!$passwordValidation['valid']) {
+            $error = implode(' ', $passwordValidation['errors']);
+        }
+    }
+    
+    if (empty($error)) {
         try {
             // Check if email exists
             $existing = db()->fetchOne("SELECT id FROM customers WHERE email = :email", ['email' => $email]);
@@ -64,6 +73,7 @@ include __DIR__ . '/includes/message.php';
             <?= displayMessage($success, $error) ?>
             
             <form method="POST" class="space-y-4">
+                <?= csrf_field() ?>
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-2">First Name</label>

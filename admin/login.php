@@ -9,7 +9,18 @@ if (session('admin_logged_in')) {
 
 $error = '';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// Security: Rate limiting for login attempts
+$attempts = session('login_attempts') ?? 0;
+$lastAttempt = session('last_attempt') ?? 0;
+$lockoutTime = 900; // 15 minutes
+
+if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
+    $remainingTime = ceil(($lockoutTime - (time() - $lastAttempt)) / 60);
+    $error = "Too many failed login attempts. Please try again in {$remainingTime} minute(s).";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
     
@@ -34,6 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             
             if ($user && password_verify($password, $user['password'])) {
+                // Security: Clear failed login attempts on success
+                session('login_attempts', 0);
+                session('last_attempt', 0);
+                
+                // Security: Regenerate session ID on successful login
+                session_regenerate_id(true);
+                
                 session('admin_logged_in', true);
                 session('admin_user_id', $user['id']);
                 session('admin_username', $user['username']);
@@ -68,7 +86,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 header('Location: ' . url('admin/index.php'));
                 exit;
             } else {
+                // Security: Track failed login attempts
+                $attempts = (session('login_attempts') ?? 0) + 1;
+                session('login_attempts', $attempts);
+                session('last_attempt', time());
+                
+                // Security: Generic error message to prevent username enumeration
                 $error = 'Invalid username or password.';
+                
+                // Log failed login attempt
+                error_log(sprintf("Failed admin login attempt for username: %s from IP: %s", 
+                    $username, 
+                    get_real_ip()
+                ));
             }
         } catch (\Exception $e) {
             $error = 'Database error. Please check your database setup.';
@@ -93,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </h2>
             </div>
             <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST">
+                <?= csrf_field() ?>
                 <?php if (!empty($error)): ?>
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                         <?= escape($error) ?>

@@ -47,10 +47,25 @@ if (!empty($_GET['delete'])) {
 }
 
 $statusFilter = $_GET['status'] ?? 'active';
-$where = $statusFilter === 'all' ? '' : "WHERE status = '$statusFilter'";
+// Security fix: Use parameterized query to prevent SQL injection
+$where = '';
+$params = [];
+if ($statusFilter !== 'all') {
+    // Validate status to prevent injection
+    $allowedStatuses = ['active', 'unsubscribed'];
+    if (in_array($statusFilter, $allowedStatuses)) {
+        $where = "WHERE status = :status";
+        $params['status'] = $statusFilter;
+    } else {
+        // Default to active if invalid status provided
+        $where = "WHERE status = :status";
+        $params['status'] = 'active';
+    }
+}
 
 $subscribers = db()->fetchAll(
-    "SELECT * FROM newsletter_subscribers $where ORDER BY subscribed_at DESC"
+    "SELECT * FROM newsletter_subscribers $where ORDER BY subscribed_at DESC",
+    $params
 );
 
 $stats = [

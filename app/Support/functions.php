@@ -214,3 +214,117 @@ if (!function_exists('get_real_ip')) {
         return $_SERVER['REMOTE_ADDR'] ?? 'unknown';
     }
 }
+
+// CSRF Protection Functions
+if (!function_exists('csrf_token')) {
+    /**
+     * Generate or retrieve CSRF token
+     * 
+     * @return string CSRF token
+     */
+    function csrf_token()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (!isset($_SESSION['csrf_token'])) {
+            $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        }
+        
+        return $_SESSION['csrf_token'];
+    }
+}
+
+if (!function_exists('csrf_field')) {
+    /**
+     * Generate CSRF token hidden input field
+     * 
+     * @return string HTML input field
+     */
+    function csrf_field()
+    {
+        return '<input type="hidden" name="csrf_token" value="' . escape(csrf_token()) . '">';
+    }
+}
+
+if (!function_exists('csrf_verify')) {
+    /**
+     * Verify CSRF token
+     * 
+     * @param string|null $token Token to verify (defaults to POST csrf_token)
+     * @return bool True if valid, false otherwise
+     */
+    function csrf_verify($token = null)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (!isset($_SESSION['csrf_token'])) {
+            return false;
+        }
+        
+        $token = $token ?? ($_POST['csrf_token'] ?? $_GET['csrf_token'] ?? null);
+        
+        if (empty($token)) {
+            return false;
+        }
+        
+        return hash_equals($_SESSION['csrf_token'], $token);
+    }
+}
+
+if (!function_exists('require_csrf')) {
+    /**
+     * Require valid CSRF token or die with error
+     * 
+     * @return void
+     */
+    function require_csrf()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+            http_response_code(403);
+            die('Invalid security token. Please refresh the page and try again.');
+        }
+    }
+}
+
+// Password Validation Function
+if (!function_exists('validate_password')) {
+    /**
+     * Validate password strength
+     * 
+     * @param string $password Password to validate
+     * @return array ['valid' => bool, 'errors' => array]
+     */
+    function validate_password($password)
+    {
+        $errors = [];
+        
+        if (strlen($password) < 12) {
+            $errors[] = 'Password must be at least 12 characters long.';
+        }
+        
+        if (!preg_match('/[A-Z]/', $password)) {
+            $errors[] = 'Password must contain at least one uppercase letter.';
+        }
+        
+        if (!preg_match('/[a-z]/', $password)) {
+            $errors[] = 'Password must contain at least one lowercase letter.';
+        }
+        
+        if (!preg_match('/[0-9]/', $password)) {
+            $errors[] = 'Password must contain at least one number.';
+        }
+        
+        if (!preg_match('/[^A-Za-z0-9]/', $password)) {
+            $errors[] = 'Password must contain at least one special character.';
+        }
+        
+        return [
+            'valid' => empty($errors),
+            'errors' => $errors
+        ];
+    }
+}

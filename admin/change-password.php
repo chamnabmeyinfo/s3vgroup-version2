@@ -7,6 +7,9 @@ $error = '';
 $userId = session('admin_user_id');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
@@ -15,9 +18,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'All fields are required.';
     } elseif ($newPassword !== $confirmPassword) {
         $error = 'New passwords do not match.';
-    } elseif (strlen($newPassword) < 6) {
-        $error = 'Password must be at least 6 characters long.';
     } else {
+        // Security: Validate password strength
+        $passwordValidation = validate_password($newPassword);
+        if (!$passwordValidation['valid']) {
+            $error = implode(' ', $passwordValidation['errors']);
+        }
+    }
+    
+    if (empty($error)) {
         // Verify current password
         $user = db()->fetchOne("SELECT password FROM admin_users WHERE id = :id", ['id' => $userId]);
         
@@ -40,6 +49,7 @@ include __DIR__ . '/includes/header.php';
 <h1 class="text-3xl font-bold mb-6">Change Password</h1>
 
 <form method="POST" class="bg-white rounded-lg shadow p-6 space-y-6 max-w-md">
+    <?= csrf_field() ?>
     <div>
         <label class="block text-sm font-medium mb-2">Current Password</label>
         <input type="password" name="current_password" required
@@ -50,7 +60,7 @@ include __DIR__ . '/includes/header.php';
         <label class="block text-sm font-medium mb-2">New Password</label>
         <input type="password" name="new_password" required minlength="6"
                class="w-full px-4 py-2 border rounded-lg">
-        <p class="text-sm text-gray-600 mt-1">Must be at least 6 characters</p>
+        <p class="text-sm text-gray-600 mt-1">Must be at least 12 characters with uppercase, lowercase, number, and special character</p>
     </div>
     
     <div>

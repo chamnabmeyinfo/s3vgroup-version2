@@ -86,8 +86,8 @@ include __DIR__ . '/includes/header.php';
                 </p>
             </div>
             
-            <!-- Categories Grid - Minimal -->
-            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+            <!-- Categories Grid - Modern with Images -->
+            <div class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6 max-w-7xl mx-auto">
                 <?php 
                 $categoryIcons = [
                     'forklift' => 'fa-truck',
@@ -124,22 +124,61 @@ include __DIR__ . '/includes/header.php';
                     $index++;
                 ?>
                 <a href="<?= url('products.php?category=' . escape($category['slug'])) ?>" 
-                   class="category-minimal group block bg-white border-2 border-gray-200 rounded-xl p-6 hover:<?= $color['border'] ?> hover:shadow-lg transition-all duration-300 text-center">
-                    <!-- Icon -->
-                    <div class="mb-4">
-                        <div class="w-16 h-16 <?= $color['bg'] ?> rounded-xl flex items-center justify-center mx-auto group-hover:<?= $color['bgHover'] ?> transition-colors duration-300">
-                            <i class="fas <?= $icon ?> <?= $color['text'] ?> text-2xl group-hover:text-white transition-colors duration-300"></i>
-                        </div>
+                   class="category-modern group block bg-white border-2 border-gray-200 rounded-2xl overflow-hidden hover:<?= $color['border'] ?> hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2">
+                    <!-- Image or Icon -->
+                    <div class="category-image-wrapper relative h-48 overflow-hidden bg-gradient-to-br <?= $color['bg'] ?> group-hover:<?= $color['bgHover'] ?> transition-all duration-300">
+                        <?php if (!empty($category['image'])): ?>
+                            <img src="<?= escape(image_url($category['image'])) ?>" 
+                                 alt="<?= escape($category['name']) ?>"
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                 loading="lazy"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="category-icon-fallback absolute inset-0 items-center justify-center hidden">
+                                <i class="fas <?= $icon ?> <?= $color['text'] ?> text-5xl group-hover:text-white transition-colors duration-300"></i>
+                            </div>
+                        <?php else: ?>
+                            <div class="w-full h-full flex items-center justify-center">
+                                <i class="fas <?= $icon ?> <?= $color['text'] ?> text-5xl group-hover:text-white transition-colors duration-300"></i>
+                            </div>
+                        <?php endif; ?>
+                        <!-- Overlay on hover -->
+                        <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300"></div>
                     </div>
                     
-                    <!-- Category Name -->
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:<?= $color['text'] ?> transition-colors duration-300">
-                        <?= escape($category['name']) ?>
-                    </h3>
-                    
-                    <!-- Arrow -->
-                    <div class="mt-4">
-                        <i class="fas fa-arrow-right text-gray-400 group-hover:<?= $color['text'] ?> transform group-hover:translate-x-1 transition-all duration-300"></i>
+                    <!-- Content -->
+                    <div class="p-6">
+                        <!-- Category Name -->
+                        <h3 class="text-xl font-bold text-gray-900 mb-3 group-hover:<?= $color['text'] ?> transition-colors duration-300">
+                            <?= escape($category['name']) ?>
+                        </h3>
+                        
+                        <!-- Short Description -->
+                        <?php 
+                        // Use short_description if available, otherwise fall back to description
+                        $shortText = $category['short_description'] ?? null;
+                        if (empty($shortText) && !empty($category['description'])) {
+                            $shortText = substr($category['description'], 0, 100);
+                        }
+                        ?>
+                        <?php if (!empty($shortText)): ?>
+                            <p class="text-sm text-gray-600 mb-4 line-clamp-2 leading-relaxed">
+                                <?= escape($shortText) ?><?= !empty($category['description']) && strlen($category['description']) > 100 && empty($category['short_description']) ? '...' : '' ?>
+                            </p>
+                        <?php else: ?>
+                            <p class="text-sm text-gray-500 mb-4 italic">
+                                Explore our <?= strtolower(escape($category['name'])) ?> collection
+                            </p>
+                        <?php endif; ?>
+                        
+                        <!-- Arrow Button -->
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm font-semibold <?= $color['text'] ?> opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                View Products
+                            </span>
+                            <div class="w-10 h-10 <?= $color['bg'] ?> rounded-full flex items-center justify-center group-hover:<?= $color['bgHover'] ?> transition-all duration-300 transform group-hover:scale-110 group-hover:rotate-[-5deg]">
+                                <i class="fas fa-arrow-right <?= $color['text'] ?> group-hover:text-white transform group-hover:translate-x-1 transition-all duration-300"></i>
+                            </div>
+                        </div>
                     </div>
                 </a>
                 <?php endforeach; ?>

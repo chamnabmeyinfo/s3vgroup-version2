@@ -84,8 +84,18 @@ switch ($sort) {
 }
 
 // Column visibility
-$selectedColumns = $_GET['columns'] ?? ['name', 'slug', 'status', 'actions'];
+$selectedColumns = $_GET['columns'] ?? ['image', 'name', 'slug', 'status', 'actions'];
+// Check if short_description column exists
+$hasShortDescription = false;
+try {
+    db()->fetchOne("SELECT short_description FROM categories LIMIT 1");
+    $hasShortDescription = true;
+} catch (\Exception $e) {
+    $hasShortDescription = false;
+}
+
 $availableColumns = [
+    'image' => 'Image',
     'name' => 'Name',
     'slug' => 'Slug',
     'description' => 'Description',
@@ -94,6 +104,10 @@ $availableColumns = [
     'created' => 'Created Date',
     'actions' => 'Actions'
 ];
+
+if ($hasShortDescription) {
+    $availableColumns['short_description'] = 'Short Description';
+}
 
 // Calculate stats for mini dashboard
 $totalCategories = count($allCategories);
@@ -238,12 +252,35 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
+                    <!-- Icon Column - Always visible -->
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="icon">
+                        <i class="fas fa-icons mr-1"></i>Icon
+                    </th>
+                    
+                    <?php if (in_array('image', $selectedColumns)): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="image">Image</th>
+                    <?php endif; ?>
+                    
                     <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="name">Name</th>
                     <?php endif; ?>
                     
                     <?php if (in_array('slug', $selectedColumns) || empty($_GET['columns'])): ?>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="slug">Slug</th>
+                    <?php endif; ?>
+                    
+                    <?php 
+                    // Check if short_description column exists
+                    $hasShortDescription = false;
+                    try {
+                        db()->fetchOne("SELECT short_description FROM categories LIMIT 1");
+                        $hasShortDescription = true;
+                    } catch (\Exception $e) {
+                        $hasShortDescription = false;
+                    }
+                    ?>
+                    <?php if ($hasShortDescription && in_array('short_description', $selectedColumns)): ?>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="short_description">Short Description</th>
                     <?php endif; ?>
                     
                     <?php if (in_array('description', $selectedColumns)): ?>
@@ -270,7 +307,7 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php if (empty($categories)): ?>
                     <tr>
-                        <td colspan="7" class="px-6 py-4 text-center text-gray-500">No categories found.</td>
+                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No categories found.</td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($categories as $category): ?>
@@ -280,8 +317,56 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                         "SELECT COUNT(*) as count FROM products WHERE category_id = :id",
                         ['id' => $category['id']]
                     )['count'] ?? 0;
+                    
+                    // Get automatic icon for category (same as frontend)
+                    $categoryIcons = [
+                        'forklift' => 'fa-truck',
+                        'electric' => 'fa-bolt',
+                        'diesel' => 'fa-gas-pump',
+                        'gas' => 'fa-fire',
+                        'ic' => 'fa-cog',
+                        'li-ion' => 'fa-battery-full',
+                        'attachment' => 'fa-puzzle-piece',
+                        'pallet' => 'fa-boxes',
+                        'stacker' => 'fa-layer-group',
+                        'reach' => 'fa-arrow-up',
+                    ];
+                    
+                    $categoryName = strtolower($category['name']);
+                    $icon = 'fa-box'; // Default icon
+                    foreach ($categoryIcons as $key => $iconClass) {
+                        if (strpos($categoryName, $key) !== false) {
+                            $icon = $iconClass;
+                            break;
+                        }
+                    }
                     ?>
                     <tr>
+                        <!-- Icon Column - Always visible to help identify categories -->
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="icon">
+                            <div class="w-12 h-12 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-lg border-2 border-blue-300 flex items-center justify-center shadow-sm">
+                                <i class="fas <?= $icon ?> text-blue-700 text-2xl" title="<?= escape($category['name']) ?> - Icon: <?= $icon ?>"></i>
+                            </div>
+                        </td>
+                        
+                        <?php if (in_array('image', $selectedColumns)): ?>
+                        <td class="px-6 py-4 whitespace-nowrap" data-column="image">
+                            <?php if (!empty($category['image'])): ?>
+                                <img src="<?= escape(image_url($category['image'])) ?>" 
+                                     alt="<?= escape($category['name']) ?>"
+                                     class="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-16 h-16 bg-blue-100 rounded-lg border border-gray-200 flex items-center justify-center hidden">
+                                    <i class="fas <?= $icon ?> text-blue-600 text-xl"></i>
+                                </div>
+                            <?php else: ?>
+                                <div class="w-16 h-16 bg-gray-100 rounded-lg border border-gray-200 flex items-center justify-center">
+                                    <span class="text-xs text-gray-500">No Image</span>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <?php endif; ?>
+                        
                         <?php if (in_array('name', $selectedColumns) || empty($_GET['columns'])): ?>
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" data-column="name">
                             <?= escape($category['name']) ?>
@@ -294,10 +379,18 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                         </td>
                         <?php endif; ?>
                         
+                        <?php if ($hasShortDescription && in_array('short_description', $selectedColumns)): ?>
+                        <td class="px-6 py-4 text-sm text-gray-500" data-column="short_description">
+                            <div class="max-w-xs truncate" title="<?= escape($category['short_description'] ?? '') ?>">
+                                <?= escape($category['short_description'] ?? 'N/A') ?>
+                            </div>
+                        </td>
+                        <?php endif; ?>
+                        
                         <?php if (in_array('description', $selectedColumns)): ?>
                         <td class="px-6 py-4 text-sm text-gray-500" data-column="description">
                             <div class="max-w-xs truncate" title="<?= escape($category['description'] ?? '') ?>">
-                                <?= escape(substr($category['description'] ?? '', 0, 50)) ?>...
+                                <?= escape(substr($category['description'] ?? '', 0, 50)) ?><?= strlen($category['description'] ?? '') > 50 ? '...' : '' ?>
                             </div>
                         </td>
                         <?php endif; ?>

@@ -12,6 +12,9 @@ header('Content-Type: application/json');
 $response = ['success' => false, 'message' => ''];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $action = $_POST['action'] ?? '';
     $productIds = $_POST['product_ids'] ?? [];
     
@@ -21,7 +24,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    $productIds = array_map('intval', $productIds);
+    // Security: Validate and filter product IDs
+    $productIds = array_filter(array_map('intval', $productIds), function($id) {
+        return $id > 0;
+    });
+    
+    if (empty($productIds)) {
+        $response['message'] = 'No valid products selected.';
+        echo json_encode($response);
+        exit;
+    }
+    
+    // Security: Limit bulk operations to prevent DoS
+    if (count($productIds) > 1000) {
+        $response['message'] = 'Too many products selected. Maximum 1000 items per operation.';
+        echo json_encode($response);
+        exit;
+    }
+    
     $placeholders = implode(',', array_fill(0, count($productIds), '?'));
     
     try {

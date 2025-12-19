@@ -245,33 +245,8 @@
     
     <!-- Modern Navigation & Slider Scripts -->
     <script>
-    // Initialize Hero Slider
+    // Hero Slider is initialized in hero-slider.php - no duplicate initialization needed
     document.addEventListener('DOMContentLoaded', function() {
-        // Hero Slider
-        const heroSwiper = new Swiper('.heroSwiper', {
-            slidesPerView: 1,
-            spaceBetween: 0,
-            loop: true,
-            autoplay: {
-                delay: 5000,
-                disableOnInteraction: false,
-            },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-                dynamicBullets: true,
-            },
-            navigation: {
-                nextEl: '.swiper-button-next',
-                prevEl: '.swiper-button-prev',
-            },
-            effect: 'fade',
-            fadeEffect: {
-                crossFade: true
-            },
-            speed: 1000,
-        });
-        
         // Mobile Bottom Navigation - More Menu Toggle
         window.toggleMobileMoreMenu = function() {
             const moreMenu = document.getElementById('mobile-more-menu');

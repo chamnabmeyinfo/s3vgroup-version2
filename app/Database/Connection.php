@@ -23,7 +23,13 @@ class Connection
                 $config['options']
             );
         } catch (PDOException $e) {
-            die("Database connection failed: " . $e->getMessage());
+            // Security: Don't expose database errors in production
+            error_log("Database connection failed: " . $e->getMessage());
+            if (config('app.debug', false)) {
+                die("Database connection failed: " . $e->getMessage());
+            } else {
+                die("Database connection failed. Please contact support.");
+            }
         }
     }
 
@@ -70,10 +76,36 @@ class Connection
         return $this->pdo->lastInsertId();
     }
 
+    /**
+     * Update records in a table
+     * SECURITY: WHERE clause must use parameterized placeholders (e.g., "id = :id")
+     * Never pass user input directly in $where - always use parameters in $whereParams
+     * 
+     * @param string $table Table name
+     * @param array $data Data to update [field => value]
+     * @param string $where WHERE clause with placeholders (e.g., "id = :id AND status = :status")
+     * @param array $whereParams Parameters for WHERE clause
+     * @return int Number of affected rows
+     */
     public function update($table, $data, $where, $whereParams = [])
     {
+        // Security: Validate table name (alphanumeric, underscore, hyphen only)
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $table)) {
+            throw new \InvalidArgumentException("Invalid table name");
+        }
+        
+        // Security: Ensure WHERE clause contains at least one parameter placeholder
+        // This prevents direct SQL injection via $where
+        if (empty($whereParams) && !preg_match('/:\w+/', $where)) {
+            throw new \InvalidArgumentException("WHERE clause must use parameterized placeholders for security");
+        }
+        
         $set = [];
         foreach (array_keys($data) as $field) {
+            // Security: Validate field names
+            if (!preg_match('/^[a-zA-Z0-9_-]+$/', $field)) {
+                throw new \InvalidArgumentException("Invalid field name: $field");
+            }
             $set[] = "`{$field}` = :$field";
         }
         
@@ -83,8 +115,28 @@ class Connection
         return $this->query($sql, $params)->rowCount();
     }
 
+    /**
+     * Delete records from a table
+     * SECURITY: WHERE clause must use parameterized placeholders (e.g., "id = :id")
+     * Never pass user input directly in $where - always use parameters in $params
+     * 
+     * @param string $table Table name
+     * @param string $where WHERE clause with placeholders (e.g., "id = :id")
+     * @param array $params Parameters for WHERE clause
+     * @return int Number of affected rows
+     */
     public function delete($table, $where, $params = [])
     {
+        // Security: Validate table name
+        if (!preg_match('/^[a-zA-Z0-9_-]+$/', $table)) {
+            throw new \InvalidArgumentException("Invalid table name");
+        }
+        
+        // Security: Ensure WHERE clause contains at least one parameter placeholder
+        if (empty($params) && !preg_match('/:\w+/', $where)) {
+            throw new \InvalidArgumentException("WHERE clause must use parameterized placeholders for security");
+        }
+        
         $sql = "DELETE FROM `{$table}` WHERE $where";
         return $this->query($sql, $params)->rowCount();
     }

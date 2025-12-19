@@ -35,6 +35,9 @@ $total = $subtotal + $tax;
 
 // Handle order submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection
+    require_csrf();
+    
     $orderData = [
         'name' => trim($_POST['name'] ?? ''),
         'email' => trim($_POST['email'] ?? ''),
@@ -106,6 +109,7 @@ include __DIR__ . '/includes/message.php';
         <?php else: ?>
             
             <form method="POST" class="grid md:grid-cols-3 gap-8">
+                <?= csrf_field() ?>
                 <!-- Order Details -->
                 <div class="md:col-span-2 space-y-6">
                     <div class="bg-white rounded-lg shadow-md p-6">

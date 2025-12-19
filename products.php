@@ -837,11 +837,26 @@ document.addEventListener('DOMContentLoaded', function() {
     const advancedChevron = document.getElementById('advanced-filters-chevron');
     
     if (advancedContent && advancedBtn && advancedChevron) {
-        // Default to collapsed
-        if (savedAdvancedState === 'true') {
-            advancedContent.classList.add('expanded');
-            advancedBtn.setAttribute('aria-expanded', 'true');
-            advancedChevron.classList.add('rotate-180');
+        // Check if mobile
+        const isMobile = window.innerWidth <= 640;
+        
+        // On mobile, always start collapsed (ignore saved state)
+        if (isMobile) {
+            advancedContent.classList.remove('expanded');
+            advancedBtn.setAttribute('aria-expanded', 'false');
+            advancedChevron.style.transform = 'rotate(0deg)';
+            advancedChevron.classList.remove('rotate-180');
+        } else {
+            // On desktop, respect saved state or default to collapsed
+            if (savedAdvancedState === 'true') {
+                advancedContent.classList.add('expanded');
+                advancedBtn.setAttribute('aria-expanded', 'true');
+                advancedChevron.classList.add('rotate-180');
+            } else {
+                advancedContent.classList.remove('expanded');
+                advancedBtn.setAttribute('aria-expanded', 'false');
+                advancedChevron.classList.remove('rotate-180');
+            }
         }
     }
     
@@ -882,17 +897,26 @@ function toggleAdvancedFilters() {
     if (!content || !btn || !chevron) return;
     
     const isExpanded = content.classList.contains('expanded');
+    const isMobile = window.innerWidth <= 640;
     
     if (isExpanded) {
         content.classList.remove('expanded');
         btn.setAttribute('aria-expanded', 'false');
         chevron.classList.remove('rotate-180');
-        localStorage.setItem('advancedFiltersExpanded', 'false');
+        chevron.style.transform = 'rotate(0deg)';
+        // Only save state on desktop
+        if (!isMobile) {
+            localStorage.setItem('advancedFiltersExpanded', 'false');
+        }
     } else {
         content.classList.add('expanded');
         btn.setAttribute('aria-expanded', 'true');
         chevron.classList.add('rotate-180');
-        localStorage.setItem('advancedFiltersExpanded', 'true');
+        chevron.style.transform = 'rotate(180deg)';
+        // Only save state on desktop
+        if (!isMobile) {
+            localStorage.setItem('advancedFiltersExpanded', 'true');
+        }
     }
 }
 
