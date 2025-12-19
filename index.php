@@ -39,7 +39,7 @@ include __DIR__ . '/includes/header.php';
     <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
         <div class="container mx-auto px-4">
             <div class="text-center mb-12 md:mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h2 class="text-3xl md:text-4xl font-bold mb-4 text-gray-800">
                     Why Choose Us
                 </h2>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">

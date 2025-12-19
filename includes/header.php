@@ -18,6 +18,8 @@ $navCategories = $categoryModel->getAll(true);
     <!-- Custom Styles -->
     <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/product-images.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/mobile-bottom-nav.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/hero-slider-modern.css') ?>">
     <?php if (basename($_SERVER['PHP_SELF']) === 'products.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/products-responsive.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/app-products.css') ?>">
@@ -131,10 +133,7 @@ $navCategories = $categoryModel->getAll(true);
             background: linear-gradient(to bottom right, var(--logo-primary), var(--logo-accent), var(--logo-tertiary)) !important;
         }
         
-        /* Site name gradient */
-        .bg-gradient-to-r.from-blue-600 {
-            background: linear-gradient(to right, var(--logo-primary), var(--logo-accent), var(--logo-tertiary)) !important;
-        }
+        /* Site name gradient - Removed as requested */
         
         /* Mobile menu items */
         .mobile-menu-item-ultra:hover {
@@ -171,6 +170,10 @@ $navCategories = $categoryModel->getAll(true);
                             <i class="fas fa-industry text-white text-xl md:text-2xl"></i>
                         </div>
                     <?php endif; ?>
+                    <!-- Site Name - Visible on Mobile -->
+                    <span class="xl:hidden font-bold text-lg md:text-xl text-gray-800">
+                        <?= escape($siteNameText) ?>
+                    </span>
                 </a>
                 
                 <!-- Desktop Navigation -->
@@ -284,99 +287,99 @@ $navCategories = $categoryModel->getAll(true);
                         <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-3 border-2 border-gray-200 rounded-3xl shadow-2xl z-50 max-h-96 overflow-y-auto" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"></div>
                     </div>
                 </div>
-                
-                <!-- Mobile Menu Button - Enhanced -->
-                <button id="mobile-menu-btn" class="xl:hidden text-gray-700 p-2.5 rounded-xl hover:bg-gray-100 transition-all duration-300 relative z-10">
-                    <i class="fas fa-bars text-2xl transition-transform duration-300" id="menu-icon"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- Mobile Menu (Ultra Modern Slide Animation) -->
-        <div id="mobile-menu" class="xl:hidden border-t border-gray-200/50 shadow-2xl transform -translate-y-full transition-all duration-500 ease-out fixed inset-x-0 top-20 z-40 max-h-[calc(100vh-5rem)] overflow-y-auto" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-            <div class="container mx-auto px-4 py-6 space-y-2">
-                <!-- Mobile Search (Always Visible) -->
-                <div class="mb-4 pb-4 border-b border-gray-200">
-                    <div class="relative">
-                        <input type="text" 
-                               id="mobile-search-input" 
-                               placeholder="Search products..." 
-                               autocomplete="off"
-                               class="w-full px-5 py-3.5 pl-12 pr-4 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50/80 focus:bg-white shadow-sm">
-                        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                    </div>
-                </div>
-                
-                <a href="<?= url() ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 group">
-                    <i class="fas fa-home mr-3 text-blue-600 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-semibold text-gray-800">Home</span>
-                </a>
-                
-                <!-- Mobile Products Accordion - Enhanced -->
-                <div class="mobile-menu-accordion">
-                    <button class="mobile-menu-item-ultra w-full text-left px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 flex items-center justify-between group" onclick="toggleMobileAccordion(this)">
-                        <span class="flex items-center">
-                            <i class="fas fa-box mr-3 text-blue-600 group-hover:scale-110 transition-transform"></i>
-                            <span class="font-semibold text-gray-800">Products</span>
-                        </span>
-                        <i class="fas fa-chevron-down transform transition-transform duration-300 text-gray-400"></i>
-                    </button>
-                    <div class="hidden pl-4 mt-2 space-y-1">
-                        <?php if (!empty($navCategories)): ?>
-                            <?php foreach ($navCategories as $cat): ?>
-                            <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                               class="block px-4 py-2.5 rounded-xl hover:bg-blue-50 transition-all duration-300 text-gray-700 font-medium border-l-2 border-transparent hover:border-blue-500">
-                                <?= escape($cat['name']) ?>
-                            </a>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                        <a href="<?= url('products.php') ?>" class="block px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white transition-all duration-300 font-bold text-center mt-2 shadow-lg">
-                            <i class="fas fa-th mr-2"></i>View All Products
-                        </a>
-                    </div>
-                </div>
-                
-                <a href="<?= url('compare.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-300 relative group">
-                    <i class="fas fa-balance-scale mr-3 text-blue-600 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-semibold text-gray-800">Compare</span>
-                    <span id="compare-count-mobile" class="hidden absolute top-2 right-4 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                </a>
-                <a href="<?= url('wishlist.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 group">
-                    <i class="fas fa-heart mr-3 text-red-600 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-semibold text-gray-800">Wishlist</span>
-                </a>
-                <a href="<?= url('cart.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all duration-300 group">
-                    <i class="fas fa-shopping-cart mr-3 text-green-600 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-semibold text-gray-800">Cart</span>
-                </a>
-                <a href="<?= url('contact.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all duration-300 group">
-                    <i class="fas fa-envelope mr-3 text-purple-600 group-hover:scale-110 transition-transform"></i>
-                    <span class="font-semibold text-gray-800">Contact</span>
-                </a>
-                
-                <?php if (isset($_SESSION['customer_id'])): ?>
-                    <a href="<?= url('account.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-indigo-50 hover:to-blue-50 transition-all duration-300 group">
-                        <i class="fas fa-user mr-3 text-indigo-600 group-hover:scale-110 transition-transform"></i>
-                        <span class="font-semibold text-gray-800">My Account</span>
-                    </a>
-                    <a href="<?= url('logout.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 text-red-600 group">
-                        <i class="fas fa-sign-out-alt mr-3 group-hover:scale-110 transition-transform"></i>
-                        <span class="font-semibold">Logout</span>
-                    </a>
-                <?php else: ?>
-                    <a href="<?= url('login.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-blue-50 transition-all duration-300 group">
-                        <i class="fas fa-sign-in-alt mr-3 text-blue-600 group-hover:scale-110 transition-transform"></i>
-                        <span class="font-semibold text-gray-800">Login</span>
-                    </a>
-                    <a href="<?= url('register.php') ?>" class="mobile-menu-item-ultra block px-5 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-gray-50 hover:to-indigo-50 transition-all duration-300 group">
-                        <i class="fas fa-user-plus mr-3 text-indigo-600 group-hover:scale-110 transition-transform"></i>
-                        <span class="font-semibold text-gray-800">Sign Up</span>
-                    </a>
-                <?php endif; ?>
-                
-                <a href="<?= url('quote.php') ?>" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-5 py-3.5 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl text-center block mt-4">
-                    <i class="fas fa-calculator mr-2"></i>Get Quote
-                </a>
             </div>
         </div>
     </nav>
+    
+    <!-- Mobile Bottom Navigation - OUTSIDE main nav to position at bottom -->
+    <div id="mobile-bottom-nav" class="xl:hidden" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; top: auto !important; z-index: 9999 !important; width: 100% !important;">
+        <nav class="mobile-bottom-nav-container">
+            <?php
+            // Define menu items with icons
+            $menuItems = [
+                ['url' => url(), 'icon' => 'fa-home', 'label' => 'Home', 'color' => 'blue'],
+                ['url' => url('products.php'), 'icon' => 'fa-box', 'label' => 'Products', 'color' => 'indigo'],
+                ['url' => url('cart.php'), 'icon' => 'fa-shopping-cart', 'label' => 'Cart', 'color' => 'green', 'badge' => 'cart-count'],
+                ['url' => url('wishlist.php'), 'icon' => 'fa-heart', 'label' => 'Wishlist', 'color' => 'red'],
+            ];
+            
+            // Additional menu items for "More" popup
+            $moreMenuItems = [
+                ['url' => url('compare.php'), 'icon' => 'fa-balance-scale', 'label' => 'Compare', 'color' => 'blue', 'badge' => 'compare-count'],
+                ['url' => url('contact.php'), 'icon' => 'fa-envelope', 'label' => 'Contact', 'color' => 'purple'],
+                ['url' => url('quote.php'), 'icon' => 'fa-calculator', 'label' => 'Get Quote', 'color' => 'blue'],
+            ];
+            
+            // Add account items based on login status
+            if (isset($_SESSION['customer_id'])) {
+                $moreMenuItems[] = ['url' => url('account.php'), 'icon' => 'fa-user', 'label' => 'Account', 'color' => 'indigo'];
+                $moreMenuItems[] = ['url' => url('logout.php'), 'icon' => 'fa-sign-out-alt', 'label' => 'Logout', 'color' => 'red'];
+            } else {
+                $moreMenuItems[] = ['url' => url('login.php'), 'icon' => 'fa-sign-in-alt', 'label' => 'Login', 'color' => 'blue'];
+                $moreMenuItems[] = ['url' => url('register.php'), 'icon' => 'fa-user-plus', 'label' => 'Sign Up', 'color' => 'indigo'];
+            }
+            
+            // Show first 4 items in bottom nav
+            foreach (array_slice($menuItems, 0, 4) as $item):
+                $currentUrl = parse_url($item['url'], PHP_URL_PATH);
+                $currentPage = basename($_SERVER['PHP_SELF']);
+                $itemPage = basename($currentUrl);
+                $isActive = ($currentPage === $itemPage) || 
+                            ($item['url'] === url() && $currentPage === 'index.php') ||
+                            (strpos($item['url'], 'products.php') !== false && $currentPage === 'products.php');
+            ?>
+                <a href="<?= $item['url'] ?>" 
+                   class="mobile-bottom-nav-item <?= $isActive ? 'active' : '' ?>"
+                   data-color="<?= $item['color'] ?>">
+                    <div class="mobile-bottom-nav-icon">
+                        <i class="fas <?= $item['icon'] ?>"></i>
+                        <?php if (isset($item['badge'])): ?>
+                            <span class="mobile-bottom-nav-badge" id="<?= $item['badge'] ?>-mobile">0</span>
+                        <?php endif; ?>
+                    </div>
+                    <span class="mobile-bottom-nav-label"><?= $item['label'] ?></span>
+                </a>
+            <?php endforeach; ?>
+            
+            <!-- More Button (if there are more items) -->
+            <?php if (count($moreMenuItems) > 0): ?>
+                <button onclick="toggleMobileMoreMenu()" 
+                        class="mobile-bottom-nav-item mobile-bottom-nav-more"
+                        id="mobile-more-btn">
+                    <div class="mobile-bottom-nav-icon">
+                        <i class="fas fa-ellipsis-h"></i>
+                    </div>
+                    <span class="mobile-bottom-nav-label">More</span>
+                </button>
+            <?php endif; ?>
+        </nav>
+    </div>
+    
+    <!-- Mobile More Menu Popup -->
+    <div id="mobile-more-menu" class="mobile-more-menu-overlay hidden" onclick="if(event.target === this) toggleMobileMoreMenu()">
+        <div class="mobile-more-menu-backdrop"></div>
+        <div class="mobile-more-menu-content" onclick="event.stopPropagation()">
+            <div class="mobile-more-menu-header">
+                <h3 class="mobile-more-menu-title">Menu</h3>
+                <button onclick="toggleMobileMoreMenu()" class="mobile-more-menu-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="mobile-more-menu-grid">
+                <?php foreach ($moreMenuItems as $item): ?>
+                    <a href="<?= $item['url'] ?>" 
+                       class="mobile-more-menu-item"
+                       data-color="<?= $item['color'] ?>"
+                       onclick="toggleMobileMoreMenu()">
+                        <div class="mobile-more-menu-icon">
+                            <i class="fas <?= $item['icon'] ?>"></i>
+                            <?php if (isset($item['badge'])): ?>
+                                <span class="mobile-more-menu-badge" id="<?= $item['badge'] ?>-more">0</span>
+                            <?php endif; ?>
+                        </div>
+                        <span class="mobile-more-menu-label"><?= $item['label'] ?></span>
+                    </a>
+                <?php endforeach; ?>
+            </div>
+        </div>
+    </div>

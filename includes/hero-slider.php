@@ -98,9 +98,9 @@ if (empty($sliders)) {
                             }
                         }
                     </style>
-                    <div class="hero-slide-overlay" style="<?= $overlayStyle ?>"></div>
+                    <div class="hero-slide-overlay light" style="<?= $overlayStyle ?>"></div>
                     <div class="container mx-auto px-4">
-                        <div class="hero-slide-content max-w-4xl mx-auto py-20 md:py-32" 
+                        <div class="hero-slide-content max-w-4xl mx-auto" 
                              style="text-align: <?= $textAlign ?>; color: <?= $textColor ?>;">
                             <?php 
                             // Animation classes based on content_animation setting
@@ -110,22 +110,19 @@ if (empty($sliders)) {
                             $buttonAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-600' : '';
                             ?>
                             <?php if (!empty($slider['title'])): ?>
-                                <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 <?= $titleAnimClass ?> <?= $speedClass ?>" 
-                                    style="color: <?= $textColor ?>; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 0, 0, 0.5);">
+                                <h1 class="<?= $titleAnimClass ?> <?= $speedClass ?>">
                                     <?= escape($slider['title']) ?>
                                 </h1>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['subtitle'])): ?>
-                                <p class="text-lg sm:text-xl md:text-2xl mb-4 md:mb-6 <?= $subtitleAnimClass ?> <?= $speedClass ?>" 
-                                   style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
+                                <p class="<?= $subtitleAnimClass ?> <?= $speedClass ?>">
                                     <?= escape($slider['subtitle']) ?>
                                 </p>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['description'])): ?>
-                                <p class="text-base sm:text-lg md:text-xl mb-6 md:mb-8 <?= $descAnimClass ?> <?= $speedClass ?>" 
-                                   style="color: <?= $textColor ?>; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 0, 0, 0.5);">
+                                <p class="<?= $descAnimClass ?> <?= $speedClass ?>">
                                     <?= escape($slider['description']) ?>
                                 </p>
                             <?php endif; ?>

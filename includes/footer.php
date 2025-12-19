@@ -19,7 +19,7 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 mb-12">
                 <!-- Company Info -->
                 <div class="lg:col-span-1">
-                    <h3 class="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                    <h3 class="text-2xl font-bold mb-4 text-white">
                         <?= escape($siteName) ?>
                     </h3>
                     <p class="text-gray-400 mb-6 leading-relaxed">
@@ -233,40 +233,70 @@
             speed: 1000,
         });
         
-        // Mobile Menu Toggle
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuIcon = document.getElementById('menu-icon');
-        const mobileSearch = document.getElementById('mobile-search');
-        
-        if (mobileMenuBtn && mobileMenu) {
-            mobileMenuBtn.addEventListener('click', function() {
-                mobileMenu.classList.toggle('show');
-                mobileSearch.classList.toggle('hidden');
+        // Mobile Bottom Navigation - More Menu Toggle
+        window.toggleMobileMoreMenu = function() {
+            const moreMenu = document.getElementById('mobile-more-menu');
+            const moreBtn = document.getElementById('mobile-more-btn');
+            
+            if (moreMenu && moreBtn) {
+                const isOpen = !moreMenu.classList.contains('hidden');
                 
-                if (mobileMenu.classList.contains('show')) {
-                    menuIcon.classList.remove('fa-bars');
-                    menuIcon.classList.add('fa-times');
+                if (isOpen) {
+                    moreMenu.classList.add('hidden');
+                    moreBtn.classList.remove('active');
                 } else {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
+                    moreMenu.classList.remove('hidden');
+                    moreBtn.classList.add('active');
                 }
-            });
-        }
+            }
+        };
         
-        // Close mobile menu when clicking outside
+        // Close More Menu when clicking overlay
         document.addEventListener('click', function(event) {
-            if (mobileMenu && mobileMenuBtn && 
-                !mobileMenu.contains(event.target) && 
-                !mobileMenuBtn.contains(event.target)) {
-                mobileMenu.classList.remove('show');
-                mobileSearch.classList.add('hidden');
-                if (menuIcon) {
-                    menuIcon.classList.remove('fa-times');
-                    menuIcon.classList.add('fa-bars');
+            const moreMenu = document.getElementById('mobile-more-menu');
+            const moreBtn = document.getElementById('mobile-more-btn');
+            const moreContent = moreMenu?.querySelector('.mobile-more-menu-content');
+            
+            if (moreMenu && !moreMenu.classList.contains('hidden')) {
+                // If clicking outside the content area
+                if (moreContent && !moreContent.contains(event.target) && 
+                    event.target !== moreBtn && !moreBtn?.contains(event.target)) {
+                    moreMenu.classList.add('hidden');
+                    if (moreBtn) moreBtn.classList.remove('active');
                 }
             }
         });
+        
+        // Update badge counts for bottom nav
+        function updateMobileNavBadges() {
+            // Cart count
+            const cartCount = document.getElementById('cart-count')?.textContent || '0';
+            const cartBadgeMobile = document.getElementById('cart-count-mobile');
+            if (cartBadgeMobile) {
+                cartBadgeMobile.textContent = cartCount;
+                cartBadgeMobile.style.display = cartCount > 0 ? 'flex' : 'none';
+            }
+            const cartBadgeMore = document.getElementById('cart-count-more');
+            if (cartBadgeMore) {
+                cartBadgeMore.textContent = cartCount;
+                cartBadgeMore.style.display = cartCount > 0 ? 'flex' : 'none';
+            }
+            
+            // Compare count
+            const compareCount = document.getElementById('compare-count')?.textContent || '0';
+            const compareBadgeMore = document.getElementById('compare-count-more');
+            if (compareBadgeMore) {
+                compareBadgeMore.textContent = compareCount;
+                compareBadgeMore.style.display = compareCount > 0 ? 'flex' : 'none';
+            }
+        }
+        
+        // Update badges on load
+        updateMobileNavBadges();
+        
+        // Update badges when cart/compare changes (listen for custom events)
+        document.addEventListener('cartUpdated', updateMobileNavBadges);
+        document.addEventListener('compareUpdated', updateMobileNavBadges);
         
         // Navbar scroll effect
         const nav = document.getElementById('main-nav');

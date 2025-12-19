@@ -30,7 +30,7 @@ include __DIR__ . '/includes/header.php';
     <div class="container mx-auto px-4">
         <!-- Header -->
         <div class="mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 class="text-3xl md:text-4xl font-bold mb-2 text-gray-800">
                 Shopping Cart
             </h1>
             <p class="text-gray-600">Review your items and proceed to checkout</p>

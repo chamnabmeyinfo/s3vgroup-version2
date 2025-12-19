@@ -49,7 +49,7 @@ include __DIR__ . '/includes/message.php';
         <div class="max-w-6xl mx-auto">
             <!-- Header Section -->
             <div class="text-center mb-12 md:mb-16">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
                     Contact Us
                 </h1>
                 <p class="text-gray-600 text-lg max-w-2xl mx-auto">

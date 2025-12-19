@@ -16,7 +16,7 @@ include __DIR__ . '/includes/header.php';
     <div class="container mx-auto px-4">
         <!-- Header -->
         <div class="text-center mb-12 md:mb-16">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">
                 What Our Customers Say
             </h1>
             <p class="text-gray-600 text-lg md:text-xl max-w-2xl mx-auto">
