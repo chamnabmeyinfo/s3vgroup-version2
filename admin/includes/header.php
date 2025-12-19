@@ -277,7 +277,11 @@
                 }
                 ?>
                 <div class="border-t border-gray-700 my-2"></div>
-                <a href="<?= url('admin/settings.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors">
+                <a href="<?= url('admin/footer.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'footer.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-sitemap w-5"></i>
+                    <span>Footer</span>
+                </a>
+                <a href="<?= url('admin/settings.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'settings.php') ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-cog w-5"></i>
                     <span>Settings</span>
                 </a>

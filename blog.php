@@ -5,30 +5,51 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Check if blog_posts table exists
+$tableExists = false;
+try {
+    db()->fetchOne("SELECT 1 FROM blog_posts LIMIT 1");
+    $tableExists = true;
+} catch (\Exception $e) {
+    $tableExists = false;
+}
+
 // Get blog posts
 $page = max(1, (int)($_GET['page'] ?? 1));
 $limit = 9;
 $offset = ($page - 1) * $limit;
 $category = $_GET['category'] ?? '';
 
-$where = "is_published = 1";
-$params = [];
+$posts = [];
+$totalPosts = 0;
+$totalPages = 0;
+$categories = [];
 
-if ($category) {
-    $where .= " AND category = :category";
-    $params['category'] = $category;
+if ($tableExists) {
+    $where = "is_published = 1";
+    $params = [];
+
+    if ($category) {
+        $where .= " AND category = :category";
+        $params['category'] = $category;
+    }
+
+    try {
+        $posts = db()->fetchAll(
+            "SELECT * FROM blog_posts WHERE {$where} ORDER BY published_at DESC, created_at DESC LIMIT {$limit} OFFSET {$offset}",
+            $params
+        );
+
+        $totalPosts = (int)db()->fetchOne("SELECT COUNT(*) as count FROM blog_posts WHERE {$where}", $params)['count'];
+        $totalPages = ceil($totalPosts / $limit);
+
+        // Get categories
+        $categories = db()->fetchAll("SELECT DISTINCT category FROM blog_posts WHERE is_published = 1 AND category IS NOT NULL AND category != '' ORDER BY category");
+    } catch (\Exception $e) {
+        // Table exists but query failed - show empty state
+        $posts = [];
+    }
 }
-
-$posts = db()->fetchAll(
-    "SELECT * FROM blog_posts WHERE {$where} ORDER BY published_at DESC, created_at DESC LIMIT {$limit} OFFSET {$offset}",
-    $params
-);
-
-$totalPosts = (int)db()->fetchOne("SELECT COUNT(*) as count FROM blog_posts WHERE {$where}", $params)['count'];
-$totalPages = ceil($totalPosts / $limit);
-
-// Get categories
-$categories = db()->fetchAll("SELECT DISTINCT category FROM blog_posts WHERE is_published = 1 AND category IS NOT NULL AND category != '' ORDER BY category");
 
 $pageTitle = 'Blog & News - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
@@ -40,6 +61,18 @@ include __DIR__ . '/includes/header.php';
             <h1 class="text-4xl font-bold mb-4">Blog & News</h1>
             <p class="text-gray-600 text-lg">Latest updates, tips, and insights about forklifts and industrial equipment</p>
         </div>
+        
+        <?php if (!$tableExists): ?>
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-lg mb-8">
+            <div class="flex items-start">
+                <i class="fas fa-exclamation-triangle text-yellow-600 mr-3 mt-1"></i>
+                <div>
+                    <h3 class="font-semibold text-yellow-800 mb-1">Blog Table Not Set Up</h3>
+                    <p class="text-yellow-700 text-sm">The blog_posts table doesn't exist yet. Please import the database schema from <code class="bg-yellow-100 px-2 py-1 rounded">database/even-more-features.sql</code> to enable the blog feature.</p>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
         
         <div class="grid md:grid-cols-4 gap-8">
             <!-- Sidebar -->

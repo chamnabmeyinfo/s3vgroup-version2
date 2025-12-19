@@ -1,11 +1,31 @@
     <!-- Footer -->
     <?php
     use App\Models\Setting;
+    use App\Models\Footer;
+    use App\Models\Category;
+    
     $settingModel = new Setting();
+    $footerModel = new Footer();
+    $categoryModel = new Category();
+    
     $siteName = $settingModel->get('site_name', 'ForkliftPro');
     $siteEmail = $settingModel->get('site_email', 'info@example.com');
     $sitePhone = $settingModel->get('site_phone', '+1 (555) 123-4567');
     $siteAddress = $settingModel->get('site_address', '123 Industrial Way');
+    
+    // Get footer content from database
+    $companyInfo = $footerModel->getCompanyInfo();
+    $companyDescription = $companyInfo['content'] ?? 'Premium industrial equipment for your business needs. Quality, reliability, and expert support.';
+    
+    $quickLinks = $footerModel->getQuickLinks();
+    $socialMedia = $footerModel->getSocialMedia();
+    $bottomLinks = $footerModel->getBottomContent();
+    
+    // Get categories for footer
+    $footerCategories = $categoryModel->getAll(true);
+    $footerCategories = array_slice($footerCategories, 0, 4); // Show first 4 categories
+    
+    // Get footer text
     $footerText = $settingModel->get('footer_text', '© ' . date('Y') . ' ' . $siteName . '. All rights reserved.');
     ?>
     <footer class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white py-12 md:py-16 relative overflow-hidden">
@@ -23,23 +43,26 @@
                         <?= escape($siteName) ?>
                     </h3>
                     <p class="text-gray-400 mb-6 leading-relaxed">
-                        Premium industrial equipment for your business needs. Quality, reliability, and expert support.
+                        <?= nl2br(escape($companyDescription)) ?>
                     </p>
                     <!-- Social Links -->
+                    <?php if (!empty($socialMedia)): ?>
                     <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
-                            <i class="fab fa-facebook-f"></i>
+                        <?php foreach ($socialMedia as $social): ?>
+                        <a href="<?= escape($social['link_url']) ?>" 
+                           target="_blank" 
+                           rel="noopener noreferrer"
+                           class="w-10 h-10 bg-white/10 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3"
+                           title="<?= escape($social['link_text']) ?>">
+                            <?php if ($social['icon']): ?>
+                                <i class="<?= escape($social['icon']) ?>"></i>
+                            <?php else: ?>
+                                <i class="fas fa-share-alt"></i>
+                            <?php endif; ?>
                         </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-400 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-pink-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
-                            <i class="fab fa-instagram"></i>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/10 hover:bg-blue-700 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
+                        <?php endforeach; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
                 
                 <!-- Quick Links -->
@@ -48,27 +71,32 @@
                         <i class="fas fa-link mr-2 text-blue-400"></i>Quick Links
                     </h4>
                     <ul class="space-y-3">
-                        <li><a href="<?= url() ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Home
-                        </a></li>
-                        <li><a href="<?= url('products.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Products
-                        </a></li>
-                        <li><a href="<?= url('blog.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Blog
-                        </a></li>
-                        <li><a href="<?= url('faq.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>FAQ
-                        </a></li>
-                        <li><a href="<?= url('testimonials.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Testimonials
-                        </a></li>
-                        <li><a href="<?= url('contact.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Contact
-                        </a></li>
-                        <li><a href="<?= url('quote.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Get Quote
-                        </a></li>
+                        <?php if (!empty($quickLinks)): ?>
+                            <?php foreach ($quickLinks as $link): ?>
+                            <li>
+                                <a href="<?= escape($link['link_url']) ?>" 
+                                   class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                                    <?php if ($link['icon']): ?>
+                                        <i class="<?= escape($link['icon']) ?> text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>
+                                    <?php else: ?>
+                                        <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>
+                                    <?php endif; ?>
+                                    <?= escape($link['link_text']) ?>
+                                </a>
+                            </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <!-- Fallback default links if none configured -->
+                            <li><a href="<?= url() ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                                <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Home
+                            </a></li>
+                            <li><a href="<?= url('products.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                                <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Products
+                            </a></li>
+                            <li><a href="<?= url('contact.php') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                                <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Contact
+                            </a></li>
+                        <?php endif; ?>
                     </ul>
                 </div>
                 
@@ -78,18 +106,19 @@
                         <i class="fas fa-th-large mr-2 text-blue-400"></i>Categories
                     </h4>
                     <ul class="space-y-3">
-                        <li><a href="<?= url('products.php?category=forklifts') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Forklifts
-                        </a></li>
-                        <li><a href="<?= url('products.php?category=pallet-trucks') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Pallet Trucks
-                        </a></li>
-                        <li><a href="<?= url('products.php?category=stackers') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Stackers
-                        </a></li>
-                        <li><a href="<?= url('products.php?category=reach-trucks') ?>" class="text-gray-400 hover:text-white transition-colors flex items-center group">
-                            <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>Reach Trucks
-                        </a></li>
+                        <?php if (!empty($footerCategories)): ?>
+                            <?php foreach ($footerCategories as $category): ?>
+                            <li>
+                                <a href="<?= url('products.php?category=' . escape($category['slug'])) ?>" 
+                                   class="text-gray-400 hover:text-white transition-colors flex items-center group">
+                                    <i class="fas fa-chevron-right text-xs mr-2 group-hover:translate-x-1 transition-transform"></i>
+                                    <?= escape($category['name']) ?>
+                                </a>
+                            </li>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <li class="text-gray-400 text-sm">No categories available</li>
+                        <?php endif; ?>
                     </ul>
                 </div>
                 
@@ -141,10 +170,20 @@
                     <div>
                         <p class="text-gray-400 text-sm"><?= nl2br(escape($footerText)) ?></p>
                     </div>
-                    <div class="flex gap-6 text-sm text-gray-400">
-                        <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                        <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
-                        <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
+                    <div class="flex gap-6 text-sm text-gray-400 flex-wrap">
+                        <?php if (!empty($bottomLinks)): ?>
+                            <?php foreach ($bottomLinks as $link): ?>
+                            <a href="<?= escape($link['link_url']) ?>" 
+                               class="hover:text-white transition-colors">
+                                <?= escape($link['link_text']) ?>
+                            </a>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <!-- Fallback default links -->
+                            <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                            <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                            <a href="#" class="hover:text-white transition-colors">Cookie Policy</a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
