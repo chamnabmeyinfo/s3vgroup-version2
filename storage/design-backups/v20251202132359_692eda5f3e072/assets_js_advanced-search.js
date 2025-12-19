@@ -1,0 +1,158 @@
+// Advanced Search with Autocomplete
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('advanced-search');
+    const searchResults = document.getElementById('search-results');
+    
+    if (!searchInput || !searchResults) return;
+    
+    let searchTimeout;
+    let currentQuery = '';
+    
+    searchInput.addEventListener('input', function() {
+        const query = this.value.trim();
+        currentQuery = query;
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+            searchResults.classList.add('hidden');
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            performSearch(query);
+        }, 300);
+    });
+    
+    searchInput.addEventListener('focus', function() {
+        if (this.value.trim().length >= 2) {
+            performSearch(this.value.trim());
+        }
+    });
+    
+    // Close results when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+            searchResults.classList.add('hidden');
+        }
+    });
+    
+    function performSearch(query) {
+        if (query !== currentQuery) return;
+        
+        fetch(`<?= url('api/search.php') ?>?q=${encodeURIComponent(query)}&type=all`)
+            .then(response => response.json())
+            .then(data => {
+                if (query !== currentQuery) return;
+                
+                if (data.results && data.results.length > 0) {
+                    displayResults(data.results);
+                } else {
+                    searchResults.innerHTML = '<div class="p-4 text-gray-500 text-center">No results found</div>';
+                    searchResults.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+            });
+    }
+    
+    function displayResults(results) {
+        let html = '<div class="p-2">';
+        
+        results.forEach(result => {
+            const icon = result.type === 'product' ? 'fa-box' : 'fa-tags';
+            const badge = result.type === 'product' 
+                ? `<span class="text-blue-600 font-semibold">${result.price || ''}</span>` 
+                : '';
+            
+            html += `
+                <a href="${result.url}" class="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
+                    <i class="fas ${icon} text-gray-400"></i>
+                    <div class="flex-1">
+                        <div class="font-semibold">${result.title}</div>
+                        ${result.description ? `<div class="text-sm text-gray-600">${result.description}</div>` : ''}
+                    </div>
+                    ${badge}
+                </a>
+            `;
+        });
+        
+        html += '</div>';
+        searchResults.innerHTML = html;
+        searchResults.classList.remove('hidden');
+    }
+    
+    // Allow Enter key to go to first result or search page
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const firstResult = searchResults.querySelector('a');
+            if (firstResult) {
+                window.location.href = firstResult.href;
+            } else if (this.value.trim()) {
+                window.location.href = `<?= url('products.php') ?>?search=${encodeURIComponent(this.value.trim())}`;
+            }
+        }
+    });
+});
+
+// Wishlist Functions
+function addToWishlist(productId) {
+    fetch(`<?= url('api/wishlist.php') ?>?action=add&id=${productId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const btn = document.getElementById(`wishlist-btn-${productId}`);
+            if (btn) {
+                btn.classList.add('bg-red-500', 'text-white');
+                btn.classList.remove('border-red-300', 'text-red-600');
+            }
+            updateWishlistCount();
+            showNotification('Added to wishlist!', 'success');
+        }
+    });
+}
+
+function addToCompare(productId) {
+    fetch(`<?= url('api/compare.php') ?>?action=add&id=${productId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification(`Added to comparison (${data.count}/4)`, 'success');
+            const btn = document.getElementById(`compare-btn-${productId}`);
+            if (btn) {
+                btn.classList.add('bg-blue-500', 'text-white');
+                btn.classList.remove('border-blue-300', 'text-blue-600');
+            }
+        } else {
+            showNotification(data.message || 'Error adding to comparison', 'error');
+        }
+    });
+}
+
+function updateWishlistCount() {
+    fetch('<?= url('api/wishlist.php') ?>?action=count')
+        .then(response => response.json())
+        .then(data => {
+            const countEl = document.getElementById('wishlist-count');
+            if (countEl) {
+                if (data.count > 0) {
+                    countEl.textContent = data.count;
+                    countEl.classList.remove('hidden');
+                } else {
+                    countEl.classList.add('hidden');
+                }
+            }
+        });
+}
+
+// Initialize wishlist count on page load
+if (typeof updateWishlistCount === 'function') {
+    document.addEventListener('DOMContentLoaded', updateWishlistCount);
+}
+

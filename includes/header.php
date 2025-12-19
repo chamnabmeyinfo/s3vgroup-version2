@@ -18,6 +18,10 @@ $navCategories = $categoryModel->getAll(true);
     <!-- Custom Styles -->
     <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/product-images.css') ?>">
+    <?php if (basename($_SERVER['PHP_SELF']) === 'products.php'): ?>
+    <link rel="stylesheet" href="<?= asset('assets/css/products-responsive.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/app-products.css') ?>">
+    <?php endif; ?>
     
     <!-- Dynamic Logo Colors -->
     <?php 
