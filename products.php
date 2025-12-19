@@ -388,6 +388,137 @@ include __DIR__ . '/includes/header.php';
             
             <!-- Products Grid -->
             <div class="flex-1 transition-all duration-300" id="products-container">
+                <!-- Advanced Filters - Top Section (Toggleable) -->
+                <div class="advanced-filters-top">
+                    <button onclick="toggleAdvancedFilters()" 
+                            class="advanced-filters-toggle"
+                            id="advanced-filters-toggle-btn"
+                            aria-expanded="false">
+                        <div class="advanced-filters-toggle-content">
+                            <i class="fas fa-sliders-h"></i>
+                            <span class="advanced-filters-toggle-text">Advanced Filters</span>
+                            <span class="advanced-filters-count" id="advanced-filters-count">0</span>
+                        </div>
+                        <i class="fas fa-chevron-down advanced-filters-chevron" id="advanced-filters-chevron"></i>
+                    </button>
+                    
+                    <div class="advanced-filters-content" id="advanced-filters-content">
+                        <form method="GET" id="advanced-filters-form" class="advanced-filters-form">
+                            <input type="hidden" name="page" value="1">
+                            <?php if (!empty($_GET['sort'])): ?>
+                                <input type="hidden" name="sort" value="<?= escape($_GET['sort']) ?>">
+                            <?php endif; ?>
+                            
+                            <div class="advanced-filters-grid">
+                                <!-- Search -->
+                                <div class="advanced-filter-item">
+                                    <label class="advanced-filter-label">
+                                        <i class="fas fa-search"></i>
+                                        <span>Search</span>
+                                    </label>
+                                    <input type="text" 
+                                           name="search" 
+                                           value="<?= escape($_GET['search'] ?? '') ?>" 
+                                           placeholder="Search products..."
+                                           class="advanced-filter-input"
+                                           onkeyup="debounceFilter()">
+                                </div>
+                                
+                                <!-- Price Range -->
+                                <div class="advanced-filter-item">
+                                    <label class="advanced-filter-label">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Price Range</span>
+                                    </label>
+                                    <div class="advanced-filter-price-inputs">
+                                        <input type="number" 
+                                               name="min_price" 
+                                               value="<?= escape($_GET['min_price'] ?? '') ?>" 
+                                               placeholder="Min"
+                                               min="0"
+                                               step="0.01"
+                                               class="advanced-filter-input advanced-filter-price-input"
+                                               onchange="applyFilters()">
+                                        <span class="advanced-filter-price-separator">-</span>
+                                        <input type="number" 
+                                               name="max_price" 
+                                               value="<?= escape($_GET['max_price'] ?? '') ?>" 
+                                               placeholder="Max"
+                                               min="0"
+                                               step="0.01"
+                                               class="advanced-filter-input advanced-filter-price-input"
+                                               onchange="applyFilters()">
+                                    </div>
+                                    <div class="advanced-filter-hint">
+                                        <i class="fas fa-info-circle"></i>
+                                        Range: $<?= number_format($minPriceRange, 2) ?> - $<?= number_format($maxPriceRange, 2) ?>
+                                    </div>
+                                </div>
+                                
+                                <!-- Category -->
+                                <div class="advanced-filter-item">
+                                    <label class="advanced-filter-label">
+                                        <i class="fas fa-th-large"></i>
+                                        <span>Category</span>
+                                    </label>
+                                    <select name="category" 
+                                            class="advanced-filter-select"
+                                            onchange="applyFilters()">
+                                        <option value="">All Categories</option>
+                                        <?php foreach ($categories as $cat): ?>
+                                            <option value="<?= escape($cat['slug']) ?>" 
+                                                    <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'selected' : '' ?>>
+                                                <?= escape($cat['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                
+                                <!-- Quick Filters -->
+                                <div class="advanced-filter-item advanced-filter-quick">
+                                    <label class="advanced-filter-label">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Quick Filters</span>
+                                    </label>
+                                    <div class="advanced-filter-chips">
+                                        <label class="advanced-filter-chip">
+                                            <input type="checkbox" 
+                                                   name="in_stock" 
+                                                   value="1" 
+                                                   <?= !empty($_GET['in_stock']) ? 'checked' : '' ?>
+                                                   onchange="applyFilters()">
+                                            <span><i class="fas fa-box-check"></i> In Stock</span>
+                                        </label>
+                                        <label class="advanced-filter-chip advanced-filter-chip-featured">
+                                            <input type="checkbox" 
+                                                   name="featured" 
+                                                   value="1" 
+                                                   <?= !empty($_GET['featured']) ? 'checked' : '' ?>
+                                                   onchange="applyFilters()">
+                                            <span><i class="fas fa-star"></i> Featured</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="advanced-filters-actions">
+                                <button type="button" 
+                                        onclick="clearFilters()" 
+                                        class="advanced-filter-btn advanced-filter-btn-clear">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Clear All</span>
+                                </button>
+                                <button type="submit" 
+                                        class="advanced-filter-btn advanced-filter-btn-apply hidden"
+                                        id="advanced-filter-submit">
+                                    <i class="fas fa-check"></i>
+                                    <span>Apply</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
                 <!-- App-Style Header -->
                 <div class="app-products-header">
                     <div class="app-header-content">
@@ -698,6 +829,31 @@ document.addEventListener('DOMContentLoaded', function() {
     if (mobileForm) {
         mobileForm.addEventListener('change', updateMobileFilterCount);
     }
+    
+    // Initialize advanced filters state
+    const savedAdvancedState = localStorage.getItem('advancedFiltersExpanded');
+    const advancedContent = document.getElementById('advanced-filters-content');
+    const advancedBtn = document.getElementById('advanced-filters-toggle-btn');
+    const advancedChevron = document.getElementById('advanced-filters-chevron');
+    
+    if (advancedContent && advancedBtn && advancedChevron) {
+        // Default to collapsed
+        if (savedAdvancedState === 'true') {
+            advancedContent.classList.add('expanded');
+            advancedBtn.setAttribute('aria-expanded', 'true');
+            advancedChevron.classList.add('rotate-180');
+        }
+    }
+    
+    // Update advanced filters count on load
+    updateAdvancedFiltersCount();
+    
+    // Update count when filters change
+    const advancedForm = document.getElementById('advanced-filters-form');
+    if (advancedForm) {
+        advancedForm.addEventListener('change', updateAdvancedFiltersCount);
+        advancedForm.addEventListener('input', updateAdvancedFiltersCount);
+    }
 });
 
 // Category Filter Toggle
@@ -714,6 +870,57 @@ function toggleCategoryFilter() {
         content.classList.remove('hidden');
         chevron.classList.add('rotate-180');
         localStorage.setItem('categoryFilterExpanded', 'true');
+    }
+}
+
+// Advanced Filters Toggle
+function toggleAdvancedFilters() {
+    const content = document.getElementById('advanced-filters-content');
+    const btn = document.getElementById('advanced-filters-toggle-btn');
+    const chevron = document.getElementById('advanced-filters-chevron');
+    
+    if (!content || !btn || !chevron) return;
+    
+    const isExpanded = content.classList.contains('expanded');
+    
+    if (isExpanded) {
+        content.classList.remove('expanded');
+        btn.setAttribute('aria-expanded', 'false');
+        chevron.classList.remove('rotate-180');
+        localStorage.setItem('advancedFiltersExpanded', 'false');
+    } else {
+        content.classList.add('expanded');
+        btn.setAttribute('aria-expanded', 'true');
+        chevron.classList.add('rotate-180');
+        localStorage.setItem('advancedFiltersExpanded', 'true');
+    }
+}
+
+// Update Advanced Filters Count
+function updateAdvancedFiltersCount() {
+    const form = document.getElementById('advanced-filters-form');
+    if (!form) return;
+    
+    let count = 0;
+    
+    // Check search
+    if (form.querySelector('input[name="search"]')?.value.trim()) count++;
+    
+    // Check price range
+    if (form.querySelector('input[name="min_price"]')?.value || 
+        form.querySelector('input[name="max_price"]')?.value) count++;
+    
+    // Check category
+    if (form.querySelector('select[name="category"]')?.value) count++;
+    
+    // Check quick filters
+    if (form.querySelector('input[name="in_stock"]:checked')) count++;
+    if (form.querySelector('input[name="featured"]:checked')) count++;
+    
+    const countBadge = document.getElementById('advanced-filters-count');
+    if (countBadge) {
+        countBadge.textContent = count;
+        countBadge.style.display = count > 0 ? 'inline-flex' : 'none';
     }
 }
 
@@ -802,7 +1009,15 @@ function debounceFilter() {
 }
 
 function applyFilters() {
-    document.getElementById('filter-form').submit();
+    // Try advanced filters form first (top section), then fallback to sidebar form
+    const advancedForm = document.getElementById('advanced-filters-form');
+    const sidebarForm = document.getElementById('filter-form');
+    
+    if (advancedForm) {
+        advancedForm.submit();
+    } else if (sidebarForm) {
+        sidebarForm.submit();
+    }
 }
 
 function clearFilters() {

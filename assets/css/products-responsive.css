@@ -31,7 +31,7 @@
     display: none !important;
   }
 
-  /* Mobile Filter Trigger Button */
+  /* Mobile Filter Trigger Button - Windows 11 Glass */
   .mobile-filter-trigger {
     width: 64px;
     height: 64px;
@@ -42,7 +42,27 @@
     bottom: 1.5rem;
     right: 1.5rem;
     z-index: 9998;
-    box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    box-shadow: 
+      0 8px 32px 0 rgba(31, 38, 135, 0.4),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+    transition: all 0.3s ease;
+  }
+  
+  .mobile-filter-trigger:hover {
+    background: rgba(255, 255, 255, 0.95);
+    transform: scale(1.1);
+    box-shadow: 
+      0 12px 40px 0 rgba(31, 38, 135, 0.5),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.6);
+  }
+  
+  .mobile-filter-trigger:active {
+    transform: scale(0.95);
   }
 
   .mobile-filter-badge {
@@ -78,20 +98,29 @@
   .mobile-sidebar-overlay {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px) saturate(180%);
+    -webkit-backdrop-filter: blur(8px) saturate(180%);
     animation: fadeIn 0.3s ease;
   }
 
   .mobile-sidebar-content {
     position: relative;
-    background: white;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     animation: slideUp 0.3s ease;
     overflow: hidden;
+    border-top-left-radius: 2rem;
+    border-top-right-radius: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      0 -8px 32px 0 rgba(31, 38, 135, 0.3),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   }
 
   @keyframes fadeIn {
@@ -104,16 +133,19 @@
     to { transform: translateY(0); }
   }
 
-  /* Mobile Sidebar Header */
+  /* Mobile Sidebar Header - Windows 11 Glass */
   .mobile-sidebar-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 1.25rem 1.5rem;
-    background: #2563eb;
+    background: rgba(37, 99, 235, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     color: white;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     flex-shrink: 0;
+    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.2);
   }
 
   .mobile-sidebar-title {
@@ -128,18 +160,22 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0.75rem;
     color: white;
     font-size: 1.25rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
   }
 
   .mobile-sidebar-close:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.4);
     transform: scale(1.1);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
   }
 
   /* Mobile Sidebar Body */
@@ -184,17 +220,22 @@
     width: 100%;
     padding: 1rem;
     font-size: 1rem;
-    border: 2px solid #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 0.75rem;
-    background: #f9fafb;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     transition: all 0.2s ease;
+    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.15);
   }
 
   .mobile-filter-input:focus {
     outline: none;
-    border-color: #2563eb;
-    background: white;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    border-color: rgba(37, 99, 235, 0.5);
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 
+      0 0 0 3px rgba(37, 99, 235, 0.2),
+      0 4px 12px 0 rgba(31, 38, 135, 0.2);
   }
 
   /* Mobile Price Inputs */
@@ -224,8 +265,10 @@
   .mobile-filter-toggle {
     width: 100%;
     padding: 1rem;
-    background: #eff6ff;
-    border: 2px solid #bfdbfe;
+    background: rgba(239, 246, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(191, 219, 254, 0.5);
     border-radius: 0.75rem;
     display: flex;
     align-items: center;
@@ -233,10 +276,11 @@
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
+    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.15);
   }
 
   .mobile-filter-toggle:active {
-    background: #dbeafe;
+    background: rgba(219, 234, 254, 0.8);
     transform: scale(0.98);
   }
 
@@ -282,12 +326,15 @@
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #f9fafb;
-    border: 2px solid #e5e7eb;
+    background: rgba(249, 250, 251, 0.6);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(229, 231, 235, 0.4);
     border-radius: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
     gap: 0.75rem;
+    box-shadow: 0 2px 6px 0 rgba(31, 38, 135, 0.1);
   }
 
   .mobile-filter-option:active {
@@ -295,8 +342,9 @@
   }
 
   .mobile-filter-option.active {
-    background: #eff6ff;
-    border-color: #2563eb;
+    background: rgba(239, 246, 255, 0.8);
+    border-color: rgba(37, 99, 235, 0.5);
+    box-shadow: 0 4px 12px 0 rgba(37, 99, 235, 0.2);
   }
 
   .mobile-filter-radio {
@@ -331,11 +379,14 @@
     display: flex;
     align-items: center;
     padding: 1rem;
-    background: #f9fafb;
-    border: 2px solid #e5e7eb;
+    background: rgba(249, 250, 251, 0.6);
+    backdrop-filter: blur(10px) saturate(180%);
+    -webkit-backdrop-filter: blur(10px) saturate(180%);
+    border: 1px solid rgba(229, 231, 235, 0.4);
     border-radius: 0.75rem;
     cursor: pointer;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 6px 0 rgba(31, 38, 135, 0.1);
   }
 
   .mobile-filter-checkbox-label:active {
@@ -343,8 +394,9 @@
   }
 
   .mobile-filter-checkbox-label.featured {
-    background: #fefce8;
-    border-color: #fde047;
+    background: rgba(254, 252, 232, 0.7);
+    border-color: rgba(253, 224, 71, 0.5);
+    box-shadow: 0 2px 8px 0 rgba(253, 224, 71, 0.2);
   }
 
   .mobile-filter-checkbox {
@@ -369,19 +421,23 @@
     color: #1f2937;
   }
 
-  /* Mobile Sidebar Footer */
+  /* Mobile Sidebar Footer - Windows 11 Glass */
   .mobile-sidebar-footer {
     position: absolute;
     bottom: 0;
     left: 0;
     right: 0;
     padding: 1rem 1.5rem;
-    background: white;
-    border-top: 1px solid #e5e7eb;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
     display: flex;
     gap: 0.75rem;
     flex-shrink: 0;
-    box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: 
+      0 -4px 16px 0 rgba(31, 38, 135, 0.2),
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
   }
 
   .mobile-filter-clear,
@@ -401,22 +457,30 @@
   }
 
   .mobile-filter-clear {
-    background: #f3f4f6;
+    background: rgba(243, 244, 246, 0.7);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     color: #374151;
+    border: 1px solid rgba(229, 231, 235, 0.4);
+    box-shadow: 0 2px 8px 0 rgba(31, 38, 135, 0.15);
   }
 
   .mobile-filter-clear:active {
-    background: #e5e7eb;
+    background: rgba(229, 231, 235, 0.8);
     transform: scale(0.98);
   }
 
   .mobile-filter-apply {
-    background: #2563eb;
+    background: rgba(37, 99, 235, 0.85);
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
     color: white;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    box-shadow: 0 4px 12px 0 rgba(37, 99, 235, 0.3);
   }
 
   .mobile-filter-apply:active {
-    background: #1d4ed8;
+    background: rgba(29, 78, 216, 0.9);
     transform: scale(0.98);
   }
 

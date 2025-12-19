@@ -13,7 +13,27 @@
 @media (max-width: 640px) {
     .app-products-main {
         padding: 0.75rem 0;
-        background: #f8fafc;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        position: relative;
+    }
+    
+    /* Windows 11 Glass Background Pattern */
+    .app-products-main::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: 
+            radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 20%, rgba(102, 126, 234, 0.2) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .products-page-container {
+        position: relative;
+        z-index: 1;
     }
 }
 
@@ -27,6 +47,20 @@
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.5rem;
     border: 1px solid #f1f5f9;
+}
+
+/* Windows 11 Glass Header - Mobile */
+@media (max-width: 640px) {
+    .app-products-header {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        box-shadow: 
+            0 8px 32px 0 rgba(31, 38, 135, 0.37),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+        border-radius: 1.25rem;
+    }
 }
 
 .app-header-content {
@@ -62,6 +96,17 @@
     width: fit-content;
 }
 
+/* Windows 11 Glass Search Badge - Mobile */
+@media (max-width: 640px) {
+    .app-search-badge {
+        background: rgba(239, 246, 255, 0.7);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(191, 219, 254, 0.4);
+        box-shadow: 0 2px 8px 0 rgba(37, 99, 235, 0.2);
+    }
+}
+
 .app-results-count {
     display: flex;
     align-items: center;
@@ -86,6 +131,17 @@
     padding: 0.5rem 1rem;
     border-radius: 0.75rem;
     border: 1px solid #e2e8f0;
+}
+
+/* Windows 11 Glass Sort Container - Mobile */
+@media (max-width: 640px) {
+    .app-sort-container {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+    }
 }
 
 .app-sort-label {
@@ -122,6 +178,17 @@
     border-radius: 0.75rem;
     border: 1px solid #e2e8f0;
     gap: 0.25rem;
+}
+
+/* Windows 11 Glass Layout Switcher - Mobile */
+@media (max-width: 640px) {
+    .app-layout-switcher {
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+    }
 }
 
 .app-layout-btn {
@@ -411,6 +478,26 @@
     transform: translateY(0);
 }
 
+/* Windows 11 Glass Product Button - Mobile */
+@media (max-width: 640px) {
+    .app-product-btn {
+        background: rgba(37, 99, 235, 0.85);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        box-shadow: 
+            0 4px 16px 0 rgba(37, 99, 235, 0.3),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .app-product-btn:hover {
+        background: rgba(29, 78, 216, 0.9);
+        box-shadow: 
+            0 6px 20px 0 rgba(37, 99, 235, 0.4),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    }
+}
+
 .app-product-btn i {
     transition: transform 0.2s ease;
 }
@@ -426,6 +513,20 @@
     background: white;
     border-radius: 1rem;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Windows 11 Glass Empty State - Mobile */
+@media (max-width: 640px) {
+    .app-empty-state {
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 
+            0 8px 32px 0 rgba(31, 38, 135, 0.25),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
+        border-radius: 1.5rem;
+    }
 }
 
 .app-empty-icon {
@@ -472,6 +573,26 @@
     background: #1d4ed8;
     transform: translateY(-2px);
     box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* Windows 11 Glass Primary Button - Mobile */
+@media (max-width: 640px) {
+    .app-btn-primary {
+        background: rgba(37, 99, 235, 0.85);
+        backdrop-filter: blur(12px) saturate(180%);
+        -webkit-backdrop-filter: blur(12px) saturate(180%);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+        box-shadow: 
+            0 4px 16px 0 rgba(37, 99, 235, 0.3),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.2);
+    }
+    
+    .app-btn-primary:hover {
+        background: rgba(29, 78, 216, 0.9);
+        box-shadow: 
+            0 6px 20px 0 rgba(37, 99, 235, 0.4),
+            inset 0 1px 0 0 rgba(255, 255, 255, 0.3);
+    }
 }
 
 /* ============================================

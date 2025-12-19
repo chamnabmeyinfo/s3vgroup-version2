@@ -21,6 +21,7 @@ $navCategories = $categoryModel->getAll(true);
     <?php if (basename($_SERVER['PHP_SELF']) === 'products.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/products-responsive.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/app-products.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/advanced-filters.css') ?>">
     <?php endif; ?>
     
     <!-- Dynamic Logo Colors -->
