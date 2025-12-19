@@ -1,6 +1,6 @@
 <?php
 /**
- * Under Construction Control Panel
+ * Website Under Maintenance Control Panel
  */
 require_once __DIR__ . '/../bootstrap/app.php';
 require_once __DIR__ . '/includes/auth.php';
@@ -17,11 +17,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($action === 'enable') {
         UnderConstruction::enable();
-        $message = 'Under construction mode has been enabled. Public users will see the construction page.';
+        $message = 'Maintenance mode has been enabled. Only logged-in admin users can access the frontend.';
         $messageType = 'success';
     } elseif ($action === 'disable') {
         UnderConstruction::disable();
-        $message = 'Under construction mode has been disabled. Website is now live for everyone.';
+        $message = 'Maintenance mode has been disabled. Website is now live for everyone.';
         $messageType = 'success';
     }
 }
@@ -47,13 +47,13 @@ try {
     $notificationCount = 0;
 }
 
-$pageTitle = 'Under Construction Control';
+$pageTitle = 'Website Maintenance Control';
 include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Under Construction Control</h1>
+        <h1 class="text-3xl font-bold">Website Maintenance Control</h1>
     </div>
     
     <?php if (!empty($message)): ?>
@@ -74,8 +74,8 @@ include __DIR__ . '/includes/header.php';
         <div class="mb-6">
             <p class="text-gray-600 mb-4">
                 <?php if ($isEnabled): ?>
-                    The website is currently showing the "Under Construction" page to all public visitors.
-                    Admin panel access is still available.
+                    <strong>Maintenance mode is ACTIVE.</strong> Only logged-in admin users can access the frontend.
+                    Public visitors will see the maintenance page. Admin panel access remains available.
                 <?php else: ?>
                     The website is live and accessible to all visitors.
                 <?php endif; ?>
@@ -90,15 +90,15 @@ include __DIR__ . '/includes/header.php';
                         value="disable"
                         class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-all">
                     <i class="fas fa-play mr-2"></i>
-                    Go Live (Disable Under Construction)
+                    Go Live (Disable Maintenance Mode)
                 </button>
             <?php else: ?>
                 <button type="submit" 
                         name="action" 
                         value="enable"
                         class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded-lg transition-all">
-                    <i class="fas fa-pause mr-2"></i>
-                    Enable Under Construction Mode
+                    <i class="fas fa-tools mr-2"></i>
+                    Enable Maintenance Mode
                 </button>
             <?php endif; ?>
         </form>
@@ -209,10 +209,11 @@ include __DIR__ . '/includes/header.php';
             How It Works
         </h3>
         <ul class="text-blue-800 space-y-2 list-disc list-inside">
-            <li>When enabled, all public visitors will see the "Under Construction" page</li>
-            <li>Admin panel and API endpoints remain accessible</li>
-            <li>Logged-in admin users can still access the full website</li>
-            <li>Visitors can subscribe to be notified when the site launches</li>
+            <li><strong>When enabled:</strong> Only logged-in admin users can access the frontend</li>
+            <li>Public visitors will see the "Website Under Maintenance" page</li>
+            <li>Admin panel and API endpoints remain fully accessible</li>
+            <li>Logged-in admin users can browse the website normally</li>
+            <li>Visitors can subscribe to be notified when maintenance is complete</li>
             <li>Email notifications are stored in the database for future reference</li>
         </ul>
     </div>

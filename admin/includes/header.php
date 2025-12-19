@@ -248,6 +248,10 @@
                 </a>
                 <div class="border-t border-gray-700 my-2"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold">System</div>
+                <a href="<?= url('admin/under-construction.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'under-construction.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-tools w-5"></i>
+                    <span>Maintenance Mode</span>
+                </a>
                 <a href="<?= url('admin/images.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors">
                     <i class="fas fa-images w-5"></i>
                     <span>Images</span>

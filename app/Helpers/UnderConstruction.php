@@ -3,8 +3,9 @@
 namespace App\Helpers;
 
 /**
- * Under Construction Helper
- * Handles under construction mode for the website
+ * Website Under Maintenance Helper
+ * Handles maintenance mode for the website
+ * Only logged-in admin users can access the frontend when enabled
  */
 class UnderConstruction
 {
@@ -42,13 +43,13 @@ class UnderConstruction
             return true;
         }
         
-        // Check if admin is logged in
+        // Check if admin is logged in - allow logged-in admin users to bypass maintenance
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         
-        // Allow logged-in admin users
-        if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in']) {
+        // Allow logged-in admin users to access frontend during maintenance
+        if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
             return true;
         }
         
@@ -71,7 +72,7 @@ class UnderConstruction
                 // Default config
                 $config = [
                     'enabled' => false,
-                    'message' => 'Website is under construction',
+                    'message' => 'Website is under maintenance',
                     'progress' => 85,
                     'contact_email' => 'info@s3vgroup.com',
                     'contact_phone' => '+1 (234) 567-890'
@@ -103,14 +104,14 @@ class UnderConstruction
     }
     
     /**
-     * Enable under construction mode
+     * Enable maintenance mode
      */
     public static function enable()
     {
         $configFile = __DIR__ . '/../../config/under-construction.php';
         $config = [
             'enabled' => true,
-            'message' => 'Website is under construction',
+            'message' => 'Website is under maintenance',
             'progress' => 85,
             'contact_email' => 'info@s3vgroup.com',
             'contact_phone' => '+1 (234) 567-890'
@@ -123,7 +124,7 @@ class UnderConstruction
     }
     
     /**
-     * Disable under construction mode
+     * Disable maintenance mode
      */
     public static function disable()
     {

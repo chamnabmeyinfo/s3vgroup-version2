@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="S3VGroup - Coming Soon! Our website is under construction.">
-    <title>Under Construction - S3VGroup</title>
+    <meta name="description" content="S3VGroup - Website Under Maintenance. We'll be back soon!">
+    <title>Website Under Maintenance - S3VGroup</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,11 +40,11 @@
         
         <!-- Main Content -->
         <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">
-            We're Building Something Amazing!
+            Website Under Maintenance
         </h1>
         
         <p class="text-xl md:text-2xl text-blue-100 mb-8">
-            Our website is currently under construction
+            We're performing scheduled maintenance to improve your experience
         </p>
         
         <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8 border border-white border-opacity-20">
@@ -53,8 +53,8 @@
                 S3VGroup - Forklift & Equipment Solutions
             </h2>
             <p class="text-blue-100 text-lg mb-6">
-                We're working hard to bring you the best forklift and factory equipment solutions.
-                Our new website will launch soon with exciting features and improved services.
+                We're currently performing maintenance to enhance our services and improve your experience.
+                The website will be back online shortly. Thank you for your patience.
             </p>
             
             <!-- Features Preview -->
@@ -81,10 +81,10 @@
         <div class="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 mb-8 border border-white border-opacity-20">
             <h2 class="text-2xl font-bold text-white mb-4">
                 <i class="fas fa-envelope mr-2"></i>
-                Get Notified When We Launch
+                Get Notified When We're Back
             </h2>
             <p class="text-blue-100 mb-6">
-                Enter your email address and we'll notify you as soon as our website goes live!
+                Enter your email address and we'll notify you as soon as maintenance is complete!
             </p>
             
             <form id="notify-form" class="max-w-md mx-auto">
