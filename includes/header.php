@@ -146,7 +146,9 @@ $navCategories = $categoryModel->getAll(true);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Swiper CSS for Slider -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" 
+          crossorigin="anonymous"
+          onerror="console.error('Failed to load Swiper CSS from CDN, trying fallback...'); this.onerror=null; this.href='https://unpkg.com/swiper@11/swiper-bundle.min.css';" />
 </head>
 <body class="bg-white">
     <!-- Ultra Modern Navigation -->
