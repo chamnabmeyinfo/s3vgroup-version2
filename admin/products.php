@@ -377,12 +377,12 @@ $defaultColumns = array_keys($availableColumns);
                         <div class="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
                             <i class="fas fa-box text-2xl md:text-3xl"></i>
                         </div>
-                        <div>
+            <div>
                             <h1 class="text-3xl md:text-4xl font-bold mb-2">
-                                Products Management
-                            </h1>
+                    Products Management
+                </h1>
                             <p class="text-blue-100 text-base md:text-lg">Manage and organize your product catalog efficiently</p>
-                        </div>
+            </div>
                     </div>
                     
                     <!-- Quick Stats in Header -->
@@ -407,13 +407,13 @@ $defaultColumns = array_keys($availableColumns);
                     <a href="<?= url('admin/products-export.php') ?>" 
                        class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-5 py-3 rounded-xl transition-all duration-300 text-center font-medium hover:scale-105 hover:shadow-lg">
                         <i class="fas fa-download mr-2 group-hover:scale-110 transition-transform"></i>
-                        Export CSV
-                    </a>
+                    Export CSV
+                </a>
                     <a href="<?= url('admin/product-edit.php') ?>" 
                        class="group bg-white text-indigo-600 hover:bg-indigo-50 px-6 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg hover:shadow-2xl text-center hover:scale-105 transform">
                         <i class="fas fa-plus mr-2 group-hover:rotate-90 transition-transform"></i>
-                        Add New Product
-                    </a>
+                    Add New Product
+                </a>
                 </div>
             </div>
         </div>
@@ -527,7 +527,7 @@ $defaultColumns = array_keys($availableColumns);
                     <div class="text-lg font-bold text-indigo-600">
                         <span id="showingCount"><?= count($products) ?></span>
                         <span class="text-sm font-normal text-gray-500">/ <?= number_format($totalCount) ?></span>
-                    </div>
+                </div>
                 </div>
             </div>
                 
@@ -542,13 +542,13 @@ $defaultColumns = array_keys($availableColumns);
             <!-- Bulk Actions -->
             <div id="bulkActions" class="hidden flex items-center gap-3 bg-indigo-50 border border-indigo-200 rounded-lg p-3">
                 <select id="bulkActionSelect" class="px-4 py-2 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
-                    <option value="">Bulk Actions</option>
-                    <option value="activate">Activate</option>
-                    <option value="deactivate">Deactivate</option>
-                    <option value="feature">Mark as Featured</option>
-                    <option value="unfeature">Unmark as Featured</option>
-                    <option value="delete">Delete</option>
-                </select>
+                <option value="">Bulk Actions</option>
+                <option value="activate">Activate</option>
+                <option value="deactivate">Deactivate</option>
+                <option value="feature">Mark as Featured</option>
+                <option value="unfeature">Unmark as Featured</option>
+                <option value="delete">Delete</option>
+            </select>
                 <button onclick="executeBulkAction()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg font-medium transition-colors">
                     Apply
                 </button>
@@ -616,7 +616,7 @@ $defaultColumns = array_keys($availableColumns);
                                     <div class="absolute inset-0 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full blur-xl opacity-20"></div>
                                     <div class="relative bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full p-8">
                                         <i class="fas fa-box-open text-5xl text-indigo-600"></i>
-                                    </div>
+                                </div>
                                 </div>
                                 <h3 class="text-2xl font-bold text-gray-800 mb-2">No Products Found</h3>
                                 <p class="text-gray-600 mb-6 text-center">Try adjusting your filters or add a new product to get started.</p>
@@ -760,7 +760,7 @@ $defaultColumns = array_keys($availableColumns);
                 </div>
                 <div class="flex items-center gap-2 text-indigo-600 font-medium">
                     <i class="fas fa-box-open"></i>
-                    <span>Loading more products...</span>
+                <span>Loading more products...</span>
                 </div>
             </div>
         </div>
@@ -776,7 +776,7 @@ $defaultColumns = array_keys($availableColumns);
         <!-- Modern Pagination Controls -->
         <?php
         // Calculate total pages (totalCount is already calculated above)
-        $totalPages = max(1, (int)ceil($totalCount / $limit));
+            $totalPages = max(1, (int)ceil($totalCount / $limit));
         
         // Always show pagination if totalCount > 0 and (totalCount > limit OR page > 1)
         // This ensures pagination is visible when there are multiple pages
@@ -964,7 +964,7 @@ function loadMoreProducts() {
         .finally(() => {
             isLoading = false;
             if (loadingIndicator) {
-                loadingIndicator.classList.add('hidden');
+            loadingIndicator.classList.add('hidden');
             }
         });
 }
@@ -1123,8 +1123,8 @@ function handleScroll() {
         const threshold = 500; // Load when 500px from bottom
         
         if (scrollPosition >= pageHeight - threshold && !isLoading && hasMore) {
-            loadMoreProducts();
-        }
+        loadMoreProducts();
+    }
     }, 100); // Throttle to check every 100ms
 }
 

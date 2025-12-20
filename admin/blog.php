@@ -18,7 +18,7 @@ try {
 $posts = [];
 if ($tableExists) {
     try {
-        $posts = db()->fetchAll("SELECT * FROM blog_posts ORDER BY created_at DESC");
+$posts = db()->fetchAll("SELECT * FROM blog_posts ORDER BY created_at DESC");
     } catch (\Exception $e) {
         $posts = [];
     }

@@ -26,25 +26,25 @@ $totalPages = 0;
 $categories = [];
 
 if ($tableExists) {
-    $where = "is_published = 1";
-    $params = [];
+$where = "is_published = 1";
+$params = [];
 
-    if ($category) {
-        $where .= " AND category = :category";
-        $params['category'] = $category;
-    }
+if ($category) {
+    $where .= " AND category = :category";
+    $params['category'] = $category;
+}
 
     try {
-        $posts = db()->fetchAll(
-            "SELECT * FROM blog_posts WHERE {$where} ORDER BY published_at DESC, created_at DESC LIMIT {$limit} OFFSET {$offset}",
-            $params
-        );
+$posts = db()->fetchAll(
+    "SELECT * FROM blog_posts WHERE {$where} ORDER BY published_at DESC, created_at DESC LIMIT {$limit} OFFSET {$offset}",
+    $params
+);
 
-        $totalPosts = (int)db()->fetchOne("SELECT COUNT(*) as count FROM blog_posts WHERE {$where}", $params)['count'];
-        $totalPages = ceil($totalPosts / $limit);
+$totalPosts = (int)db()->fetchOne("SELECT COUNT(*) as count FROM blog_posts WHERE {$where}", $params)['count'];
+$totalPages = ceil($totalPosts / $limit);
 
-        // Get categories
-        $categories = db()->fetchAll("SELECT DISTINCT category FROM blog_posts WHERE is_published = 1 AND category IS NOT NULL AND category != '' ORDER BY category");
+// Get categories
+$categories = db()->fetchAll("SELECT DISTINCT category FROM blog_posts WHERE is_published = 1 AND category IS NOT NULL AND category != '' ORDER BY category");
     } catch (\Exception $e) {
         // Table exists but query failed - show empty state
         $posts = [];

@@ -22,12 +22,12 @@ class Setting
         }
 
         try {
-            $setting = $this->db->fetchOne("SELECT value FROM settings WHERE `key` = :key", ['key' => $key]);
-            
-            if ($setting && $setting['value'] !== null) {
-                $value = $setting['value'];
-                self::$cache[$key] = $value;
-                return $value;
+        $setting = $this->db->fetchOne("SELECT value FROM settings WHERE `key` = :key", ['key' => $key]);
+        
+        if ($setting && $setting['value'] !== null) {
+            $value = $setting['value'];
+            self::$cache[$key] = $value;
+            return $value;
             }
         } catch (\Exception $e) {
             // If table doesn't exist or query fails, return default

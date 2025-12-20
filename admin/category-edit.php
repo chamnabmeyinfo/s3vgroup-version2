@@ -183,24 +183,24 @@ include __DIR__ . '/includes/header.php';
 
         <!-- Basic Information -->
         <div class="grid md:grid-cols-2 gap-6">
-            <div>
+    <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-tag text-gray-400 mr-2"></i> Category Name *
                 </label>
-                <input type="text" name="name" required value="<?= escape($category['name'] ?? '') ?>"
+        <input type="text" name="name" required value="<?= escape($category['name'] ?? '') ?>"
                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-            </div>
-            
-            <div>
+    </div>
+    
+    <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-link text-gray-400 mr-2"></i> Slug
                 </label>
-                <input type="text" name="slug" value="<?= escape($category['slug'] ?? '') ?>"
+        <input type="text" name="slug" value="<?= escape($category['slug'] ?? '') ?>"
                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                        placeholder="auto-generated-from-name">
                 <p class="text-xs text-gray-500 mt-1">Leave empty to auto-generate from name</p>
             </div>
-        </div>
+    </div>
     
         <!-- Short Description for Homepage -->
         <?php
@@ -290,13 +290,13 @@ include __DIR__ . '/includes/header.php';
         <div class="flex gap-4 pt-4 border-t border-gray-200">
             <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                 <i class="fas fa-save mr-2"></i>
-                <?= $category ? 'Update Category' : 'Create Category' ?>
-            </button>
+            <?= $category ? 'Update Category' : 'Create Category' ?>
+        </button>
             <a href="<?= url('admin/categories.php') ?>" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
                 <i class="fas fa-times mr-2"></i>Cancel
-            </a>
-        </div>
-    </form>
+        </a>
+    </div>
+</form>
 </div>
 
 <script>
