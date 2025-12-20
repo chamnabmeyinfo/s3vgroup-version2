@@ -33,6 +33,7 @@ $globalSettings = [
     'particle_effects' => 0,
     'animated_gradients' => 1,
     'morphing_shapes' => 1,
+    'layer_engine_enabled' => 0, // Optional layer system - disabled by default
 ];
 
 // Try to load from database, but never fail if it doesn't work
@@ -61,6 +62,7 @@ try {
         $globalSettings['particle_effects'] = (bool)$settingModel->get('hero_slider_particles', 0);
         $globalSettings['animated_gradients'] = (bool)$settingModel->get('hero_slider_animated_gradients', 1);
         $globalSettings['morphing_shapes'] = (bool)$settingModel->get('hero_slider_morphing_shapes', 1);
+        $globalSettings['layer_engine_enabled'] = (bool)$settingModel->get('hero_slider_layer_engine', 0);
     }
 } catch (\Exception $e) {
     // Silently use defaults - never break the page
@@ -115,7 +117,7 @@ $hasMultipleSlides = $sliderCount > 1;
 ?>
 
 <!-- Hero Slider Section - Ultra Modern Premium -->
-<section class="hero-slider-premium" id="heroSliderSection" data-slide-count="<?= $sliderCount ?>">
+<section class="hero-slider-premium" id="heroSliderSection" data-slide-count="<?= $sliderCount ?>"<?php if ($globalSettings['layer_engine_enabled']): ?> data-layer-engine-enabled="1"<?php endif; ?>>
     <!-- Loading State -->
     <div class="hero-slider-loading" id="heroSliderLoading">
         <div class="loading-spinner"></div>
@@ -1007,4 +1009,511 @@ $hasMultipleSlides = $sliderCount > 1;
     
     startInitialization();
 })();
+
+// ============================================
+// OPTIONAL LAYER ENGINE MODULE
+// Only activates if explicitly enabled via config
+// Completely backward-compatible - does not affect existing functionality
+// ============================================
+(function() {
+    'use strict';
+    
+    /**
+     * LayerEngine - Optional layer-based animation system
+     * Works alongside existing slider without modifying current behavior
+     */
+    const LayerEngine = {
+        // Configuration storage
+        config: null,
+        activeSlide: null,
+        animationFrameId: null,
+        
+        /**
+         * Initialize layer engine (only if config exists)
+         */
+        init: function() {
+            try {
+                // Check feature flag first
+                const sliderSection = document.getElementById('heroSliderSection');
+                if (!sliderSection) return;
+                
+                // Check if layer engine is enabled
+                const isEnabled = sliderSection.getAttribute('data-layer-engine-enabled') === '1';
+                if (!isEnabled) return; // Silent exit
+                
+                const layerConfig = sliderSection.getAttribute('data-layer-config');
+                if (!layerConfig) return; // No config = skip silently
+                
+                // Parse config
+                try {
+                    this.config = JSON.parse(layerConfig);
+                } catch (e) {
+                    return; // Invalid JSON = skip silently
+                }
+                
+                // Validate config structure
+                if (!this.config || typeof this.config !== 'object') return;
+                if (!this.config.enabled) return; // Must be explicitly enabled
+                
+                // Feature detection
+                if (!window.requestAnimationFrame) return;
+                if (!document.querySelector) return;
+                
+                // Initialize layer system
+                this.setupLayers();
+                this.attachToSwiper();
+                
+            } catch (e) {
+                // Silent failure - fallback to existing behavior
+                return;
+            }
+        },
+        
+        /**
+         * Setup layer containers (additive only - doesn't modify existing structure)
+         */
+        setupLayers: function() {
+            try {
+                const slides = document.querySelectorAll('.hero-slide-premium');
+                if (!slides.length) return;
+                
+                slides.forEach(function(slide, slideIndex) {
+                    // Check if this slide has layer config
+                    const slideConfig = LayerEngine.config.slides && LayerEngine.config.slides[slideIndex];
+                    if (!slideConfig || !slideConfig.layers) return;
+                    
+                    // Find or create layers container (preserve existing structure)
+                    let layersContainer = slide.querySelector('.hero-layers-engine-container');
+                    if (!layersContainer) {
+                        layersContainer = document.createElement('div');
+                        layersContainer.className = 'hero-layers-engine-container';
+                        layersContainer.style.cssText = 'position: absolute; inset: 0; z-index: 4; pointer-events: none;';
+                        
+                        // Insert after existing layers container (non-destructive)
+                        const existingContainer = slide.querySelector('.hero-layers-container');
+                        if (existingContainer && existingContainer.parentNode) {
+                            existingContainer.parentNode.insertBefore(layersContainer, existingContainer.nextSibling);
+                        } else {
+                            const bgLayer = slide.querySelector('.hero-bg-layer');
+                            if (bgLayer && bgLayer.parentNode) {
+                                bgLayer.parentNode.insertBefore(layersContainer, bgLayer.nextSibling);
+                            }
+                        }
+                    }
+                    
+                    // Create layers from config
+                    slideConfig.layers.forEach(function(layerConfig, layerIndex) {
+                        LayerEngine.createLayer(layersContainer, layerConfig, layerIndex);
+                    });
+                });
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Create a single layer element
+         */
+        createLayer: function(container, layerConfig, index) {
+            try {
+                if (!layerConfig || !layerConfig.type) return;
+                
+                const layer = document.createElement('div');
+                layer.className = 'hero-layer-engine hero-layer-' + layerConfig.type;
+                layer.setAttribute('data-layer-index', index);
+                layer.style.cssText = 'position: absolute; pointer-events: auto;';
+                
+                // Apply responsive positioning (only if config exists)
+                if (layerConfig.position) {
+                    this.applyResponsivePosition(layer, layerConfig.position);
+                }
+                
+                // Create layer content based on type
+                switch (layerConfig.type) {
+                    case 'text':
+                        this.createTextLayer(layer, layerConfig);
+                        break;
+                    case 'image':
+                        this.createImageLayer(layer, layerConfig);
+                        break;
+                    case 'button':
+                        this.createButtonLayer(layer, layerConfig);
+                        break;
+                }
+                
+                // Apply animation config (if exists)
+                if (layerConfig.animation) {
+                    this.setupLayerAnimation(layer, layerConfig.animation);
+                }
+                
+                container.appendChild(layer);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Create text layer
+         */
+        createTextLayer: function(layer, config) {
+            try {
+                const text = document.createElement(config.tag || 'div');
+                text.textContent = config.content || '';
+                
+                if (config.style) {
+                    Object.assign(text.style, config.style);
+                }
+                
+                layer.appendChild(text);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Create image layer with lazy loading (optional, doesn't affect existing images)
+         */
+        createImageLayer: function(layer, config) {
+            try {
+                if (!config.src) return;
+                
+                const img = document.createElement('img');
+                img.style.cssText = 'max-width: 100%; height: auto; display: block;';
+                
+                // Lazy loading (only if enabled in config)
+                if (config.lazy !== false && 'loading' in HTMLImageElement.prototype) {
+                    img.loading = 'lazy';
+                    img.src = config.placeholder || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+                    
+                    // Load actual image when in viewport
+                    const observer = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting) {
+                                img.src = config.src;
+                                if (config.srcset) img.srcset = config.srcset;
+                                observer.unobserve(img);
+                            }
+                        });
+                    }, { rootMargin: '50px' });
+                    
+                    observer.observe(img);
+                } else {
+                    img.src = config.src;
+                    if (config.srcset) img.srcset = config.srcset;
+                }
+                
+                if (config.alt) img.alt = config.alt;
+                if (config.style) {
+                    Object.assign(img.style, config.style);
+                }
+                
+                layer.appendChild(img);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Create button layer
+         */
+        createButtonLayer: function(layer, config) {
+            try {
+                const button = document.createElement('a');
+                button.href = config.href || '#';
+                button.textContent = config.text || '';
+                button.className = config.className || 'premium-btn premium-btn-primary';
+                
+                if (config.style) {
+                    Object.assign(button.style, config.style);
+                }
+                
+                layer.appendChild(button);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Apply responsive positioning (only when config exists)
+         */
+        applyResponsivePosition: function(layer, positionConfig) {
+            try {
+                if (!positionConfig) return;
+                
+                // Desktop (default)
+                if (positionConfig.desktop) {
+                    this.applyPosition(layer, positionConfig.desktop);
+                }
+                
+                // Tablet override (only if config exists)
+                if (positionConfig.tablet) {
+                    const tabletMedia = window.matchMedia('(min-width: 769px) and (max-width: 1024px)');
+                    if (tabletMedia.matches) {
+                        this.applyPosition(layer, positionConfig.tablet);
+                    }
+                }
+                
+                // Mobile override (only if config exists)
+                if (positionConfig.mobile) {
+                    const mobileMedia = window.matchMedia('(max-width: 768px)');
+                    if (mobileMedia.matches) {
+                        this.applyPosition(layer, positionConfig.mobile);
+                    }
+                }
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Apply position values
+         */
+        applyPosition: function(layer, position) {
+            try {
+                if (position.top !== undefined) layer.style.top = position.top;
+                if (position.right !== undefined) layer.style.right = position.right;
+                if (position.bottom !== undefined) layer.style.bottom = position.bottom;
+                if (position.left !== undefined) layer.style.left = position.left;
+                if (position.width !== undefined) layer.style.width = position.width;
+                if (position.height !== undefined) layer.style.height = position.height;
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Setup timeline-based animation for layer
+         */
+        setupLayerAnimation: function(layer, animationConfig) {
+            try {
+                if (!animationConfig) return;
+                
+                // Set initial state
+                layer.style.opacity = '0';
+                layer.style.transform = this.getInitialTransform(animationConfig.enter);
+                
+                // Store animation config
+                layer.setAttribute('data-animation-enter', JSON.stringify(animationConfig.enter || {}));
+                layer.setAttribute('data-animation-exit', JSON.stringify(animationConfig.exit || {}));
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Get initial transform based on animation type
+         */
+        getInitialTransform: function(animConfig) {
+            if (!animConfig || !animConfig.type) return 'translateY(0)';
+            
+            const type = animConfig.type;
+            const distance = animConfig.distance || 50;
+            
+            switch (type) {
+                case 'slideUp': return 'translateY(' + distance + 'px)';
+                case 'slideDown': return 'translateY(-' + distance + 'px)';
+                case 'slideLeft': return 'translateX(' + distance + 'px)';
+                case 'slideRight': return 'translateX(-' + distance + 'px)';
+                case 'fade': return 'translateY(0)';
+                case 'zoom': return 'scale(' + (animConfig.scale || 0.5) + ')';
+                default: return 'translateY(0)';
+            }
+        },
+        
+        /**
+         * Animate layer enter
+         */
+        animateLayerEnter: function(layer) {
+            try {
+                const enterConfig = JSON.parse(layer.getAttribute('data-animation-enter') || '{}');
+                if (!enterConfig.type) return;
+                
+                const duration = enterConfig.duration || 1000;
+                const delay = enterConfig.delay || 0;
+                const easing = enterConfig.easing || 'cubic-bezier(0.4, 0, 0.2, 1)';
+                
+                setTimeout(function() {
+                    layer.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+                    layer.style.opacity = '1';
+                    layer.style.transform = 'translateY(0) scale(1)';
+                }, delay);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Animate layer exit
+         */
+        animateLayerExit: function(layer) {
+            try {
+                const exitConfig = JSON.parse(layer.getAttribute('data-animation-exit') || '{}');
+                if (!exitConfig.type) {
+                    // Default exit
+                    layer.style.opacity = '0';
+                    return;
+                }
+                
+                const duration = exitConfig.duration || 500;
+                const easing = exitConfig.easing || 'cubic-bezier(0.4, 0, 0.2, 1)';
+                
+                layer.style.transition = 'opacity ' + duration + 'ms ' + easing + ', transform ' + duration + 'ms ' + easing;
+                layer.style.opacity = '0';
+                layer.style.transform = this.getInitialTransform(exitConfig);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Attach to Swiper events (non-intrusive)
+         */
+        attachToSwiper: function() {
+            try {
+                // Wait for Swiper to be initialized
+                const checkSwiper = setInterval(function() {
+                    if (window.heroSwiper && window.heroSwiper.on) {
+                        clearInterval(checkSwiper);
+                        
+                        // Hook into slide change (additive only)
+                        window.heroSwiper.on('slideChange', function() {
+                            LayerEngine.handleSlideChange(window.heroSwiper);
+                        });
+                        
+                        // Initial slide
+                        LayerEngine.handleSlideChange(window.heroSwiper);
+                    }
+                }, 100);
+                
+                // Timeout after 5 seconds
+                setTimeout(function() {
+                    clearInterval(checkSwiper);
+                }, 5000);
+            } catch (e) {
+                // Silent failure
+            }
+        },
+        
+        /**
+         * Handle slide change
+         */
+        handleSlideChange: function(swiper) {
+            try {
+                if (!swiper || !swiper.slides) return;
+                
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                if (!activeSlide) return;
+                
+                // Exit previous slide layers
+                const allLayers = document.querySelectorAll('.hero-layer-engine');
+                allLayers.forEach(function(layer) {
+                    const slide = layer.closest('.hero-slide-premium');
+                    if (slide && slide !== activeSlide) {
+                        LayerEngine.animateLayerExit(layer);
+                    }
+                });
+                
+                // Enter active slide layers
+                const activeLayers = activeSlide.querySelectorAll('.hero-layer-engine');
+                activeLayers.forEach(function(layer) {
+                    LayerEngine.animateLayerEnter(layer);
+                });
+            } catch (e) {
+                // Silent failure
+            }
+        }
+    };
+    
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            LayerEngine.init();
+        });
+    } else {
+        LayerEngine.init();
+    }
+    
+    // Also try after window load
+    window.addEventListener('load', function() {
+        setTimeout(function() {
+            LayerEngine.init();
+        }, 100);
+    });
+})();
 </script>
+
+<!-- 
+    EXAMPLE CONFIGURATION (for reference only - add to data-layer-config attribute):
+    
+    {
+        "enabled": true,
+        "slides": [
+            {
+                "layers": [
+                    {
+                        "type": "text",
+                        "content": "Custom Layer Text",
+                        "tag": "h2",
+                        "position": {
+                            "desktop": { "top": "20%", "left": "10%", "width": "400px" },
+                            "tablet": { "top": "15%", "left": "5%", "width": "300px" },
+                            "mobile": { "top": "10%", "left": "5%", "width": "90%" }
+                        },
+                        "animation": {
+                            "enter": {
+                                "type": "slideUp",
+                                "distance": 50,
+                                "duration": 1000,
+                                "delay": 200,
+                                "easing": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+                            },
+                            "exit": {
+                                "type": "fade",
+                                "duration": 500
+                            }
+                        },
+                        "style": {
+                            "color": "#ffffff",
+                            "fontSize": "2rem",
+                            "fontWeight": "bold"
+                        }
+                    },
+                    {
+                        "type": "image",
+                        "src": "/path/to/image.jpg",
+                        "srcset": "/path/to/image-2x.jpg 2x",
+                        "lazy": true,
+                        "placeholder": "/path/to/placeholder.jpg",
+                        "position": {
+                            "desktop": { "top": "50%", "right": "10%", "width": "300px" }
+                        },
+                        "animation": {
+                            "enter": {
+                                "type": "zoom",
+                                "scale": 0.5,
+                                "duration": 1200,
+                                "delay": 400
+                            }
+                        }
+                    },
+                    {
+                        "type": "button",
+                        "text": "Learn More",
+                        "href": "/learn-more",
+                        "className": "premium-btn premium-btn-primary",
+                        "position": {
+                            "desktop": { "bottom": "20%", "left": "10%" }
+                        },
+                        "animation": {
+                            "enter": {
+                                "type": "slideUp",
+                                "duration": 800,
+                                "delay": 600
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    }
+-->

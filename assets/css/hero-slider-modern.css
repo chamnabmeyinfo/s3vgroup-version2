@@ -1039,3 +1039,70 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* ============================================
+   OPTIONAL LAYER ENGINE STYLES
+   Only applies when LayerEngine is enabled
+   Does not affect existing slider styles
+   ============================================ */
+
+/* Layer Engine Container */
+.hero-layers-engine-container {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Individual Layer */
+.hero-layer-engine {
+  position: absolute;
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+/* Layer Types */
+.hero-layer-text {
+  /* Text layer specific styles */
+}
+
+.hero-layer-image {
+  /* Image layer specific styles */
+}
+
+.hero-layer-image img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-layer-button {
+  /* Button layer specific styles */
+}
+
+/* Layer Animation States */
+.hero-layer-engine[data-animation-state="entering"] {
+  opacity: 0;
+}
+
+.hero-layer-engine[data-animation-state="active"] {
+  opacity: 1;
+}
+
+.hero-layer-engine[data-animation-state="exiting"] {
+  opacity: 0;
+}
+
+/* Responsive Layer Adjustments */
+@media (max-width: 768px) {
+  .hero-layers-engine-container {
+    /* Mobile adjustments if needed */
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .hero-layers-engine-container {
+    /* Tablet adjustments if needed */
+  }
+}
