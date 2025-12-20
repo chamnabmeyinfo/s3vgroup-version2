@@ -482,54 +482,54 @@ $defaultColumns = array_keys($availableColumns);
                     <div class="p-2 bg-blue-50 rounded-lg">
                         <i class="fas fa-cube text-blue-600"></i>
                     </div>
-                    <div>
-                        <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
-                        <div class="text-lg font-bold text-gray-900" id="totalProductsCount"><?= number_format($totalProducts) ?></div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Total</div>
+                    <div class="text-lg font-bold text-gray-900" id="totalProductsCount"><?= number_format($totalProducts) ?></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-green-50 rounded-lg">
+                    <i class="fas fa-check-circle text-green-600"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Active</div>
+                    <div class="text-lg font-bold text-green-600"><?= number_format($activeProducts) ?></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-yellow-50 rounded-lg">
+                    <i class="fas fa-star text-yellow-600"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Featured</div>
+                    <div class="text-lg font-bold text-yellow-600"><?= number_format($featuredProducts) ?></div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <div class="p-2 bg-red-50 rounded-lg">
+                    <i class="fas fa-exclamation-triangle text-red-600"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Low Stock</div>
+                    <div class="text-lg font-bold text-red-600"><?= number_format($lowStockProducts) ?></div>
+                </div>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-2 pl-4 border-l border-gray-200">
+                <div class="p-2 bg-indigo-50 rounded-lg">
+                    <i class="fas fa-eye text-indigo-600"></i>
+                </div>
+                <div>
+                    <div class="text-xs text-gray-500 uppercase tracking-wide">Showing</div>
+                    <div class="text-lg font-bold text-indigo-600">
+                        <span id="showingCount"><?= count($products) ?></span>
+                        <span class="text-sm font-normal text-gray-500">/ <?= number_format($totalCount) ?></span>
                     </div>
                 </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="p-2 bg-green-50 rounded-lg">
-                        <i class="fas fa-check-circle text-green-600"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 uppercase tracking-wide">Active</div>
-                        <div class="text-lg font-bold text-green-600"><?= number_format($activeProducts) ?></div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="p-2 bg-yellow-50 rounded-lg">
-                        <i class="fas fa-star text-yellow-600"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 uppercase tracking-wide">Featured</div>
-                        <div class="text-lg font-bold text-yellow-600"><?= number_format($featuredProducts) ?></div>
-                    </div>
-                </div>
-                
-                <div class="flex items-center gap-2">
-                    <div class="p-2 bg-red-50 rounded-lg">
-                        <i class="fas fa-exclamation-triangle text-red-600"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 uppercase tracking-wide">Low Stock</div>
-                        <div class="text-lg font-bold text-red-600"><?= number_format($lowStockProducts) ?></div>
-                    </div>
-                </div>
-                
-                <div class="hidden md:flex items-center gap-2 pl-4 border-l border-gray-200">
-                    <div class="p-2 bg-indigo-50 rounded-lg">
-                        <i class="fas fa-eye text-indigo-600"></i>
-                    </div>
-                    <div>
-                        <div class="text-xs text-gray-500 uppercase tracking-wide">Showing</div>
-                        <div class="text-lg font-bold text-indigo-600">
-                            <span id="showingCount"><?= count($products) ?></span>
-                            <span class="text-sm font-normal text-gray-500">/ <?= number_format($totalCount) ?></span>
-                        </div>
-                    </div>
-                </div>
+            </div>
                 
                 <?php if ($search || $categoryFilter || $statusFilter || $featuredFilter || $dateFrom || $dateTo || $priceMin !== null || $priceMax !== null): ?>
                 <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-200 px-4 py-2 rounded-lg">
@@ -910,7 +910,7 @@ function loadMoreProducts() {
     
     // Show loading indicator
     if (loadingIndicator) {
-        loadingIndicator.classList.remove('hidden');
+    loadingIndicator.classList.remove('hidden');
     }
     
     const params = getFilterParams();

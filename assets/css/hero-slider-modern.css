@@ -4,401 +4,401 @@
 
 /* Hero Slider Container */
 .hero-slider {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  background: #000;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    background: #000;
 }
 
 .heroSwiper {
-  width: 100%;
-  height: 100%;
-  position: relative;
+    width: 100%;
+    height: 100%;
+    position: relative;
 }
 
 /* Swiper Wrapper - Essential for Swiper to work */
 .heroSwiper .swiper-wrapper {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
 }
 
 /* Hero Slide - Swiper handles positioning */
 .hero-slide {
-  min-height: 600px;
-  height: 85vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  width: 100%;
-  flex-shrink: 0;
+    min-height: 600px;
+    height: 85vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 100%;
+    flex-shrink: 0;
 }
 
 /* Swiper fade effect - let Swiper control opacity */
 .heroSwiper .swiper-slide {
-  opacity: 0;
-  transition: opacity 0.6s ease-in-out;
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
 }
 
 .heroSwiper .swiper-slide-active {
-  opacity: 1 !important;
-  z-index: 1;
+    opacity: 1 !important;
+    z-index: 1;
 }
 
 .heroSwiper .swiper-slide:not(.swiper-slide-active) {
-  opacity: 0 !important;
-  z-index: 0;
-  pointer-events: none;
+    opacity: 0 !important;
+    z-index: 0;
+    pointer-events: none;
 }
 
 @media (max-width: 1024px) {
-  .hero-slide {
-    min-height: 500px;
-    height: 75vh;
-  }
+    .hero-slide {
+        min-height: 500px;
+        height: 75vh;
+    }
 }
 
 @media (max-width: 768px) {
-  .hero-slide {
-    min-height: 450px;
-    height: 70vh;
-  }
+    .hero-slide {
+        min-height: 450px;
+        height: 70vh;
+    }
 }
 
 @media (max-width: 640px) {
-  .hero-slide {
-    min-height: 400px;
-    height: 60vh;
-  }
+    .hero-slide {
+        min-height: 400px;
+        height: 60vh;
+    }
 }
 
 /* Modern Clean Overlay - Subtle gradient */
 .hero-slide-overlay {
-  position: absolute !important;
-  inset: 0 !important;
-  z-index: 1 !important;
-  background: linear-gradient(
-    180deg,
-    rgba(0, 0, 0, 0.2) 0%,
-    rgba(0, 0, 0, 0.4) 50%,
-    rgba(0, 0, 0, 0.6) 100%
-  ) !important;
-  backdrop-filter: blur(0.5px) !important;
-  -webkit-backdrop-filter: blur(0.5px) !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.2) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        rgba(0, 0, 0, 0.6) 100%
+    ) !important;
+    backdrop-filter: blur(0.5px) !important;
+    -webkit-backdrop-filter: blur(0.5px) !important;
 }
 
 /* Remove old overlay after pseudo-element from style.css */
 .hero-slide-overlay::after {
-  display: none !important;
-  content: none !important;
-  background: none !important;
+    display: none !important;
+    content: none !important;
+    background: none !important;
 }
 
 /* Content Container - Clean & Spacious */
 .hero-slide-content {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 1200px;
-  padding: 2rem 1.5rem;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    padding: 2rem 1.5rem;
 }
 
 /* Modern Clean Typography - Override old styles */
 .hero-slide-content h1,
 .hero-slide-content h2,
 .hero-slide-content h3 {
-  font-size: clamp(2.5rem, 6vw, 5rem) !important;
-  font-weight: 700 !important;
-  line-height: 1.1 !important;
-  margin-bottom: 1.5rem !important;
-  color: #ffffff !important;
-  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3) !important;
-  letter-spacing: -0.02em !important;
-  background: none !important;
-  padding: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  display: block !important;
+    font-size: clamp(2.5rem, 6vw, 5rem) !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    margin-bottom: 1.5rem !important;
+    color: #ffffff !important;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3) !important;
+    letter-spacing: -0.02em !important;
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    display: block !important;
 }
 
 .hero-slide-content p {
-  font-size: clamp(1.125rem, 2.5vw, 1.5rem) !important;
-  line-height: 1.6 !important;
-  margin-bottom: 2rem !important;
-  color: rgba(255, 255, 255, 0.95) !important;
-  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3) !important;
-  font-weight: 400 !important;
-  background: none !important;
-  padding: 0 !important;
-  border: none !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  display: block !important;
-  max-width: 700px;
-  position: relative !important;
-  z-index: 2 !important;
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem) !important;
+    line-height: 1.6 !important;
+    margin-bottom: 2rem !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 400 !important;
+    background: none !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    display: block !important;
+    max-width: 700px;
+    position: relative !important;
+    z-index: 2 !important;
 }
 
 /* Hide any duplicate or unwanted text overlays */
 .hero-slide-content p:empty {
-  display: none !important;
+    display: none !important;
 }
 
 /* Modern Clean Buttons */
 .hero-slide-content .btn-primary {
-  background: #ffffff;
-  color: #1a1a1a;
-  padding: 1rem 2.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  border: none;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
+    background: #ffffff;
+    color: #1a1a1a;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
 }
 
 .hero-slide-content .btn-primary:hover {
-  background: #f8f8f8;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    background: #f8f8f8;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 .hero-slide-content .btn-primary:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 .hero-slide-content .btn-secondary {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #ffffff;
-  padding: 1rem 2.5rem;
-  border-radius: 50px;
-  font-weight: 600;
-  font-size: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #ffffff;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    font-weight: 600;
+    font-size: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
 }
 
 .hero-slide-content .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
 }
 
 .hero-slide-content .btn-secondary:active {
-  transform: translateY(0);
+    transform: translateY(0);
 }
 
 /* Button Container */
 .hero-slide-content .flex {
-  margin-top: 2.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
+    margin-top: 2.5rem;
+    gap: 1rem;
+    flex-wrap: wrap;
 }
 
 /* Modern Clean Navigation Buttons - Positioned Left and Right */
 .hero-nav-next,
 .hero-nav-prev {
-  width: 50px !important;
-  height: 50px !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  border-radius: 50% !important;
-  color: #ffffff !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
-  z-index: 10 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  margin-top: 0 !important;
-  position: absolute !important;
-  top: 50% !important;
-  transform: translateY(-50%) !important;
+    width: 50px !important;
+    height: 50px !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    color: #ffffff !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    z-index: 10 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 0 !important;
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
 }
 
 /* Previous Button - Left Side */
 .hero-nav-prev {
-  left: 2rem !important;
-  right: auto !important;
+    left: 2rem !important;
+    right: auto !important;
 }
 
 /* Next Button - Right Side */
 .hero-nav-next {
-  right: 2rem !important;
-  left: auto !important;
+    right: 2rem !important;
+    left: auto !important;
 }
 
 .hero-nav-next:hover,
 .hero-nav-prev:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.4) !important;
-  transform: translateY(-50%) scale(1.1) !important;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+    background: rgba(255, 255, 255, 0.25) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    transform: translateY(-50%) scale(1.1) !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
 }
 
 .hero-nav-next:after,
 .hero-nav-prev:after {
-  font-size: 1.125rem !important;
-  font-weight: 600 !important;
-  color: #ffffff !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: #ffffff !important;
 }
 
 /* Modern Clean Pagination */
 .hero-pagination {
-  bottom: 2rem !important;
-  z-index: 10 !important;
-  position: absolute !important;
-  display: flex !important;
-  justify-content: center !important;
-  align-items: center !important;
+    bottom: 2rem !important;
+    z-index: 10 !important;
+    position: absolute !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
 }
 
 .hero-pagination .swiper-pagination-bullet {
-  width: 10px;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  opacity: 1;
-  transition: all 0.3s ease;
-  margin: 0 6px;
-  border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    opacity: 1;
+    transition: all 0.3s ease;
+    margin: 0 6px;
+    border-radius: 50%;
 }
 
 .hero-pagination .swiper-pagination-bullet-active {
-  background: #ffffff;
-  width: 30px;
-  border-radius: 15px;
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    background: #ffffff;
+    width: 30px;
+    border-radius: 15px;
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
-  .hero-slide-content {
-    padding: 1.5rem 1rem;
-  }
-
-  .hero-slide-content h1 {
-    margin-bottom: 1rem;
-  }
-
-  .hero-slide-content p {
-    margin-bottom: 1.5rem;
-    font-size: clamp(1rem, 4vw, 1.25rem);
-  }
-
-  .hero-slide-content .btn-primary,
-  .hero-slide-content .btn-secondary {
-    padding: 0.875rem 2rem;
-    font-size: 0.9375rem;
-    width: 100%;
-    justify-content: center;
-  }
-
-  .hero-slide-content .flex {
-    flex-direction: column;
-    gap: 0.75rem;
-    margin-top: 2rem;
-  }
-
+    .hero-slide-content {
+        padding: 1.5rem 1rem;
+    }
+    
+    .hero-slide-content h1 {
+        margin-bottom: 1rem;
+    }
+    
+    .hero-slide-content p {
+        margin-bottom: 1.5rem;
+        font-size: clamp(1rem, 4vw, 1.25rem);
+    }
+    
+    .hero-slide-content .btn-primary,
+    .hero-slide-content .btn-secondary {
+        padding: 0.875rem 2rem;
+        font-size: 0.9375rem;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .hero-slide-content .flex {
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-top: 2rem;
+    }
+    
   /* Hide navigation on mobile by default (can be overridden by global settings) */
   .hero-nav-next[style*="display: none"],
   .hero-nav-prev[style*="display: none"] {
-    display: none !important;
-  }
-
-  .hero-pagination {
-    bottom: 1.5rem !important;
-  }
-
-  .hero-pagination .swiper-pagination-bullet {
-    width: 8px;
-    height: 8px;
-    margin: 0 4px;
-  }
-
-  .hero-pagination .swiper-pagination-bullet-active {
-    width: 24px;
-  }
+        display: none !important;
+    }
+    
+    .hero-pagination {
+        bottom: 1.5rem !important;
+    }
+    
+    .hero-pagination .swiper-pagination-bullet {
+        width: 8px;
+        height: 8px;
+        margin: 0 4px;
+    }
+    
+    .hero-pagination .swiper-pagination-bullet-active {
+        width: 24px;
+    }
 }
 
 /* Tablet Adjustments */
 @media (min-width: 769px) and (max-width: 1024px) {
-  .hero-nav-next,
-  .hero-nav-prev {
-    width: 45px !important;
-    height: 45px !important;
-  }
-
-  .hero-nav-prev {
-    left: 1.5rem !important;
-  }
-
-  .hero-nav-next {
-    right: 1.5rem !important;
-  }
+    .hero-nav-next,
+    .hero-nav-prev {
+        width: 45px !important;
+        height: 45px !important;
+    }
+    
+    .hero-nav-prev {
+        left: 1.5rem !important;
+    }
+    
+    .hero-nav-next {
+        right: 1.5rem !important;
+    }
 }
 
 /* Desktop - Ensure navigation is visible and properly positioned */
 @media (min-width: 769px) {
-  .hero-nav-next,
-  .hero-nav-prev {
-    display: flex !important;
-  }
-
-  .hero-nav-prev {
-    left: 2rem !important;
-  }
-
-  .hero-nav-next {
-    right: 2rem !important;
-  }
+    .hero-nav-next,
+    .hero-nav-prev {
+        display: flex !important;
+    }
+    
+    .hero-nav-prev {
+        left: 2rem !important;
+    }
+    
+    .hero-nav-next {
+        right: 2rem !important;
+    }
 }
 
 /* Content Alignment */
 .hero-slide-content[style*="text-align: left"] {
-  text-align: left;
+    text-align: left;
 }
 
 .hero-slide-content[style*="text-align: center"] {
-  text-align: center;
-  margin-left: auto;
-  margin-right: auto;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .hero-slide-content[style*="text-align: right"] {
-  text-align: right;
-  margin-left: auto;
+    text-align: right;
+    margin-left: auto;
 }
 
 /* Full Height Option */
 .hero-slide[style*="height: 100vh"] {
-  min-height: 100vh !important;
-  height: 100vh !important;
+    min-height: 100vh !important;
+    height: 100vh !important;
 }
 
 /* Progress Bar for Autoplay */

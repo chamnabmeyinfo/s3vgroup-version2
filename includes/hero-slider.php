@@ -7,27 +7,51 @@
 use App\Database\Connection;
 use App\Models\Setting;
 
-// Get global settings
-$settingModel = new Setting();
+// Get global settings with error handling - defaults ensure slider works even if settings fail
 $globalSettings = [
-    'autoplay_enabled' => (bool)$settingModel->get('hero_slider_autoplay_enabled', 1),
-    'autoplay_delay' => (int)$settingModel->get('hero_slider_autoplay_delay', 5000),
-    'pause_on_hover' => (bool)$settingModel->get('hero_slider_pause_on_hover', 1),
-    'show_navigation' => (bool)$settingModel->get('hero_slider_show_navigation', 1),
-    'show_pagination' => (bool)$settingModel->get('hero_slider_show_pagination', 1),
-    'navigation_mobile' => (bool)$settingModel->get('hero_slider_navigation_mobile', 0),
-    'transition_effect' => $settingModel->get('hero_slider_transition_effect', 'fade'),
-    'transition_speed' => (int)$settingModel->get('hero_slider_transition_speed', 1000),
-    'loop' => (bool)$settingModel->get('hero_slider_loop', 1),
-    'height' => $settingModel->get('hero_slider_height', 'auto'),
-    'custom_height' => $settingModel->get('hero_slider_custom_height', ''),
-    'show_counter' => (bool)$settingModel->get('hero_slider_show_counter', 1),
-    'show_progress' => (bool)$settingModel->get('hero_slider_show_progress', 1),
-    'keyboard_enabled' => (bool)$settingModel->get('hero_slider_keyboard_enabled', 1),
-    'mousewheel_enabled' => (bool)$settingModel->get('hero_slider_mousewheel_enabled', 0),
-    'lazy_loading' => (bool)$settingModel->get('hero_slider_lazy_loading', 1),
-    'preload_images' => (bool)$settingModel->get('hero_slider_preload_images', 0),
+    'autoplay_enabled' => 1,
+    'autoplay_delay' => 5000,
+    'pause_on_hover' => 1,
+    'show_navigation' => 1,
+    'show_pagination' => 1,
+    'navigation_mobile' => 0,
+    'transition_effect' => 'fade',
+    'transition_speed' => 1000,
+    'loop' => 1,
+    'height' => 'auto',
+    'custom_height' => '',
+    'show_counter' => 1,
+    'show_progress' => 1,
+    'keyboard_enabled' => 1,
+    'mousewheel_enabled' => 0,
+    'lazy_loading' => 1,
+    'preload_images' => 0,
 ];
+
+// Try to load settings from database, but don't break if it fails
+try {
+    $settingModel = new Setting();
+    $globalSettings['autoplay_enabled'] = (bool)$settingModel->get('hero_slider_autoplay_enabled', 1);
+    $globalSettings['autoplay_delay'] = (int)$settingModel->get('hero_slider_autoplay_delay', 5000);
+    $globalSettings['pause_on_hover'] = (bool)$settingModel->get('hero_slider_pause_on_hover', 1);
+    $globalSettings['show_navigation'] = (bool)$settingModel->get('hero_slider_show_navigation', 1);
+    $globalSettings['show_pagination'] = (bool)$settingModel->get('hero_slider_show_pagination', 1);
+    $globalSettings['navigation_mobile'] = (bool)$settingModel->get('hero_slider_navigation_mobile', 0);
+    $globalSettings['transition_effect'] = $settingModel->get('hero_slider_transition_effect', 'fade');
+    $globalSettings['transition_speed'] = (int)$settingModel->get('hero_slider_transition_speed', 1000);
+    $globalSettings['loop'] = (bool)$settingModel->get('hero_slider_loop', 1);
+    $globalSettings['height'] = $settingModel->get('hero_slider_height', 'auto');
+    $globalSettings['custom_height'] = $settingModel->get('hero_slider_custom_height', '');
+    $globalSettings['show_counter'] = (bool)$settingModel->get('hero_slider_show_counter', 1);
+    $globalSettings['show_progress'] = (bool)$settingModel->get('hero_slider_show_progress', 1);
+    $globalSettings['keyboard_enabled'] = (bool)$settingModel->get('hero_slider_keyboard_enabled', 1);
+    $globalSettings['mousewheel_enabled'] = (bool)$settingModel->get('hero_slider_mousewheel_enabled', 0);
+    $globalSettings['lazy_loading'] = (bool)$settingModel->get('hero_slider_lazy_loading', 1);
+    $globalSettings['preload_images'] = (bool)$settingModel->get('hero_slider_preload_images', 0);
+} catch (\Exception $e) {
+    // If settings can't be loaded, use defaults - don't break the page
+    // Error is silently handled, defaults ensure slider still works
+}
 
 try {
     $db = Connection::getInstance();
@@ -84,9 +108,9 @@ if (empty($sliders)) {
                 $bgPosition = $slider['background_position'] ?? 'center';
                 $parallax = ($slider['parallax_effect'] ?? 0) ? 'true' : 'false';
                 
-                // Height options - use global settings if slide doesn't have custom height
-                $slideHeight = $slider['slide_height'] ?? $globalSettings['height'];
-                $customHeight = $slider['custom_height'] ?? $globalSettings['custom_height'];
+                // Height options - prioritize individual slide settings, fallback to global, then default
+                $slideHeight = !empty($slider['slide_height']) ? $slider['slide_height'] : (!empty($globalSettings['height']) ? $globalSettings['height'] : 'auto');
+                $customHeight = !empty($slider['custom_height']) ? $slider['custom_height'] : (!empty($globalSettings['custom_height']) ? $globalSettings['custom_height'] : '');
                 $heightStyle = '';
                 if ($slideHeight === 'full') {
                     $heightStyle = 'height: 100vh;';
@@ -222,10 +246,13 @@ if (empty($sliders)) {
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize Swiper for Hero Slider with Advanced Features
     if (typeof Swiper !== 'undefined') {
-        // Get autoplay delay - use global setting, but allow individual slide override
+        // Get autoplay delay - prioritize individual slide setting, then global, then default
         const firstSlider = <?= json_encode($sliders[0] ?? []) ?>;
-        // Use individual slide delay if set, otherwise use global setting
-        const autoplayDelay = firstSlider && firstSlider.autoplay_delay ? parseInt(firstSlider.autoplay_delay) : <?= $globalSettings['autoplay_delay'] ?>;
+        let autoplayDelay = <?= $globalSettings['autoplay_delay'] ?>;
+        // Use individual slide delay if set and valid
+        if (firstSlider && firstSlider.autoplay_delay && parseInt(firstSlider.autoplay_delay) > 0) {
+            autoplayDelay = parseInt(firstSlider.autoplay_delay);
+        }
         
         const heroSwiper = new Swiper('.heroSwiper', {
             slidesPerView: 1,

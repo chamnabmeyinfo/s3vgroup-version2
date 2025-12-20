@@ -67,9 +67,9 @@ include __DIR__ . '/includes/header.php';
                 <a href="<?= url('admin/setup-hero-slider-advanced.php') ?>" class="bg-white/20 text-white px-4 md:px-6 py-2 md:py-3 rounded-lg font-bold hover:bg-white/30 transition-all shadow-lg hover:shadow-xl">
                     <i class="fas fa-database mr-2"></i>Setup Advanced
                 </a>
-                <a href="<?= url('admin/hero-slider-edit.php') ?>" class="bg-white text-blue-600 px-4 md:px-6 py-2 md:py-3 rounded-lg font-bold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
-                    <i class="fas fa-plus mr-2"></i>Add New Slider
-                </a>
+            <a href="<?= url('admin/hero-slider-edit.php') ?>" class="bg-white text-blue-600 px-4 md:px-6 py-2 md:py-3 rounded-lg font-bold hover:bg-blue-50 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                <i class="fas fa-plus mr-2"></i>Add New Slider
+            </a>
             </div>
         </div>
     </div>

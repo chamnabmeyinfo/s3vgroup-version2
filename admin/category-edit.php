@@ -201,7 +201,7 @@ include __DIR__ . '/includes/header.php';
                 <p class="text-xs text-gray-500 mt-1">Leave empty to auto-generate from name</p>
             </div>
         </div>
-
+    
         <!-- Short Description for Homepage -->
         <?php
         // Check if short_description column exists
@@ -240,7 +240,7 @@ include __DIR__ . '/includes/header.php';
         <?php endif; ?>
 
         <!-- Full Description -->
-        <div>
+    <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">
                 <i class="fas fa-file-alt text-gray-400 mr-2"></i> Full Description
             </label>
@@ -248,44 +248,44 @@ include __DIR__ . '/includes/header.php';
                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
                       placeholder="Full category description (optional)"><?= escape($category['description'] ?? '') ?></textarea>
             <p class="text-xs text-gray-500 mt-1">Full description for category pages (optional)</p>
-        </div>
+    </div>
     
         <!-- Additional Settings -->
-        <div class="grid md:grid-cols-2 gap-6">
-            <div>
+    <div class="grid md:grid-cols-2 gap-6">
+        <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-sitemap text-gray-400 mr-2"></i> Parent Category
                 </label>
                 <select name="parent_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                    <option value="">None (Top Level)</option>
-                    <?php foreach ($categories as $cat): ?>
-                        <?php if (!$categoryId || $cat['id'] != $categoryId): ?>
-                            <option value="<?= $cat['id'] ?>" <?= ($category['parent_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
-                                <?= escape($cat['name']) ?>
-                            </option>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-            
-            <div>
+                <option value="">None (Top Level)</option>
+                <?php foreach ($categories as $cat): ?>
+                    <?php if (!$categoryId || $cat['id'] != $categoryId): ?>
+                        <option value="<?= $cat['id'] ?>" <?= ($category['parent_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
+                            <?= escape($cat['name']) ?>
+                        </option>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        
+        <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
                     <i class="fas fa-sort-numeric-down text-gray-400 mr-2"></i> Sort Order
                 </label>
-                <input type="number" name="sort_order" value="<?= escape($category['sort_order'] ?? 0) ?>"
+            <input type="number" name="sort_order" value="<?= escape($category['sort_order'] ?? 0) ?>"
                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
                 <p class="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
-            </div>
         </div>
-        
+    </div>
+    
         <div class="bg-gray-50 rounded-lg p-4">
             <label class="flex items-center cursor-pointer">
                 <input type="checkbox" name="is_active" <?= ($category['is_active'] ?? 1) ? 'checked' : '' ?>
                        class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
                 <span class="ml-3 text-sm font-semibold text-gray-700">Active (Show on website)</span>
-            </label>
-        </div>
-        
+        </label>
+    </div>
+    
         <!-- Action Buttons -->
         <div class="flex gap-4 pt-4 border-t border-gray-200">
             <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
