@@ -1,13 +1,15 @@
 <?php
 /**
- * Hero Slider Component
- * Displays dynamic hero sliders from database
+ * Hero Slider Component - Redesigned from Scratch
+ * Robust, production-ready slider with comprehensive error handling
  */
 
 use App\Database\Connection;
 use App\Models\Setting;
 
-// Get global settings with error handling - defaults ensure slider works even if settings fail
+// ============================================
+// 1. LOAD GLOBAL SETTINGS (with safe defaults)
+// ============================================
 $globalSettings = [
     'autoplay_enabled' => 1,
     'autoplay_delay' => 5000,
@@ -28,42 +30,50 @@ $globalSettings = [
     'preload_images' => 0,
 ];
 
-// Try to load settings from database, but don't break if it fails
+// Try to load from database, but never fail if it doesn't work
 try {
-    $settingModel = new Setting();
-    $globalSettings['autoplay_enabled'] = (bool)$settingModel->get('hero_slider_autoplay_enabled', 1);
-    $globalSettings['autoplay_delay'] = (int)$settingModel->get('hero_slider_autoplay_delay', 5000);
-    $globalSettings['pause_on_hover'] = (bool)$settingModel->get('hero_slider_pause_on_hover', 1);
-    $globalSettings['show_navigation'] = (bool)$settingModel->get('hero_slider_show_navigation', 1);
-    $globalSettings['show_pagination'] = (bool)$settingModel->get('hero_slider_show_pagination', 1);
-    $globalSettings['navigation_mobile'] = (bool)$settingModel->get('hero_slider_navigation_mobile', 0);
-    $globalSettings['transition_effect'] = $settingModel->get('hero_slider_transition_effect', 'fade');
-    $globalSettings['transition_speed'] = (int)$settingModel->get('hero_slider_transition_speed', 1000);
-    $globalSettings['loop'] = (bool)$settingModel->get('hero_slider_loop', 1);
-    $globalSettings['height'] = $settingModel->get('hero_slider_height', 'auto');
-    $globalSettings['custom_height'] = $settingModel->get('hero_slider_custom_height', '');
-    $globalSettings['show_counter'] = (bool)$settingModel->get('hero_slider_show_counter', 1);
-    $globalSettings['show_progress'] = (bool)$settingModel->get('hero_slider_show_progress', 1);
-    $globalSettings['keyboard_enabled'] = (bool)$settingModel->get('hero_slider_keyboard_enabled', 1);
-    $globalSettings['mousewheel_enabled'] = (bool)$settingModel->get('hero_slider_mousewheel_enabled', 0);
-    $globalSettings['lazy_loading'] = (bool)$settingModel->get('hero_slider_lazy_loading', 1);
-    $globalSettings['preload_images'] = (bool)$settingModel->get('hero_slider_preload_images', 0);
+    if (class_exists('App\Models\Setting')) {
+        $settingModel = new Setting();
+        $globalSettings['autoplay_enabled'] = (bool)$settingModel->get('hero_slider_autoplay_enabled', 1);
+        $globalSettings['autoplay_delay'] = max(1000, min(30000, (int)$settingModel->get('hero_slider_autoplay_delay', 5000)));
+        $globalSettings['pause_on_hover'] = (bool)$settingModel->get('hero_slider_pause_on_hover', 1);
+        $globalSettings['show_navigation'] = (bool)$settingModel->get('hero_slider_show_navigation', 1);
+        $globalSettings['show_pagination'] = (bool)$settingModel->get('hero_slider_show_pagination', 1);
+        $globalSettings['navigation_mobile'] = (bool)$settingModel->get('hero_slider_navigation_mobile', 0);
+        $globalSettings['transition_effect'] = $settingModel->get('hero_slider_transition_effect', 'fade');
+        $globalSettings['transition_speed'] = max(100, min(5000, (int)$settingModel->get('hero_slider_transition_speed', 1000)));
+        $globalSettings['loop'] = (bool)$settingModel->get('hero_slider_loop', 1);
+        $globalSettings['height'] = $settingModel->get('hero_slider_height', 'auto');
+        $globalSettings['custom_height'] = $settingModel->get('hero_slider_custom_height', '');
+        $globalSettings['show_counter'] = (bool)$settingModel->get('hero_slider_show_counter', 1);
+        $globalSettings['show_progress'] = (bool)$settingModel->get('hero_slider_show_progress', 1);
+        $globalSettings['keyboard_enabled'] = (bool)$settingModel->get('hero_slider_keyboard_enabled', 1);
+        $globalSettings['mousewheel_enabled'] = (bool)$settingModel->get('hero_slider_mousewheel_enabled', 0);
+        $globalSettings['lazy_loading'] = (bool)$settingModel->get('hero_slider_lazy_loading', 1);
+        $globalSettings['preload_images'] = (bool)$settingModel->get('hero_slider_preload_images', 0);
+    }
 } catch (\Exception $e) {
-    // If settings can't be loaded, use defaults - don't break the page
-    // Error is silently handled, defaults ensure slider still works
+    // Silently use defaults - never break the page
 }
 
+// ============================================
+// 2. LOAD SLIDERS FROM DATABASE
+// ============================================
+$sliders = [];
 try {
-    $db = Connection::getInstance();
-    $sliders = $db->fetchAll(
-        "SELECT * FROM hero_sliders WHERE is_active = 1 ORDER BY sort_order ASC, id ASC"
-    );
+    if (class_exists('App\Database\Connection')) {
+        $db = Connection::getInstance();
+        $sliders = $db->fetchAll(
+            "SELECT * FROM hero_sliders WHERE is_active = 1 ORDER BY sort_order ASC, id ASC LIMIT 20"
+        );
+    }
 } catch (\Exception $e) {
+    // Database error - use fallback
     $sliders = [];
 }
 
+// Fallback if no sliders found
 if (empty($sliders)) {
-    // Fallback to default slider if no sliders in database
     $sliders = [
         [
             'title' => 'Premium Forklifts & Industrial Equipment',
@@ -77,78 +87,123 @@ if (empty($sliders)) {
             'button_link_2' => url('quote.php'),
             'overlay_color' => 'rgba(30, 58, 138, 0.9)',
             'text_alignment' => 'center',
-            'text_color' => '#ffffff'
+            'text_color' => '#ffffff',
+            'slide_height' => 'auto',
+            'background_size' => 'cover',
+            'background_position' => 'center',
+            'content_animation' => 'fade',
+            'animation_speed' => 'normal',
+            'button_style_1' => 'primary',
+            'button_style_2' => 'secondary',
         ]
     ];
 }
+
+// Ensure we have at least one slider
+$sliderCount = count($sliders);
+$hasMultipleSlides = $sliderCount > 1;
 ?>
 
 <!-- Hero Slider Section -->
-<section class="hero-slider relative" id="heroSlider">
-    <div class="swiper heroSwiper">
-        <div class="swiper-wrapper">
-            <?php foreach ($sliders as $index => $slider): 
-                $overlayStyle = !empty($slider['overlay_gradient']) 
-                    ? "background: {$slider['overlay_gradient']};" 
-                    : "background: linear-gradient(135deg, {$slider['overlay_color']}, rgba(17, 24, 39, 0.8));";
-                
-                $bgImage = !empty($slider['image']) ? image_url($slider['image']) : 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920';
-                $bgImageMobile = !empty($slider['image_mobile']) ? image_url($slider['image_mobile']) : $bgImage;
-                
-                // Video URLs
-                $videoUrl = $slider['video_url'] ?? '';
-                $videoMobileUrl = $slider['video_mobile_url'] ?? $videoUrl;
-                $hasVideo = !empty($videoUrl);
-                
-                $textAlign = $slider['text_alignment'] ?? 'center';
-                $textColor = $slider['text_color'] ?? '#ffffff';
-                
-                // Background options
-                $bgSize = $slider['background_size'] ?? 'cover';
-                $bgPosition = $slider['background_position'] ?? 'center';
-                $parallax = ($slider['parallax_effect'] ?? 0) ? 'true' : 'false';
-                
-                // Height options - prioritize individual slide settings, fallback to global, then default
-                $slideHeight = !empty($slider['slide_height']) ? $slider['slide_height'] : (!empty($globalSettings['height']) ? $globalSettings['height'] : 'auto');
-                $customHeight = !empty($slider['custom_height']) ? $slider['custom_height'] : (!empty($globalSettings['custom_height']) ? $globalSettings['custom_height'] : '');
-                $heightStyle = '';
-                if ($slideHeight === 'full') {
-                    $heightStyle = 'height: 100vh;';
-                } elseif ($slideHeight === 'custom' && !empty($customHeight)) {
-                    $heightStyle = 'height: ' . escape($customHeight) . ';';
-                }
-                
-                // Animation options
-                $contentAnimation = $slider['content_animation'] ?? 'fade';
-                $animationSpeed = $slider['animation_speed'] ?? 'normal';
-                
-                // Button styles
-                $buttonStyle1 = $slider['button_style_1'] ?? 'primary';
-                $buttonStyle2 = $slider['button_style_2'] ?? 'secondary';
-                
-                // Build background style (only if no video)
-                $bgStyle = '';
-                if (!$hasVideo) {
-                    // Handle stretch and fill specially - they need 100% 100%
-                    $bgSizeValue = $bgSize;
-                    if ($bgSize === 'stretch' || $bgSize === 'fill') {
-                        $bgSizeValue = '100% 100%';
+<section class="hero-slider-container" id="heroSliderSection" data-slide-count="<?= $sliderCount ?>">
+    <!-- Loading State -->
+    <div class="hero-slider-loading" id="heroSliderLoading">
+        <div class="loading-spinner"></div>
+    </div>
+    
+    <!-- Slider Container -->
+    <div class="hero-slider-wrapper">
+        <div class="swiper heroSwiper" id="heroSwiper">
+            <div class="swiper-wrapper">
+                <?php foreach ($sliders as $index => $slider): 
+                    // Safe defaults for all fields
+                    $title = !empty($slider['title']) ? escape($slider['title']) : '';
+                    $subtitle = !empty($slider['subtitle']) ? escape($slider['subtitle']) : '';
+                    $description = !empty($slider['description']) ? escape($slider['description']) : '';
+                    
+                    // Images with fallbacks
+                    $bgImage = !empty($slider['image']) ? image_url($slider['image']) : 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=1920';
+                    $bgImageMobile = !empty($slider['image_mobile']) ? image_url($slider['image_mobile']) : $bgImage;
+                    
+                    // Video support (check if columns exist)
+                    $hasVideo = false;
+                    $videoUrl = '';
+                    $videoMobileUrl = '';
+                    if (isset($slider['video_url']) && !empty($slider['video_url'])) {
+                        $hasVideo = true;
+                        $videoUrl = escape($slider['video_url']);
+                        $videoMobileUrl = !empty($slider['video_mobile_url']) ? escape($slider['video_mobile_url']) : $videoUrl;
                     }
                     
-                    $bgStyle = "background-image: url('" . escape($bgImage) . "'); ";
-                    $bgStyle .= "background-size: " . escape($bgSizeValue) . " !important; ";
-                    $bgStyle .= "background-position: " . escape($bgPosition) . " !important; ";
-                    $bgStyle .= "background-repeat: no-repeat;";
-                }
-                
-                // Animation speed class (for child elements)
-                $speedClass = 'animation-speed-' . $animationSpeed;
-            ?>
+                    // Styling options
+                    $textAlign = !empty($slider['text_alignment']) ? $slider['text_alignment'] : 'center';
+                    $textColor = !empty($slider['text_color']) ? escape($slider['text_color']) : '#ffffff';
+                    
+                    // Overlay
+                    $overlayStyle = '';
+                    if (!empty($slider['overlay_gradient'])) {
+                        $overlayStyle = "background: " . escape($slider['overlay_gradient']) . ";";
+                    } elseif (!empty($slider['overlay_color'])) {
+                        $overlayColor = escape($slider['overlay_color']);
+                        $overlayStyle = "background: linear-gradient(135deg, {$overlayColor}, rgba(17, 24, 39, 0.8));";
+                    } else {
+                        $overlayStyle = "background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.8));";
+                    }
+                    
+                    // Background options
+                    $bgSize = !empty($slider['background_size']) ? $slider['background_size'] : 'cover';
+                    $bgPosition = !empty($slider['background_position']) ? escape($slider['background_position']) : 'center';
+                    $parallax = (isset($slider['parallax_effect']) && $slider['parallax_effect']) ? 'true' : 'false';
+                    
+                    // Height - prioritize slide, then global, then default
+                    $slideHeight = !empty($slider['slide_height']) ? $slider['slide_height'] : $globalSettings['height'];
+                    $customHeight = !empty($slider['custom_height']) ? escape($slider['custom_height']) : $globalSettings['custom_height'];
+                    $heightStyle = '';
+                    if ($slideHeight === 'full') {
+                        $heightStyle = 'height: 100vh;';
+                    } elseif ($slideHeight === 'custom' && !empty($customHeight)) {
+                        $heightStyle = 'height: ' . $customHeight . ';';
+                    }
+                    
+                    // Animation
+                    $contentAnimation = !empty($slider['content_animation']) ? $slider['content_animation'] : 'fade';
+                    $animationSpeed = !empty($slider['animation_speed']) ? $slider['animation_speed'] : 'normal';
+                    $speedClass = 'animation-speed-' . $animationSpeed;
+                    
+                    // Button styles
+                    $buttonStyle1 = !empty($slider['button_style_1']) ? $slider['button_style_1'] : 'primary';
+                    $buttonStyle2 = !empty($slider['button_style_2']) ? $slider['button_style_2'] : 'secondary';
+                    
+                    // Build background style (only if no video)
+                    $bgStyle = '';
+                    if (!$hasVideo) {
+                        $bgSizeValue = $bgSize;
+                        if ($bgSize === 'stretch' || $bgSize === 'fill') {
+                            $bgSizeValue = '100% 100%';
+                        }
+                        $bgStyle = "background-image: url('{$bgImage}'); background-size: {$bgSizeValue}; background-position: {$bgPosition}; background-repeat: no-repeat;";
+                    }
+                    
+                    // Animation classes
+                    $titleAnimClass = ($contentAnimation !== 'none') ? 'animate-' . $contentAnimation : '';
+                    $subtitleAnimClass = ($contentAnimation !== 'none') ? 'animate-' . $contentAnimation . ' animation-delay-200' : '';
+                    $descAnimClass = ($contentAnimation !== 'none') ? 'animate-' . $contentAnimation . ' animation-delay-400' : '';
+                    $buttonAnimClass = ($contentAnimation !== 'none') ? 'animate-' . $contentAnimation . ' animation-delay-600' : '';
+                    
+                    // Button alignment
+                    $buttonJustify = 'justify-center';
+                    if ($textAlign === 'left') {
+                        $buttonJustify = 'justify-start';
+                    } elseif ($textAlign === 'right') {
+                        $buttonJustify = 'justify-end';
+                    }
+                ?>
                 <div class="swiper-slide hero-slide" 
-                     style="<?= $bgStyle ?> <?= $heightStyle ?>"
-                     data-parallax="<?= $parallax ?>"
                      data-slide-index="<?= $index ?>"
-                     data-has-video="<?= $hasVideo ? 'true' : 'false' ?>">
+                     data-has-video="<?= $hasVideo ? 'true' : 'false' ?>"
+                     data-parallax="<?= $parallax ?>"
+                     style="<?= $bgStyle ?> <?= $heightStyle ?>">
+                    
                     <?php if ($hasVideo): ?>
                         <!-- Video Background -->
                         <video class="hero-video-bg" 
@@ -156,68 +211,82 @@ if (empty($sliders)) {
                                muted 
                                loop 
                                playsinline
-                               poster="<?= escape($bgImage) ?>">
-                            <source src="<?= escape($videoUrl) ?>" type="video/mp4" media="(min-width: 769px)">
-                            <?php if (!empty($videoMobileUrl)): ?>
-                                <source src="<?= escape($videoMobileUrl) ?>" type="video/mp4" media="(max-width: 768px)">
+                               preload="auto"
+                               poster="<?= $bgImage ?>">
+                            <source src="<?= $videoUrl ?>" type="video/mp4" media="(min-width: 769px)">
+                            <?php if (!empty($videoMobileUrl) && $videoMobileUrl !== $videoUrl): ?>
+                                <source src="<?= $videoMobileUrl ?>" type="video/mp4" media="(max-width: 768px)">
                             <?php endif; ?>
-                            <!-- Fallback to image if video fails -->
-                            Your browser does not support the video tag.
                         </video>
                     <?php else: ?>
+                        <!-- Mobile Image Override -->
                         <style>
                             @media (max-width: 768px) {
                                 .hero-slide[data-slide-index="<?= $index ?>"] {
-                                    background-image: url('<?= escape($bgImageMobile) ?>') !important;
-                                    background-size: <?= escape($bgSize === 'stretch' || $bgSize === 'fill' ? '100% 100%' : $bgSize) ?> !important;
-                                    background-position: <?= escape($bgPosition) ?> !important;
+                                    background-image: url('<?= $bgImageMobile ?>') !important;
                                 }
                             }
                         </style>
                     <?php endif; ?>
-                    <div class="hero-slide-overlay light" style="<?= $overlayStyle ?>"></div>
+                    
+                    <!-- Overlay -->
+                    <div class="hero-slide-overlay" style="<?= $overlayStyle ?>"></div>
+                    
+                    <!-- Content -->
                     <div class="container mx-auto px-4">
                         <div class="hero-slide-content max-w-4xl mx-auto" 
                              style="text-align: <?= $textAlign ?>; color: <?= $textColor ?>;">
-                            <?php 
-                            // Animation classes based on content_animation setting
-                            $titleAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation : '';
-                            $subtitleAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-200' : '';
-                            $descAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-400' : '';
-                            $buttonAnimClass = $contentAnimation !== 'none' ? 'animate-' . $contentAnimation . ' animation-delay-600' : '';
-                            ?>
-                            <?php if (!empty($slider['title'])): ?>
-                                <h1 class="<?= $titleAnimClass ?> <?= $speedClass ?>">
-                                    <?= escape($slider['title']) ?>
+                            
+                            <?php if (!empty($title)): ?>
+                                <h1 class="hero-title <?= $titleAnimClass ?> <?= $speedClass ?>">
+                                    <?= $title ?>
                                 </h1>
                             <?php endif; ?>
                             
-                            <?php if (!empty($slider['subtitle'])): ?>
-                                <p class="<?= $subtitleAnimClass ?> <?= $speedClass ?>">
-                                    <?= escape($slider['subtitle']) ?>
+                            <?php if (!empty($subtitle)): ?>
+                                <p class="hero-subtitle <?= $subtitleAnimClass ?> <?= $speedClass ?>">
+                                    <?= $subtitle ?>
                                 </p>
                             <?php endif; ?>
                             
-                            <?php if (!empty($slider['description'])): ?>
-                                <p class="<?= $descAnimClass ?> <?= $speedClass ?>">
-                                    <?= escape($slider['description']) ?>
+                            <?php if (!empty($description)): ?>
+                                <p class="hero-description <?= $descAnimClass ?> <?= $speedClass ?>">
+                                    <?= $description ?>
                                 </p>
                             <?php endif; ?>
                             
                             <?php if (!empty($slider['button_text_1']) || !empty($slider['button_text_2'])): ?>
-                                <div class="flex flex-col sm:flex-row gap-3 md:gap-4 justify-<?= $textAlign === 'center' ? 'center' : ($textAlign === 'right' ? 'end' : 'start') ?> <?= $buttonAnimClass ?> <?= $speedClass ?>">
+                                <div class="hero-buttons flex flex-col sm:flex-row gap-3 md:gap-4 <?= $buttonJustify ?> <?= $buttonAnimClass ?> <?= $speedClass ?>">
                                     <?php if (!empty($slider['button_text_1'])): ?>
                                         <a href="<?= escape($slider['button_link_1'] ?? '#') ?>" 
-                                           class="btn-<?= $buttonStyle1 ?> inline-block transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
-                                            <i class="fas fa-<?= strpos(strtolower($slider['button_text_1']), 'browse') !== false || strpos(strtolower($slider['button_text_1']), 'shop') !== false ? 'box' : (strpos(strtolower($slider['button_text_1']), 'quote') !== false ? 'calculator' : 'arrow-right') ?> mr-2"></i>
+                                           class="btn-<?= $buttonStyle1 ?> hero-btn">
+                                            <?php
+                                            $btn1Icon = 'arrow-right';
+                                            $btn1Text = strtolower($slider['button_text_1']);
+                                            if (strpos($btn1Text, 'browse') !== false || strpos($btn1Text, 'shop') !== false) {
+                                                $btn1Icon = 'box';
+                                            } elseif (strpos($btn1Text, 'quote') !== false) {
+                                                $btn1Icon = 'calculator';
+                                            }
+                                            ?>
+                                            <i class="fas fa-<?= $btn1Icon ?> mr-2"></i>
                                             <?= escape($slider['button_text_1']) ?>
                                         </a>
                                     <?php endif; ?>
                                     
                                     <?php if (!empty($slider['button_text_2'])): ?>
                                         <a href="<?= escape($slider['button_link_2'] ?? '#') ?>" 
-                                           class="btn-<?= $buttonStyle2 ?> inline-block transform hover:scale-105 transition-all shadow-lg hover:shadow-xl">
-                                            <i class="fas fa-<?= strpos(strtolower($slider['button_text_2']), 'quote') !== false ? 'calculator' : (strpos(strtolower($slider['button_text_2']), 'contact') !== false ? 'phone' : 'arrow-right') ?> mr-2"></i>
+                                           class="btn-<?= $buttonStyle2 ?> hero-btn">
+                                            <?php
+                                            $btn2Icon = 'arrow-right';
+                                            $btn2Text = strtolower($slider['button_text_2']);
+                                            if (strpos($btn2Text, 'quote') !== false) {
+                                                $btn2Icon = 'calculator';
+                                            } elseif (strpos($btn2Text, 'contact') !== false) {
+                                                $btn2Icon = 'phone';
+                                            }
+                                            ?>
+                                            <i class="fas fa-<?= $btn2Icon ?> mr-2"></i>
                                             <?= escape($slider['button_text_2']) ?>
                                         </a>
                                     <?php endif; ?>
@@ -226,395 +295,501 @@ if (empty($sliders)) {
                         </div>
                     </div>
                 </div>
-            <?php endforeach; ?>
+                <?php endforeach; ?>
+            </div>
+            
+            <!-- Navigation Arrows -->
+            <?php if ($globalSettings['show_navigation'] && $hasMultipleSlides): ?>
+                <?php
+                $showNavMobile = $globalSettings['navigation_mobile'] ? 'flex' : 'none';
+                ?>
+                <div class="swiper-button-next hero-nav-next" style="display: <?= $showNavMobile ?>;"></div>
+                <div class="swiper-button-prev hero-nav-prev" style="display: <?= $showNavMobile ?>;"></div>
+            <?php endif; ?>
+            
+            <!-- Pagination Dots -->
+            <?php if ($globalSettings['show_pagination'] && $hasMultipleSlides): ?>
+                <div class="swiper-pagination hero-pagination"></div>
+            <?php endif; ?>
         </div>
         
-        <!-- Navigation -->
-        <?php if ($globalSettings['show_navigation']): ?>
-        <div class="swiper-button-next hero-nav-next" style="display: <?= ($globalSettings['navigation_mobile'] || (!isset($_SERVER['HTTP_USER_AGENT']) || strpos($_SERVER['HTTP_USER_AGENT'], 'Mobile') === false)) ? 'flex' : 'none' ?>;"></div>
-        <div class="swiper-button-prev hero-nav-prev" style="display: <?= ($globalSettings['navigation_mobile'] || (!isset($_SERVER['HTTP_USER_AGENT']) || strpos($_SERVER['HTTP_USER_AGENT'], 'Mobile') === false)) ? 'flex' : 'none' ?>;"></div>
-        <?php endif; ?>
-        
-        <!-- Pagination -->
-        <?php if ($globalSettings['show_pagination']): ?>
-        <div class="swiper-pagination hero-pagination"></div>
+        <!-- Slide Counter -->
+        <?php if ($globalSettings['show_counter'] && $hasMultipleSlides): ?>
+            <div class="hero-slide-counter" id="hero-slide-counter">
+                <span class="counter-current">1</span>
+                <span class="counter-separator">/</span>
+                <span class="counter-total"><?= $sliderCount ?></span>
+            </div>
         <?php endif; ?>
     </div>
 </section>
 
 <script>
-// Wait for Swiper to load - handle both DOM ready and Swiper loading
 (function() {
-    function initHeroSwiper() {
-        // Check if Swiper is loaded
-        if (typeof Swiper === 'undefined') {
-            // Wait a bit more if Swiper isn't ready yet (max 5 seconds)
-            if (typeof initHeroSwiper.attempts === 'undefined') {
-                initHeroSwiper.attempts = 0;
-            }
-            initHeroSwiper.attempts++;
-            if (initHeroSwiper.attempts < 50) { // Try for 5 seconds (50 * 100ms)
-                setTimeout(initHeroSwiper, 100);
-            } else {
-                console.error('Swiper library failed to load after 5 seconds - using fallback');
-                // Fallback: Show first slide only
-                const slides = document.querySelectorAll('.hero-slide');
-                if (slides.length > 0) {
-                    slides.forEach((slide, index) => {
-                        if (index === 0) {
-                            slide.style.display = 'flex';
-                            slide.style.opacity = '1';
-                            slide.style.position = 'relative';
-                            slide.style.zIndex = '1';
-                        } else {
-                            slide.style.display = 'none';
-                        }
-                    });
+    'use strict';
+    
+    // Configuration
+    const CONFIG = {
+        swiperMaxWait: 5000, // Max 5 seconds to wait for Swiper
+        swiperCheckInterval: 100, // Check every 100ms
+        autoplayDelay: <?= $globalSettings['autoplay_delay'] ?>,
+        transitionSpeed: <?= $globalSettings['transition_speed'] ?>,
+        transitionEffect: '<?= escape($globalSettings['transition_effect']) ?>',
+        autoplayEnabled: <?= $globalSettings['autoplay_enabled'] ? 'true' : 'false' ?>,
+        pauseOnHover: <?= $globalSettings['pause_on_hover'] ? 'true' : 'false' ?>,
+        loopEnabled: <?= ($globalSettings['loop'] && $hasMultipleSlides) ? 'true' : 'false' ?>,
+        showProgress: <?= $globalSettings['show_progress'] ? 'true' : 'false' ?>,
+        showCounter: <?= $globalSettings['show_counter'] ? 'true' : 'false' ?>,
+        keyboardEnabled: <?= $globalSettings['keyboard_enabled'] ? 'true' : 'false' ?>,
+        mousewheelEnabled: <?= $globalSettings['mousewheel_enabled'] ? 'true' : 'false' ?>,
+        lazyLoading: <?= $globalSettings['lazy_loading'] ? 'true' : 'false' ?>,
+        preloadImages: <?= $globalSettings['preload_images'] ? 'true' : 'false' ?>,
+        slideCount: <?= $sliderCount ?>,
+        hasMultipleSlides: <?= $hasMultipleSlides ? 'true' : 'false' ?>
+    };
+    
+    // Get individual slide delay if available
+    const firstSlider = <?= json_encode($sliders[0] ?? []) ?>;
+    if (firstSlider && firstSlider.autoplay_delay && parseInt(firstSlider.autoplay_delay) > 0) {
+        CONFIG.autoplayDelay = parseInt(firstSlider.autoplay_delay);
+    }
+    
+    let heroSwiper = null;
+    let initAttempts = 0;
+    let isInitialized = false;
+    
+    // Fallback: Show first slide if Swiper fails
+    function showFallbackSlider() {
+        const slides = document.querySelectorAll('.hero-slide');
+        if (slides.length > 0) {
+            slides.forEach((slide, index) => {
+                if (index === 0) {
+                    slide.style.display = 'flex';
+                    slide.style.opacity = '1';
+                    slide.style.position = 'relative';
+                    slide.style.zIndex = '1';
+                } else {
+                    slide.style.display = 'none';
                 }
-            }
+            });
+        }
+        // Hide loading
+        const loading = document.getElementById('heroSliderLoading');
+        if (loading) loading.style.display = 'none';
+    }
+    
+    // Initialize Swiper
+    function initSwiper() {
+        // Prevent double initialization
+        if (isInitialized) return;
+        
+        const swiperEl = document.querySelector('.heroSwiper');
+        if (!swiperEl) {
+            console.warn('Hero slider element not found');
+            showFallbackSlider();
             return;
         }
         
+        // Check if Swiper is available
+        if (typeof Swiper === 'undefined') {
+            initAttempts++;
+            const maxAttempts = CONFIG.swiperMaxWait / CONFIG.swiperCheckInterval;
+            
+            if (initAttempts < maxAttempts) {
+                setTimeout(initSwiper, CONFIG.swiperCheckInterval);
+                return;
+            } else {
+                console.warn('Swiper library not loaded - using fallback');
+                showFallbackSlider();
+                return;
+            }
+        }
+        
         // Check if already initialized
-        const swiperEl = document.querySelector('.heroSwiper');
-        if (!swiperEl) {
-            return; // Slider element not found
-        }
-        
         if (swiperEl.swiper) {
-            return; // Already initialized
-        }
-        
-        // Initialize Swiper for Hero Slider with Advanced Features
-        // Get autoplay delay - prioritize individual slide setting, then global, then default
-        const firstSlider = <?= json_encode($sliders[0] ?? []) ?>;
-        let autoplayDelay = <?= $globalSettings['autoplay_delay'] ?>;
-        // Use individual slide delay if set and valid
-        if (firstSlider && firstSlider.autoplay_delay && parseInt(firstSlider.autoplay_delay) > 0) {
-            autoplayDelay = parseInt(firstSlider.autoplay_delay);
+            isInitialized = true;
+            return;
         }
         
         try {
-            const heroSwiper = new Swiper('.heroSwiper', {
+            // Build Swiper config
+            const swiperConfig = {
                 slidesPerView: 1,
                 spaceBetween: 0,
-                loop: <?= ($globalSettings['loop'] && count($sliders) > 1) ? 'true' : 'false' ?>,
-                autoplay: <?= $globalSettings['autoplay_enabled'] ? '{ delay: autoplayDelay, disableOnInteraction: false, pauseOnMouseEnter: ' . ($globalSettings['pause_on_hover'] ? 'true' : 'false') . ' }' : 'false' ?>,
-                speed: <?= $globalSettings['transition_speed'] ?>,
-                effect: '<?= escape($globalSettings['transition_effect']) ?>',
-                fadeEffect: {
-                    crossFade: true
-                },
-            cubeEffect: {
-                shadow: true,
-                slideShadows: true,
-                shadowOffset: 20,
-                shadowScale: 0.94,
-            },
-            coverflowEffect: {
-                rotate: 50,
-                stretch: 0,
-                depth: 100,
-                modifier: 1,
-                slideShadows: true,
-            },
-            flipEffect: {
-                slideShadows: true,
-                limitRotation: true,
-            },
-            pagination: <?= $globalSettings['show_pagination'] ? '{
-                el: ".hero-pagination",
-                clickable: true,
-                dynamicBullets: true,
-                renderBullet: function (index, className) {
-                    return "<span class=\"" + className + "\"><span class=\"bullet-progress\"></span></span>";
-                },
-            }' : 'false' ?>,
-            navigation: <?= $globalSettings['show_navigation'] ? '{
-                nextEl: ".hero-nav-next",
-                prevEl: ".hero-nav-prev",
-            }' : 'false' ?>,
-            keyboard: {
-                enabled: <?= $globalSettings['keyboard_enabled'] ? 'true' : 'false' ?>,
-                onlyInViewport: true,
-            },
-            mousewheel: {
-                enabled: <?= $globalSettings['mousewheel_enabled'] ? 'true' : 'false' ?>,
-                invert: false,
-            },
-            lazy: {
-                enabled: <?= $globalSettings['lazy_loading'] ? 'true' : 'false' ?>,
-                loadPrevNext: true,
-                loadPrevNextAmount: 1,
-            },
-            preloadImages: <?= $globalSettings['preload_images'] ? 'true' : 'false' ?>,
-            touchEventsTarget: 'container',
-            touchRatio: 1,
-            touchAngle: 45,
-            grabCursor: true,
-            a11y: {
+                loop: CONFIG.loopEnabled,
+                speed: CONFIG.transitionSpeed,
+                effect: CONFIG.transitionEffect,
+                touchEventsTarget: 'container',
+                touchRatio: 1,
+                touchAngle: 45,
+                grabCursor: true,
+                watchOverflow: true,
+                observer: true,
+                observeParents: true,
+            };
+            
+            // Autoplay
+            if (CONFIG.autoplayEnabled && CONFIG.hasMultipleSlides) {
+                swiperConfig.autoplay = {
+                    delay: CONFIG.autoplayDelay,
+                    disableOnInteraction: false,
+                    pauseOnMouseEnter: CONFIG.pauseOnHover,
+                };
+            }
+            
+            // Fade effect
+            if (CONFIG.transitionEffect === 'fade') {
+                swiperConfig.fadeEffect = { crossFade: true };
+            }
+            
+            // Cube effect
+            if (CONFIG.transitionEffect === 'cube') {
+                swiperConfig.cubeEffect = {
+                    shadow: true,
+                    slideShadows: true,
+                    shadowOffset: 20,
+                    shadowScale: 0.94,
+                };
+            }
+            
+            // Coverflow effect
+            if (CONFIG.transitionEffect === 'coverflow') {
+                swiperConfig.coverflowEffect = {
+                    rotate: 50,
+                    stretch: 0,
+                    depth: 100,
+                    modifier: 1,
+                    slideShadows: true,
+                };
+            }
+            
+            // Flip effect
+            if (CONFIG.transitionEffect === 'flip') {
+                swiperConfig.flipEffect = {
+                    slideShadows: true,
+                    limitRotation: true,
+                };
+            }
+            
+            // Pagination
+            if (CONFIG.hasMultipleSlides && document.querySelector('.hero-pagination')) {
+                swiperConfig.pagination = {
+                    el: '.hero-pagination',
+                    clickable: true,
+                    dynamicBullets: true,
+                    renderBullet: CONFIG.showProgress ? function(index, className) {
+                        return '<span class="' + className + '"><span class="bullet-progress"></span></span>';
+                    } : undefined,
+                };
+            }
+            
+            // Navigation
+            if (CONFIG.hasMultipleSlides && document.querySelector('.hero-nav-next')) {
+                swiperConfig.navigation = {
+                    nextEl: '.hero-nav-next',
+                    prevEl: '.hero-nav-prev',
+                };
+            }
+            
+            // Keyboard
+            if (CONFIG.keyboardEnabled) {
+                swiperConfig.keyboard = {
+                    enabled: true,
+                    onlyInViewport: true,
+                };
+            }
+            
+            // Mousewheel
+            if (CONFIG.mousewheelEnabled) {
+                swiperConfig.mousewheel = {
+                    enabled: true,
+                    invert: false,
+                };
+            }
+            
+            // Lazy loading
+            if (CONFIG.lazyLoading) {
+                swiperConfig.lazy = {
+                    enabled: true,
+                    loadPrevNext: true,
+                    loadPrevNextAmount: 1,
+                };
+            }
+            
+            // Preload images
+            swiperConfig.preloadImages = CONFIG.preloadImages;
+            
+            // Accessibility
+            swiperConfig.a11y = {
                 prevSlideMessage: 'Previous slide',
                 nextSlideMessage: 'Next slide',
                 firstSlideMessage: 'This is the first slide',
                 lastSlideMessage: 'This is the last slide',
-            },
-            on: {
+            };
+            
+            // Event handlers
+            swiperConfig.on = {
                 init: function() {
+                    isInitialized = true;
+                    hideLoading();
                     initSlideAnimations(this);
-                    initProgressBar(this);
+                    initProgressBar();
                     updateSlideCounter(this);
+                    initVideoBackgrounds();
                 },
                 slideChange: function() {
                     initSlideAnimations(this);
-                    resetProgressBar(this);
+                    resetProgressBar();
                     updateSlideCounter(this);
+                    handleVideoOnSlideChange(this);
                 },
                 autoplayTimeLeft: function(swiper, time, progress) {
-                    updateProgressBar(swiper, progress);
+                    if (CONFIG.showProgress) {
+                        updateProgressBar(progress);
+                    }
                 },
-            }
-            });
+            };
             
-            // Store reference globally for debugging
+            // Initialize Swiper
+            heroSwiper = new Swiper('.heroSwiper', swiperConfig);
+            
+            // Store globally for debugging
             window.heroSwiper = heroSwiper;
             
-            // Initialize slide animations
-            function initSlideAnimations(swiper) {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            if (activeSlide) {
-                const animatedElements = activeSlide.querySelectorAll('.animate-fade, .animate-slide-up, .animate-slide-down, .animate-zoom');
-                animatedElements.forEach(function(el) {
-                    el.style.opacity = '0';
-                    el.style.transform = getInitialTransform(el);
-                    setTimeout(function() {
-                        el.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
-                        el.style.opacity = '1';
-                        el.style.transform = 'translateY(0) scale(1)';
-                    }, 100);
-                });
-            }
-        }
-        
-        // Get initial transform based on animation type
-        function getInitialTransform(el) {
-            if (el.classList.contains('animate-slide-up')) {
-                return 'translateY(30px)';
-            } else if (el.classList.contains('animate-slide-down')) {
-                return 'translateY(-30px)';
-            } else if (el.classList.contains('animate-zoom')) {
-                return 'scale(0.9)';
-            }
-            return 'translateY(0) scale(1)';
-        }
-        
-        // Progress bar for autoplay
-        <?php if ($globalSettings['show_progress']): ?>
-        function initProgressBar(swiper) {
-            const bullets = document.querySelectorAll('.hero-pagination .swiper-pagination-bullet');
-            bullets.forEach(function(bullet) {
-                if (!bullet.querySelector('.bullet-progress')) {
-                    const progress = document.createElement('span');
-                    progress.className = 'bullet-progress';
-                    bullet.appendChild(progress);
-                }
-            });
-        }
-        
-        function resetProgressBar(swiper) {
-            const bullets = document.querySelectorAll('.hero-pagination .swiper-pagination-bullet');
-            bullets.forEach(function(bullet) {
-                const progress = bullet.querySelector('.bullet-progress');
-                if (progress) {
-                    progress.style.width = '0%';
-                }
-            });
-        }
-        
-        function updateProgressBar(swiper, progress) {
-            const activeBullet = document.querySelector('.hero-pagination .swiper-pagination-bullet-active');
-            if (activeBullet) {
-                const progressBar = activeBullet.querySelector('.bullet-progress');
-                if (progressBar) {
-                    progressBar.style.width = (progress * 100) + '%';
-                }
-            }
-        }
-        <?php else: ?>
-        // Progress bar disabled in global settings
-        function initProgressBar(swiper) {}
-        function resetProgressBar(swiper) {}
-        function updateProgressBar(swiper, progress) {}
-        <?php endif; ?>
-        
-        // Slide counter
-        function updateSlideCounter(swiper) {
-            <?php if ($globalSettings['show_counter']): ?>
-            let counterEl = document.getElementById('hero-slide-counter');
-            if (!counterEl) {
-                counterEl = document.createElement('div');
-                counterEl.id = 'hero-slide-counter';
-                counterEl.className = 'hero-slide-counter';
-                document.querySelector('.hero-slider').appendChild(counterEl);
-            }
-            const current = swiper.realIndex + 1;
-            const total = swiper.slides.length;
-            counterEl.innerHTML = '<span class="counter-current">' + current + '</span><span class="counter-separator">/</span><span class="counter-total">' + total + '</span>';
-            <?php else: ?>
-            // Counter disabled in global settings
-            <?php endif; ?>
-        }
-        
-        // Parallax effect for slides with data-parallax="true"
-        const parallaxSlides = document.querySelectorAll('.hero-slide[data-parallax="true"]');
-        if (parallaxSlides.length > 0 && window.innerWidth > 768) {
-            let ticking = false;
-            window.addEventListener('scroll', function() {
-                if (!ticking) {
-                    window.requestAnimationFrame(function() {
-                        const scrolled = window.pageYOffset;
-                        parallaxSlides.forEach(function(slide) {
-                            const rect = slide.getBoundingClientRect();
-                            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                                const rate = scrolled * 0.3;
-                                slide.style.transform = 'translateY(' + rate + 'px)';
-                            }
-                        });
-                        ticking = false;
-                    });
-                    ticking = true;
-                }
-            });
-        }
-        
-        // Initialize video backgrounds
-        function initVideoBackgrounds() {
-            const videoSlides = document.querySelectorAll('.hero-slide[data-has-video="true"]');
-            videoSlides.forEach(function(slide) {
-                const video = slide.querySelector('video.hero-video-bg');
-                if (video) {
-                    // Ensure video plays
-                    video.addEventListener('loadeddata', function() {
-                        video.play().catch(function(e) {
-                            console.log('Video autoplay prevented:', e);
-                        });
-                    });
-                    
-                    // Play video when slide becomes active
-                    const observer = new MutationObserver(function(mutations) {
-                        if (slide.classList.contains('swiper-slide-active')) {
-                            video.play().catch(function(e) {
-                                console.log('Video play prevented:', e);
-                            });
-                        } else {
-                            video.pause();
-                        }
-                    });
-                    
-                    observer.observe(slide, {
-                        attributes: true,
-                        attributeFilter: ['class']
-                    });
-                    
-                    // Initial play if slide is active
-                    if (slide.classList.contains('swiper-slide-active')) {
-                        video.play().catch(function(e) {
-                            console.log('Video autoplay prevented:', e);
-                        });
-                    }
-                }
-            });
-        }
-        
-            // Initialize videos after Swiper is ready
+            // Setup hover pause
+            setupHoverPause();
+            
+            // Setup video backgrounds
             initVideoBackgrounds();
             
-            // Re-initialize videos on slide change
-            heroSwiper.on('slideChange', function() {
-                initVideoBackgrounds();
-            });
-            
-            // Pause autoplay on hover (if not already handled)
-            const heroSlider = document.querySelector('.hero-slider');
-            if (heroSlider && heroSwiper.autoplay) {
-                heroSlider.addEventListener('mouseenter', function() {
-                    if (heroSwiper.autoplay && heroSwiper.autoplay.running) {
-                        heroSwiper.autoplay.pause();
-                    }
-                    // Pause videos on hover
-                    const videos = heroSlider.querySelectorAll('video.hero-video-bg');
-                    videos.forEach(function(video) {
-                        video.pause();
-                    });
-                });
-                heroSlider.addEventListener('mouseleave', function() {
-                    if (heroSwiper.autoplay && !heroSwiper.autoplay.running) {
-                        heroSwiper.autoplay.resume();
-                    }
-                    // Resume active video
-                    const activeSlide = document.querySelector('.hero-slide.swiper-slide-active');
-                    if (activeSlide) {
-                        const video = activeSlide.querySelector('video.hero-video-bg');
-                        if (video) {
-                            video.play().catch(function(e) {
-                                console.log('Video play prevented:', e);
-                            });
-                        }
-                    }
-                });
-            }
-            
-            // Keyboard shortcuts indicator (optional - can be toggled)
-            let showShortcuts = false;
-            document.addEventListener('keydown', function(e) {
-                if (e.key === '?' && e.shiftKey) {
-                    showShortcuts = !showShortcuts;
-                    toggleShortcutsIndicator(showShortcuts);
-                }
-            });
-            
-            function toggleShortcutsIndicator(show) {
-                let indicator = document.getElementById('hero-shortcuts');
-                if (!indicator && show) {
-                    indicator = document.createElement('div');
-                    indicator.id = 'hero-shortcuts';
-                    indicator.className = 'hero-shortcuts';
-                    indicator.innerHTML = '<div class="shortcuts-content"><h4>Keyboard Shortcuts</h4><ul><li><kbd>←</kbd> Previous slide</li><li><kbd>→</kbd> Next slide</li><li><kbd>Space</kbd> Pause/Resume</li><li><kbd>?</kbd> Toggle this help</li></ul></div>';
-                    document.querySelector('.hero-slider').appendChild(indicator);
-                } else if (indicator) {
-                    indicator.style.display = show ? 'block' : 'none';
-                }
-            }
         } catch (error) {
             console.error('Error initializing hero slider:', error);
-            // Fallback: Show first slide only
-            const slides = document.querySelectorAll('.hero-slide');
-            if (slides.length > 0) {
-                slides.forEach((slide, index) => {
-                    if (index === 0) {
-                        slide.style.display = 'flex';
-                        slide.style.opacity = '1';
-                        slide.style.position = 'relative';
-                        slide.style.zIndex = '1';
-                    } else {
-                        slide.style.display = 'none';
-                    }
+            showFallbackSlider();
+        }
+    }
+    
+    // Hide loading indicator
+    function hideLoading() {
+        const loading = document.getElementById('heroSliderLoading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
+    
+    // Initialize slide animations
+    function initSlideAnimations(swiper) {
+        if (!swiper || !swiper.slides) return;
+        
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        if (!activeSlide) return;
+        
+        const animatedElements = activeSlide.querySelectorAll('.animate-fade, .animate-slide-up, .animate-slide-down, .animate-zoom');
+        animatedElements.forEach(function(el) {
+            el.style.opacity = '0';
+            el.style.transform = getInitialTransform(el);
+            
+            setTimeout(function() {
+                el.style.transition = 'opacity 0.8s ease-out, transform 0.8s ease-out';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0) scale(1)';
+            }, 100);
+        });
+    }
+    
+    // Get initial transform
+    function getInitialTransform(el) {
+        if (el.classList.contains('animate-slide-up')) {
+            return 'translateY(30px)';
+        } else if (el.classList.contains('animate-slide-down')) {
+            return 'translateY(-30px)';
+        } else if (el.classList.contains('animate-zoom')) {
+            return 'scale(0.9)';
+        }
+        return 'translateY(0) scale(1)';
+    }
+    
+    // Progress bar functions
+    function initProgressBar() {
+        if (!CONFIG.showProgress) return;
+        
+        const bullets = document.querySelectorAll('.hero-pagination .swiper-pagination-bullet');
+        bullets.forEach(function(bullet) {
+            if (!bullet.querySelector('.bullet-progress')) {
+                const progress = document.createElement('span');
+                progress.className = 'bullet-progress';
+                bullet.appendChild(progress);
+            }
+        });
+    }
+    
+    function resetProgressBar() {
+        if (!CONFIG.showProgress) return;
+        
+        const bullets = document.querySelectorAll('.hero-pagination .swiper-pagination-bullet');
+        bullets.forEach(function(bullet) {
+            const progress = bullet.querySelector('.bullet-progress');
+            if (progress) {
+                progress.style.width = '0%';
+            }
+        });
+    }
+    
+    function updateProgressBar(progress) {
+        if (!CONFIG.showProgress) return;
+        
+        const activeBullet = document.querySelector('.hero-pagination .swiper-pagination-bullet-active');
+        if (activeBullet) {
+            const progressBar = activeBullet.querySelector('.bullet-progress');
+            if (progressBar) {
+                progressBar.style.width = (progress * 100) + '%';
+            }
+        }
+    }
+    
+    // Slide counter
+    function updateSlideCounter(swiper) {
+        if (!CONFIG.showCounter || !swiper) return;
+        
+        let counterEl = document.getElementById('hero-slide-counter');
+        if (!counterEl) {
+            counterEl = document.createElement('div');
+            counterEl.id = 'hero-slide-counter';
+            counterEl.className = 'hero-slide-counter';
+            const wrapper = document.querySelector('.hero-slider-wrapper');
+            if (wrapper) wrapper.appendChild(counterEl);
+        }
+        
+        if (counterEl) {
+            const current = swiper.realIndex !== undefined ? swiper.realIndex + 1 : swiper.activeIndex + 1;
+            const total = swiper.slides ? swiper.slides.length : CONFIG.slideCount;
+            counterEl.innerHTML = '<span class="counter-current">' + current + '</span><span class="counter-separator">/</span><span class="counter-total">' + total + '</span>';
+        }
+    }
+    
+    // Video background handling
+    function initVideoBackgrounds() {
+        const videoSlides = document.querySelectorAll('.hero-slide[data-has-video="true"]');
+        videoSlides.forEach(function(slide) {
+            const video = slide.querySelector('video.hero-video-bg');
+            if (video) {
+                // Try to play video
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(function(error) {
+                        // Autoplay prevented - this is normal in some browsers
+                        console.log('Video autoplay prevented (normal behavior):', error);
+                    });
+                }
+            }
+        });
+    }
+    
+    function handleVideoOnSlideChange(swiper) {
+        if (!swiper || !swiper.slides) return;
+        
+        const activeSlide = swiper.slides[swiper.activeIndex];
+        if (!activeSlide) return;
+        
+        // Pause all videos
+        const allVideos = document.querySelectorAll('.hero-video-bg');
+        allVideos.forEach(function(video) {
+            video.pause();
+        });
+        
+        // Play active slide video
+        const activeVideo = activeSlide.querySelector('video.hero-video-bg');
+        if (activeVideo) {
+            const playPromise = activeVideo.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(function(error) {
+                    console.log('Video play prevented:', error);
                 });
             }
         }
     }
     
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initHeroSwiper);
-    } else {
-        // DOM already loaded, try to initialize
-        initHeroSwiper();
+    // Setup hover pause
+    function setupHoverPause() {
+        if (!heroSwiper || !CONFIG.pauseOnHover) return;
+        
+        const heroSlider = document.querySelector('.hero-slider-container');
+        if (!heroSlider) return;
+        
+        heroSlider.addEventListener('mouseenter', function() {
+            if (heroSwiper.autoplay && heroSwiper.autoplay.running) {
+                heroSwiper.autoplay.pause();
+            }
+            // Pause videos
+            const videos = heroSlider.querySelectorAll('video.hero-video-bg');
+            videos.forEach(function(video) {
+                video.pause();
+            });
+        });
+        
+        heroSlider.addEventListener('mouseleave', function() {
+            if (heroSwiper.autoplay && !heroSwiper.autoplay.running) {
+                heroSwiper.autoplay.resume();
+            }
+            // Resume active video
+            const activeSlide = document.querySelector('.hero-slide.swiper-slide-active');
+            if (activeSlide) {
+                const video = activeSlide.querySelector('video.hero-video-bg');
+                if (video) {
+                    video.play().catch(function(e) {
+                        console.log('Video play prevented:', e);
+                    });
+                }
+            }
+        });
     }
     
-    // Also try after window load (in case Swiper loads late)
-    window.addEventListener('load', function() {
-        setTimeout(initHeroSwiper, 100);
-    });
+    // Parallax effect
+    function initParallax() {
+        const parallaxSlides = document.querySelectorAll('.hero-slide[data-parallax="true"]');
+        if (parallaxSlides.length === 0 || window.innerWidth <= 768) return;
+        
+        let ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    const scrolled = window.pageYOffset;
+                    parallaxSlides.forEach(function(slide) {
+                        const rect = slide.getBoundingClientRect();
+                        if (rect.top < window.innerHeight && rect.bottom > 0) {
+                            const rate = scrolled * 0.3;
+                            slide.style.transform = 'translateY(' + rate + 'px)';
+                        }
+                    });
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }, { passive: true });
+    }
+    
+    // Initialize when ready
+    function startInitialization() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                initSwiper();
+                initParallax();
+            });
+        } else {
+            initSwiper();
+            initParallax();
+        }
+        
+        // Also try after window load
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (!isInitialized) {
+                    initSwiper();
+                }
+            }, 100);
+        });
+    }
+    
+    // Start
+    startInitialization();
 })();
 </script>
-
