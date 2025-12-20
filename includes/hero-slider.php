@@ -1,7 +1,7 @@
 <?php
 /**
- * Hero Slider Component - Revolution Slider Style
- * Advanced layer-based animations, Ken Burns effect, and modern transitions
+ * Hero Slider Component - Ultra Modern Premium Design
+ * Cutting-edge animations, effects, and modern UI patterns
  */
 
 use App\Database\Connection;
@@ -31,6 +31,8 @@ $globalSettings = [
     'ken_burns_enabled' => 1,
     'parallax_enabled' => 1,
     'particle_effects' => 0,
+    'animated_gradients' => 1,
+    'morphing_shapes' => 1,
 ];
 
 // Try to load from database, but never fail if it doesn't work
@@ -57,6 +59,8 @@ try {
         $globalSettings['ken_burns_enabled'] = (bool)$settingModel->get('hero_slider_ken_burns', 1);
         $globalSettings['parallax_enabled'] = (bool)$settingModel->get('hero_slider_parallax', 1);
         $globalSettings['particle_effects'] = (bool)$settingModel->get('hero_slider_particles', 0);
+        $globalSettings['animated_gradients'] = (bool)$settingModel->get('hero_slider_animated_gradients', 1);
+        $globalSettings['morphing_shapes'] = (bool)$settingModel->get('hero_slider_morphing_shapes', 1);
     }
 } catch (\Exception $e) {
     // Silently use defaults - never break the page
@@ -110,12 +114,22 @@ $sliderCount = count($sliders);
 $hasMultipleSlides = $sliderCount > 1;
 ?>
 
-<!-- Hero Slider Section - Revolution Style -->
-<section class="hero-slider-revolution" id="heroSliderSection" data-slide-count="<?= $sliderCount ?>">
+<!-- Hero Slider Section - Ultra Modern Premium -->
+<section class="hero-slider-premium" id="heroSliderSection" data-slide-count="<?= $sliderCount ?>">
     <!-- Loading State -->
     <div class="hero-slider-loading" id="heroSliderLoading">
         <div class="loading-spinner"></div>
     </div>
+    
+    <!-- Animated Background Shapes -->
+    <?php if ($globalSettings['morphing_shapes']): ?>
+    <div class="hero-animated-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+    </div>
+    <?php endif; ?>
     
     <!-- Slider Container -->
     <div class="hero-slider-wrapper">
@@ -145,7 +159,7 @@ $hasMultipleSlides = $sliderCount > 1;
                     $textAlign = !empty($slider['text_alignment']) ? $slider['text_alignment'] : 'center';
                     $textColor = !empty($slider['text_color']) ? escape($slider['text_color']) : '#ffffff';
                     
-                    // Overlay
+                    // Overlay with animated gradient
                     $overlayStyle = '';
                     if (!empty($slider['overlay_gradient'])) {
                         $overlayStyle = "background: " . escape($slider['overlay_gradient']) . ";";
@@ -153,7 +167,7 @@ $hasMultipleSlides = $sliderCount > 1;
                         $overlayColor = escape($slider['overlay_color']);
                         $overlayStyle = "background: linear-gradient(135deg, {$overlayColor}, rgba(17, 24, 39, 0.8));";
                     } else {
-                        $overlayStyle = "background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.8));";
+                        $overlayStyle = "background: linear-gradient(135deg, rgba(30, 58, 138, 0.85), rgba(17, 24, 39, 0.75));";
                     }
                     
                     // Background options
@@ -193,11 +207,11 @@ $hasMultipleSlides = $sliderCount > 1;
                         $bgStyle = "background-image: url('{$bgImage}'); background-size: {$bgSizeValue}; background-position: {$bgPosition}; background-repeat: no-repeat;";
                     }
                     
-                    // Animation classes - Revolution style
-                    $titleAnimClass = ($contentAnimation !== 'none') ? 'rev-animate-' . $contentAnimation : '';
-                    $subtitleAnimClass = ($contentAnimation !== 'none') ? 'rev-animate-' . $contentAnimation . ' rev-delay-200' : '';
-                    $descAnimClass = ($contentAnimation !== 'none') ? 'rev-animate-' . $contentAnimation . ' rev-delay-400' : '';
-                    $buttonAnimClass = ($contentAnimation !== 'none') ? 'rev-animate-' . $contentAnimation . ' rev-delay-600' : '';
+                    // Animation classes - Premium style
+                    $titleAnimClass = ($contentAnimation !== 'none') ? 'premium-animate-' . $contentAnimation : '';
+                    $subtitleAnimClass = ($contentAnimation !== 'none') ? 'premium-animate-' . $contentAnimation . ' premium-delay-200' : '';
+                    $descAnimClass = ($contentAnimation !== 'none') ? 'premium-animate-' . $contentAnimation . ' premium-delay-400' : '';
+                    $buttonAnimClass = ($contentAnimation !== 'none') ? 'premium-animate-' . $contentAnimation . ' premium-delay-600' : '';
                     
                     // Button alignment
                     $buttonJustify = 'justify-center';
@@ -207,7 +221,7 @@ $hasMultipleSlides = $sliderCount > 1;
                         $buttonJustify = 'justify-end';
                     }
                 ?>
-                <div class="swiper-slide hero-slide-rev" 
+                <div class="swiper-slide hero-slide-premium" 
                      data-slide-index="<?= $index ?>"
                      data-has-video="<?= $hasVideo ? 'true' : 'false' ?>"
                      data-parallax="<?= $parallax ?>"
@@ -238,11 +252,16 @@ $hasMultipleSlides = $sliderCount > 1;
                             <!-- Mobile Image Override -->
                             <style>
                                 @media (max-width: 768px) {
-                                    .hero-slide-rev[data-slide-index="<?= $index ?>"] .hero-image-bg {
+                                    .hero-slide-premium[data-slide-index="<?= $index ?>"] .hero-image-bg {
                                         background-image: url('<?= $bgImageMobile ?>') !important;
                                     }
                                 }
                             </style>
+                        <?php endif; ?>
+                        
+                        <!-- Animated Gradient Overlay -->
+                        <?php if ($globalSettings['animated_gradients']): ?>
+                            <div class="hero-gradient-overlay"></div>
                         <?php endif; ?>
                         
                         <!-- Particle Effects (optional) -->
@@ -264,11 +283,11 @@ $hasMultipleSlides = $sliderCount > 1;
                                     <div class="hero-layer hero-layer-title <?= $titleAnimClass ?> <?= $speedClass ?>" 
                                          data-layer-delay="0"
                                          style="color: <?= $textColor ?>;">
-                                        <h1 class="rev-title">
+                                        <h1 class="premium-title">
                                             <?php if (strpos($contentAnimation, 'split') !== false || strpos($contentAnimation, 'word') !== false): ?>
-                                                <span class="rev-text-split"><?= $title ?></span>
+                                                <span class="premium-text-split"><?= $title ?></span>
                                             <?php elseif (strpos($contentAnimation, 'letter') !== false): ?>
-                                                <span class="rev-text-letters"><?= $title ?></span>
+                                                <span class="premium-text-letters"><?= $title ?></span>
                                             <?php else: ?>
                                                 <?= $title ?>
                                             <?php endif; ?>
@@ -281,11 +300,11 @@ $hasMultipleSlides = $sliderCount > 1;
                                     <div class="hero-layer hero-layer-subtitle <?= $subtitleAnimClass ?> <?= $speedClass ?>" 
                                          data-layer-delay="200"
                                          style="color: <?= $textColor ?>;">
-                                        <p class="rev-subtitle">
+                                        <p class="premium-subtitle">
                                             <?php if (strpos($contentAnimation, 'split') !== false || strpos($contentAnimation, 'word') !== false): ?>
-                                                <span class="rev-text-split"><?= $subtitle ?></span>
+                                                <span class="premium-text-split"><?= $subtitle ?></span>
                                             <?php elseif (strpos($contentAnimation, 'letter') !== false): ?>
-                                                <span class="rev-text-letters"><?= $subtitle ?></span>
+                                                <span class="premium-text-letters"><?= $subtitle ?></span>
                                             <?php else: ?>
                                                 <?= $subtitle ?>
                                             <?php endif; ?>
@@ -298,9 +317,9 @@ $hasMultipleSlides = $sliderCount > 1;
                                     <div class="hero-layer hero-layer-description <?= $descAnimClass ?> <?= $speedClass ?>" 
                                          data-layer-delay="400"
                                          style="color: <?= $textColor ?>;">
-                                        <p class="rev-description">
+                                        <p class="premium-description">
                                             <?php if (strpos($contentAnimation, 'split') !== false || strpos($contentAnimation, 'word') !== false): ?>
-                                                <span class="rev-text-split"><?= $description ?></span>
+                                                <span class="premium-text-split"><?= $description ?></span>
                                             <?php else: ?>
                                                 <?= $description ?>
                                             <?php endif; ?>
@@ -312,10 +331,10 @@ $hasMultipleSlides = $sliderCount > 1;
                                 <?php if (!empty($slider['button_text_1']) || !empty($slider['button_text_2'])): ?>
                                     <div class="hero-layer hero-layer-buttons <?= $buttonAnimClass ?> <?= $speedClass ?>" 
                                          data-layer-delay="600">
-                                        <div class="rev-buttons flex flex-col sm:flex-row gap-3 md:gap-4 <?= $buttonJustify ?>">
+                                        <div class="premium-buttons flex flex-col sm:flex-row gap-4 md:gap-5 <?= $buttonJustify ?>">
                                             <?php if (!empty($slider['button_text_1'])): ?>
                                                 <a href="<?= escape($slider['button_link_1'] ?? '#') ?>" 
-                                                   class="rev-btn rev-btn-<?= $buttonStyle1 ?>">
+                                                   class="premium-btn premium-btn-<?= $buttonStyle1 ?>">
                                                     <?php
                                                     $btn1Icon = 'arrow-right';
                                                     $btn1Text = strtolower($slider['button_text_1']);
@@ -325,14 +344,17 @@ $hasMultipleSlides = $sliderCount > 1;
                                                         $btn1Icon = 'calculator';
                                                     }
                                                     ?>
-                                                    <i class="fas fa-<?= $btn1Icon ?> mr-2"></i>
-                                                    <?= escape($slider['button_text_1']) ?>
+                                                    <span class="btn-content">
+                                                        <i class="fas fa-<?= $btn1Icon ?>"></i>
+                                                        <span><?= escape($slider['button_text_1']) ?></span>
+                                                    </span>
+                                                    <span class="btn-shine"></span>
                                                 </a>
                                             <?php endif; ?>
                                             
                                             <?php if (!empty($slider['button_text_2'])): ?>
                                                 <a href="<?= escape($slider['button_link_2'] ?? '#') ?>" 
-                                                   class="rev-btn rev-btn-<?= $buttonStyle2 ?>">
+                                                   class="premium-btn premium-btn-<?= $buttonStyle2 ?>">
                                                     <?php
                                                     $btn2Icon = 'arrow-right';
                                                     $btn2Text = strtolower($slider['button_text_2']);
@@ -342,8 +364,11 @@ $hasMultipleSlides = $sliderCount > 1;
                                                         $btn2Icon = 'phone';
                                                     }
                                                     ?>
-                                                    <i class="fas fa-<?= $btn2Icon ?> mr-2"></i>
-                                                    <?= escape($slider['button_text_2']) ?>
+                                                    <span class="btn-content">
+                                                        <i class="fas fa-<?= $btn2Icon ?>"></i>
+                                                        <span><?= escape($slider['button_text_2']) ?></span>
+                                                    </span>
+                                                    <span class="btn-shine"></span>
                                                 </a>
                                             <?php endif; ?>
                                         </div>
@@ -362,22 +387,28 @@ $hasMultipleSlides = $sliderCount > 1;
                 <?php
                 $showNavMobile = $globalSettings['navigation_mobile'] ? 'flex' : 'none';
                 ?>
-                <div class="swiper-button-next rev-nav-next" style="display: <?= $showNavMobile ?>;"></div>
-                <div class="swiper-button-prev rev-nav-prev" style="display: <?= $showNavMobile ?>;"></div>
+                <div class="swiper-button-next premium-nav-next" style="display: <?= $showNavMobile ?>;">
+                    <div class="nav-arrow-inner"></div>
+                </div>
+                <div class="swiper-button-prev premium-nav-prev" style="display: <?= $showNavMobile ?>;">
+                    <div class="nav-arrow-inner"></div>
+                </div>
             <?php endif; ?>
             
             <!-- Pagination Dots -->
             <?php if ($globalSettings['show_pagination'] && $hasMultipleSlides): ?>
-                <div class="swiper-pagination rev-pagination"></div>
+                <div class="swiper-pagination premium-pagination"></div>
             <?php endif; ?>
         </div>
         
         <!-- Slide Counter -->
         <?php if ($globalSettings['show_counter'] && $hasMultipleSlides): ?>
-            <div class="rev-slide-counter" id="rev-slide-counter">
-                <span class="counter-current">1</span>
-                <span class="counter-separator">/</span>
-                <span class="counter-total"><?= $sliderCount ?></span>
+            <div class="premium-slide-counter" id="premium-slide-counter">
+                <div class="counter-inner">
+                    <span class="counter-current">1</span>
+                    <span class="counter-separator">/</span>
+                    <span class="counter-total"><?= $sliderCount ?></span>
+                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -406,6 +437,8 @@ $hasMultipleSlides = $sliderCount > 1;
         kenBurnsEnabled: <?= $globalSettings['ken_burns_enabled'] ? 'true' : 'false' ?>,
         parallaxEnabled: <?= $globalSettings['parallax_enabled'] ? 'true' : 'false' ?>,
         particleEffects: <?= $globalSettings['particle_effects'] ? 'true' : 'false' ?>,
+        animatedGradients: <?= $globalSettings['animated_gradients'] ? 'true' : 'false' ?>,
+        morphingShapes: <?= $globalSettings['morphing_shapes'] ? 'true' : 'false' ?>,
         slideCount: <?= $sliderCount ?>,
         hasMultipleSlides: <?= $hasMultipleSlides ? 'true' : 'false' ?>
     };
@@ -422,7 +455,7 @@ $hasMultipleSlides = $sliderCount > 1;
     
     // Fallback: Show first slide if Swiper fails
     function showFallbackSlider() {
-        const slides = document.querySelectorAll('.hero-slide-rev');
+        const slides = document.querySelectorAll('.hero-slide-premium');
         if (slides.length > 0) {
             slides.forEach((slide, index) => {
                 if (index === 0) {
@@ -523,9 +556,9 @@ $hasMultipleSlides = $sliderCount > 1;
                 };
             }
             
-            if (CONFIG.hasMultipleSlides && document.querySelector('.rev-pagination')) {
+            if (CONFIG.hasMultipleSlides && document.querySelector('.premium-pagination')) {
                 swiperConfig.pagination = {
-                    el: '.rev-pagination',
+                    el: '.premium-pagination',
                     clickable: true,
                     dynamicBullets: true,
                     renderBullet: CONFIG.showProgress ? function(index, className) {
@@ -534,10 +567,10 @@ $hasMultipleSlides = $sliderCount > 1;
                 };
             }
             
-            if (CONFIG.hasMultipleSlides && document.querySelector('.rev-nav-next')) {
+            if (CONFIG.hasMultipleSlides && document.querySelector('.premium-nav-next')) {
                 swiperConfig.navigation = {
-                    nextEl: '.rev-nav-next',
-                    prevEl: '.rev-nav-prev',
+                    nextEl: '.premium-nav-next',
+                    prevEl: '.premium-nav-prev',
                 };
             }
             
@@ -576,20 +609,22 @@ $hasMultipleSlides = $sliderCount > 1;
                 init: function() {
                     isInitialized = true;
                     hideLoading();
-                    initRevolutionAnimations(this);
+                    initPremiumAnimations(this);
                     initProgressBar();
                     updateSlideCounter(this);
                     initVideoBackgrounds();
                     initKenBurns();
                     if (CONFIG.particleEffects) initParticles();
+                    if (CONFIG.animatedGradients) initAnimatedGradients();
                 },
                 slideChange: function() {
-                    initRevolutionAnimations(this);
+                    initPremiumAnimations(this);
                     resetProgressBar();
                     updateSlideCounter(this);
                     handleVideoOnSlideChange(this);
                     initKenBurns();
                     if (CONFIG.particleEffects) initParticles();
+                    if (CONFIG.animatedGradients) initAnimatedGradients();
                 },
                 autoplayTimeLeft: function(swiper, time, progress) {
                     if (CONFIG.showProgress) {
@@ -604,6 +639,7 @@ $hasMultipleSlides = $sliderCount > 1;
             setupHoverPause();
             initVideoBackgrounds();
             initParallax();
+            if (CONFIG.morphingShapes) initMorphingShapes();
             
         } catch (error) {
             console.error('Error initializing hero slider:', error);
@@ -617,8 +653,8 @@ $hasMultipleSlides = $sliderCount > 1;
         if (loading) loading.style.display = 'none';
     }
     
-    // Revolution-style animations
-    function initRevolutionAnimations(swiper) {
+    // Premium animations
+    function initPremiumAnimations(swiper) {
         if (!swiper || !swiper.slides) return;
         
         const activeSlide = swiper.slides[swiper.activeIndex];
@@ -627,7 +663,7 @@ $hasMultipleSlides = $sliderCount > 1;
         // Reset all layers
         const layers = activeSlide.querySelectorAll('.hero-layer');
         layers.forEach(function(layer) {
-            layer.classList.remove('rev-animated');
+            layer.classList.remove('premium-animated');
             layer.style.opacity = '0';
             layer.style.transform = '';
         });
@@ -635,13 +671,13 @@ $hasMultipleSlides = $sliderCount > 1;
         // Animate layers with delays
         layers.forEach(function(layer) {
             const delay = parseInt(layer.getAttribute('data-layer-delay') || 0);
-            const animClass = Array.from(layer.classList).find(cls => cls.startsWith('rev-animate-'));
+            const animClass = Array.from(layer.classList).find(cls => cls.startsWith('premium-animate-'));
             
             setTimeout(function() {
-                layer.classList.add('rev-animated');
+                layer.classList.add('premium-animated');
                 
                 // Handle text splitting animations
-                const splitTexts = layer.querySelectorAll('.rev-text-split, .rev-text-letters');
+                const splitTexts = layer.querySelectorAll('.premium-text-split, .premium-text-letters');
                 splitTexts.forEach(function(textEl) {
                     animateSplitText(textEl, animClass);
                 });
@@ -649,40 +685,37 @@ $hasMultipleSlides = $sliderCount > 1;
         });
     }
     
-    // Animate split text (word-by-word or letter-by-letter)
+    // Animate split text
     function animateSplitText(element, animClass) {
-        if (!element || element.classList.contains('rev-split-animated')) return;
+        if (!element || element.classList.contains('premium-split-animated')) return;
         
-        element.classList.add('rev-split-animated');
+        element.classList.add('premium-split-animated');
         const text = element.textContent.trim();
         const words = text.split(' ');
         
-        // Check if letter-by-letter animation
-        const isLetterAnim = element.classList.contains('rev-text-letters');
+        const isLetterAnim = element.classList.contains('premium-text-letters');
         
         if (isLetterAnim) {
-            // Letter-by-letter
             element.innerHTML = '';
             text.split('').forEach(function(char, index) {
                 const span = document.createElement('span');
-                span.className = 'rev-char';
+                span.className = 'premium-char';
                 span.textContent = char === ' ' ? '\u00A0' : char;
                 span.style.opacity = '0';
                 span.style.transform = getInitialTransform(animClass);
                 element.appendChild(span);
                 
                 setTimeout(function() {
-                    span.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    span.style.transition = 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     span.style.opacity = '1';
                     span.style.transform = 'translateY(0) scale(1)';
-                }, index * 50);
+                }, index * 30);
             });
         } else {
-            // Word-by-word
             element.innerHTML = '';
             words.forEach(function(word, index) {
                 const span = document.createElement('span');
-                span.className = 'rev-word';
+                span.className = 'premium-word';
                 span.textContent = word;
                 span.style.opacity = '0';
                 span.style.transform = getInitialTransform(animClass);
@@ -693,34 +726,33 @@ $hasMultipleSlides = $sliderCount > 1;
                 }
                 
                 setTimeout(function() {
-                    span.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                    span.style.transition = 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
                     span.style.opacity = '1';
                     span.style.transform = 'translateY(0) scale(1)';
-                }, index * 100);
+                }, index * 80);
             });
         }
     }
     
-    // Get initial transform based on animation
+    // Get initial transform
     function getInitialTransform(animClass) {
         if (!animClass) return 'translateY(0) scale(1)';
         
-        if (animClass.includes('slide-up')) return 'translateY(50px)';
-        if (animClass.includes('slide-down')) return 'translateY(-50px)';
-        if (animClass.includes('slide-left')) return 'translateX(50px)';
-        if (animClass.includes('slide-right')) return 'translateX(-50px)';
-        if (animClass.includes('zoom')) return 'scale(0.5)';
-        if (animClass.includes('rotate')) return 'rotate(10deg)';
-        if (animClass.includes('blur')) return 'translateY(0)';
+        if (animClass.includes('slide-up')) return 'translateY(60px)';
+        if (animClass.includes('slide-down')) return 'translateY(-60px)';
+        if (animClass.includes('slide-left')) return 'translateX(60px)';
+        if (animClass.includes('slide-right')) return 'translateX(-60px)';
+        if (animClass.includes('zoom')) return 'scale(0.3)';
+        if (animClass.includes('rotate')) return 'rotate(15deg)';
         
-        return 'translateY(30px)';
+        return 'translateY(40px)';
     }
     
     // Ken Burns effect
     function initKenBurns() {
         if (!CONFIG.kenBurnsEnabled) return;
         
-        const activeSlide = document.querySelector('.hero-slide-rev.swiper-slide-active');
+        const activeSlide = document.querySelector('.hero-slide-premium.swiper-slide-active');
         if (!activeSlide) return;
         
         const kenBurns = activeSlide.getAttribute('data-ken-burns');
@@ -729,28 +761,26 @@ $hasMultipleSlides = $sliderCount > 1;
         const imageBg = activeSlide.querySelector('.hero-image-bg');
         if (!imageBg) return;
         
-        // Reset animation
         imageBg.style.animation = 'none';
-        imageBg.offsetHeight; // Trigger reflow
+        imageBg.offsetHeight;
         
-        // Apply Ken Burns animation
         if (kenBurns === 'zoom') {
-            imageBg.style.animation = 'kenBurnsZoom 15s ease-in-out infinite';
+            imageBg.style.animation = 'kenBurnsZoom 20s ease-in-out infinite';
         } else if (kenBurns === 'pan-left') {
-            imageBg.style.animation = 'kenBurnsPanLeft 15s ease-in-out infinite';
+            imageBg.style.animation = 'kenBurnsPanLeft 20s ease-in-out infinite';
         } else if (kenBurns === 'pan-right') {
-            imageBg.style.animation = 'kenBurnsPanRight 15s ease-in-out infinite';
+            imageBg.style.animation = 'kenBurnsPanRight 20s ease-in-out infinite';
         } else if (kenBurns === 'pan-up') {
-            imageBg.style.animation = 'kenBurnsPanUp 15s ease-in-out infinite';
+            imageBg.style.animation = 'kenBurnsPanUp 20s ease-in-out infinite';
         } else if (kenBurns === 'pan-down') {
-            imageBg.style.animation = 'kenBurnsPanDown 15s ease-in-out infinite';
+            imageBg.style.animation = 'kenBurnsPanDown 20s ease-in-out infinite';
         }
     }
     
     // Progress bar
     function initProgressBar() {
         if (!CONFIG.showProgress) return;
-        const bullets = document.querySelectorAll('.rev-pagination .swiper-pagination-bullet');
+        const bullets = document.querySelectorAll('.premium-pagination .swiper-pagination-bullet');
         bullets.forEach(function(bullet) {
             if (!bullet.querySelector('.bullet-progress')) {
                 const progress = document.createElement('span');
@@ -762,7 +792,7 @@ $hasMultipleSlides = $sliderCount > 1;
     
     function resetProgressBar() {
         if (!CONFIG.showProgress) return;
-        const bullets = document.querySelectorAll('.rev-pagination .swiper-pagination-bullet');
+        const bullets = document.querySelectorAll('.premium-pagination .swiper-pagination-bullet');
         bullets.forEach(function(bullet) {
             const progress = bullet.querySelector('.bullet-progress');
             if (progress) progress.style.width = '0%';
@@ -771,7 +801,7 @@ $hasMultipleSlides = $sliderCount > 1;
     
     function updateProgressBar(progress) {
         if (!CONFIG.showProgress) return;
-        const activeBullet = document.querySelector('.rev-pagination .swiper-pagination-bullet-active');
+        const activeBullet = document.querySelector('.premium-pagination .swiper-pagination-bullet-active');
         if (activeBullet) {
             const progressBar = activeBullet.querySelector('.bullet-progress');
             if (progressBar) progressBar.style.width = (progress * 100) + '%';
@@ -781,24 +811,24 @@ $hasMultipleSlides = $sliderCount > 1;
     // Slide counter
     function updateSlideCounter(swiper) {
         if (!CONFIG.showCounter || !swiper) return;
-        let counterEl = document.getElementById('rev-slide-counter');
+        let counterEl = document.getElementById('premium-slide-counter');
         if (!counterEl) {
             counterEl = document.createElement('div');
-            counterEl.id = 'rev-slide-counter';
-            counterEl.className = 'rev-slide-counter';
+            counterEl.id = 'premium-slide-counter';
+            counterEl.className = 'premium-slide-counter';
             const wrapper = document.querySelector('.hero-slider-wrapper');
             if (wrapper) wrapper.appendChild(counterEl);
         }
         if (counterEl) {
             const current = swiper.realIndex !== undefined ? swiper.realIndex + 1 : swiper.activeIndex + 1;
             const total = swiper.slides ? swiper.slides.length : CONFIG.slideCount;
-            counterEl.innerHTML = '<span class="counter-current">' + current + '</span><span class="counter-separator">/</span><span class="counter-total">' + total + '</span>';
+            counterEl.innerHTML = '<div class="counter-inner"><span class="counter-current">' + current + '</span><span class="counter-separator">/</span><span class="counter-total">' + total + '</span></div>';
         }
     }
     
     // Video backgrounds
     function initVideoBackgrounds() {
-        const videoSlides = document.querySelectorAll('.hero-slide-rev[data-has-video="true"]');
+        const videoSlides = document.querySelectorAll('.hero-slide-premium[data-has-video="true"]');
         videoSlides.forEach(function(slide) {
             const video = slide.querySelector('video.hero-video-bg');
             if (video) {
@@ -836,7 +866,7 @@ $hasMultipleSlides = $sliderCount > 1;
     // Hover pause
     function setupHoverPause() {
         if (!heroSwiper || !CONFIG.pauseOnHover) return;
-        const heroSlider = document.querySelector('.hero-slider-revolution');
+        const heroSlider = document.querySelector('.hero-slider-premium');
         if (!heroSlider) return;
         
         heroSlider.addEventListener('mouseenter', function() {
@@ -853,7 +883,7 @@ $hasMultipleSlides = $sliderCount > 1;
             if (heroSwiper.autoplay && !heroSwiper.autoplay.running) {
                 heroSwiper.autoplay.resume();
             }
-            const activeSlide = document.querySelector('.hero-slide-rev.swiper-slide-active');
+            const activeSlide = document.querySelector('.hero-slide-premium.swiper-slide-active');
             if (activeSlide) {
                 const video = activeSlide.querySelector('video.hero-video-bg');
                 if (video) {
@@ -868,7 +898,7 @@ $hasMultipleSlides = $sliderCount > 1;
     // Parallax
     function initParallax() {
         if (!CONFIG.parallaxEnabled) return;
-        const parallaxSlides = document.querySelectorAll('.hero-slide-rev[data-parallax="true"]');
+        const parallaxSlides = document.querySelectorAll('.hero-slide-premium[data-parallax="true"]');
         if (parallaxSlides.length === 0 || window.innerWidth <= 768) return;
         
         let ticking = false;
@@ -890,9 +920,9 @@ $hasMultipleSlides = $sliderCount > 1;
         }, { passive: true });
     }
     
-    // Particle effects (simple implementation)
+    // Particle effects
     function initParticles() {
-        const activeSlide = document.querySelector('.hero-slide-rev.swiper-slide-active');
+        const activeSlide = document.querySelector('.hero-slide-premium.swiper-slide-active');
         if (!activeSlide) return;
         
         const canvas = activeSlide.querySelector('.hero-particles');
@@ -904,16 +934,16 @@ $hasMultipleSlides = $sliderCount > 1;
         canvas.height = rect.height;
         
         const particles = [];
-        const particleCount = 50;
+        const particleCount = 60;
         
         for (let i = 0; i < particleCount; i++) {
             particles.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                radius: Math.random() * 2 + 1,
-                speedX: (Math.random() - 0.5) * 0.5,
-                speedY: (Math.random() - 0.5) * 0.5,
-                opacity: Math.random() * 0.5 + 0.2,
+                radius: Math.random() * 2.5 + 1,
+                speedX: (Math.random() - 0.5) * 0.8,
+                speedY: (Math.random() - 0.5) * 0.8,
+                opacity: Math.random() * 0.4 + 0.2,
             });
         }
         
@@ -937,6 +967,23 @@ $hasMultipleSlides = $sliderCount > 1;
         }
         
         animate();
+    }
+    
+    // Animated gradients
+    function initAnimatedGradients() {
+        const gradientOverlays = document.querySelectorAll('.hero-gradient-overlay');
+        gradientOverlays.forEach(function(overlay) {
+            overlay.style.animation = 'gradientShift 8s ease infinite';
+        });
+    }
+    
+    // Morphing shapes
+    function initMorphingShapes() {
+        const shapes = document.querySelectorAll('.hero-animated-shapes .shape');
+        shapes.forEach(function(shape, index) {
+            const delay = index * 0.5;
+            shape.style.animation = `morphShape ${5 + index * 2}s ease-in-out infinite ${delay}s`;
+        });
     }
     
     // Initialize
