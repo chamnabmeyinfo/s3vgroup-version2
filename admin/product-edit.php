@@ -316,7 +316,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$categories = $categoryModel->getAll();
+// Get categories in hierarchical tree format for dropdown
+$categories = $categoryModel->getFlatTree(null, true);
 $gallery = [];
 if ($product && !empty($product['gallery'])) {
     $gallery = json_decode($product['gallery'], true) ?? [];
@@ -466,12 +467,22 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-medium mb-2">Category</label>
                         <select name="category_id" class="w-full px-4 py-2 border rounded-lg">
                             <option value="">Select Category</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
-                                    <?= escape($cat['name']) ?>
+                            <?php 
+                            // Get categories in hierarchical tree format
+                            $categoryTree = $categoryModel->getFlatTree(null, true);
+                            foreach ($categoryTree as $cat): 
+                                $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $cat['level'] ?? 0);
+                                $prefix = ($cat['level'] ?? 0) > 0 ? '└─ ' : '';
+                            ?>
+                                <option value="<?= $cat['id'] ?>" <?= ($product['category_id'] ?? null) == $cat['id'] ? 'selected' : '' ?>>
+                                    <?= $indent . $prefix . escape($cat['name']) ?>
                                 </option>
                             <?php endforeach; ?>
                         </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            You can assign products to sub-categories. Products in sub-categories will also appear in parent category listings.
+                        </p>
                     </div>
                 </div>
                 

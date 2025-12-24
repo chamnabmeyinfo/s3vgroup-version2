@@ -32,8 +32,36 @@ class Product
         // If include_inactive is true and is_active is not set, show ALL products (no filter)
 
         if (!empty($filters['category_id'])) {
-            $where[] = "p.category_id = :category_id";
-            $params['category_id'] = $filters['category_id'];
+            // Support sub-categories: include products from sub-categories
+            $includeSubcategories = $filters['include_subcategories'] ?? true;
+            
+            if ($includeSubcategories) {
+                // Get all descendant category IDs
+                $categoryModel = new \App\Models\Category();
+                $descendants = $categoryModel->getDescendants($filters['category_id'], false);
+                $descendants[] = (int)$filters['category_id']; // Include the category itself
+                $descendants = array_filter($descendants); // Remove any null/empty values
+                $descendants = array_unique($descendants);
+                
+                if (count($descendants) > 1) {
+                    // Multiple categories - use IN clause
+                    $placeholders = [];
+                    foreach ($descendants as $idx => $catId) {
+                        $key = 'cat_id_' . $idx;
+                        $placeholders[] = ':' . $key;
+                        $params[$key] = $catId;
+                    }
+                    $where[] = "p.category_id IN (" . implode(',', $placeholders) . ")";
+                } else {
+                    // Single category - use equality
+                    $where[] = "p.category_id = :category_id";
+                    $params['category_id'] = $filters['category_id'];
+                }
+            } else {
+                // Only direct category
+                $where[] = "p.category_id = :category_id";
+                $params['category_id'] = $filters['category_id'];
+            }
         }
 
         if (!empty($filters['is_featured'])) {

@@ -175,67 +175,99 @@ $navCategories = $categoryModel->getAll(true);
                 </a>
                 
                 <!-- Desktop Navigation -->
-                <div class="hidden xl:flex items-center space-x-2">
-                    <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                        <i class="fas fa-home mr-2"></i>Home
-                        <span class="nav-link-indicator"></span>
-                    </a>
+                <?php
+                // Use new menu system
+                try {
+                    require_once __DIR__ . '/../app/Helpers/MenuHelper.php';
+                    $headerMenu = \App\Helpers\get_menu_by_location('header');
                     
-                    <!-- Products Mega Menu -->
-                    <div class="relative group" id="products-dropdown">
-                        <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center">
-                            <i class="fas fa-box mr-2"></i>Products
-                            <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                    if ($headerMenu && !empty($headerMenu['id'])):
+                        echo \App\Helpers\render_menu($headerMenu['id'], ['location' => 'header']);
+                    else:
+                        // Fallback to old menu
+                ?>
+                    <div class="hidden xl:flex items-center space-x-2">
+                        <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                            <i class="fas fa-home mr-2"></i>Home
                             <span class="nav-link-indicator"></span>
-                        </button>
-                        <div class="absolute top-full left-0 mt-3 w-80 rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-gray-200/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-                            <div class="p-3 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100">
-                                <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider px-3 py-2">Browse Categories</h3>
-                            </div>
-                            <div class="p-2 max-h-96 overflow-y-auto">
-                                <?php if (!empty($navCategories)): ?>
-                                    <?php foreach (array_slice($navCategories, 0, 8) as $cat): ?>
-                                    <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                                       class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 hover:to-purple-50 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-md mb-1">
-                                        <div class="flex items-center justify-between">
-                                            <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
-                                            <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
-                                        </div>
-                                    </a>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                                <div class="mt-3 pt-3 border-t border-gray-200">
-                                    <a href="<?= url('products.php') ?>" class="block px-4 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 font-bold text-center shadow-lg hover:shadow-xl transform hover:scale-105">
-                                        <i class="fas fa-th mr-2"></i>View All Products
-                                    </a>
+                        </a>
+                        
+                        <!-- Products Mega Menu -->
+                        <div class="relative group" id="products-dropdown">
+                            <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center">
+                                <i class="fas fa-box mr-2"></i>Products
+                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                                <span class="nav-link-indicator"></span>
+                            </button>
+                            <div class="absolute top-full left-0 mt-3 w-80 rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-gray-200/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                                <div class="p-3 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100">
+                                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider px-3 py-2">Browse Categories</h3>
+                                </div>
+                                <div class="p-2 max-h-96 overflow-y-auto">
+                                    <?php if (!empty($navCategories)): ?>
+                                        <?php foreach (array_slice($navCategories, 0, 8) as $cat): ?>
+                                        <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
+                                           class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 hover:to-purple-50 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-md mb-1">
+                                            <div class="flex items-center justify-between">
+                                                <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
+                                                <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
+                                            </div>
+                                        </a>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <a href="<?= url('products.php') ?>" class="block px-4 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 font-bold text-center shadow-lg hover:shadow-xl transform hover:scale-105">
+                                            <i class="fas fa-th mr-2"></i>View All Products
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Quick Actions -->
+                        <a href="<?= url('compare.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
+                            <i class="fas fa-balance-scale mr-2"></i>Compare
+                            <span id="compare-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                        
+                        <a href="<?= url('wishlist.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
+                            <i class="fas fa-heart mr-2"></i>Wishlist
+                            <span id="wishlist-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                        
+                        <a href="<?= url('cart.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
+                            <i class="fas fa-shopping-cart mr-2"></i>Cart
+                            <span id="cart-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                        
+                        <a href="<?= url('contact.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                            <i class="fas fa-envelope mr-2"></i>Contact
+                            <span class="nav-link-indicator"></span>
+                        </a>
                     </div>
-                    
-                    <!-- Quick Actions -->
-                    <a href="<?= url('compare.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                        <i class="fas fa-balance-scale mr-2"></i>Compare
-                        <span id="compare-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                        <span class="nav-link-indicator"></span>
-                    </a>
-                    
-                    <a href="<?= url('wishlist.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                        <i class="fas fa-heart mr-2"></i>Wishlist
-                        <span id="wishlist-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                        <span class="nav-link-indicator"></span>
-                    </a>
-                    
-                    <a href="<?= url('cart.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                        <i class="fas fa-shopping-cart mr-2"></i>Cart
-                        <span id="cart-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                        <span class="nav-link-indicator"></span>
-                    </a>
-                    
-                    <a href="<?= url('contact.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                        <i class="fas fa-envelope mr-2"></i>Contact
-                        <span class="nav-link-indicator"></span>
-                    </a>
+                <?php 
+                    endif;
+                } catch (\Exception $e) {
+                    // Fallback to old menu on error
+                ?>
+                    <div class="hidden xl:flex items-center space-x-2">
+                        <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                            <i class="fas fa-home mr-2"></i>Home
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                        <a href="<?= url('products.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                            <i class="fas fa-box mr-2"></i>Products
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                        <a href="<?= url('contact.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                            <i class="fas fa-envelope mr-2"></i>Contact
+                            <span class="nav-link-indicator"></span>
+                        </a>
+                    </div>
+                <?php } ?>
                     
                     <?php if (isset($_SESSION['customer_id'])): ?>
                         <div class="relative group ml-2" id="account-dropdown">

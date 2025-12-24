@@ -20,7 +20,14 @@ if (!empty($_GET['category'])) {
     $category = $categoryModel->getBySlug($_GET['category']);
     if ($category) {
         $filters['category_id'] = $category['id'];
+        $filters['include_subcategories'] = true; // Include products from sub-categories
         $categoryName = $category['name'];
+        
+        // Get breadcrumbs for category
+        $categoryBreadcrumbs = $categoryModel->getBreadcrumbs($category['id']);
+        
+        // Get sub-categories for display
+        $subCategories = $categoryModel->getChildren($category['id'], true);
     }
 }
 
@@ -64,6 +71,8 @@ $maxPriceRange = !empty($prices) ? max($prices) : 10000;
 $products = $productModel->getAll($filters);
 $totalProducts = $productModel->count($filters);
 $totalPages = ceil($totalProducts / $filters['limit']);
+// Get categories in tree format for sidebar
+$categoryTree = $categoryModel->getTree(null, true);
 $categories = $categoryModel->getAll(true);
 
 $pageTitle = 'Products - Forklift & Equipment Pro';
@@ -194,21 +203,68 @@ include __DIR__ . '/includes/header.php';
                                         <i class="fas fa-th mr-2 text-blue-600"></i>All Categories
                                     </span>
                                 </label>
-                                <?php foreach ($categories as $cat): ?>
-                                <label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200 <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'bg-blue-50 border-blue-200' : '' ?>">
-                                    <input type="radio" name="category" value="<?= escape($cat['slug']) ?>" 
-                                           <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'checked' : '' ?>
-                                           onchange="applyFilters()"
-                                           class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer">
-                                    <span class="text-sm text-gray-700 group-hover/item:text-blue-600 transition-colors flex items-center flex-1">
-                                        <i class="fas fa-box mr-2 text-gray-500 group-hover/item:text-blue-600 transition-colors"></i>
-                                        <?= escape($cat['name']) ?>
-                                    </span>
-                                    <?php if (($cat['slug'] ?? '') === ($_GET['category'] ?? '')): ?>
-                                        <i class="fas fa-check-circle text-blue-600 ml-auto"></i>
-                                    <?php endif; ?>
-                                </label>
-                                <?php endforeach; ?>
+                                <?php 
+                                // Render categories in hierarchical tree (for desktop sidebar)
+                                if (!function_exists('renderCategoryFilter')) {
+                                    function renderCategoryFilter($categoryTree, $selectedSlug, $level = 0, $mobile = false) {
+                                        $html = '';
+                                        foreach ($categoryTree as $cat) {
+                                            $hasChildren = !empty($cat['children']);
+                                            $isSelected = ($selectedSlug ?? '') === ($cat['slug'] ?? '');
+                                            
+                                            if ($mobile) {
+                                                // Mobile format
+                                                $html .= '<label class="mobile-filter-option ' . ($isSelected ? 'active' : '') . '">';
+                                                $html .= '<input type="radio" name="category" value="' . escape($cat['slug']) . '" ';
+                                                $html .= $isSelected ? 'checked' : '';
+                                                $html .= ' onchange="applyFilters()" class="mobile-filter-radio">';
+                                                $html .= '<span class="mobile-filter-option-text">';
+                                                $html .= '<i class="fas ' . ($level > 0 ? 'fa-folder-open' : 'fa-folder') . ' mobile-filter-option-icon"></i>';
+                                                $html .= str_repeat('&nbsp;&nbsp;', $level) . ($level > 0 ? '└─ ' : '') . escape($cat['name']);
+                                                if ($hasChildren) {
+                                                    $html .= ' <span class="text-xs text-gray-400">(' . count($cat['children']) . ')</span>';
+                                                }
+                                                $html .= '</span>';
+                                                if ($isSelected) {
+                                                    $html .= '<i class="fas fa-check-circle mobile-filter-check"></i>';
+                                                }
+                                                $html .= '</label>';
+                                            } else {
+                                                // Desktop format
+                                                $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $level);
+                                                $prefix = $level > 0 ? '└─ ' : '';
+                                                
+                                                $html .= '<label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200 ' . ($isSelected ? 'bg-blue-50 border-blue-200' : '') . '">';
+                                                $html .= '<input type="radio" name="category" value="' . escape($cat['slug']) . '" ';
+                                                $html .= $isSelected ? 'checked' : '';
+                                                $html .= ' onchange="applyFilters()" class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer">';
+                                                $html .= '<span class="text-sm text-gray-700 group-hover/item:text-blue-600 transition-colors flex items-center flex-1">';
+                                                if ($level > 0) {
+                                                    $html .= '<i class="fas fa-folder-open mr-2 text-indigo-500"></i>';
+                                                } else {
+                                                    $html .= '<i class="fas fa-folder mr-2 text-blue-600"></i>';
+                                                }
+                                                $html .= $indent . $prefix . escape($cat['name']);
+                                                if ($hasChildren) {
+                                                    $html .= ' <span class="ml-2 text-xs bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded">' . count($cat['children']) . ' sub</span>';
+                                                }
+                                                $html .= '</span>';
+                                                if ($isSelected) {
+                                                    $html .= '<i class="fas fa-check-circle text-blue-600 ml-auto"></i>';
+                                                }
+                                                $html .= '</label>';
+                                            }
+                                            
+                                            // Render children
+                                            if ($hasChildren) {
+                                                $html .= renderCategoryFilter($cat['children'], $selectedSlug, $level + 1, $mobile);
+                                            }
+                                        }
+                                        return $html;
+                                    }
+                                }
+                                echo renderCategoryFilter($categoryTree, $_GET['category'] ?? '', 0, false);
+                                ?>
                             </div>
                         </div>
                         
@@ -325,20 +381,7 @@ include __DIR__ . '/includes/header.php';
                                             <i class="fas fa-th mobile-filter-option-icon"></i>All Categories
                                         </span>
                                     </label>
-                                    <?php foreach ($categories as $cat): ?>
-                                    <label class="mobile-filter-option <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'active' : '' ?>">
-                                        <input type="radio" name="category" value="<?= escape($cat['slug']) ?>" 
-                                               <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'checked' : '' ?>
-                                               onchange="applyFilters()"
-                                               class="mobile-filter-radio">
-                                        <span class="mobile-filter-option-text">
-                                            <i class="fas fa-box mobile-filter-option-icon"></i><?= escape($cat['name']) ?>
-                                        </span>
-                                        <?php if (($cat['slug'] ?? '') === ($_GET['category'] ?? '')): ?>
-                                            <i class="fas fa-check-circle mobile-filter-check"></i>
-                                        <?php endif; ?>
-                                    </label>
-                                    <?php endforeach; ?>
+                                    <?php echo renderCategoryFilter($categoryTree, $_GET['category'] ?? '', 0, true); ?>
                                 </div>
                             </div>
                             
@@ -465,10 +508,15 @@ include __DIR__ . '/includes/header.php';
                                             class="advanced-filter-select"
                                             onchange="applyFilters()">
                                         <option value="">All Categories</option>
-                                        <?php foreach ($categories as $cat): ?>
+                                        <?php 
+                                        $flatCategories = $categoryModel->getFlatTree(null, true);
+                                        foreach ($flatCategories as $cat): 
+                                            $indent = str_repeat('&nbsp;&nbsp;', $cat['level'] ?? 0);
+                                            $prefix = ($cat['level'] ?? 0) > 0 ? '└─ ' : '';
+                                        ?>
                                             <option value="<?= escape($cat['slug']) ?>" 
                                                     <?= ($_GET['category'] ?? '') === $cat['slug'] ? 'selected' : '' ?>>
-                                                <?= escape($cat['name']) ?>
+                                                <?= $indent . $prefix . escape($cat['name']) ?>
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -523,8 +571,35 @@ include __DIR__ . '/includes/header.php';
                 <div class="app-products-header">
                     <div class="app-header-content">
                         <div class="app-header-title-section">
+                            <?php if (!empty($categoryName) && !empty($categoryBreadcrumbs)): ?>
+                                <nav class="mb-2" aria-label="Breadcrumb">
+                                    <ol class="flex items-center space-x-2 text-sm text-gray-600">
+                                        <?php foreach ($categoryBreadcrumbs as $idx => $crumb): ?>
+                                            <li class="flex items-center">
+                                                <?php if ($idx > 0): ?>
+                                                    <i class="fas fa-chevron-right mx-2 text-gray-400 text-xs"></i>
+                                                <?php endif; ?>
+                                                <?php if ($idx < count($categoryBreadcrumbs) - 1): ?>
+                                                    <a href="<?= escape($crumb['url']) ?>" class="hover:text-blue-600 transition-colors">
+                                                        <?= escape($crumb['name']) ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span class="text-gray-900 font-semibold"><?= escape($crumb['name']) ?></span>
+                                                <?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ol>
+                                </nav>
+                            <?php endif; ?>
                             <h1 class="app-page-title">
-                                <?= isset($categoryName) ? escape($categoryName) : 'All Products' ?>
+                                <?php if (!empty($categoryName)): ?>
+                                    <?= escape($categoryName) ?>
+                                    <?php if (!empty($subCategories)): ?>
+                                        <span class="text-sm text-gray-500 font-normal ml-2">(<?= count($subCategories) ?> sub-categories)</span>
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    All Products
+                                <?php endif; ?>
                             </h1>
                             <?php if (!empty($_GET['search'])): ?>
                                 <div class="app-search-badge">

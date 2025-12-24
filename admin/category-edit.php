@@ -86,22 +86,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             if ($categoryId) {
-                db()->update('categories', $data, 'id = :id', ['id' => $categoryId]);
-                $message = 'Category updated successfully.';
+                // Prevent circular reference
+                if (!empty($data['parent_id']) && $data['parent_id'] == $categoryId) {
+                    $error = 'Category cannot be its own parent.';
+                } else {
+                    $updated = $categoryModel->update($categoryId, $data);
+                    if ($updated) {
+                        $message = 'Category updated successfully.';
+                        $category = $categoryModel->getById($categoryId);
+                    } else {
+                        $error = 'Failed to update category. It may have circular reference or invalid parent.';
+                    }
+                }
             } else {
-                db()->insert('categories', $data);
-                $message = 'Category created successfully.';
-                header('Location: ' . url('admin/categories.php'));
-                exit;
+                $newId = $categoryModel->create($data);
+                if ($newId) {
+                    $message = 'Category created successfully.';
+                    header('Location: ' . url('admin/categories.php'));
+                    exit;
+                } else {
+                    $error = 'Failed to create category.';
+                }
             }
-            $category = $categoryModel->getById($categoryId);
         } catch (Exception $e) {
             $error = 'Error saving category: ' . $e->getMessage();
         }
     }
 }
 
-$categories = $categoryModel->getAll(false);
+// Get categories for parent selection (exclude current category to prevent self-reference)
+$allCategories = $categoryModel->getAll(false);
+$categoriesForParent = $categoryId 
+    ? $categoryModel->getFlatTree(null, false, 0, $categoryId)
+    : $categoryModel->getFlatTree(null, false);
 
 $pageTitle = $category ? 'Edit Category' : 'Add New Category';
 include __DIR__ . '/includes/header.php';
@@ -257,15 +274,26 @@ include __DIR__ . '/includes/header.php';
                     <i class="fas fa-sitemap text-gray-400 mr-2"></i> Parent Category
                 </label>
                 <select name="parent_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
-                <option value="">None (Top Level)</option>
-                <?php foreach ($categories as $cat): ?>
-                    <?php if (!$categoryId || $cat['id'] != $categoryId): ?>
-                        <option value="<?= $cat['id'] ?>" <?= ($category['parent_id'] ?? '') == $cat['id'] ? 'selected' : '' ?>>
-                            <?= escape($cat['name']) ?>
-                        </option>
-                    <?php endif; ?>
+                <option value="">None (Top Level Category)</option>
+                <?php foreach ($categoriesForParent as $cat): 
+                    $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $cat['level'] ?? 0);
+                    $prefix = ($cat['level'] ?? 0) > 0 ? '└─ ' : '';
+                ?>
+                    <option value="<?= $cat['id'] ?>" <?= ($category['parent_id'] ?? null) == $cat['id'] ? 'selected' : '' ?>>
+                        <?= $indent . $prefix . escape($cat['name']) ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
+            <p class="text-xs text-gray-500 mt-1">
+                <i class="fas fa-info-circle mr-1"></i>
+                Select a parent category to create a sub-category. Leave empty for top-level category.
+                <?php if ($categoryId && !empty($category['parent_id'])): 
+                    $parent = $categoryModel->getById($category['parent_id']);
+                    if ($parent):
+                ?>
+                    <br><span class="text-blue-600">Current Parent: <?= escape($parent['name']) ?></span>
+                <?php endif; endif; ?>
+            </p>
         </div>
         
         <div>
