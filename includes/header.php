@@ -139,6 +139,172 @@ $navCategories = $categoryModel->getAll(true);
         .mobile-menu-item-ultra:hover {
             background: linear-gradient(to right, color-mix(in srgb, var(--logo-primary) 10%, white), color-mix(in srgb, var(--logo-accent) 10%, white)) !important;
         }
+        
+        /* Modern Navigation Bar - Premium Design */
+        #main-nav {
+            background: rgba(255, 255, 255, 0.99);
+            backdrop-filter: blur(16px) saturate(200%);
+            -webkit-backdrop-filter: blur(16px) saturate(200%);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 
+                        0 2px 4px -1px rgba(0, 0, 0, 0.02),
+                        0 0 0 1px rgba(0, 0, 0, 0.02);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.4);
+        }
+        
+        /* Navigation container improvements */
+        #main-nav .container {
+            max-width: 1400px;
+        }
+        
+        /* Smooth scroll behavior */
+        @media (prefers-reduced-motion: no-preference) {
+            #main-nav {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+        
+        /* Enhanced Navigation Links */
+        .nav-link-modern {
+            position: relative;
+            color: #4b5563;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            padding: 0.625rem 1rem;
+            border-radius: 0.625rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-link-modern:hover {
+            color: var(--logo-primary, #2563eb);
+            background: rgba(59, 130, 246, 0.08);
+            transform: translateY(-1px);
+        }
+        
+        .nav-link-modern.active {
+            color: var(--logo-primary, #2563eb);
+            background: rgba(59, 130, 246, 0.1);
+            font-weight: 600;
+        }
+        
+        /* Modern Action Buttons */
+        .nav-action-btn {
+            position: relative;
+            padding: 0.625rem 1rem;
+            border-radius: 0.625rem;
+            font-weight: 500;
+            font-size: 0.9375rem;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-action-btn:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* Badge styling */
+        .nav-badge {
+            position: absolute;
+            top: -0.25rem;
+            right: -0.25rem;
+            min-width: 1.25rem;
+            height: 1.25rem;
+            padding: 0 0.375rem;
+            border-radius: 0.625rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+            border: 2px solid white;
+        }
+        
+        /* Search Bar - Visible in Menu */
+        .nav-search-container {
+            position: relative;
+            width: 200px;
+            min-width: 180px;
+            display: flex !important;
+            align-items: center;
+            margin-left: 0.5rem;
+        }
+        
+        .nav-search-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.625rem;
+            background: #ffffff;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            color: #1f2937;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 2.5rem;
+            line-height: 1.5;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .nav-search-input::placeholder {
+            color: #9ca3af;
+            font-weight: 400;
+        }
+        
+        .nav-search-input:focus {
+            outline: none;
+            border-color: var(--logo-primary, #2563eb);
+            background: #ffffff;
+            color: #1f2937;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-search-icon {
+            position: absolute;
+            left: 0.875rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 0.875rem;
+            transition: color 0.25s;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .nav-search-input:focus + .nav-search-icon {
+            color: var(--logo-primary, #2563eb);
+        }
+        
+        /* Enhanced Dropdown Menus */
+        .nav-dropdown {
+            position: absolute;
+            top: calc(100% + 0.75rem);
+            left: 0;
+            min-width: 20rem;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px) saturate(200%);
+            -webkit-backdrop-filter: blur(20px) saturate(200%);
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
+                        0 8px 10px -6px rgba(0, 0, 0, 0.1),
+                        0 0 0 1px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(229, 231, 235, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-0.5rem);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 50;
+        }
+        
+        .nav-dropdown-group:hover .nav-dropdown {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
     </style>
     
     <!-- Font Awesome -->
@@ -146,10 +312,10 @@ $navCategories = $categoryModel->getAll(true);
     
 </head>
 <body class="bg-white">
-    <!-- Ultra Modern Navigation -->
-    <nav class="bg-white backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b border-gray-200/50 transition-all duration-500" id="main-nav" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-        <div class="container mx-auto px-4 lg:px-6">
-            <div class="flex justify-between items-center h-20 md:h-24">
+    <!-- Premium Modern Navigation -->
+    <nav class="sticky top-0 z-50" id="main-nav">
+        <div class="container mx-auto px-4 lg:px-6 xl:px-8">
+            <div class="flex items-center h-20 lg:h-24 gap-2">
                 <!-- Logo Section -->
                 <?php
                 // Get site logo from settings
@@ -158,21 +324,35 @@ $navCategories = $categoryModel->getAll(true);
                 $siteName = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'site_name'");
                 $siteNameText = $siteName ? $siteName['value'] : 'ForkliftPro';
                 ?>
-                <a href="<?= url() ?>" class="flex items-center space-x-3 group flex-shrink-0 z-10">
+                <!-- Logo Section - Enhanced -->
+                <a href="<?= url() ?>" class="flex items-center gap-3 group flex-shrink-0 z-10">
                     <?php if ($siteLogo): ?>
                         <img src="<?= escape(image_url($siteLogo)) ?>" 
                              alt="<?= escape($siteNameText) ?>" 
-                             class="h-12 md:h-16 w-auto object-contain transform group-hover:scale-105 transition-all duration-300">
+                             class="h-10 md:h-14 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300">
                     <?php else: ?>
-                        <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-2.5 md:p-3 rounded-2xl transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-lg group-hover:shadow-2xl group-hover:shadow-blue-500/50">
-                            <i class="fas fa-industry text-white text-xl md:text-2xl"></i>
+                        <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-2.5 md:p-3 rounded-xl transform group-hover:scale-105 group-hover:rotate-2 transition-all duration-300 shadow-md group-hover:shadow-lg">
+                            <i class="fas fa-industry text-white text-lg md:text-xl lg:text-2xl"></i>
                         </div>
                     <?php endif; ?>
                     <!-- Site Name - Visible on Mobile -->
-                    <span class="xl:hidden font-bold text-lg md:text-xl text-gray-800">
+                    <span class="xl:hidden font-bold text-base md:text-lg text-gray-800">
                         <?= escape($siteNameText) ?>
                     </span>
                 </a>
+                
+                <!-- Search Field - Aligned Left -->
+                <div class="flex items-center ml-2">
+                    <div class="relative">
+                        <input type="text" 
+                               id="advanced-search" 
+                               placeholder="Search products..." 
+                               autocomplete="off"
+                               class="w-64 px-4 py-2.5 pl-10 pr-4 border border-gray-300 rounded-lg bg-white text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+                        <div id="search-results" class="hidden absolute top-full left-0 mt-2 w-96 rounded-lg shadow-xl bg-white border border-gray-200 z-50 max-h-96 overflow-y-auto"></div>
+                    </div>
+                </div>
                 
                 <!-- Desktop Navigation -->
                 <?php
@@ -186,37 +366,37 @@ $navCategories = $categoryModel->getAll(true);
                     else:
                         // Fallback to old menu
                 ?>
-                    <div class="hidden xl:flex items-center space-x-2">
+                    <div class="hidden xl:flex items-center space-x-1">
                         <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
                             <i class="fas fa-home mr-2"></i>Home
                             <span class="nav-link-indicator"></span>
                         </a>
                         
                         <!-- Products Mega Menu -->
-                        <div class="relative group" id="products-dropdown">
-                            <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center">
-                                <i class="fas fa-box mr-2"></i>Products
-                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
-                                <span class="nav-link-indicator"></span>
+                        <div class="nav-dropdown-group relative" id="products-dropdown">
+                            <button class="nav-link-modern">
+                                <i class="fas fa-box"></i>
+                                <span>Products</span>
+                                <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                             </button>
-                            <div class="absolute top-full left-0 mt-3 w-80 rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-gray-200/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-                                <div class="p-3 bg-gradient-to-r from-blue-50/50 to-indigo-50/50 border-b border-gray-100">
-                                    <h3 class="text-sm font-bold text-gray-700 uppercase tracking-wider px-3 py-2">Browse Categories</h3>
+                            <div class="nav-dropdown w-80 overflow-hidden">
+                                <div class="p-4 bg-gradient-to-r from-blue-50/60 to-indigo-50/60 border-b border-gray-100/50">
+                                    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Browse Categories</h3>
                                 </div>
                                 <div class="p-2 max-h-96 overflow-y-auto">
                                     <?php if (!empty($navCategories)): ?>
                                         <?php foreach (array_slice($navCategories, 0, 8) as $cat): ?>
                                         <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                                           class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 hover:to-purple-50 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-md mb-1">
+                                           class="group/item block px-4 py-2.5 rounded-lg hover:bg-blue-50/50 transition-all duration-200 border-l-2 border-transparent hover:border-blue-500 mb-0.5">
                                             <div class="flex items-center justify-between">
-                                                <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
-                                                <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
+                                                <span class="text-sm font-medium text-gray-700 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
+                                                <i class="fas fa-arrow-right text-xs text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-1 transition-all duration-200"></i>
                                             </div>
                                         </a>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
-                                    <div class="mt-3 pt-3 border-t border-gray-200">
-                                        <a href="<?= url('products.php') ?>" class="block px-4 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 font-bold text-center shadow-lg hover:shadow-xl transform hover:scale-105">
+                                    <div class="mt-2 pt-2 border-t border-gray-100 p-2">
+                                        <a href="<?= url('products.php') ?>" class="block px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-200 font-semibold text-sm text-center shadow-md hover:shadow-lg">
                                             <i class="fas fa-th mr-2"></i>View All Products
                                         </a>
                                     </div>
@@ -225,27 +405,27 @@ $navCategories = $categoryModel->getAll(true);
                         </div>
                         
                         <!-- Quick Actions -->
-                        <a href="<?= url('compare.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                            <i class="fas fa-balance-scale mr-2"></i>Compare
-                            <span id="compare-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('compare.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-blue-600">
+                            <i class="fas fa-balance-scale"></i>
+                            <span class="hidden 2xl:inline">Compare</span>
+                            <span id="compare-count" class="nav-badge hidden bg-gradient-to-r from-blue-500 to-indigo-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('wishlist.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                            <i class="fas fa-heart mr-2"></i>Wishlist
-                            <span id="wishlist-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('wishlist.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-red-600">
+                            <i class="fas fa-heart"></i>
+                            <span class="hidden 2xl:inline">Wishlist</span>
+                            <span id="wishlist-count" class="nav-badge hidden bg-gradient-to-r from-red-500 to-pink-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('cart.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 relative group">
-                            <i class="fas fa-shopping-cart mr-2"></i>Cart
-                            <span id="cart-count" class="hidden absolute -top-1.5 -right-1.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold shadow-lg ring-2 ring-white">0</span>
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('cart.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-green-600">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="hidden 2xl:inline">Cart</span>
+                            <span id="cart-count" class="nav-badge hidden bg-gradient-to-r from-green-500 to-emerald-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('contact.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                            <i class="fas fa-envelope mr-2"></i>Contact
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('contact.php') ?>" class="nav-link-modern">
+                            <i class="fas fa-envelope"></i>
+                            <span>Contact</span>
                         </a>
                     </div>
                 <?php 
@@ -253,69 +433,41 @@ $navCategories = $categoryModel->getAll(true);
                 } catch (\Exception $e) {
                     // Fallback to old menu on error
                 ?>
-                    <div class="hidden xl:flex items-center space-x-2">
-                        <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                            <i class="fas fa-home mr-2"></i>Home
-                            <span class="nav-link-indicator"></span>
+                    <div class="hidden xl:flex items-center gap-0.5">
+                        <a href="<?= url() ?>" class="nav-link-modern">
+                            <i class="fas fa-home"></i>
+                            <span>Home</span>
                         </a>
-                        <a href="<?= url('products.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                            <i class="fas fa-box mr-2"></i>Products
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('products.php') ?>" class="nav-link-modern">
+                            <i class="fas fa-box"></i>
+                            <span>Products</span>
                         </a>
-                        <a href="<?= url('contact.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                            <i class="fas fa-envelope mr-2"></i>Contact
-                            <span class="nav-link-indicator"></span>
+                        <a href="<?= url('contact.php') ?>" class="nav-link-modern">
+                            <i class="fas fa-envelope"></i>
+                            <span>Contact</span>
                         </a>
                     </div>
                 <?php } ?>
                     
                     <?php if (isset($_SESSION['customer_id'])): ?>
-                        <div class="relative group ml-2" id="account-dropdown">
-                            <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 flex items-center group relative">
-                                <i class="fas fa-user-circle mr-2"></i>Account
-                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
-                                <span class="nav-link-indicator"></span>
+                        <div class="nav-dropdown-group relative ml-2" id="account-dropdown">
+                            <button class="nav-link-modern">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Account</span>
+                                <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                             </button>
-                            <div class="absolute top-full right-0 mt-3 w-64 rounded-3xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-gray-200/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+                            <div class="nav-dropdown right-0 left-auto w-56">
                                 <div class="p-2">
-                                    <a href="<?= url('account.php') ?>" class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50 hover:via-indigo-50 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 mb-1">
-                                        <i class="fas fa-user mr-3 text-blue-600"></i><span class="font-semibold text-gray-800 group-hover/item:text-blue-600">My Account</span>
+                                    <a href="<?= url('account.php') ?>" class="group/item block px-4 py-2.5 rounded-lg hover:bg-blue-50/50 transition-all duration-200 border-l-2 border-transparent hover:border-blue-500 mb-0.5">
+                                        <i class="fas fa-user mr-3 text-blue-600 text-sm"></i><span class="text-sm font-medium text-gray-700 group-hover/item:text-blue-600">My Account</span>
                                     </a>
-                                    <a href="<?= url('logout.php') ?>" class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 transition-all duration-300 border-l-4 border-transparent hover:border-red-500">
-                                        <i class="fas fa-sign-out-alt mr-3 text-red-600"></i><span class="font-semibold text-red-600">Logout</span>
+                                    <a href="<?= url('logout.php') ?>" class="group/item block px-4 py-2.5 rounded-lg hover:bg-red-50/50 transition-all duration-200 border-l-2 border-transparent hover:border-red-500">
+                                        <i class="fas fa-sign-out-alt mr-3 text-red-600 text-sm"></i><span class="text-sm font-medium text-red-600">Logout</span>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                    <?php else: ?>
-                        <a href="<?= url('login.php') ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
-                            <i class="fas fa-sign-in-alt mr-2"></i>Login
-                            <span class="nav-link-indicator"></span>
-                        </a>
-                        <a href="<?= url('register.php') ?>" class="bg-gradient-to-r from-gray-800 to-gray-900 text-white px-5 py-2.5 rounded-xl font-bold hover:from-gray-900 hover:to-black transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 ml-2">
-                            Sign Up
-                        </a>
                     <?php endif; ?>
-                    
-                    <a href="<?= url('quote.php') ?>" class="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-xl font-bold hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 ml-3">
-                        <i class="fas fa-calculator mr-2"></i>Get Quote
-                    </a>
-                </div>
-                
-                <!-- Search Bar (Desktop) - Enhanced -->
-                <div class="hidden lg:block flex-1 max-w-xl mx-6 xl:mx-8">
-                    <div class="relative group">
-                        <input type="text" 
-                               id="advanced-search" 
-                               placeholder="Search products, categories..." 
-                               autocomplete="off"
-                               class="w-full px-6 py-3.5 pl-14 pr-12 border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-gray-50/80 focus:bg-white shadow-sm focus:shadow-xl backdrop-blur-sm">
-                        <i class="fas fa-search absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"></i>
-                        <button class="absolute right-3 top-1/2 transform -translate-y-1/2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all opacity-0 group-focus-within:opacity-100 pointer-events-none group-focus-within:pointer-events-auto">
-                            <i class="fas fa-arrow-right text-xs"></i>
-                        </button>
-                        <div id="search-results" class="hidden absolute top-full left-0 right-0 mt-3 border-2 border-gray-200 rounded-3xl shadow-2xl z-50 max-h-96 overflow-y-auto" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);"></div>
-                    </div>
                 </div>
             </div>
         </div>
