@@ -48,9 +48,18 @@ class Connection
 
     public function query($sql, $params = [])
     {
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute($params);
-        return $stmt;
+        try {
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return $stmt;
+        } catch (PDOException $e) {
+            // Log the error for debugging
+            error_log("Database query error: " . $e->getMessage());
+            error_log("SQL: " . $sql);
+            error_log("Params: " . json_encode($params));
+            // Re-throw so calling code can handle it
+            throw $e;
+        }
     }
 
     public function fetchAll($sql, $params = [])

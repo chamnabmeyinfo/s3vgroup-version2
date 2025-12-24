@@ -32,29 +32,6 @@ if (!empty($_GET['action']) && $_GET['action'] === 'clear_all_parents') {
     }
 }
 
-// Handle AJAX requests for drag and drop reordering
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $input = file_get_contents('php://input');
-    $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
-    
-    // Check if JSON request
-    if (strpos($contentType, 'application/json') !== false && !empty($input)) {
-        $data = json_decode($input, true);
-        
-        if (!empty($data) && !empty($data['action']) && $data['action'] === 'save_order') {
-            header('Content-Type: application/json');
-            
-            $orders = $data['orders'] ?? [];
-            if (!empty($orders)) {
-                $saved = $categoryModel->reorder($orders);
-                echo json_encode(['success' => $saved]);
-            } else {
-                echo json_encode(['success' => false, 'error' => 'Invalid data']);
-            }
-            exit;
-        }
-    }
-}
 
 if (!empty($_GET['delete'])) {
     try {
@@ -253,8 +230,8 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                 </h1>
                 <p class="text-green-100 text-sm md:text-lg">Organize your products into categories</p>
             </div>
-            <a href="<?= url('admin/category-edit.php') ?>" class="bg-white text-green-600 hover:bg-green-50 px-4 md:px-6 py-2 rounded-lg font-semibold transition-all shadow-lg hover:shadow-xl w-full sm:w-auto text-center text-sm md:text-base">
-                <i class="fas fa-plus mr-2"></i>
+            <a href="<?= url('admin/category-edit.php') ?>" class="btn-primary w-full sm:w-auto text-center">
+                <i class="fas fa-plus"></i>
                 Add New Category
             </a>
         </div>
@@ -309,16 +286,16 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
             <div class="relative">
                 <button type="button" 
                         onclick="toggleBulkActions()"
-                        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all flex items-center gap-2">
+                        class="btn-primary">
                     <i class="fas fa-cog"></i>
                     <span>Bulk Actions</span>
-                    <i class="fas fa-chevron-down text-xs"></i>
+                    <i class="fas fa-chevron-down"></i>
                 </button>
                 <div id="bulkActionsDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
                     <div class="p-2">
                         <?php if ($categoriesWithParents > 0): ?>
-                        <a href="<?= url('admin/categories.php?action=clear_all_parents') ?>" 
-                           onclick="return confirm('Are you sure you want to clear all parent categories? This will make all <?= $categoriesWithParents ?> categories with parents become top-level categories. This action cannot be undone.')"
+                        <a href="#" 
+                           onclick="clearAllParents(); return false;"
                            class="block px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors">
                             <i class="fas fa-unlink mr-2"></i>
                             <span class="font-semibold">Clear All Parent Categories</span>
@@ -343,11 +320,6 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                 <tr>
-                    <!-- Drag Handle Column - Always visible -->
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-10" data-column="drag">
-                        <i class="fas fa-grip-vertical"></i>
-                    </th>
-                    
                     <!-- Icon Column - Always visible -->
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" data-column="icon">
                         <i class="fas fa-icons mr-1"></i>Icon
@@ -410,8 +382,8 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                                 <i class="fas fa-folder-open text-gray-300 text-6xl mb-4"></i>
                                 <p class="text-lg font-semibold text-gray-700 mb-2">No Categories</p>
                                 <p class="text-gray-500 mb-4">Create your first category to get started.</p>
-                                <a href="<?= url('admin/category-edit.php') ?>" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all">
-                                    <i class="fas fa-plus mr-2"></i>Add First Category
+                                <a href="<?= url('admin/category-edit.php') ?>" class="btn-primary">
+                                    <i class="fas fa-plus"></i>Add First Category
                                 </a>
                             </div>
                         </td>
@@ -463,11 +435,6 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                             $hasChildren = !empty($category['children']);
                             
                             $html .= '<tr class="category-row ' . ($hasChildren ? 'bg-blue-50/30' : '') . ' hover:bg-gray-50 transition-colors" data-category-id="' . $category['id'] . '" data-parent-id="' . ($category['parent_id'] ?? '') . '" data-level="' . $level . '" data-sort-order="' . ($category['sort_order'] ?? 0) . '">';
-                            
-                            // Drag Handle Column
-                            $html .= '<td class="px-4 py-4 whitespace-nowrap cursor-move drag-handle" data-column="drag">';
-                            $html .= '<i class="fas fa-grip-vertical text-gray-400 hover:text-gray-600 transition-colors"></i>';
-                            $html .= '</td>';
                             
                             // Icon Column
                             $html .= '<td class="px-6 py-4 whitespace-nowrap" data-column="icon">';
@@ -550,14 +517,14 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                             if (in_array('actions', $selectedColumns) || empty($_GET['columns'])) {
                                 $html .= '<td class="px-6 py-4 whitespace-nowrap" data-column="actions">';
                                 $html .= '<div class="flex items-center space-x-2">';
-                                $html .= '<a href="' . url('admin/category-edit.php?id=' . $category['id']) . '" class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded-lg transition-all" title="Edit"><i class="fas fa-edit text-sm"></i></a>';
+                                $html .= '<a href="' . url('admin/category-edit.php?id=' . $category['id']) . '" class="action-btn action-btn-edit" title="Edit"><i class="fas fa-edit"></i></a>';
                                 if ($hasChildren) {
-                                    $html .= '<span class="bg-indigo-100 text-indigo-700 p-2 rounded-lg cursor-default" title="Has ' . count($category['children']) . ' Sub-Categories"><i class="fas fa-sitemap text-sm"></i></span>';
+                                    $html .= '<span class="action-btn bg-indigo-100 text-indigo-700 cursor-default" title="Has ' . count($category['children']) . ' Sub-Categories"><i class="fas fa-sitemap"></i></span>';
                                 }
                                 $descendants = $categoryModel->getDescendants($category['id'], false);
                                 $hasDescendants = !empty($descendants);
                                 $deleteMsg = $hasDescendants ? 'Delete this category and all ' . count($descendants) . ' sub-categories?' : 'Delete this category?';
-                                $html .= '<a href="?delete=' . $category['id'] . '" onclick="return confirm(\'' . escape($deleteMsg) . '\')" class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded-lg transition-all" title="Delete"><i class="fas fa-trash text-sm"></i></a>';
+                                $html .= '<a href="#" onclick="deleteCategory(' . $category['id'] . ', \'' . escape($deleteMsg) . '\'); return false;" class="action-btn action-btn-delete" title="Delete"><i class="fas fa-trash"></i></a>';
                                 $html .= '</div></td>';
                             }
                             
@@ -581,33 +548,7 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
     </div>
 </div>
 
-<!-- SortableJS for Drag and Drop -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-
 <style>
-.sortable-ghost {
-    opacity: 0.4;
-    background-color: #e5e7eb;
-}
-
-.category-row.sortable-ghost {
-    background-color: #dbeafe !important;
-}
-
-.drag-handle {
-    cursor: move;
-    user-select: none;
-}
-
-.drag-handle:hover {
-    color: #4b5563;
-}
-
-.category-row.dragging {
-    opacity: 0.5;
-}
-
 .category-row {
     transition: background-color 0.2s ease;
 }
@@ -616,7 +557,6 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
     background-color: rgba(239, 246, 255, 0.3);
 }
 
-/* Visual feedback for drag and drop */
 .category-row {
     position: relative;
 }
@@ -632,315 +572,8 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
 .category-row[data-level="3"] {
     border-left: 3px solid #8b5cf6;
 }
-
-.save-order-btn {
-    position: fixed;
-    bottom: 2rem;
-    right: 2rem;
-    z-index: 50;
-    display: none;
-}
-
-.save-order-btn.show {
-    display: block;
-}
 </style>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tbody = document.querySelector('tbody');
-    const saveOrderBtn = document.getElementById('save-order-btn');
-    let sortableInstance = null;
-    let hasChanges = false;
-    
-    if (tbody && typeof Sortable !== 'undefined') {
-        // Create save button if it doesn't exist
-        if (!saveOrderBtn) {
-            const btn = document.createElement('button');
-            btn.id = 'save-order-btn';
-            btn.className = 'save-order-btn bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-lg font-semibold transition-all flex items-center gap-2';
-            btn.innerHTML = '<i class="fas fa-save"></i> Save Order';
-            btn.onclick = saveCategoryOrder;
-            document.body.appendChild(btn);
-        }
-        
-        sortableInstance = new Sortable(tbody, {
-            handle: '.drag-handle',
-            animation: 150,
-            ghostClass: 'sortable-ghost',
-            chosenClass: 'dragging',
-            onStart: function(evt) {
-                hasChanges = true;
-                document.getElementById('save-order-btn').classList.add('show');
-                // Store original position
-                evt.item.setAttribute('data-original-index', evt.oldIndex);
-            },
-            onEnd: function(evt) {
-                // Update hierarchy based on new position
-                // Small delay to ensure DOM is updated
-                setTimeout(() => {
-                    updateCategoryHierarchy();
-                }, 10);
-            }
-        });
-    } else {
-        console.error('SortableJS not loaded or tbody not found');
-    }
-    
-    function updateCategoryHierarchy() {
-        const rows = Array.from(tbody.querySelectorAll('.category-row:not(.sortable-ghost)'));
-        
-        // WordPress-style hierarchy logic:
-        // - Items placed directly below another item become its children (indented)
-        // - Items at the same indentation level are siblings
-        // - This creates intuitive drag-and-drop behavior
-        
-        rows.forEach((row, index) => {
-            let newParentId = null;
-            let newLevel = 0;
-            
-            if (index > 0) {
-                // Look at the previous row
-                const prevRow = rows[index - 1];
-                const prevLevel = parseInt(prevRow.getAttribute('data-level') || 0);
-                const prevCategoryId = parseInt(prevRow.getAttribute('data-category-id'));
-                
-                // WordPress behavior: When you drag an item below another, it becomes a child
-                // The level increases by 1 from the previous item
-                const maxDepth = 5; // Allow up to 5 levels deep
-                
-                if (prevLevel < maxDepth) {
-                    // Make this a child of the previous item (WordPress-style)
-                    newParentId = prevCategoryId;
-                    newLevel = prevLevel + 1;
-                } else {
-                    // At max depth, find the appropriate parent
-                    // Look backwards to find an item at a lower level
-                    newLevel = prevLevel;
-                    for (let i = index - 1; i >= 0; i--) {
-                        const checkRow = rows[i];
-                        const checkLevel = parseInt(checkRow.getAttribute('data-level') || 0);
-                        if (checkLevel < prevLevel) {
-                            newParentId = parseInt(checkRow.getAttribute('data-category-id'));
-                            newLevel = checkLevel + 1;
-                            break;
-                        }
-                    }
-                    // If no suitable parent found, make it top-level
-                    if (!newParentId) {
-                        newParentId = null;
-                        newLevel = 0;
-                    }
-                }
-            } else {
-                // First item is always top-level
-                newParentId = null;
-                newLevel = 0;
-            }
-            
-            // Update row attributes
-            row.setAttribute('data-parent-id', newParentId || '');
-            row.setAttribute('data-level', newLevel);
-            row.setAttribute('data-sort-order', index + 1);
-            
-            // Update visual indentation immediately for instant feedback
-            updateRowVisuals(row, newLevel);
-        });
-    }
-    
-    function updateRowVisuals(row, level) {
-        // Update the name cell's indentation
-        const nameCell = row.querySelector('[data-column="name"]');
-        if (nameCell) {
-            // Remove existing indentation classes
-            nameCell.className = nameCell.className.replace(/pl-\d+/g, '');
-            if (level > 0) {
-                nameCell.classList.add('pl-' + (level * 6));
-            }
-            
-            // Update the category name content div
-            const nameContent = nameCell.querySelector('.category-name-content');
-            if (nameContent) {
-                // Remove existing chevrons and folder icons
-                const existingIcons = nameContent.querySelectorAll('.fa-chevron-right, .fa-folder, .fa-folder-open');
-                existingIcons.forEach(icon => icon.remove());
-                
-                // Get the name span to preserve it
-                const nameSpan = nameContent.querySelector('span.font-semibold');
-                const badges = Array.from(nameContent.querySelectorAll('span.ml-2, span.ml-1'));
-                
-                // Create a temporary container to hold everything
-                const fragment = document.createDocumentFragment();
-                
-                // Add indentation chevrons
-                for (let i = 0; i < level; i++) {
-                    const chevron = document.createElement('i');
-                    chevron.className = 'fas fa-chevron-right text-gray-300 text-xs';
-                    fragment.appendChild(chevron);
-                }
-                
-                // Add folder icon
-                const folderIcon = document.createElement('i');
-                folderIcon.className = level > 0 
-                    ? 'fas fa-folder-open mr-2 text-indigo-500'
-                    : 'fas fa-folder mr-2 text-blue-600';
-                fragment.appendChild(folderIcon);
-                
-                // Add name span if it exists
-                if (nameSpan) {
-                    fragment.appendChild(nameSpan.cloneNode(true));
-                }
-                
-                // Add badges
-                badges.forEach(badge => {
-                    fragment.appendChild(badge.cloneNode(true));
-                });
-                
-                // Clear and rebuild
-                nameContent.innerHTML = '';
-                nameContent.appendChild(fragment);
-                
-            }
-            
-            // Update parent info (it's outside nameContent, in the nameCell)
-            const existingParentInfo = nameCell.querySelector('.category-parent-info');
-            if (level > 0) {
-                // Find the parent category name from the row structure
-                const allRows = Array.from(tbody.querySelectorAll('.category-row:not(.sortable-ghost)'));
-                const currentIndex = allRows.indexOf(row);
-                if (currentIndex > 0) {
-                    const parentId = row.getAttribute('data-parent-id');
-                    if (parentId) {
-                        // Find the parent row
-                        const parentRow = allRows.find(r => r.getAttribute('data-category-id') === parentId);
-                        if (parentRow) {
-                            const parentNameSpan = parentRow.querySelector('[data-column="name"] span.font-semibold');
-                            const parentName = parentNameSpan ? parentNameSpan.textContent.trim() : 'Parent';
-                            
-                            if (existingParentInfo) {
-                                existingParentInfo.textContent = 'Parent: ' + parentName;
-                            } else {
-                                const parentInfoDiv = document.createElement('div');
-                                parentInfoDiv.className = 'text-xs text-gray-500 mt-1 category-parent-info';
-                                parentInfoDiv.textContent = 'Parent: ' + parentName;
-                                nameCell.appendChild(parentInfoDiv);
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Remove parent info for top-level items
-                if (existingParentInfo) {
-                    existingParentInfo.remove();
-                }
-            }
-        }
-        
-        // Update row background for sub-items
-        if (level > 0) {
-            if (!row.classList.contains('bg-blue-50/30')) {
-                row.classList.add('bg-blue-50/30');
-            }
-        } else {
-            row.classList.remove('bg-blue-50/30');
-        }
-    }
-    
-    function saveCategoryOrder() {
-        const rows = tbody.querySelectorAll('.category-row:not(.sortable-ghost)');
-        const orders = [];
-        
-        rows.forEach((row, index) => {
-            const categoryId = parseInt(row.getAttribute('data-category-id'));
-            // Get updated parent_id from data attribute (updated by updateCategoryHierarchy)
-            const parentIdAttr = row.getAttribute('data-parent-id');
-            const parentId = (parentIdAttr && parentIdAttr !== '' && parentIdAttr !== 'null') ? parseInt(parentIdAttr) : null;
-            const sortOrder = index + 1;
-            
-            orders.push({
-                id: categoryId,
-                parent_id: parentId,
-                sort_order: sortOrder
-            });
-        });
-        
-        if (orders.length === 0) {
-            alert('No categories to save');
-            return;
-        }
-        
-        // Show loading state
-        const btn = document.getElementById('save-order-btn');
-        const originalHTML = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        
-        fetch(window.location.href, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'save_order',
-                orders: orders
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                showNotification('Category order saved successfully!', 'success');
-                hasChanges = false;
-                btn.classList.remove('show');
-                
-                // Reload page after a short delay to show updated order
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1000);
-            } else {
-                showNotification('Failed to save category order: ' + (data.error || 'Unknown error'), 'error');
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showNotification('Error saving category order: ' + error.message, 'error');
-            btn.disabled = false;
-            btn.innerHTML = originalHTML;
-        });
-    }
-    
-    function showNotification(message, type) {
-        // Remove existing notifications
-        const existing = document.querySelector('.category-notification');
-        if (existing) {
-            existing.remove();
-        }
-        
-        const notification = document.createElement('div');
-        notification.className = 'category-notification fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg font-semibold ' + 
-            (type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white');
-        notification.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + ' mr-2"></i>' + message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transition = 'opacity 0.3s';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
-    
-    // Warn before leaving if there are unsaved changes
-    window.addEventListener('beforeunload', function(e) {
-        if (hasChanges) {
-            e.preventDefault();
-            e.returnValue = 'You have unsaved changes to category order. Are you sure you want to leave?';
-            return e.returnValue;
-        }
-    });
-});
-</script>
 
 <script>
 function toggleBulkActions() {
@@ -957,6 +590,24 @@ document.addEventListener('click', function(event) {
         dropdown.classList.add('hidden');
     }
 });
+
+async function clearAllParents() {
+    const count = <?= $categoriesWithParents ?>;
+    const confirmed = await customConfirm(
+        'Are you sure you want to clear all parent categories? This will make all ' + count + ' categories with parents become top-level categories. This action cannot be undone.',
+        'Clear All Parent Categories'
+    );
+    if (confirmed) {
+        window.location.href = '<?= url('admin/categories.php?action=clear_all_parents') ?>';
+    }
+}
+
+async function deleteCategory(categoryId, message) {
+    const confirmed = await customConfirm(message, 'Delete Category');
+    if (confirmed) {
+        window.location.href = '?delete=' + categoryId;
+    }
+}
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

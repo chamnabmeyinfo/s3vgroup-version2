@@ -82,10 +82,12 @@ include __DIR__ . '/includes/header.php';
                     <i class="fas fa-redo"></i>
                     <span class="hidden sm:inline">Reset</span>
                 </button>
-                <a href="<?= url('developer/login.php') ?>" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <?php if (session('admin_role_slug') === 'super_admin'): ?>
+                <a href="<?= url('developer/index.php') ?>" class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-lg hover:shadow-xl transform hover:scale-105">
                     <i class="fas fa-code"></i>
                     <span class="hidden sm:inline">Developer</span>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
     </div>

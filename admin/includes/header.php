@@ -52,6 +52,202 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
+        
+        /* Custom Modal Styles */
+        .custom-modal-overlay {
+            animation: fadeIn 0.2s ease-out;
+        }
+        
+        .custom-modal {
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        /* Interactive Button Classes */
+        .btn-primary, .btn-secondary, .btn-danger, .btn-success, .btn-warning, .btn-info {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem 1.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-decoration: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(107, 114, 128, 0.4);
+        }
+        .btn-secondary:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+        .btn-danger:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+        .btn-success:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        .btn-warning:hover {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+        }
+        .btn-warning:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+        }
+        .btn-info:hover {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(6, 182, 212, 0.4);
+        }
+        .btn-info:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(6, 182, 212, 0.3);
+        }
+        
+        /* Button Sizes */
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.75rem;
+        }
+        .btn-lg {
+            padding: 0.875rem 1.75rem;
+            font-size: 1rem;
+        }
+        
+        /* Icon-only buttons */
+        .btn-icon {
+            padding: 0.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+        
+        /* Disabled state */
+        .btn-primary:disabled, .btn-secondary:disabled, .btn-danger:disabled,
+        .btn-success:disabled, .btn-warning:disabled, .btn-info:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Action button groups */
+        .btn-group {
+            display: inline-flex;
+            gap: 0.5rem;
+        }
+        
+        /* Action buttons in tables */
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2rem;
+            height: 2rem;
+            padding: 0;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .action-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        .action-btn-edit {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .action-btn-edit:hover {
+            background-color: #bfdbfe;
+        }
+        .action-btn-delete {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .action-btn-delete:hover {
+            background-color: #fecaca;
+        }
+        .action-btn-view {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .action-btn-view:hover {
+            background-color: #a7f3d0;
+        }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -172,9 +368,11 @@
                                     <i class="fas fa-key mr-2"></i> Change Password
                                 </a>
                                 <div class="border-t border-gray-200 my-1"></div>
-                                <a href="<?= url('developer/login.php') ?>" class="block px-3 py-2 text-sm text-purple-700 hover:bg-purple-50 rounded">
+                                <?php if (session('admin_role_slug') === 'super_admin'): ?>
+                                <a href="<?= url('developer/index.php') ?>" class="block px-3 py-2 text-sm text-purple-700 hover:bg-purple-50 rounded">
                                     <i class="fas fa-code mr-2"></i> Developer Panel
                                 </a>
+                                <?php endif; ?>
                                 <a href="<?= url() ?>" target="_blank" class="block px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded">
                                     <i class="fas fa-external-link-alt mr-2"></i> View Website
                                 </a>

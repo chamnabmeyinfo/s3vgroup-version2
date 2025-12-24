@@ -354,14 +354,14 @@ include __DIR__ . '/includes/header.php';
     
         <!-- Action Buttons -->
         <div class="flex gap-4 pt-4 border-t border-gray-200">
-            <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                <i class="fas fa-save mr-2"></i>
-            <?= $category ? 'Update Category' : 'Create Category' ?>
-        </button>
-            <a href="<?= url('admin/categories.php') ?>" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
-                <i class="fas fa-times mr-2"></i>Cancel
-        </a>
-    </div>
+            <button type="submit" class="btn-primary btn-lg">
+                <i class="fas fa-save"></i>
+                <?= $category ? 'Update Category' : 'Create Category' ?>
+            </button>
+            <a href="<?= url('admin/categories.php') ?>" class="btn-secondary btn-lg">
+                <i class="fas fa-times"></i>Cancel
+            </a>
+        </div>
 </form>
 </div>
 

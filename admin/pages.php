@@ -209,16 +209,16 @@ include __DIR__ . '/includes/header.php';
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
                                     <a href="<?= url('page.php?slug=' . urlencode($page['slug'])) ?>" target="_blank" 
-                                       class="text-blue-600 hover:text-blue-800 transition-colors" title="View">
+                                       class="action-btn action-btn-view" title="View">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="<?= url('admin/page-edit.php?id=' . $page['id']) ?>" 
-                                       class="text-indigo-600 hover:text-indigo-800 transition-colors" title="Edit">
+                                       class="action-btn action-btn-edit" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <a href="<?= url('admin/pages.php?delete=' . $page['id']) ?>" 
-                                       onclick="return confirm('Are you sure you want to delete this page?')"
-                                       class="text-red-600 hover:text-red-800 transition-colors" title="Delete">
+                                    <a href="#" 
+                                       onclick="deletePage(<?= $page['id'] ?>); return false;"
+                                       class="action-btn action-btn-delete" title="Delete">
                                         <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
@@ -232,5 +232,14 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+async function deletePage(pageId) {
+    const confirmed = await customConfirm('Are you sure you want to delete this page?', 'Delete Page');
+    if (confirmed) {
+        window.location.href = '?delete=' + pageId;
+    }
+}
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

@@ -177,8 +177,8 @@ include __DIR__ . '/includes/header.php';
                        class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex items-end">
-                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all">
-                    <i class="fas fa-plus mr-2"></i>Create Location
+                <button type="submit" class="btn-primary w-full">
+                    <i class="fas fa-plus"></i>Create Location
                 </button>
             </div>
         </form>
@@ -213,11 +213,11 @@ include __DIR__ . '/includes/header.php';
                                     <code class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
                                         <?= escape($loc['location']) ?>
                                     </code>
-                                    <a href="<?= url('admin/menu-locations.php?delete=' . $loc['id']) ?>" 
-                                       onclick="return confirm('Are you sure you want to delete this location?')"
-                                       class="text-red-600 hover:text-red-800 transition-colors text-sm">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
+                                <a href="#" 
+                                   onclick="deleteLocation(<?= $loc['id'] ?>); return false;"
+                                   class="action-btn action-btn-delete" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
                                 </div>
                                 <?php if (!empty($loc['description'])): ?>
                                 <p class="text-sm text-gray-600"><?= escape($loc['description']) ?></p>
@@ -261,11 +261,11 @@ include __DIR__ . '/includes/header.php';
                                 <code class="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">
                                     <?= escape($loc['location']) ?>
                                 </code>
-                                <a href="<?= url('admin/menu-locations.php?delete=' . $loc['id']) ?>" 
-                                   onclick="return confirm('Are you sure you want to delete this location?')"
-                                   class="text-red-600 hover:text-red-800 transition-colors text-sm">
-                                    <i class="fas fa-trash"></i>
-                                </a>
+                                    <a href="#" 
+                                       onclick="deleteLocation(<?= $loc['id'] ?>); return false;"
+                                       class="action-btn action-btn-delete" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
                             </div>
                             <?php if (!empty($loc['description'])): ?>
                             <p class="text-sm text-gray-600"><?= escape($loc['description']) ?></p>
@@ -291,11 +291,20 @@ include __DIR__ . '/includes/header.php';
         <?php endif; ?>
         
         <div class="mt-6 flex justify-end">
-            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg">
-                <i class="fas fa-save mr-2"></i>Save All Assignments
+            <button type="submit" class="btn-primary btn-lg">
+                <i class="fas fa-save"></i>Save All Assignments
             </button>
         </div>
     </form>
 </div>
+
+<script>
+async function deleteLocation(locationId) {
+    const confirmed = await customConfirm('Are you sure you want to delete this location?', 'Delete Location');
+    if (confirmed) {
+        window.location.href = '?delete=' + locationId;
+    }
+}
+</script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

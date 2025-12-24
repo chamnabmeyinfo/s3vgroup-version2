@@ -406,66 +406,79 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
     
-    <form method="POST" id="productForm" class="bg-white rounded-lg shadow-md p-6">
+    <form method="POST" id="productForm" class="product-form-container">
         <!-- Tabs -->
-        <div class="border-b mb-6">
-            <nav class="flex space-x-8">
-                <button type="button" onclick="switchTab('basic')" id="tab-basic" class="tab-button active py-4 px-1 border-b-2 border-blue-500 font-medium text-blue-600">
-                    <i class="fas fa-info-circle mr-2"></i> Basic Information
+        <div class="product-tabs-container">
+            <nav class="product-tabs-nav">
+                <button type="button" onclick="switchTab('basic')" id="tab-basic" class="product-tab-button active">
+                    <i class="fas fa-info-circle"></i> 
+                    <span>Basic Information</span>
                 </button>
-                <button type="button" onclick="switchTab('images')" id="tab-images" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-images mr-2"></i> Images & Gallery
+                <button type="button" onclick="switchTab('images')" id="tab-images" class="product-tab-button">
+                    <i class="fas fa-images"></i> 
+                    <span>Images & Gallery</span>
                 </button>
-                <button type="button" onclick="switchTab('details')" id="tab-details" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-list mr-2"></i> Details & Specs
+                <button type="button" onclick="switchTab('details')" id="tab-details" class="product-tab-button">
+                    <i class="fas fa-list"></i> 
+                    <span>Details & Specs</span>
                 </button>
-                <button type="button" onclick="switchTab('variants')" id="tab-variants" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-layer-group mr-2"></i> Variants
+                <button type="button" onclick="switchTab('variants')" id="tab-variants" class="product-tab-button">
+                    <i class="fas fa-layer-group"></i> 
+                    <span>Variants</span>
                 </button>
-                <button type="button" onclick="switchTab('seo')" id="tab-seo" class="tab-button py-4 px-1 border-b-2 border-transparent font-medium text-gray-500 hover:text-gray-700">
-                    <i class="fas fa-search mr-2"></i> SEO & Settings
+                <button type="button" onclick="switchTab('seo')" id="tab-seo" class="product-tab-button">
+                    <i class="fas fa-search"></i> 
+                    <span>SEO & Settings</span>
                 </button>
             </nav>
         </div>
         
         <!-- Tab Content: Basic Information -->
         <div id="tab-content-basic" class="tab-content">
-            <div class="space-y-6">
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Product Name *</label>
+            <div class="product-form-section">
+                <div class="product-form-grid">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-tag"></i> Product Name *
+                        </label>
                         <input type="text" name="name" required value="<?= escape($product['name'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg"
+                               class="product-form-input"
                                placeholder="Enter product name">
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Slug</label>
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-link"></i> Slug
+                        </label>
                         <input type="text" name="slug" value="<?= escape($product['slug'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg"
+                               class="product-form-input"
                                placeholder="product-slug"
                                id="product-slug-input">
-                        <p class="text-xs text-gray-500 mt-1">
+                        <p class="product-form-hint">
                             Leave empty to auto-generate from name. 
-                            <span class="text-red-600">Slug must be unique.</span>
+                            <span class="text-red-600 font-semibold">Slug must be unique.</span>
                         </p>
-                        <button type="button" onclick="generateSlugFromName()" class="mt-1 text-xs text-blue-600 hover:text-blue-800">
-                            <i class="fas fa-magic mr-1"></i> Generate from name
+                        <button type="button" onclick="generateSlugFromName()" class="product-form-action-btn">
+                            <i class="fas fa-magic"></i> Generate from name
                         </button>
                     </div>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">SKU</label>
+                <div class="product-form-grid">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-barcode"></i> SKU
+                        </label>
                         <input type="text" name="sku" value="<?= escape($product['sku'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg"
+                               class="product-form-input"
                                placeholder="PROD-001">
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Category</label>
-                        <select name="category_id" class="w-full px-4 py-2 border rounded-lg">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-folder"></i> Category
+                        </label>
+                        <select name="category_id" class="product-form-select">
                             <option value="">Select Category</option>
                             <?php 
                             // Get categories in hierarchical tree format
@@ -479,54 +492,93 @@ include __DIR__ . '/includes/header.php';
                                 </option>
                             <?php endforeach; ?>
                         </select>
-                        <p class="text-xs text-gray-500 mt-1">
-                            <i class="fas fa-info-circle mr-1"></i>
+                        <p class="product-form-hint">
+                            <i class="fas fa-info-circle"></i>
                             You can assign products to sub-categories. Products in sub-categories will also appear in parent category listings.
                         </p>
                     </div>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Short Description</label>
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-align-left"></i> Short Description
+                    </label>
                     <textarea name="short_description" rows="3" 
-                              class="w-full px-4 py-2 border rounded-lg"
+                              class="product-form-textarea"
                               placeholder="Brief description for product listings..."><?= escape($product['short_description'] ?? '') ?></textarea>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Full Description</label>
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-file-alt"></i> Full Description
+                    </label>
                     <textarea name="description" rows="8" 
-                              class="w-full px-4 py-2 border rounded-lg"
+                              class="product-form-textarea"
                               placeholder="Detailed product description..."><?= escape($product['description'] ?? '') ?></textarea>
                 </div>
                 
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Price *</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                <div class="product-form-grid product-form-grid-3">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-dollar-sign"></i> Price *
+                        </label>
+                        <div class="product-form-input-wrapper">
+                            <span class="product-form-input-prefix">$</span>
                             <input type="number" step="0.01" name="price" required value="<?= escape($product['price'] ?? '0') ?>"
-                                   class="w-full pl-8 pr-4 py-2 border rounded-lg">
+                                   class="product-form-input product-form-input-with-prefix">
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Sale Price</label>
-                        <div class="relative">
-                            <span class="absolute left-3 top-2 text-gray-500">$</span>
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-tag"></i> Sale Price
+                        </label>
+                        <div class="product-form-input-wrapper">
+                            <span class="product-form-input-prefix">$</span>
                             <input type="number" step="0.01" name="sale_price" value="<?= escape($product['sale_price'] ?? '') ?>"
-                                   class="w-full pl-8 pr-4 py-2 border rounded-lg"
+                                   class="product-form-input product-form-input-with-prefix"
                                    placeholder="Optional">
                         </div>
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Stock Status</label>
-                        <select name="stock_status" class="w-full px-4 py-2 border rounded-lg">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-warehouse"></i> Stock Status
+                        </label>
+                        <select name="stock_status" class="product-form-select">
                             <option value="in_stock" <?= ($product['stock_status'] ?? '') == 'in_stock' ? 'selected' : '' ?>>In Stock</option>
                             <option value="out_of_stock" <?= ($product['stock_status'] ?? '') == 'out_of_stock' ? 'selected' : '' ?>>Out of Stock</option>
                             <option value="on_order" <?= ($product['stock_status'] ?? '') == 'on_order' ? 'selected' : '' ?>>On Order</option>
                         </select>
+                    </div>
+                </div>
+                
+                <div class="border-t pt-4 product-options-section">
+                    <h3 class="font-semibold mb-4 text-gray-800 flex items-center">
+                        <i class="fas fa-cog text-blue-600 mr-2"></i>
+                        Product Options
+                    </h3>
+                    <div class="space-y-3">
+                        <label class="product-option-label product-option-featured">
+                            <input type="checkbox" name="is_featured" <?= ($product['is_featured'] ?? 0) ? 'checked' : '' ?> class="product-option-checkbox">
+                            <span class="product-option-content">
+                                <span class="product-option-icon">
+                                    <i class="fas fa-star"></i>
+                                </span>
+                                <span class="product-option-text">Featured Product</span>
+                                <span class="product-option-badge">Premium</span>
+                            </span>
+                        </label>
+                        
+                        <label class="product-option-label product-option-active">
+                            <input type="checkbox" name="is_active" <?= ($product['is_active'] ?? 1) ? 'checked' : '' ?> class="product-option-checkbox">
+                            <span class="product-option-content">
+                                <span class="product-option-icon">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                                <span class="product-option-text">Active (Visible on website)</span>
+                            </span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -534,10 +586,12 @@ include __DIR__ . '/includes/header.php';
         
         <!-- Tab Content: Images & Gallery -->
         <div id="tab-content-images" class="tab-content hidden">
-            <div class="space-y-6">
+            <div class="product-form-section">
                 <!-- Main Product Image -->
-                <div>
-                    <label class="block text-sm font-medium mb-2">Main Product Image</label>
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-image"></i> Main Product Image
+                    </label>
                     <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
                         <div id="mainImageArea" class="text-center">
                             <?php if (!empty($product['image'])): ?>
@@ -638,35 +692,49 @@ include __DIR__ . '/includes/header.php';
         
         <!-- Tab Content: Details & Specs -->
         <div id="tab-content-details" class="tab-content hidden">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">Features</label>
+            <div class="product-form-section">
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-star"></i> Features
+                    </label>
                     <textarea name="features" rows="6" 
-                              class="w-full px-4 py-2 border rounded-lg"
+                              class="product-form-textarea"
                               placeholder="Enter product features, one per line..."><?= escape($product['features'] ?? '') ?></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Enter one feature per line</p>
+                    <p class="product-form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Enter one feature per line
+                    </p>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Specifications (JSON)</label>
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-code"></i> Specifications (JSON)
+                    </label>
                     <textarea name="specifications" rows="8" 
-                              class="w-full px-4 py-2 border rounded-lg font-mono text-sm"
+                              class="product-form-textarea font-mono text-sm"
                               placeholder='{"key": "value", "key2": "value2"}'><?= escape($product['specifications'] ? json_encode(json_decode($product['specifications'], true), JSON_PRETTY_PRINT) : '') ?></textarea>
-                    <p class="text-xs text-gray-500 mt-1">Enter specifications as JSON format</p>
+                    <p class="product-form-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Enter specifications as JSON format
+                    </p>
                 </div>
                 
-                <div class="grid md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Weight (kg)</label>
+                <div class="product-form-grid">
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-weight"></i> Weight (kg)
+                        </label>
                         <input type="number" step="0.01" name="weight" value="<?= escape($product['weight'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg"
+                               class="product-form-input"
                                placeholder="0.00">
                     </div>
                     
-                    <div>
-                        <label class="block text-sm font-medium mb-2">Dimensions</label>
+                    <div class="product-form-group">
+                        <label class="product-form-label">
+                            <i class="fas fa-ruler-combined"></i> Dimensions
+                        </label>
                         <input type="text" name="dimensions" value="<?= escape($product['dimensions'] ?? '') ?>"
-                               class="w-full px-4 py-2 border rounded-lg"
+                               class="product-form-input"
                                placeholder="L x W x H">
                     </div>
                 </div>
@@ -995,35 +1063,24 @@ include __DIR__ . '/includes/header.php';
         
         <!-- Tab Content: SEO & Settings -->
         <div id="tab-content-seo" class="tab-content hidden">
-            <div class="space-y-6">
-                <div>
-                    <label class="block text-sm font-medium mb-2">Meta Title</label>
+            <div class="product-form-section">
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-heading"></i> Meta Title
+                    </label>
                     <input type="text" name="meta_title" value="<?= escape($product['meta_title'] ?? '') ?>"
-                           class="w-full px-4 py-2 border rounded-lg"
+                           class="product-form-input"
                            placeholder="SEO title for search engines">
-                    <p class="text-xs text-gray-500 mt-1">Leave empty to use product name</p>
+                    <p class="product-form-hint">Leave empty to use product name</p>
                 </div>
                 
-                <div>
-                    <label class="block text-sm font-medium mb-2">Meta Description</label>
+                <div class="product-form-group">
+                    <label class="product-form-label">
+                        <i class="fas fa-align-center"></i> Meta Description
+                    </label>
                     <textarea name="meta_description" rows="3" 
-                              class="w-full px-4 py-2 border rounded-lg"
+                              class="product-form-textarea"
                               placeholder="SEO description for search engines"><?= escape($product['meta_description'] ?? '') ?></textarea>
-                </div>
-                
-                <div class="border-t pt-4">
-                    <h3 class="font-semibold mb-4">Product Settings</h3>
-                    <div class="space-y-3">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="is_featured" <?= ($product['is_featured'] ?? 0) ? 'checked' : '' ?> class="rounded">
-                            <span class="ml-2">Featured Product</span>
-                        </label>
-                        
-                        <label class="flex items-center">
-                            <input type="checkbox" name="is_active" <?= ($product['is_active'] ?? 1) ? 'checked' : '' ?> class="rounded">
-                            <span class="ml-2">Active (Visible on website)</span>
-                        </label>
-                    </div>
                 </div>
             </div>
         </div>
@@ -2422,15 +2479,465 @@ function generateSlugFromName() {
 </script>
 
 <style>
-.tab-button.active {
-    border-bottom-color: #3b82f6;
-    color: #2563eb;
+/* Product Form Container */
+.product-form-container {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    padding: 2rem;
+    transition: all 0.3s ease;
 }
+
+.product-form-container:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Tabs Styling */
+.product-tabs-container {
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 0.75rem 0.75rem 0 0;
+    padding: 0.5rem;
+}
+
+.product-tabs-nav {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.product-tab-button {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    border: none;
+    background: transparent;
+    color: #64748b;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    white-space: nowrap;
+}
+
+.product-tab-button i {
+    font-size: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.product-tab-button:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+    transform: translateY(-2px);
+}
+
+.product-tab-button:hover i {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.product-tab-button.active {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+}
+
+.product-tab-button.active i {
+    transform: scale(1.1);
+}
+
+/* Form Sections */
+.product-form-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.product-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.product-form-grid-3 {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+/* Form Groups */
+.product-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.product-form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.product-form-label i {
+    color: #3b82f6;
+    font-size: 0.875rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+/* Form Inputs */
+.product-form-input,
+.product-form-textarea,
+.product-form-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.625rem;
+    font-size: 0.875rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white;
+    color: #1e293b;
+}
+
+.product-form-input:focus,
+.product-form-textarea:focus,
+.product-form-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    transform: translateY(-1px);
+}
+
+.product-form-input:hover,
+.product-form-textarea:hover,
+.product-form-select:hover {
+    border-color: #cbd5e1;
+}
+
+.product-form-textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.product-form-select {
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+    appearance: none;
+}
+
+.product-form-select:hover {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%233b82f6' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* Input with Prefix */
+.product-form-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.product-form-input-prefix {
+    position: absolute;
+    left: 1rem;
+    color: #64748b;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.product-form-input-with-prefix {
+    padding-left: 2.5rem;
+}
+
+/* Form Hints */
+.product-form-hint {
+    font-size: 0.75rem;
+    color: #64748b;
+    margin-top: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.product-form-hint i {
+    color: #3b82f6;
+}
+
+/* Action Buttons */
+.product-form-action-btn {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.product-form-action-btn:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.product-form-action-btn i {
+    transition: transform 0.3s ease;
+}
+
+.product-form-action-btn:hover i {
+    transform: scale(1.2) rotate(15deg);
+}
+
+/* Gallery Item */
 .gallery-item {
     transition: transform 0.2s;
 }
 .gallery-item:hover {
     transform: scale(1.05);
+}
+
+/* Product Options Section - Interactive Styling */
+.product-options-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.product-options-section:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-color: #cbd5e1;
+}
+
+.product-option-label {
+    display: flex;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.625rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.product-option-label::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.product-option-label:hover::before {
+    left: 100%;
+}
+
+.product-option-label:hover {
+    border-color: #3b82f6;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.product-option-label:active {
+    transform: translateX(2px) scale(0.98);
+}
+
+.product-option-featured:hover {
+    border-color: #f59e0b;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+}
+
+.product-option-active:hover {
+    border-color: #10b981;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.product-option-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-right: 0.875rem;
+    cursor: pointer;
+    appearance: none;
+    border: 2px solid #cbd5e1;
+    border-radius: 0.375rem;
+    background: white;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.product-option-checkbox:hover {
+    border-color: #3b82f6;
+    transform: scale(1.1);
+}
+
+.product-option-checkbox:checked {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #2563eb;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.product-option-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    animation: checkmark 0.3s ease;
+}
+
+.product-option-featured .product-option-checkbox:checked {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    border-color: #d97706;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.4);
+}
+
+.product-option-active .product-option-checkbox:checked {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #059669;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+}
+
+@keyframes checkmark {
+    0% {
+        transform: translate(-50%, -50%) scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+    }
+    100% {
+        transform: translate(-50%, -50%) scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.product-option-content {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.product-option-icon {
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    border-radius: 0.5rem;
+    color: #64748b;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.product-option-label:hover .product-option-icon {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #3b82f6;
+    transform: scale(1.1) rotate(5deg);
+}
+
+.product-option-featured:hover .product-option-icon {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #f59e0b;
+}
+
+.product-option-active:hover .product-option-icon {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #10b981;
+}
+
+.product-option-label:has(.product-option-checkbox:checked) .product-option-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    transform: scale(1.1);
+}
+
+.product-option-featured:has(.product-option-checkbox:checked) .product-option-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.product-option-active:has(.product-option-checkbox:checked) .product-option-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.product-option-text {
+    font-weight: 500;
+    color: #1e293b;
+    transition: color 0.2s ease;
+    flex: 1;
+}
+
+.product-option-label:hover .product-option-text {
+    color: #0f172a;
+}
+
+.product-option-badge {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    padding: 0.25rem 0.625rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    animation: pulse-badge 2s infinite;
+}
+
+@keyframes pulse-badge {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Fallback for browsers that don't support :has() */
+.product-option-checkbox:checked ~ .product-option-content .product-option-icon {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    transform: scale(1.1);
+}
+
+.product-option-featured .product-option-checkbox:checked ~ .product-option-content .product-option-icon {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.product-option-active .product-option-checkbox:checked ~ .product-option-content .product-option-icon {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 /* Variant Table - Clean & Simple */

@@ -564,46 +564,84 @@ $defaultColumns = array_keys($availableColumns);
         <div class="overflow-x-auto">
             <div class="inline-block min-w-full align-middle">
             <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gradient-to-r from-gray-50 via-gray-50 to-gray-100 border-b-2 border-gray-200">
+                <thead class="product-table-header">
                 <tr>
-                    <th class="px-4 py-4 text-left" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <input type="checkbox" id="selectAll" onchange="toggleAll(this)" class="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                    <th class="product-table-th product-table-th-checkbox" data-column="checkbox" style="display: <?= (in_array('checkbox', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <input type="checkbox" id="selectAll" onchange="toggleAll(this)" class="product-table-checkbox">
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-image mr-1 text-gray-400"></i>Image
+                    <th class="product-table-th" data-column="image" data-label="Image" style="display: <?= (in_array('image', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-image"></i></span>
+                            <span class="product-table-th-text">Image</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-tag mr-1 text-gray-400"></i>Product Name
+                    <th class="product-table-th" data-column="name" data-label="Product Name" style="display: <?= (in_array('name', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-tag"></i></span>
+                            <span class="product-table-th-text">Product Name</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="sku" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-barcode mr-1 text-gray-400"></i>SKU
+                    <th class="product-table-th" data-column="sku" data-label="SKU" style="display: <?= (in_array('sku', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-barcode"></i></span>
+                            <span class="product-table-th-text">SKU</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-folder mr-1 text-gray-400"></i>Category
+                    <th class="product-table-th" data-column="category" data-label="Category" style="display: <?= (in_array('category', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-folder"></i></span>
+                            <span class="product-table-th-text">Category</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-dollar-sign mr-1 text-gray-400"></i>Price
+                    <th class="product-table-th product-table-th-number" data-column="price" data-label="Price" style="display: <?= (in_array('price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-dollar-sign"></i></span>
+                            <span class="product-table-th-text">Price</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="sale_price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-tag mr-1 text-gray-400"></i>Sale Price
+                    <th class="product-table-th product-table-th-number" data-column="sale_price" data-label="Sale Price" style="display: <?= (in_array('sale_price', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-tag"></i></span>
+                            <span class="product-table-th-text">Sale Price</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-warehouse mr-1 text-gray-400"></i>Stock
+                    <th class="product-table-th product-table-th-number" data-column="stock" data-label="Stock" style="display: <?= (in_array('stock', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-warehouse"></i></span>
+                            <span class="product-table-th-text">Stock</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-eye mr-1 text-gray-400"></i>Views
+                    <th class="product-table-th product-table-th-number" data-column="views" data-label="Views" style="display: <?= (in_array('views', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-eye"></i></span>
+                            <span class="product-table-th-text">Views</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-toggle-on mr-1 text-gray-400"></i>Status
+                    <th class="product-table-th" data-column="status" data-label="Status" style="display: <?= (in_array('status', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-toggle-on"></i></span>
+                            <span class="product-table-th-text">Status</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-star mr-1 text-gray-400"></i>Featured
+                    <th class="product-table-th" data-column="featured" data-label="Featured" style="display: <?= (in_array('featured', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-star"></i></span>
+                            <span class="product-table-th-text">Featured</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-calendar mr-1 text-gray-400"></i>Created
+                    <th class="product-table-th" data-column="created" data-label="Created" style="display: <?= (in_array('created', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-calendar"></i></span>
+                            <span class="product-table-th-text">Created</span>
+                        </div>
                     </th>
-                    <th class="px-4 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider" data-column="actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
-                        <i class="fas fa-cog mr-1 text-gray-400"></i>Actions
+                    <th class="product-table-th product-table-th-actions" data-column="actions" data-label="Actions" style="display: <?= (in_array('actions', $selectedColumns) || empty($_GET['columns'])) ? '' : 'none' ?>;">
+                        <div class="product-table-th-content">
+                            <span class="product-table-th-icon"><i class="fas fa-cog"></i></span>
+                            <span class="product-table-th-text">Actions</span>
+                        </div>
                     </th>
                 </tr>
             </thead>
@@ -1258,6 +1296,203 @@ function executeBulkAction() {
 
 .overflow-x-auto::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(to right, #4f46e5, #7c3aed);
+}
+
+/* Interactive Table Header */
+.product-table-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+    border-bottom: 2px solid #cbd5e1;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.product-table-th {
+    padding: 1rem 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #1e293b;
+    white-space: nowrap;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    border-right: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+.product-table-th:last-child {
+    border-right: none;
+}
+
+.product-table-th:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    color: #3b82f6;
+    transform: translateY(-1px);
+    box-shadow: inset 0 -2px 0 #3b82f6;
+}
+
+.product-table-th-content {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: fit-content;
+}
+
+.product-table-th-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    flex-shrink: 0;
+    color: #64748b;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+}
+
+.product-table-th:hover .product-table-th-icon {
+    color: #3b82f6;
+    transform: scale(1.15) rotate(5deg);
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 0.375rem;
+    padding: 0.25rem;
+}
+
+.product-table-th-text {
+    font-weight: 700;
+    color: inherit;
+    transition: color 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+/* Responsive: Hide icons on very tight spaces */
+@media (max-width: 1024px) {
+    .product-table-th-icon {
+        display: none;
+    }
+    
+    .product-table-th-content {
+        gap: 0;
+    }
+}
+
+/* For extremely tight spaces, show only icons */
+@media (max-width: 768px) {
+    .product-table-th-text {
+        display: none;
+    }
+    
+    .product-table-th-icon {
+        display: flex;
+        width: 1.75rem;
+        height: 1.75rem;
+    }
+    
+    .product-table-th:hover .product-table-th-icon {
+        transform: scale(1.2);
+    }
+}
+
+/* Special column styles */
+.product-table-th-checkbox {
+    width: 3rem;
+    min-width: 3rem;
+    max-width: 3rem;
+    padding: 1rem 0.75rem;
+    text-align: center;
+}
+
+.product-table-th-checkbox:hover {
+    background: transparent;
+    transform: none;
+    box-shadow: none;
+}
+
+.product-table-checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    cursor: pointer;
+    accent-color: #6366f1;
+    transition: all 0.2s ease;
+}
+
+.product-table-checkbox:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+}
+
+.product-table-th-number {
+    text-align: right;
+}
+
+.product-table-th-number .product-table-th-content {
+    justify-content: flex-end;
+}
+
+.product-table-th-actions {
+    text-align: center;
+    width: 6rem;
+    min-width: 6rem;
+}
+
+.product-table-th-actions .product-table-th-content {
+    justify-content: center;
+}
+
+/* Add subtle animation on load */
+@keyframes headerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.product-table-header {
+    animation: headerSlideIn 0.4s ease-out;
+}
+
+/* Tooltip on hover for mobile (when text is hidden) */
+@media (max-width: 768px) {
+    .product-table-th {
+        position: relative;
+    }
+    
+    .product-table-th:hover::after {
+        content: attr(data-label);
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1e293b;
+        color: white;
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.375rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+        z-index: 20;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .product-table-th:hover::before {
+        content: '';
+        position: absolute;
+        bottom: calc(100% - 0.25rem);
+        left: 50%;
+        transform: translateX(-50%);
+        border: 4px solid transparent;
+        border-top-color: #1e293b;
+        z-index: 20;
+    }
 }
 </style>
 

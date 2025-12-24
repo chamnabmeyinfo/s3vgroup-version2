@@ -72,16 +72,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'type' => $_POST['item_type'] ?? 'custom',
             'object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
             'target' => $_POST['target'] ?? '_self',
-            'icon' => trim($_POST['icon'] ?? ''),
-            'css_classes' => trim($_POST['css_classes'] ?? '')
+            'icon' => trim($_POST['icon'] ?? '')
         ];
         
-        if (empty($data['title'])) {
-            echo json_encode(['success' => false, 'error' => 'Title is required']);
-            exit;
-        }
-        
-        if ($data['type'] === 'category') {
+        // Validate based on type
+        if ($data['type'] === 'custom') {
+            // For custom links, title is required
+            if (empty($data['title'])) {
+                echo json_encode(['success' => false, 'error' => 'Title is required for custom links']);
+                exit;
+            }
+            // URL is optional for custom links, default to #
+            if (empty($data['url'])) {
+                $data['url'] = '#';
+            }
+        } elseif ($data['type'] === 'category') {
             if (empty($data['object_id'])) {
                 echo json_encode(['success' => false, 'error' => 'Please select a category']);
                 exit;
@@ -299,8 +304,8 @@ include __DIR__ . '/includes/header.php';
                 <p class="text-blue-100"><?= $isEdit ? 'Manage menu items' : 'Create a new menu' ?></p>
             </div>
             <div class="flex gap-3">
-                <a href="<?= url('admin/menus.php') ?>" class="bg-white/20 text-white px-4 py-2 rounded-lg font-semibold hover:bg-white/30 transition-all">
-                    <i class="fas fa-arrow-left mr-2"></i>Back
+                <a href="<?= url('admin/menus.php') ?>" class="btn-secondary" style="background: rgba(255, 255, 255, 0.2); color: white;">
+                    <i class="fas fa-arrow-left"></i>Back
                 </a>
             </div>
         </div>
@@ -347,8 +352,8 @@ include __DIR__ . '/includes/header.php';
     <div class="bg-white rounded-xl shadow-lg p-6">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800">Menu Items</h2>
-            <button onclick="showAddItemModal()" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg">
-                <i class="fas fa-plus mr-2"></i>Add Menu Item
+            <button onclick="showAddItemModal()" class="btn-primary">
+                <i class="fas fa-plus"></i>Add Menu Item
             </button>
         </div>
 
@@ -388,11 +393,11 @@ include __DIR__ . '/includes/header.php';
                         $html .= '</div>';
                         $html .= '</div>';
                         $html .= '<div class="flex items-center gap-2">';
-                        $html .= '<button onclick="editItem(' . $item['id'] . ')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 p-2 rounded transition-all" title="Edit">';
-                        $html .= '<i class="fas fa-edit text-sm"></i>';
+                        $html .= '<button onclick="editItem(' . $item['id'] . ')" class="action-btn action-btn-edit" title="Edit">';
+                        $html .= '<i class="fas fa-edit"></i>';
                         $html .= '</button>';
-                        $html .= '<button onclick="deleteItem(' . $item['id'] . ')" class="bg-red-100 hover:bg-red-200 text-red-700 p-2 rounded transition-all" title="Delete">';
-                        $html .= '<i class="fas fa-trash text-sm"></i>';
+                        $html .= '<button onclick="deleteItem(' . $item['id'] . ')" class="action-btn action-btn-delete" title="Delete">';
+                        $html .= '<i class="fas fa-trash"></i>';
                         $html .= '</button>';
                         $html .= '</div>';
                         $html .= '</div>';
@@ -408,8 +413,8 @@ include __DIR__ . '/includes/header.php';
         </div>
 
         <div class="mt-6 flex justify-end">
-            <button onclick="saveMenuOrder()" class="bg-green-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-green-700 transition-all">
-                <i class="fas fa-save mr-2"></i>Save Menu Order
+            <button onclick="saveMenuOrder()" class="btn-success btn-lg">
+                <i class="fas fa-save"></i>Save Menu Order
             </button>
         </div>
     </div>
@@ -485,7 +490,7 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-heading mr-2 text-gray-400"></i>Title *
                         </label>
-                        <input type="text" name="title" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Menu Item Title">
+                        <input type="text" name="title" id="custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Menu Item Title">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -610,24 +615,25 @@ include __DIR__ . '/includes/header.php';
             <div class="border-t pt-4 mt-4">
                 <div class="mb-4">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-icons mr-2 text-gray-400"></i>Icon (Font Awesome class)
+                        <i class="fas fa-icons mr-2 text-gray-400"></i>Icon
                     </label>
-                    <input type="text" name="icon" placeholder="fas fa-home" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Optional: e.g., "fas fa-home", "fas fa-user"
-                    </p>
-                </div>
-                
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-code mr-2 text-gray-400"></i>CSS Classes
-                    </label>
-                    <input type="text" name="css_classes" placeholder="custom-class another-class" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <p class="text-xs text-gray-500 mt-1">
-                        <i class="fas fa-info-circle mr-1"></i>
-                        Optional: Add custom CSS classes for styling
-                    </p>
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <input type="text" name="icon" id="iconInput" placeholder="Click to choose an icon" readonly
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer"
+                                   onclick="openIconPicker()">
+                        </div>
+                        <button type="button" onclick="openIconPicker()" 
+                                class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all font-semibold">
+                            <i class="fas fa-icons mr-2"></i>Choose Icon
+                        </button>
+                        <button type="button" onclick="clearIcon()" 
+                                class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
+                                title="Clear icon">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="selectedIconPreview" class="mt-2 text-center"></div>
                 </div>
                 
                 <div class="mb-4">
@@ -642,11 +648,11 @@ include __DIR__ . '/includes/header.php';
             </div>
             
             <div class="flex justify-end gap-3 pt-4 border-t mt-4">
-                <button type="button" onclick="closeAddItemModal()" class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-all">
-                    <i class="fas fa-times mr-2"></i>Cancel
+                <button type="button" onclick="closeAddItemModal()" class="btn-secondary">
+                    <i class="fas fa-times"></i>Cancel
                 </button>
-                <button type="submit" class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg">
-                    <i class="fas fa-plus mr-2"></i>Add Item
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-plus"></i>Add Item
                 </button>
             </div>
         </form>
@@ -685,7 +691,99 @@ include __DIR__ . '/includes/header.php';
         transform: translateY(0);
     }
 }
+
+/* Icon Picker Modal */
+#iconPickerModal {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 12px;
+    max-height: 500px;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.icon-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+}
+
+.icon-item:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.icon-item.selected {
+    border-color: #3b82f6;
+    background: #dbeafe;
+}
+
+.icon-item i {
+    font-size: 24px;
+    color: #4b5563;
+    margin-bottom: 8px;
+}
+
+.icon-item.selected i {
+    color: #1e40af;
+}
+
+.icon-item span {
+    font-size: 10px;
+    color: #6b7280;
+    text-align: center;
+    word-break: break-word;
+}
+
+.icon-item.selected span {
+    color: #1e40af;
+    font-weight: 600;
+}
 </style>
+
+<!-- Icon Picker Modal -->
+<div id="iconPickerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-t-xl flex items-center justify-between">
+            <h3 class="text-xl font-bold">
+                <i class="fas fa-icons mr-2"></i>Choose an Icon
+            </h3>
+            <button onclick="closeIconPicker()" class="text-white hover:text-gray-200 transition-colors text-2xl">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-6 flex-1 overflow-y-auto">
+            <div class="mb-4">
+                <input type="text" id="iconSearch" placeholder="Search icons..." 
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                       onkeyup="filterIcons()">
+            </div>
+            <div id="iconGrid" class="icon-grid"></div>
+        </div>
+        <div class="border-t p-4 flex justify-end gap-3">
+            <button onclick="closeIconPicker()" class="btn-secondary">
+                Cancel
+            </button>
+            <button onclick="confirmIconSelection()" class="btn-primary">
+                Select Icon
+            </button>
+        </div>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
@@ -772,7 +870,7 @@ function selectItemType(type) {
     switch(type) {
         case 'custom':
             fieldsToShow = ['customLinkFields'];
-            requiredFields = ['title'];
+            requiredFields = ['custom_title'];
             break;
         case 'category':
             fieldsToShow = ['categoryFields'];
@@ -812,9 +910,9 @@ function selectItemType(type) {
         }
     });
     
-    // For custom type, also require title input
+    // For custom type, require title input by ID
     if (type === 'custom') {
-        const titleInput = form.querySelector('#customLinkFields input[name="title"]');
+        const titleInput = document.getElementById('custom_title');
         if (titleInput) {
             titleInput.setAttribute('required', 'required');
         }
@@ -836,7 +934,7 @@ if (addItemForm) {
         let validationError = '';
         
         if (itemType === 'custom') {
-            const title = this.querySelector('input[name="title"]')?.value.trim();
+            const title = document.getElementById('custom_title')?.value.trim();
             if (!title) {
                 validationError = 'Title is required for custom links';
             }
@@ -868,7 +966,7 @@ if (addItemForm) {
         }
         
         if (validationError) {
-            alert(validationError);
+            customAlert(validationError, 'Validation Error', 'error').then(() => {});
             return;
         }
         
@@ -894,12 +992,12 @@ if (addItemForm) {
                 closeAddItemModal();
                 location.reload();
             } else {
-                alert('Error adding item: ' + (result.error || 'Unknown error'));
+                customAlert('Error adding item: ' + (result.error || 'Unknown error'), 'Error', 'error').then(() => {});
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
             }
         } catch (error) {
-            alert('Error: ' + error.message);
+            customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
@@ -953,7 +1051,7 @@ function saveMenuOrder() {
     const orders = updateMenuStructure();
     
     if (Object.keys(orders).length === 0) {
-        alert('No items to save');
+        customAlert('No items to save', 'Information', 'info').then(() => {});
         return;
     }
     
@@ -980,15 +1078,16 @@ function saveMenuOrder() {
             return res.json();
         }).then(data => {
             if (data.success) {
-                alert('Menu order saved!');
-                location.reload();
+                customAlert('Menu order saved successfully!', 'Success', 'success').then(() => {
+                    location.reload();
+                });
             } else {
-                alert('Error saving order: ' + (data.error || 'Unknown error'));
+                customAlert('Error saving order: ' + (data.error || 'Unknown error'), 'Error', 'error').then(() => {});
                 saveBtn.disabled = false;
                 saveBtn.innerHTML = originalText;
             }
         }).catch(error => {
-            alert('Error: ' + error.message);
+            customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
             saveBtn.disabled = false;
             saveBtn.innerHTML = originalText;
         });
@@ -998,14 +1097,17 @@ function saveMenuOrder() {
 function editItem(id) {
     // TODO: Implement edit modal
     // For now, redirect to edit page or show alert
-    if (confirm('Edit menu item? This will reload the page.')) {
-        // Could implement inline editing modal here
-        alert('Edit functionality coming soon. For now, delete and recreate the item.');
-    }
+    customConfirm('Edit menu item? This will reload the page.', 'Edit Menu Item').then((confirmed) => {
+        if (confirmed) {
+            // Could implement inline editing modal here
+            customAlert('Edit functionality coming soon. For now, delete and recreate the item.', 'Information', 'info').then(() => {});
+        }
+    });
 }
 
-function deleteItem(id) {
-    if (!confirm('Delete this menu item? This will also delete all sub-items.')) {
+async function deleteItem(id) {
+    const confirmed = await customConfirm('Delete this menu item? This will also delete all sub-items.', 'Delete Menu Item');
+    if (!confirmed) {
         return;
     }
     
@@ -1025,14 +1127,208 @@ function deleteItem(id) {
         return res.json();
     }).then(data => {
         if (data.success) {
-            location.reload();
+            customAlert('Menu item deleted successfully!', 'Success', 'success').then(() => {
+                location.reload();
+            });
         } else {
-            alert('Error deleting item: ' + (data.error || 'Unknown error'));
+            customAlert('Error deleting item: ' + (data.error || 'Unknown error'), 'Error', 'error').then(() => {});
         }
     }).catch(error => {
-        alert('Error: ' + error.message);
+        customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
     });
 }
+</script>
+
+<script>
+// Common Font Awesome icons for menu items
+const commonIcons = [
+    { class: 'fas fa-home', name: 'Home' },
+    { class: 'fas fa-user', name: 'User' },
+    { class: 'fas fa-users', name: 'Users' },
+    { class: 'fas fa-shopping-cart', name: 'Cart' },
+    { class: 'fas fa-box', name: 'Box' },
+    { class: 'fas fa-tags', name: 'Tags' },
+    { class: 'fas fa-folder', name: 'Folder' },
+    { class: 'fas fa-file-alt', name: 'File' },
+    { class: 'fas fa-envelope', name: 'Email' },
+    { class: 'fas fa-phone', name: 'Phone' },
+    { class: 'fas fa-map-marker-alt', name: 'Location' },
+    { class: 'fas fa-info-circle', name: 'Info' },
+    { class: 'fas fa-question-circle', name: 'Question' },
+    { class: 'fas fa-star', name: 'Star' },
+    { class: 'fas fa-heart', name: 'Heart' },
+    { class: 'fas fa-bell', name: 'Bell' },
+    { class: 'fas fa-cog', name: 'Settings' },
+    { class: 'fas fa-search', name: 'Search' },
+    { class: 'fas fa-bars', name: 'Menu' },
+    { class: 'fas fa-arrow-right', name: 'Arrow' },
+    { class: 'fas fa-chevron-right', name: 'Chevron' },
+    { class: 'fas fa-check', name: 'Check' },
+    { class: 'fas fa-times', name: 'Close' },
+    { class: 'fas fa-plus', name: 'Plus' },
+    { class: 'fas fa-minus', name: 'Minus' },
+    { class: 'fas fa-edit', name: 'Edit' },
+    { class: 'fas fa-trash', name: 'Delete' },
+    { class: 'fas fa-save', name: 'Save' },
+    { class: 'fas fa-download', name: 'Download' },
+    { class: 'fas fa-upload', name: 'Upload' },
+    { class: 'fas fa-share', name: 'Share' },
+    { class: 'fas fa-link', name: 'Link' },
+    { class: 'fas fa-external-link-alt', name: 'External' },
+    { class: 'fas fa-calendar', name: 'Calendar' },
+    { class: 'fas fa-clock', name: 'Clock' },
+    { class: 'fas fa-image', name: 'Image' },
+    { class: 'fas fa-video', name: 'Video' },
+    { class: 'fas fa-music', name: 'Music' },
+    { class: 'fas fa-globe', name: 'Globe' },
+    { class: 'fas fa-building', name: 'Building' },
+    { class: 'fas fa-store', name: 'Store' },
+    { class: 'fas fa-truck', name: 'Truck' },
+    { class: 'fas fa-wrench', name: 'Wrench' },
+    { class: 'fas fa-tools', name: 'Tools' },
+    { class: 'fas fa-bolt', name: 'Bolt' },
+    { class: 'fas fa-fire', name: 'Fire' },
+    { class: 'fas fa-gift', name: 'Gift' },
+    { class: 'fas fa-trophy', name: 'Trophy' },
+    { class: 'fas fa-medal', name: 'Medal' },
+    { class: 'fas fa-certificate', name: 'Certificate' },
+    { class: 'fas fa-book', name: 'Book' },
+    { class: 'fas fa-graduation-cap', name: 'Education' },
+    { class: 'fas fa-briefcase', name: 'Briefcase' },
+    { class: 'fas fa-handshake', name: 'Handshake' },
+    { class: 'fas fa-comments', name: 'Comments' },
+    { class: 'fas fa-newspaper', name: 'News' },
+    { class: 'fas fa-blog', name: 'Blog' },
+    { class: 'fas fa-rss', name: 'RSS' },
+    { class: 'fas fa-shield-alt', name: 'Shield' },
+    { class: 'fas fa-lock', name: 'Lock' },
+    { class: 'fas fa-unlock', name: 'Unlock' },
+    { class: 'fas fa-key', name: 'Key' },
+    { class: 'fas fa-eye', name: 'Eye' },
+    { class: 'fas fa-eye-slash', name: 'Hide' },
+    { class: 'fas fa-thumbs-up', name: 'Like' },
+    { class: 'fas fa-thumbs-down', name: 'Dislike' },
+    { class: 'fas fa-share-alt', name: 'Share Alt' },
+    { class: 'fas fa-facebook', name: 'Facebook' },
+    { class: 'fab fa-twitter', name: 'Twitter' },
+    { class: 'fab fa-instagram', name: 'Instagram' },
+    { class: 'fab fa-youtube', name: 'YouTube' },
+    { class: 'fab fa-linkedin', name: 'LinkedIn' },
+    { class: 'fab fa-whatsapp', name: 'WhatsApp' },
+    { class: 'fab fa-telegram', name: 'Telegram' }
+];
+
+let selectedIconClass = '';
+let filteredIcons = [...commonIcons];
+
+function openIconPicker() {
+    const modal = document.getElementById('iconPickerModal');
+    const currentIcon = document.getElementById('iconInput').value;
+    selectedIconClass = currentIcon;
+    
+    // Render icons
+    renderIcons();
+    
+    // Highlight current selection
+    if (currentIcon) {
+        setTimeout(() => {
+            const selectedItem = document.querySelector(`.icon-item[data-icon="${currentIcon}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+                selectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+    
+    modal.classList.remove('hidden');
+    document.getElementById('iconSearch').focus();
+}
+
+function closeIconPicker() {
+    document.getElementById('iconPickerModal').classList.add('hidden');
+    document.getElementById('iconSearch').value = '';
+    filteredIcons = [...commonIcons];
+    renderIcons();
+}
+
+function renderIcons() {
+    const grid = document.getElementById('iconGrid');
+    grid.innerHTML = '';
+    
+    filteredIcons.forEach(icon => {
+        const item = document.createElement('div');
+        item.className = 'icon-item' + (selectedIconClass === icon.class ? ' selected' : '');
+        item.setAttribute('data-icon', icon.class);
+        item.onclick = () => selectIcon(icon.class);
+        
+        item.innerHTML = `
+            <i class="${icon.class}"></i>
+            <span>${icon.name}</span>
+        `;
+        
+        grid.appendChild(item);
+    });
+}
+
+function selectIcon(iconClass) {
+    // Remove previous selection
+    document.querySelectorAll('.icon-item').forEach(item => {
+        item.classList.remove('selected');
+    });
+    
+    // Add selection to clicked item
+    const item = document.querySelector(`.icon-item[data-icon="${iconClass}"]`);
+    if (item) {
+        item.classList.add('selected');
+        selectedIconClass = iconClass;
+    }
+}
+
+function confirmIconSelection() {
+    document.getElementById('iconInput').value = selectedIconClass;
+    updateIconPreview();
+    closeIconPicker();
+}
+
+function clearIcon() {
+    document.getElementById('iconInput').value = '';
+    selectedIconClass = '';
+    updateIconPreview();
+}
+
+function filterIcons() {
+    const search = document.getElementById('iconSearch').value.toLowerCase();
+    filteredIcons = commonIcons.filter(icon => 
+        icon.name.toLowerCase().includes(search) || 
+        icon.class.toLowerCase().includes(search)
+    );
+    renderIcons();
+}
+
+function updateIconPreview() {
+    const preview = document.getElementById('selectedIconPreview');
+    const iconValue = document.getElementById('iconInput').value;
+    
+    if (iconValue) {
+        preview.innerHTML = `
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-lg border border-blue-200">
+                <i class="${iconValue} text-blue-600 text-xl"></i>
+                <span class="text-sm text-gray-700 font-medium">${iconValue}</span>
+            </div>
+        `;
+    } else {
+        preview.innerHTML = '<span class="text-sm text-gray-400 italic">No icon selected</span>';
+    }
+}
+
+// Update preview when icon input changes
+document.addEventListener('DOMContentLoaded', function() {
+    const iconInput = document.getElementById('iconInput');
+    if (iconInput) {
+        iconInput.addEventListener('input', updateIconPreview);
+        updateIconPreview();
+    }
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

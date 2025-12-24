@@ -209,6 +209,18 @@ class Category
                 }
             }
             
+            // Check for duplicate slug if slug is being updated
+            if (isset($updateData['slug']) && !empty($updateData['slug'])) {
+                $existing = $this->db->fetchOne(
+                    "SELECT id FROM categories WHERE slug = :slug AND id != :id",
+                    ['slug' => $updateData['slug'], 'id' => $id]
+                );
+                if ($existing) {
+                    $validationError = 'A category with the slug "' . $updateData['slug'] . '" already exists. Please choose a different slug.';
+                    unset($updateData['slug']); // Remove slug from update to prevent constraint violation
+                }
+            }
+            
             // Handle parent_id validation
             if (isset($updateData['parent_id'])) {
                 if ($updateData['parent_id'] === '' || $updateData['parent_id'] === 0) {
@@ -258,28 +270,80 @@ class Category
                 return true;
             }
             
-            $result = $this->db->update('categories', $updateData, 'id = :id', ['id' => $id]);
-            
-            // Store validation warning if update succeeded but had a warning
-            if ($validationError && $result) {
+            try {
+                $result = $this->db->update('categories', $updateData, 'id = :id', ['id' => $id]);
+                
+                // Store validation warning if update succeeded but had a warning
+                if ($validationError && $result) {
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    $_SESSION['category_update_warning'] = $validationError;
+                }
+                
+                // If update failed and we have validation error, store it
+                if (!$result && $validationError) {
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    $_SESSION['category_update_error'] = $validationError;
+                }
+                
+                // If update returned 0 rows (no changes or category not found), check why
+                if ($result === 0 && empty($validationError)) {
+                    // Check if category still exists
+                    $existing = $this->getById($id);
+                    if (!$existing) {
+                        if (session_status() === PHP_SESSION_NONE) {
+                            session_start();
+                        }
+                        $_SESSION['category_update_error'] = 'Category not found. It may have been deleted.';
+                        return false;
+                    }
+                    // Category exists but no rows updated - might be duplicate data
+                    // This is actually OK, return true (no changes needed)
+                    return true;
+                }
+                
+                return $result > 0;
+            } catch (\PDOException $e) {
+                // Capture actual database error
+                $errorCode = $e->getCode();
+                $errorMessage = $e->getMessage();
+                
+                error_log('Category update PDO error: ' . $errorMessage);
+                error_log('Category update error code: ' . $errorCode);
+                
                 if (session_status() === PHP_SESSION_NONE) {
                     session_start();
                 }
-                $_SESSION['category_update_warning'] = $validationError;
-            }
-            
-            // If update failed and we have validation error, store it
-            if (!$result && $validationError) {
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
+                
+                // Check for common database errors
+                if ($errorCode == 23000 || strpos($errorMessage, 'Duplicate entry') !== false) {
+                    // Unique constraint violation - likely duplicate slug
+                    if (strpos($errorMessage, 'slug') !== false) {
+                        $_SESSION['category_update_error'] = 'A category with this slug already exists. Please choose a different slug.';
+                    } else {
+                        $_SESSION['category_update_error'] = 'Duplicate entry detected. This category may conflict with an existing one.';
+                    }
+                } elseif (strpos($errorMessage, 'foreign key') !== false || strpos($errorMessage, 'constraint') !== false) {
+                    $_SESSION['category_update_error'] = 'Cannot update category due to database constraint. Please check parent category relationships.';
+                } else {
+                    // Generic database error - show user-friendly message
+                    $_SESSION['category_update_error'] = 'Database error: ' . (config('app.debug', false) ? $errorMessage : 'Please check that all fields are valid and try again.');
                 }
-                $_SESSION['category_update_error'] = $validationError;
+                
+                return false;
             }
-            
-            return $result;
         } catch (\Exception $e) {
             error_log('Category update error: ' . $e->getMessage());
             error_log('Category update error trace: ' . $e->getTraceAsString());
+            
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['category_update_error'] = 'Error updating category: ' . (config('app.debug', false) ? $e->getMessage() : 'Please try again or contact support.');
+            
             return false;
         }
     }

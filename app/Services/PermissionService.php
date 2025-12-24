@@ -58,15 +58,23 @@ class PermissionService {
         try {
             $userId = session('admin_user_id');
             
-            // Get user's role
+            // Get user's role with slug
             $user = $this->db->fetchOne(
-                "SELECT role_id FROM admin_users WHERE id = :id AND is_active = 1",
+                "SELECT u.role_id, r.slug as role_slug 
+                 FROM admin_users u 
+                 LEFT JOIN roles r ON u.role_id = r.id 
+                 WHERE u.id = :id AND u.is_active = 1",
                 ['id' => $userId]
             );
             
             // If no user or no role, deny permission (unless role management not set up)
             if (!$user) {
                 return false;
+            }
+            
+            // Super Admin has access to everything
+            if (!empty($user['role_slug']) && $user['role_slug'] === 'super_admin') {
+                return true;
             }
             
             // If user has no role assigned, allow access (backward compatibility)
