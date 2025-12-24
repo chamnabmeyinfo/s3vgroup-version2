@@ -66,8 +66,13 @@ if ($readFilter === 'unread') {
 }
 
 if ($search) {
-    $where[] = "(name LIKE :search OR email LIKE :search OR phone LIKE :search OR subject LIKE :search OR message LIKE :search)";
-    $params['search'] = '%' . $search . '%';
+    $searchTerm = '%' . $search . '%';
+    $where[] = "(name LIKE :search_name OR email LIKE :search_email OR phone LIKE :search_phone OR subject LIKE :search_subject OR message LIKE :search_message)";
+    $params['search_name'] = $searchTerm;
+    $params['search_email'] = $searchTerm;
+    $params['search_phone'] = $searchTerm;
+    $params['search_subject'] = $searchTerm;
+    $params['search_message'] = $searchTerm;
 }
 
 if ($dateFrom) {

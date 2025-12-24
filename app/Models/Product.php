@@ -73,8 +73,11 @@ class Product
         }
 
         if (!empty($filters['search'])) {
-            $where[] = "(p.name LIKE :search OR p.description LIKE :search OR p.short_description LIKE :search)";
-            $params['search'] = "%{$filters['search']}%";
+            $searchTerm = "%{$filters['search']}%";
+            $where[] = "(p.name LIKE :search_name OR p.description LIKE :search_desc OR p.short_description LIKE :search_short)";
+            $params['search_name'] = $searchTerm;
+            $params['search_desc'] = $searchTerm;
+            $params['search_short'] = $searchTerm;
         }
 
         // Price filtering
@@ -181,8 +184,11 @@ class Product
         }
 
         if (!empty($filters['search'])) {
-            $where[] = "(name LIKE :search OR description LIKE :search OR short_description LIKE :search)";
-            $params['search'] = "%{$filters['search']}%";
+            $searchTerm = "%{$filters['search']}%";
+            $where[] = "(name LIKE :search_name OR description LIKE :search_desc OR short_description LIKE :search_short)";
+            $params['search_name'] = $searchTerm;
+            $params['search_desc'] = $searchTerm;
+            $params['search_short'] = $searchTerm;
         }
 
         if (!empty($filters['featured'])) {

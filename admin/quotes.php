@@ -65,8 +65,13 @@ if ($statusFilter !== 'all') {
 }
 
 if ($search) {
-    $where[] = "(q.name LIKE :search OR q.email LIKE :search OR q.phone LIKE :search OR q.company LIKE :search OR p.name LIKE :search)";
-    $params['search'] = '%' . $search . '%';
+    $searchTerm = '%' . $search . '%';
+    $where[] = "(q.name LIKE :search_name OR q.email LIKE :search_email OR q.phone LIKE :search_phone OR q.company LIKE :search_company OR p.name LIKE :search_product)";
+    $params['search_name'] = $searchTerm;
+    $params['search_email'] = $searchTerm;
+    $params['search_phone'] = $searchTerm;
+    $params['search_company'] = $searchTerm;
+    $params['search_product'] = $searchTerm;
 }
 
 if ($dateFrom) {

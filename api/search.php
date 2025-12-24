@@ -17,11 +17,15 @@ if (empty($query) || strlen($query) < 2) {
 $results = [];
 
 if ($type === 'products' || $type === 'all') {
+    $searchTerm = "%{$query}%";
+    $exactTerm = $query;
+    $startTerm = "{$query}%";
+    
     $products = db()->fetchAll(
         "SELECT id, name, slug, price, image, short_description 
          FROM products 
          WHERE is_active = 1 
-         AND (name LIKE :query OR short_description LIKE :query OR description LIKE :query)
+         AND (name LIKE :query_name OR short_description LIKE :query_short OR description LIKE :query_desc)
          ORDER BY 
            CASE 
              WHEN name LIKE :exact THEN 1
@@ -31,9 +35,11 @@ if ($type === 'products' || $type === 'all') {
            name ASC
          LIMIT 10",
         [
-            'query' => "%{$query}%",
-            'exact' => $query,
-            'start' => "{$query}%"
+            'query_name' => $searchTerm,
+            'query_short' => $searchTerm,
+            'query_desc' => $searchTerm,
+            'exact' => $exactTerm,
+            'start' => $startTerm
         ]
     );
     
@@ -51,13 +57,17 @@ if ($type === 'products' || $type === 'all') {
 }
 
 if ($type === 'categories' || $type === 'all') {
+    $categorySearchTerm = "%{$query}%";
     $categories = db()->fetchAll(
         "SELECT id, name, slug, description 
          FROM categories 
          WHERE is_active = 1 
-         AND (name LIKE :query OR description LIKE :query)
+         AND (name LIKE :cat_query_name OR description LIKE :cat_query_desc)
          LIMIT 5",
-        ['query' => "%{$query}%"]
+        [
+            'cat_query_name' => $categorySearchTerm,
+            'cat_query_desc' => $categorySearchTerm
+        ]
     );
     
     foreach ($categories as $category) {
