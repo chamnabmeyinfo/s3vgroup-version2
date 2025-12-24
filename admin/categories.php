@@ -8,6 +8,30 @@ $categoryModel = new Category();
 $message = '';
 $error = '';
 
+// Handle clear all parents action
+if (!empty($_GET['action']) && $_GET['action'] === 'clear_all_parents') {
+    try {
+        // Count how many will be affected
+        $count = db()->fetchOne("SELECT COUNT(*) as count FROM categories WHERE parent_id IS NOT NULL")['count'] ?? 0;
+        
+        if ($count > 0) {
+            // Use direct SQL query since we need to update all rows with parent_id IS NOT NULL
+            $stmt = db()->query("UPDATE categories SET parent_id = NULL WHERE parent_id IS NOT NULL");
+            $affected = $stmt->rowCount();
+            
+            if ($affected > 0) {
+                $message = "Successfully cleared parent relationships from {$affected} categor" . ($affected == 1 ? 'y' : 'ies') . ". All categories are now top-level.";
+            } else {
+                $error = 'Failed to clear parent categories.';
+            }
+        } else {
+            $message = 'No categories have parent relationships to clear.';
+        }
+    } catch (\Exception $e) {
+        $error = 'Error clearing parent categories: ' . $e->getMessage();
+    }
+}
+
 // Handle AJAX requests for drag and drop reordering
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
@@ -145,6 +169,9 @@ $totalCategories = count($allCategories);
 $activeCategories = count(array_filter($allCategories, fn($c) => $c['is_active'] == 1));
 $inactiveCategories = $totalCategories - $activeCategories;
 
+// Count categories with parents
+$categoriesWithParents = count(array_filter($allCategories, fn($c) => !empty($c['parent_id'])));
+
 // Count products per category
 $categoriesWithProducts = 0;
 foreach ($allCategories as $cat) {
@@ -271,6 +298,39 @@ $defaultColumns = ['name', 'slug', 'status', 'actions'];
                 <div>
                     <span class="text-sm text-gray-600">Showing:</span>
                     <span class="ml-2 font-bold text-green-600"><?= count($categories) ?></span>
+                </div>
+                <?php if ($categoriesWithParents > 0): ?>
+                <div>
+                    <span class="text-sm text-gray-600">With Parents:</span>
+                    <span class="ml-2 font-bold text-orange-600"><?= $categoriesWithParents ?></span>
+                </div>
+                <?php endif; ?>
+            </div>
+            <div class="relative">
+                <button type="button" 
+                        onclick="toggleBulkActions()"
+                        class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <i class="fas fa-cog"></i>
+                    <span>Bulk Actions</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </button>
+                <div id="bulkActionsDropdown" class="hidden absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 border border-gray-200">
+                    <div class="p-2">
+                        <?php if ($categoriesWithParents > 0): ?>
+                        <a href="<?= url('admin/categories.php?action=clear_all_parents') ?>" 
+                           onclick="return confirm('Are you sure you want to clear all parent categories? This will make all <?= $categoriesWithParents ?> categories with parents become top-level categories. This action cannot be undone.')"
+                           class="block px-4 py-3 text-sm text-gray-700 hover:bg-red-50 hover:text-red-700 rounded-lg transition-colors">
+                            <i class="fas fa-unlink mr-2"></i>
+                            <span class="font-semibold">Clear All Parent Categories</span>
+                            <p class="text-xs text-gray-500 mt-1">Remove parent relationships from all categories (<?= $categoriesWithParents ?> categories affected)</p>
+                        </a>
+                        <?php else: ?>
+                        <div class="px-4 py-3 text-sm text-gray-500">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            No categories have parent relationships to clear.
+                        </div>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
@@ -879,6 +939,23 @@ document.addEventListener('DOMContentLoaded', function() {
             return e.returnValue;
         }
     });
+});
+</script>
+
+<script>
+function toggleBulkActions() {
+    const dropdown = document.getElementById('bulkActionsDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    const dropdown = document.getElementById('bulkActionsDropdown');
+    const button = event.target.closest('button[onclick="toggleBulkActions()"]');
+    
+    if (!button && !dropdown.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
 });
 </script>
 

@@ -86,16 +86,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         try {
             if ($categoryId) {
-                // Prevent circular reference
+                // Prevent circular reference (basic check)
                 if (!empty($data['parent_id']) && $data['parent_id'] == $categoryId) {
                     $error = 'Category cannot be its own parent.';
                 } else {
+                    // Check for session errors/warnings first
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    
                     $updated = $categoryModel->update($categoryId, $data);
                     if ($updated) {
-                        $message = 'Category updated successfully.';
+                        // Check if there was a validation warning
+                        if (isset($_SESSION['category_update_warning'])) {
+                            $warning = $_SESSION['category_update_warning'];
+                            unset($_SESSION['category_update_warning']);
+                            $message = 'Category updated successfully, but: ' . $warning;
+                        } else {
+                            $message = 'Category updated successfully.';
+                        }
                         $category = $categoryModel->getById($categoryId);
                     } else {
-                        $error = 'Failed to update category. It may have circular reference or invalid parent.';
+                        // Check for stored error message
+                        if (isset($_SESSION['category_update_error'])) {
+                            $error = $_SESSION['category_update_error'];
+                            unset($_SESSION['category_update_error']);
+                        } else {
+                            // Get more specific error from logs or provide detailed message
+                            $error = 'Failed to update category. ';
+                            
+                            // Check for common issues
+                            if (!empty($data['parent_id'])) {
+                                $parentId = (int)$data['parent_id'];
+                                $parent = $categoryModel->getById($parentId);
+                                if (!$parent) {
+                                    $error .= 'The selected parent category does not exist.';
+                                } else {
+                                    // Check for circular reference
+                                    $descendants = $categoryModel->getDescendants($categoryId, false);
+                                    if (in_array($parentId, $descendants)) {
+                                        $error .= 'Cannot set parent: This would create a circular reference (the selected parent is a child of this category).';
+                                    } else {
+                                        $error .= 'Database update failed. Please check error logs for details.';
+                                    }
+                                }
+                            } else {
+                                $error .= 'Database update failed. Please check error logs for details.';
+                            }
+                        }
                     }
                 }
             } else {

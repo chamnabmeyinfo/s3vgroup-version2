@@ -192,14 +192,24 @@ class Category
                 'sort_order', 'is_active'
             ];
             
+            // Check if short_description field exists
+            try {
+                $this->db->fetchOne("SELECT short_description FROM categories LIMIT 1");
+                $fields[] = 'short_description';
+            } catch (\Exception $e) {
+                // Field doesn't exist, skip it
+            }
+            
             $updateData = [];
+            $validationError = null;
+            
             foreach ($fields as $field) {
                 if (isset($data[$field])) {
                     $updateData[$field] = $data[$field];
                 }
             }
             
-            // Handle parent_id
+            // Handle parent_id validation
             if (isset($updateData['parent_id'])) {
                 if ($updateData['parent_id'] === '' || $updateData['parent_id'] === 0) {
                     $updateData['parent_id'] = null;
@@ -208,16 +218,19 @@ class Category
                     
                     // Prevent self-reference
                     if ($updateData['parent_id'] == $id) {
+                        $validationError = 'Category cannot be its own parent.';
                         unset($updateData['parent_id']);
                     } else {
-                        // Prevent circular reference
+                        // Prevent circular reference - check if the new parent is a descendant
                         $descendants = $this->getDescendants($id, false);
                         if (in_array($updateData['parent_id'], $descendants)) {
+                            $validationError = 'Cannot set parent: This would create a circular reference (the selected parent is a child of this category).';
                             unset($updateData['parent_id']);
                         } else {
                             // Validate parent exists
                             $parent = $this->getById($updateData['parent_id']);
                             if (!$parent) {
+                                $validationError = 'Selected parent category does not exist.';
                                 unset($updateData['parent_id']);
                             }
                         }
@@ -225,9 +238,48 @@ class Category
                 }
             }
             
-            return $this->db->update('categories', $updateData, 'id = :id', ['id' => $id]);
+            // If there's a validation error, log it but still allow other fields to update
+            if ($validationError) {
+                error_log('Category update validation: ' . $validationError . ' (Category ID: ' . $id . ')');
+            }
+            
+            // If updateData is empty, check if we had validation issues
+            if (empty($updateData)) {
+                // If there was a validation error, we should still return false to indicate the update didn't work as expected
+                if ($validationError) {
+                    // Store error for retrieval
+                    if (session_status() === PHP_SESSION_NONE) {
+                        session_start();
+                    }
+                    $_SESSION['category_update_error'] = $validationError;
+                    return false;
+                }
+                // No validation error and nothing to update - return true (no changes needed)
+                return true;
+            }
+            
+            $result = $this->db->update('categories', $updateData, 'id = :id', ['id' => $id]);
+            
+            // Store validation warning if update succeeded but had a warning
+            if ($validationError && $result) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $_SESSION['category_update_warning'] = $validationError;
+            }
+            
+            // If update failed and we have validation error, store it
+            if (!$result && $validationError) {
+                if (session_status() === PHP_SESSION_NONE) {
+                    session_start();
+                }
+                $_SESSION['category_update_error'] = $validationError;
+            }
+            
+            return $result;
         } catch (\Exception $e) {
             error_log('Category update error: ' . $e->getMessage());
+            error_log('Category update error trace: ' . $e->getTraceAsString());
             return false;
         }
     }
