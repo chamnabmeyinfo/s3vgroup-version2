@@ -19,7 +19,6 @@ $navCategories = $categoryModel->getAll(true);
     <link rel="stylesheet" href="<?= asset('assets/css/style.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/product-images.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/mobile-bottom-nav.css') ?>">
-    <link rel="stylesheet" href="<?= asset('assets/css/hero-slider-modern.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/category-modern.css') ?>">
     <?php if (basename($_SERVER['PHP_SELF']) === 'products.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/products-responsive.css') ?>">
@@ -145,10 +144,6 @@ $navCategories = $categoryModel->getAll(true);
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Swiper CSS for Slider -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" 
-          crossorigin="anonymous"
-          onerror="console.error('Failed to load Swiper CSS from CDN, trying fallback...'); this.onerror=null; this.href='https://unpkg.com/swiper@11/swiper-bundle.min.css';" />
 </head>
 <body class="bg-white">
     <!-- Ultra Modern Navigation -->

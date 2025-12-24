@@ -32,8 +32,6 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <main>
-    <!-- Hero Slider Section (Dynamic) -->
-    <?php include __DIR__ . '/includes/hero-slider.php'; ?>
 
     <!-- Features Section - Modern Design -->
     <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">

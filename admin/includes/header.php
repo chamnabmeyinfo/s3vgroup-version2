@@ -232,10 +232,6 @@
                     <i class="fas fa-paper-plane w-5"></i>
                     <span>Newsletter</span>
                 </a>
-                <a href="<?= url('admin/hero-sliders.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'hero-sliders.php') ? 'bg-gray-700' : '' ?>">
-                    <i class="fas fa-sliders-h w-5"></i>
-                    <span>Hero Sliders</span>
-                </a>
                 <div class="border-t border-gray-700 my-2"></div>
                 <div class="px-4 py-2 text-xs text-gray-400 uppercase font-semibold">Analytics</div>
                 <a href="<?= url('admin/analytics.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors">

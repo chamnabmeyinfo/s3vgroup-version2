@@ -222,10 +222,6 @@
     <!-- Image Zoom -->
     <?php include __DIR__ . '/image-zoom.php'; ?>
 
-    <!-- Swiper JS -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" 
-            crossorigin="anonymous"
-            onerror="console.error('Failed to load Swiper from CDN, trying fallback...'); this.onerror=null; this.src='https://unpkg.com/swiper@11/swiper-bundle.min.js';"></script>
     
     <!-- Global API URLs Config -->
     <script>
@@ -247,7 +243,7 @@
     
     <!-- Modern Navigation & Slider Scripts -->
     <script>
-    // Hero Slider is initialized in hero-slider.php - no duplicate initialization needed
+    // Slider is initialized in slider.php
     document.addEventListener('DOMContentLoaded', function() {
         // Mobile Bottom Navigation - More Menu Toggle
         window.toggleMobileMoreMenu = function() {

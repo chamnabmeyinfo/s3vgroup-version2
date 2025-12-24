@@ -94,16 +94,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cleanup_orphaned'])) 
         }
     }
     
-    // Check hero sliders
-    try {
-        $heroSliders = db()->fetchAll("SELECT desktop_image, mobile_image FROM hero_sliders");
-        foreach ($heroSliders as $slider) {
-            if (!empty($slider['desktop_image'])) $usedImages[] = $slider['desktop_image'];
-            if (!empty($slider['mobile_image'])) $usedImages[] = $slider['mobile_image'];
-        }
-    } catch (Exception $e) {
-        // Hero sliders table might not exist
-    }
     
     $orphaned = $imageOptimizer->findOrphanedImages($usedImages);
     
