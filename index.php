@@ -32,7 +32,6 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <main>
-
     <!-- Features Section - Modern Design -->
     <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
         <div class="container mx-auto px-4">
