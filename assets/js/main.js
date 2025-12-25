@@ -126,7 +126,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Update cart count function
 function updateCartCount() {
-    fetch(window.location.origin + '/api/cart.php?action=count')
+    const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
+    fetch(cartUrl + '?action=count')
         .then(response => response.json())
         .then(data => {
             const cartCount = document.getElementById('cart-count');
