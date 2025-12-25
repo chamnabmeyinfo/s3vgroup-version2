@@ -49,9 +49,18 @@ function initOneClickAddToCart() {
             // Add to cart
             const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
             fetch(`${cartUrl}?action=add&product_id=${productId}`, {
-                method: 'POST'
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     // Success animation
@@ -59,10 +68,14 @@ function initOneClickAddToCart() {
                     button.classList.add('bg-green-500');
                     
                     // Show notification
-                    showNotification('Product added to cart!', 'success');
+                    if (typeof showNotification === 'function') {
+                        showNotification('Product added to cart!', 'success');
+                    }
                     
                     // Update cart count
-                    updateCartCount();
+                    if (typeof updateCartCount === 'function') {
+                        updateCartCount();
+                    }
                     
                     // Reset button after 2 seconds
                     setTimeout(() => {
@@ -73,13 +86,18 @@ function initOneClickAddToCart() {
                 } else {
                     button.innerHTML = originalHTML;
                     button.disabled = false;
-                    showNotification('Error adding to cart', 'error');
+                    if (typeof showNotification === 'function') {
+                        showNotification(data.message || 'Error adding to cart', 'error');
+                    }
                 }
             })
             .catch(error => {
+                console.error('Error adding to cart:', error);
                 button.innerHTML = originalHTML;
                 button.disabled = false;
-                showNotification('Error adding to cart', 'error');
+                if (typeof showNotification === 'function') {
+                    showNotification('Error adding to cart', 'error');
+                }
             });
         });
     });
@@ -350,8 +368,15 @@ function initLoadingStates() {
 // Update cart count
 function updateCartCount() {
     const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
-    fetch(`${cartUrl}?action=count`)
-        .then(response => response.json())
+    fetch(`${cartUrl}?action=count`, {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const cartCount = document.getElementById('cart-count');
             if (cartCount) {
@@ -362,6 +387,20 @@ function updateCartCount() {
                     cartCount.classList.add('hidden');
                 }
             }
+            
+            // Update mobile cart count
+            const cartCountMobile = document.getElementById('cart-count-mobile');
+            if (cartCountMobile) {
+                if (data.count > 0) {
+                    cartCountMobile.textContent = data.count;
+                    cartCountMobile.classList.remove('hidden');
+                } else {
+                    cartCountMobile.classList.add('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating cart count:', error);
         });
 }
 

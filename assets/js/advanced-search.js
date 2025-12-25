@@ -103,9 +103,18 @@ document.addEventListener('DOMContentLoaded', function() {
 function addToWishlist(productId) {
     const wishlistUrl = window.APP_CONFIG?.urls?.wishlist || 'api/wishlist.php';
     fetch(`${wishlistUrl}?action=add&id=${productId}`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             const btn = document.getElementById(`wishlist-btn-${productId}`);
@@ -114,7 +123,19 @@ function addToWishlist(productId) {
                 btn.classList.remove('border-red-300', 'text-red-600');
             }
             updateWishlistCount();
-            showNotification('Added to wishlist!', 'success');
+            if (typeof showNotification === 'function') {
+                showNotification('Added to wishlist!', 'success');
+            }
+        } else {
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error adding to wishlist', 'error');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to wishlist:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Error adding to wishlist', 'error');
         }
     });
 }
@@ -122,12 +143,23 @@ function addToWishlist(productId) {
 function addToCompare(productId) {
     const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
     fetch(`${compareUrl}?action=add&id=${productId}`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            showNotification(`Added to comparison (${data.count}/4)`, 'success');
+            if (typeof showNotification === 'function') {
+                showNotification(`Added to comparison (${data.count || 0}/4)`, 'success');
+            }
             const btn = document.getElementById(`compare-btn-${productId}`);
             if (btn) {
                 btn.classList.add('bg-blue-500', 'text-white');
@@ -136,19 +168,30 @@ function addToCompare(productId) {
             // Update compare count in header
             updateCompareCount();
         } else {
-            showNotification(data.message || 'Error adding to comparison', 'error');
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error adding to comparison', 'error');
+            }
         }
     })
     .catch(error => {
         console.error('Error adding to compare:', error);
-        showNotification('Error adding to comparison', 'error');
+        if (typeof showNotification === 'function') {
+            showNotification('Error adding to comparison', 'error');
+        }
     });
 }
 
 function updateCompareCount() {
     const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
-    fetch(`${compareUrl}?action=get`)
-        .then(response => response.json())
+    fetch(`${compareUrl}?action=get`, {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const count = Array.isArray(data.compare) ? data.compare.length : 0;
             
@@ -181,8 +224,15 @@ function updateCompareCount() {
 
 function updateWishlistCount() {
     const wishlistUrl = window.APP_CONFIG?.urls?.wishlist || 'api/wishlist.php';
-    fetch(`${wishlistUrl}?action=count`)
-        .then(response => response.json())
+    fetch(`${wishlistUrl}?action=count`, {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const countEl = document.getElementById('wishlist-count');
             if (countEl) {
@@ -193,6 +243,20 @@ function updateWishlistCount() {
                     countEl.classList.add('hidden');
                 }
             }
+            
+            // Update mobile wishlist count
+            const countElMobile = document.getElementById('wishlist-count-mobile');
+            if (countElMobile) {
+                if (data.count > 0) {
+                    countElMobile.textContent = data.count;
+                    countElMobile.classList.remove('hidden');
+                } else {
+                    countElMobile.classList.add('hidden');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error updating wishlist count:', error);
         });
 }
 

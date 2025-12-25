@@ -24,8 +24,15 @@ function openQuickView(productId) {
     modal.classList.remove('hidden');
     content.innerHTML = '<div class="text-center py-12"><i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i><p class="mt-4 text-gray-600">Loading product...</p></div>';
     
-    fetch('<?= url('api/quick-view.php') ?>?product_id=' + productId)
-        .then(response => response.json())
+    fetch('<?= url('api/quick-view.php') ?>?product_id=' + productId, {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const product = data.product;

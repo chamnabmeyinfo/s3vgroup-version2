@@ -42,16 +42,28 @@ switch ($action) {
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
         if ($productId && !in_array($productId, $_SESSION['wishlist'])) {
             $_SESSION['wishlist'][] = $productId;
-            echo json_encode(['success' => true, 'message' => 'Added to wishlist']);
+            echo json_encode([
+                'success' => true, 
+                'message' => 'Added to wishlist',
+                'count' => count($_SESSION['wishlist'])
+            ]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Already in wishlist']);
+            echo json_encode([
+                'success' => false, 
+                'message' => 'Already in wishlist',
+                'count' => count($_SESSION['wishlist'])
+            ]);
         }
         break;
         
     case 'remove':
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
         $_SESSION['wishlist'] = array_values(array_filter($_SESSION['wishlist'], fn($id) => $id != $productId));
-        echo json_encode(['success' => true, 'message' => 'Removed from wishlist']);
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Removed from wishlist',
+            'count' => count($_SESSION['wishlist'])
+        ]);
         break;
         
     case 'count':
@@ -59,6 +71,9 @@ switch ($action) {
         break;
         
     default:
-        echo json_encode(['wishlist' => $_SESSION['wishlist']]);
+        echo json_encode([
+            'wishlist' => $_SESSION['wishlist'],
+            'count' => count($_SESSION['wishlist'])
+        ]);
 }
 

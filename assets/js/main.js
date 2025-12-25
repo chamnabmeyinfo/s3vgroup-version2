@@ -124,25 +124,130 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
 });
 
-// Update cart count function
-function updateCartCount() {
+// Add to cart function
+function addToCart(productId, quantity = 1) {
+    if (!productId) {
+        console.error('Product ID is required');
+        if (typeof showNotification === 'function') {
+            showNotification('Error: Product ID is required', 'error');
+        }
+        return;
+    }
+    
     const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
-    fetch(cartUrl + '?action=count')
-        .then(response => response.json())
+    const button = document.getElementById('add-to-cart-btn');
+    const originalHTML = button ? button.innerHTML : '';
+    
+    // Show loading state
+    if (button) {
+        button.disabled = true;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Adding...';
+    }
+    
+    fetch(`${cartUrl}?action=add&product_id=${productId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            const cartCount = document.getElementById('cart-count');
-            if (cartCount) {
-                if (data.count > 0) {
-                    cartCount.textContent = data.count;
-                    cartCount.classList.remove('hidden');
-                } else {
-                    cartCount.classList.add('hidden');
+            if (data.success) {
+                // Success state
+                if (button) {
+                    button.innerHTML = '<i class="fas fa-check mr-2"></i> Added!';
+                    button.classList.add('bg-green-500');
+                    button.classList.remove('bg-blue-600');
+                }
+                
+                // Show notification
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message || 'Product added to cart!', 'success');
+                }
+                
+                // Update cart count
+                if (typeof updateCartCount === 'function') {
+                    updateCartCount();
+                }
+                
+                // Reset button after 2 seconds
+                if (button) {
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.remove('bg-green-500');
+                        button.classList.add('bg-blue-600');
+                        button.disabled = false;
+                    }, 2000);
+                }
+            } else {
+                // Error state
+                if (button) {
+                    button.innerHTML = originalHTML;
+                    button.disabled = false;
+                }
+                
+                if (typeof showNotification === 'function') {
+                    showNotification(data.message || 'Error adding to cart', 'error');
                 }
             }
         })
-        .catch(() => {
-            // Silently fail if cart API is not available
+        .catch(error => {
+            console.error('Error adding to cart:', error);
+            if (button) {
+                button.innerHTML = originalHTML;
+                button.disabled = false;
+            }
+            if (typeof showNotification === 'function') {
+                showNotification('Error adding to cart. Please try again.', 'error');
+            }
         });
+}
+
+// Update cart count function (if not already defined)
+if (typeof updateCartCount === 'undefined') {
+    function updateCartCount() {
+        const cartUrl = window.APP_CONFIG?.urls?.cart || 'api/cart.php';
+        fetch(cartUrl + '?action=count', {
+            credentials: 'include'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                const cartCount = document.getElementById('cart-count');
+                if (cartCount) {
+                    if (data.count > 0) {
+                        cartCount.textContent = data.count;
+                        cartCount.classList.remove('hidden');
+                    } else {
+                        cartCount.classList.add('hidden');
+                    }
+                }
+                
+                // Update mobile cart count
+                const cartCountMobile = document.getElementById('cart-count-mobile');
+                if (cartCountMobile) {
+                    if (data.count > 0) {
+                        cartCountMobile.textContent = data.count;
+                        cartCountMobile.classList.remove('hidden');
+                    } else {
+                        cartCountMobile.classList.add('hidden');
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error updating cart count:', error);
+            });
+    }
 }
 
 // Utility Functions

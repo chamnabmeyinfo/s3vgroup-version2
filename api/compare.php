@@ -63,10 +63,23 @@ switch ($action) {
         break;
         
     case 'get':
-        echo json_encode(['compare' => $_SESSION['compare'] ?? []]);
+        $compare = $_SESSION['compare'] ?? [];
+        echo json_encode([
+            'compare' => $compare,
+            'count' => count($compare)
+        ]);
+        break;
+        
+    case 'count':
+        $compare = $_SESSION['compare'] ?? [];
+        echo json_encode(['count' => count($compare)]);
         break;
         
     default:
-        echo json_encode(['compare' => $_SESSION['compare'] ?? []]);
+        $compare = $_SESSION['compare'] ?? [];
+        echo json_encode([
+            'compare' => $compare,
+            'count' => count($compare)
+        ]);
 }
 
