@@ -124,6 +124,35 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCartCount();
 });
 
+// Mobile Search Toggle Function
+function toggleMobileSearch() {
+    const overlay = document.getElementById('mobile-search-overlay');
+    const searchInput = document.getElementById('mobile-advanced-search');
+    
+    if (overlay) {
+        overlay.classList.toggle('hidden');
+        
+        // Focus on input when overlay opens
+        if (!overlay.classList.contains('hidden') && searchInput) {
+            setTimeout(() => {
+                searchInput.focus();
+            }, 100);
+        }
+    }
+}
+
+// Close mobile search when clicking outside
+document.addEventListener('click', function(event) {
+    const overlay = document.getElementById('mobile-search-overlay');
+    const toggleBtn = document.getElementById('mobile-search-toggle');
+    
+    if (overlay && !overlay.classList.contains('hidden')) {
+        if (!overlay.contains(event.target) && !toggleBtn?.contains(event.target)) {
+            overlay.classList.add('hidden');
+        }
+    }
+});
+
 // Add to cart function
 function addToCart(productId, quantity = 1) {
     if (!productId) {

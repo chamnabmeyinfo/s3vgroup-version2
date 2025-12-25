@@ -1,10 +1,21 @@
 // Advanced Search with Autocomplete
 
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('advanced-search');
-    const searchResults = document.getElementById('search-results');
+    // Initialize search for both desktop and mobile inputs
+    const desktopInput = document.getElementById('advanced-search');
+    const desktopResults = document.getElementById('search-results');
+    const mobileInput = document.getElementById('mobile-advanced-search');
+    const mobileResults = document.getElementById('mobile-search-results');
     
-    if (!searchInput || !searchResults) return;
+    if (desktopInput && desktopResults) {
+        initSearch(desktopInput, desktopResults);
+    }
+    
+    if (mobileInput && mobileResults) {
+        initSearch(mobileInput, mobileResults);
+    }
+    
+    function initSearch(searchInput, searchResults) {
     
     let searchTimeout;
     let currentQuery = '';
@@ -95,8 +106,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 const productsUrl = window.APP_CONFIG?.urls?.products || 'products.php';
                 window.location.href = `${productsUrl}?search=${encodeURIComponent(this.value.trim())}`;
             }
+            // Close mobile overlay if on mobile
+            if (searchInput.id === 'mobile-advanced-search') {
+                const overlay = document.getElementById('mobile-search-overlay');
+                if (overlay) {
+                    overlay.classList.add('hidden');
+                }
+            }
         }
     });
+    }
 });
 
 // Wishlist Functions
