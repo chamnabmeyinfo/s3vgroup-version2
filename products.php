@@ -695,11 +695,23 @@ include __DIR__ . '/includes/header.php';
                                                 title="Quick View">
                                             <i class="fas fa-eye"></i>
                                         </button>
-                                        <button onclick="event.preventDefault(); event.stopPropagation(); quickAddToCart(<?= $product['id'] ?>)" 
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); addToCart(<?= $product['id'] ?>)" 
                                                 class="app-overlay-btn app-overlay-btn-primary"
                                                 data-quick-add-cart="<?= $product['id'] ?>"
                                                 title="Add to Cart">
                                             <i class="fas fa-cart-plus"></i>
+                                        </button>
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); addToWishlist(<?= $product['id'] ?>)" 
+                                                class="app-overlay-btn app-overlay-btn-wishlist"
+                                                id="wishlist-btn-<?= $product['id'] ?>"
+                                                title="Add to Wishlist">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); addToCompare(<?= $product['id'] ?>)" 
+                                                class="app-overlay-btn app-overlay-btn-compare"
+                                                id="compare-btn-<?= $product['id'] ?>"
+                                                title="Add to Compare">
+                                            <i class="fas fa-balance-scale"></i>
                                         </button>
                                     </div>
                                 </div>
