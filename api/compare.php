@@ -41,12 +41,13 @@ switch ($action) {
             if (!in_array($productId, $compare) && count($compare) < 4) {
                 $compare[] = $productId;
                 $_SESSION['compare'] = $compare;
-                echo json_encode(['success' => true, 'count' => count($compare), 'message' => 'Added to comparison']);
+                $response = ['success' => true, 'count' => count($compare), 'message' => 'Added to comparison'];
             } elseif (count($compare) >= 4) {
-                echo json_encode(['success' => false, 'message' => 'Maximum 4 products can be compared']);
+                $response = ['success' => false, 'message' => 'Maximum 4 products can be compared'];
             } else {
-                echo json_encode(['success' => false, 'message' => 'Already in comparison']);
+                $response = ['success' => false, 'message' => 'Already in comparison'];
             }
+            echo json_encode($response);
         }
         break;
         
@@ -81,5 +82,10 @@ switch ($action) {
             'compare' => $compare,
             'count' => count($compare)
         ]);
+}
+
+// PHP will automatically write session on script end, but force it here to ensure data is saved
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
 }
 

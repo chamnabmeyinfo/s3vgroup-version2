@@ -132,5 +132,10 @@ switch ($action) {
         $response['success'] = true;
 }
 
+// PHP will automatically write session on script end, but force it here to ensure data is saved
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
+}
+
 echo json_encode($response);
 

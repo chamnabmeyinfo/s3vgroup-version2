@@ -1,6 +1,23 @@
 <?php
 
 // Configure secure session settings BEFORE starting session
+// IMPORTANT: All session cookie settings MUST be set BEFORE session_start() is called
+
+// Configure session cookie to work with both www and non-www domains
+// Set cookie domain to work across subdomains (e.g., www.s3vtgroup.com.kh and s3vtgroup.com.kh)
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+// For production domains, set cookie to work for both www and non-www
+if (strpos($host, 's3vtgroup.com.kh') !== false) {
+    // Extract the base domain
+    $parts = explode('.', $host);
+    if (count($parts) >= 3) {
+        // Domain like www.s3vtgroup.com.kh or s3vtgroup.com.kh
+        $domain = '.' . implode('.', array_slice($parts, -3)); // .s3vtgroup.com.kh
+        ini_set('session.cookie_domain', $domain);
+    }
+}
+
 // Security: Set secure session cookie parameters
 ini_set('session.cookie_httponly', 1);
 // Use 'Lax' instead of 'Strict' to allow cookies to work across www/non-www subdomains
@@ -19,24 +36,6 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 // Developer pages set session_name('developer_session') before including this file
 // Skip session start if headers already sent (e.g., during deployment)
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
-    // Configure session cookie to work with both www and non-www domains
-    // Set cookie domain to work across subdomains (e.g., www.s3vtgroup.com.kh and s3vtgroup.com.kh)
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-    
-    // For production domains, set cookie to work for both www and non-www
-    if (strpos($host, 's3vtgroup.com.kh') !== false) {
-        // Extract the base domain
-        $parts = explode('.', $host);
-        if (count($parts) >= 3) {
-            // Domain like www.s3vtgroup.com.kh or s3vtgroup.com.kh
-            $domain = '.' . implode('.', array_slice($parts, -3)); // .s3vtgroup.com.kh
-            // Only override if not already set
-            if (ini_get('session.cookie_domain') == '') {
-                ini_set('session.cookie_domain', $domain);
-            }
-        }
-    }
-    
     @session_start();
 }
 

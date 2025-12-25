@@ -5,28 +5,39 @@ php.ini
 .htaccess.local
 
 # Environment & Config Files (keep structure but ignore sensitive data)
+# Only ignore actual config files with sensitive data, keep examples
 config/database.php
 !config/database.php.example
 config/app.php
 !config/app.php.example
 config/under-construction.php
 !config/under-construction.php.example
+
+# Environment files (sensitive - never commit)
 .env
 .env.local
+.env.*
 *.env
+!*.env.example
 deploy-config.json
 !deploy-config.example.json
 
-# Storage & Uploads (user-generated content)
-# Images and assets are excluded from Git (uploaded via FTP for faster deployment)
-storage/uploads/*
-!storage/uploads/.gitkeep
+# Storage - Only ignore runtime/generated files, keep uploads and assets
+# Cache files (generated at runtime)
 storage/cache/*
 !storage/cache/.gitkeep
+
+# Log files (generated at runtime)
 storage/logs/*
 !storage/logs/.gitkeep
+
+# Backup files (generated, can be large)
 storage/backups/*
 !storage/backups/.gitkeep
+
+# Note: storage/uploads/ is now INCLUDED in Git to track all images and assets
+# Design backups can be included if needed
+# storage/design-backups/ is included
 
 # Test Files
 test-*.php
@@ -66,8 +77,8 @@ composer.lock
 *.temp
 *.bak
 *.backup
-*.zip
-!vendor/*.zip
+# Allow zip files in storage/uploads (for asset management)
+# *.zip
 
 # OS Files
 .DS_Store

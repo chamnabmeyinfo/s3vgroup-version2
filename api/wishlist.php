@@ -42,28 +42,30 @@ switch ($action) {
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
         if ($productId && !in_array($productId, $_SESSION['wishlist'])) {
             $_SESSION['wishlist'][] = $productId;
-            echo json_encode([
+            $response = [
                 'success' => true, 
                 'message' => 'Added to wishlist',
                 'count' => count($_SESSION['wishlist'])
-            ]);
+            ];
         } else {
-            echo json_encode([
+            $response = [
                 'success' => false, 
                 'message' => 'Already in wishlist',
                 'count' => count($_SESSION['wishlist'])
-            ]);
+            ];
         }
+        echo json_encode($response);
         break;
         
     case 'remove':
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
         $_SESSION['wishlist'] = array_values(array_filter($_SESSION['wishlist'], fn($id) => $id != $productId));
-        echo json_encode([
+        $response = [
             'success' => true, 
             'message' => 'Removed from wishlist',
             'count' => count($_SESSION['wishlist'])
-        ]);
+        ];
+        echo json_encode($response);
         break;
         
     case 'count':
@@ -75,5 +77,10 @@ switch ($action) {
             'wishlist' => $_SESSION['wishlist'],
             'count' => count($_SESSION['wishlist'])
         ]);
+}
+
+// PHP will automatically write session on script end, but force it here to ensure data is saved
+if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
 }
 
