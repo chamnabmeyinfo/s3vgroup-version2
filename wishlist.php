@@ -74,13 +74,28 @@ include __DIR__ . '/includes/header.php';
 <script>
 function removeFromWishlist(productId) {
     fetch('<?= url('api/wishlist.php') ?>?action=remove&id=' + productId, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             location.reload();
+        } else {
+            alert(data.message || 'Error removing from wishlist');
         }
+    })
+    .catch(error => {
+        console.error('Error removing from wishlist:', error);
+        alert('Error removing from wishlist. Please try again.');
     });
 }
 
@@ -90,8 +105,15 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function updateWishlistCount() {
-    fetch('<?= url('api/wishlist.php') ?>?action=count')
-        .then(response => response.json())
+    fetch('<?= url('api/wishlist.php') ?>?action=count', {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const countEl = document.getElementById('wishlist-count');
             if (countEl && data.count > 0) {
@@ -100,6 +122,9 @@ function updateWishlistCount() {
             } else if (countEl) {
                 countEl.classList.add('hidden');
             }
+        })
+        .catch(error => {
+            console.error('Error updating wishlist count:', error);
         });
 }
 </script>

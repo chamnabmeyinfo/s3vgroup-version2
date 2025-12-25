@@ -165,9 +165,18 @@ include __DIR__ . '/includes/header.php';
 function clearComparison() {
     const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
     fetch(`${compareUrl}?action=clear`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             window.location.href = '<?= url('compare.php') ?>';
@@ -182,15 +191,24 @@ function clearComparison() {
 function removeFromCompare(productId) {
     const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
     fetch(`${compareUrl}?action=remove&id=${productId}`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             // Reload page to update the comparison table
             window.location.reload();
         } else {
-            alert('Error removing product from comparison');
+            alert(data.message || 'Error removing product from comparison');
         }
     })
     .catch(error => {
@@ -206,8 +224,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function updateCompareCount() {
     const compareUrl = window.APP_CONFIG?.urls?.compare || 'api/compare.php';
-    fetch(`${compareUrl}?action=get`)
-        .then(response => response.json())
+    fetch(`${compareUrl}?action=get`, {
+        credentials: 'include'
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             const countEl = document.getElementById('compare-count');
             if (countEl && data.compare) {

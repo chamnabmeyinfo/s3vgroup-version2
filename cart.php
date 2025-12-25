@@ -168,17 +168,45 @@ function updateQuantity(productId, quantity) {
     }
     
     fetch('<?= url('api/cart.php') ?>?action=update&product_id=' + productId + '&quantity=' + quantity, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
     })
-    .then(() => location.reload());
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(() => location.reload())
+    .catch(error => {
+        console.error('Error updating quantity:', error);
+        alert('Error updating quantity. Please try again.');
+    });
 }
 
 function removeFromCart(productId) {
     if (confirm('Remove this item from cart?')) {
         fetch('<?= url('api/cart.php') ?>?action=remove&product_id=' + productId, {
-            method: 'POST'
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         })
-        .then(() => location.reload());
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(() => location.reload())
+        .catch(error => {
+            console.error('Error removing item:', error);
+            alert('Error removing item. Please try again.');
+        });
     }
 }
 </script>

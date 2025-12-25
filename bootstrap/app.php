@@ -3,7 +3,9 @@
 // Configure secure session settings BEFORE starting session
 // Security: Set secure session cookie parameters
 ini_set('session.cookie_httponly', 1);
-ini_set('session.cookie_samesite', 'Strict');
+// Use 'Lax' instead of 'Strict' to allow cookies to work across www/non-www subdomains
+// while still providing CSRF protection for cross-site requests
+ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_strict_mode', 1);
 ini_set('session.cookie_lifetime', 0); // Session cookie (expires on browser close)
 
@@ -17,6 +19,24 @@ if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
 // Developer pages set session_name('developer_session') before including this file
 // Skip session start if headers already sent (e.g., during deployment)
 if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+    // Configure session cookie to work with both www and non-www domains
+    // Set cookie domain to work across subdomains (e.g., www.s3vtgroup.com.kh and s3vtgroup.com.kh)
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // For production domains, set cookie to work for both www and non-www
+    if (strpos($host, 's3vtgroup.com.kh') !== false) {
+        // Extract the base domain
+        $parts = explode('.', $host);
+        if (count($parts) >= 3) {
+            // Domain like www.s3vtgroup.com.kh or s3vtgroup.com.kh
+            $domain = '.' . implode('.', array_slice($parts, -3)); // .s3vtgroup.com.kh
+            // Only override if not already set
+            if (ini_get('session.cookie_domain') == '') {
+                ini_set('session.cookie_domain', $domain);
+            }
+        }
+    }
+    
     @session_start();
 }
 
