@@ -252,7 +252,7 @@
 .app-product-image-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 10/7;
+    aspect-ratio: 1 / 1; /* 4:4 (Square) */
     background: #f8fafc;
     overflow: hidden;
 }
@@ -261,6 +261,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -739,7 +740,7 @@
 .app-products-grid.list-view .app-product-image-wrapper {
     width: 200px;
     flex-shrink: 0;
-    aspect-ratio: 10/7;
+    aspect-ratio: 1 / 1; /* 4:4 (Square) */
 }
 
 .app-products-grid.list-view .app-product-info {

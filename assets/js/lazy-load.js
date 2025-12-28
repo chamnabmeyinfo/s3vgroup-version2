@@ -383,31 +383,58 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
     
-    // Auto-load products when load more button comes into view
+    // Auto-load products when user scrolls to 70% of page height or hits the bottom
     if (loadMoreBtn) {
-        // Use IntersectionObserver to detect when button is visible
-        const loadMoreObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && !isLoading) {
-                    const btn = loadMoreBtn;
-                    const currentPage = parseInt(btn.dataset.currentPage) || 1;
-                    const totalPages = parseInt(btn.dataset.totalPages) || 1;
-                    
-                    // Check if there are more pages to load
-                    if (currentPage < totalPages) {
-                        // Auto-load products
-                        loadMoreProducts();
-                    }
-                }
-            });
-        }, {
-            root: null,
-            rootMargin: '200px', // Start loading 200px before button is visible
-            threshold: 0.1
-        });
+        let lastScrollPercent = 0;
+        let hasLoadedAt70 = false;
         
-        // Start observing the load more button
-        loadMoreObserver.observe(loadMoreBtn);
+        // Function to check scroll position and auto-load
+        function checkScrollAndLoad() {
+            if (isLoading) return;
+            
+            const btn = loadMoreBtn;
+            const currentPage = parseInt(btn.dataset.currentPage) || 1;
+            const totalPages = parseInt(btn.dataset.totalPages) || 1;
+            
+            // Check if there are more pages to load
+            if (currentPage >= totalPages) {
+                return; // No more products to load
+            }
+            
+            // Calculate scroll percentage
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const scrollPercent = (scrollTop + windowHeight) / documentHeight * 100;
+            
+            // Check if user hit the bottom (within 50px of bottom)
+            const isAtBottom = scrollTop + windowHeight >= documentHeight - 50;
+            
+            // Auto-load when user reaches 70% of page or hits the bottom
+            if ((scrollPercent >= 70 && !hasLoadedAt70) || isAtBottom) {
+                loadMoreProducts();
+                hasLoadedAt70 = true;
+            }
+            
+            // Reset flag if user scrolls back up significantly
+            if (scrollPercent < 60) {
+                hasLoadedAt70 = false;
+            }
+            
+            lastScrollPercent = scrollPercent;
+        }
+        
+        // Throttle scroll event for better performance
+        let scrollTimeout = null;
+        window.addEventListener('scroll', function() {
+            if (scrollTimeout) {
+                clearTimeout(scrollTimeout);
+            }
+            scrollTimeout = setTimeout(checkScrollAndLoad, 100); // Check every 100ms
+        }, { passive: true });
+        
+        // Also check on initial load in case page is already scrolled
+        checkScrollAndLoad();
         
         // Manual click handler (still works if user wants to click)
         loadMoreBtn.addEventListener('click', function(e) {
@@ -416,7 +443,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadMoreProducts();
             }
         });
-    }
     }
 });
 
