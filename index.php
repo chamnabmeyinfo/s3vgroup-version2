@@ -33,79 +33,52 @@ include __DIR__ . '/includes/header.php';
 
 <main>
     <!-- Hero Slider Section -->
+    <?php
+    use App\Models\HeroSlider;
+    $heroSliderModel = new HeroSlider();
+    $heroSlides = $heroSliderModel->getAll(true); // Get only active slides
+    
+    if (!empty($heroSlides)):
+    ?>
     <section class="hero-slider">
         <div class="hero-slider-container">
-            <!-- Slide 1 -->
-            <div class="hero-slide active" style="background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
+            <?php foreach ($heroSlides as $index => $slide): 
+                // Build background style
+                $bgStyle = '';
+                if (!empty($slide['background_image'])) {
+                    $bgStyle = "background-image: linear-gradient(135deg, " . 
+                               ($slide['background_gradient_start'] ?? 'rgba(0, 0, 0, 0.4)') . ", " . 
+                               ($slide['background_gradient_end'] ?? 'rgba(0, 0, 0, 0.4)') . "), url('" . 
+                               escape(image_url($slide['background_image'])) . "');";
+                } elseif (!empty($slide['background_gradient_start']) && !empty($slide['background_gradient_end'])) {
+                    $bgStyle = "background-image: linear-gradient(135deg, " . 
+                               escape($slide['background_gradient_start']) . ", " . 
+                               escape($slide['background_gradient_end']) . ");";
+                } else {
+                    $bgStyle = "background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9));";
+                }
+            ?>
+            <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>" style="<?= $bgStyle ?>">
                 <div class="hero-slide-content">
-                    <h1>Premium Forklifts & Industrial Equipment</h1>
-                    <p>Discover our extensive range of high-quality forklifts, material handling equipment, and industrial solutions designed to power your business.</p>
+                    <h1><?= escape($slide['title']) ?></h1>
+                    <?php if (!empty($slide['description'])): ?>
+                        <p><?= escape($slide['description']) ?></p>
+                    <?php endif; ?>
                     <div class="hero-slide-buttons">
-                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
-                            <i class="fas fa-shopping-bag"></i>
-                            Shop Now
-                        </a>
-                        <a href="<?= url('quote.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
-                            <i class="fas fa-calculator"></i>
-                            Get Quote
-                        </a>
+                        <?php if (!empty($slide['button1_text']) && !empty($slide['button1_url'])): ?>
+                            <a href="<?= url($slide['button1_url']) ?>" class="hero-slide-btn hero-slide-btn-primary">
+                                <?= escape($slide['button1_text']) ?>
+                            </a>
+                        <?php endif; ?>
+                        <?php if (!empty($slide['button2_text']) && !empty($slide['button2_url'])): ?>
+                            <a href="<?= url($slide['button2_url']) ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                                <?= escape($slide['button2_text']) ?>
+                            </a>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-            
-            <!-- Slide 2 -->
-            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
-                <div class="hero-slide-content">
-                    <h1>Expert Support & Maintenance</h1>
-                    <p>24/7 customer support and professional maintenance services to keep your equipment running at peak performance.</p>
-                    <div class="hero-slide-buttons">
-                        <a href="<?= url('contact.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
-                            <i class="fas fa-headset"></i>
-                            Contact Us
-                        </a>
-                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
-                            <i class="fas fa-box"></i>
-                            Browse Products
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Slide 3 -->
-            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
-                <div class="hero-slide-content">
-                    <h1>Quality You Can Trust</h1>
-                    <p>All our equipment is thoroughly inspected and certified to meet the highest industry standards for safety and performance.</p>
-                    <div class="hero-slide-buttons">
-                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
-                            <i class="fas fa-check-circle"></i>
-                            Explore Quality
-                        </a>
-                        <a href="<?= url('testimonials.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
-                            <i class="fas fa-star"></i>
-                            Read Reviews
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Slide 4 -->
-            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(219, 39, 119, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
-                <div class="hero-slide-content">
-                    <h1>Fast Delivery & Installation</h1>
-                    <p>Quick shipping and professional installation services to get your equipment up and running when you need it most.</p>
-                    <div class="hero-slide-buttons">
-                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
-                            <i class="fas fa-shipping-fast"></i>
-                            Shop Now
-                        </a>
-                        <a href="<?= url('contact.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
-                            <i class="fas fa-phone"></i>
-                            Learn More
-                        </a>
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
         
         <!-- Navigation Arrows -->
@@ -117,18 +90,20 @@ include __DIR__ . '/includes/header.php';
         </button>
         
         <!-- Dots Navigation -->
+        <?php if (count($heroSlides) > 1): ?>
         <div class="hero-slider-dots">
-            <button class="hero-slider-dot active" aria-label="Slide 1"></button>
-            <button class="hero-slider-dot" aria-label="Slide 2"></button>
-            <button class="hero-slider-dot" aria-label="Slide 3"></button>
-            <button class="hero-slider-dot" aria-label="Slide 4"></button>
+            <?php foreach ($heroSlides as $index => $slide): ?>
+                <button class="hero-slider-dot <?= $index === 0 ? 'active' : '' ?>" aria-label="Slide <?= $index + 1 ?>"></button>
+            <?php endforeach; ?>
         </div>
+        <?php endif; ?>
         
         <!-- Progress Bar -->
         <div class="hero-slider-progress">
             <div class="hero-slider-progress-bar"></div>
         </div>
     </section>
+    <?php endif; ?>
 
     <!-- Features Section - Modern Design -->
     <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">

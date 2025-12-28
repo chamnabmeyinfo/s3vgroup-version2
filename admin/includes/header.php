@@ -414,6 +414,10 @@
                     <i class="fas fa-file-alt w-5"></i>
                     <span>Pages</span>
                 </a>
+                <a href="<?= url('admin/hero-slider.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['hero-slider.php', 'hero-slider-edit.php'])) ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-images w-5"></i>
+                    <span>Hero Slider</span>
+                </a>
                 <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php'])) ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-bars w-5"></i>
                     <span>Menus</span>
