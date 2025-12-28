@@ -156,7 +156,7 @@ include __DIR__ . '/includes/header.php';
                         <img id="main-image" 
                              src="<?= asset('storage/uploads/' . escape($gallery[0])) ?>" 
                              alt="<?= escape($product['name']) ?>" 
-                             class="product-zoom-image w-full aspect-square object-cover rounded-lg cursor-zoom-in"
+                             class="product-zoom-image w-full max-w-[480px] max-h-[450px] aspect-[4/3] object-cover rounded-lg cursor-zoom-in mx-auto"
                              loading="eager">
                         <button onclick="openImageLightbox(this.previousElementSibling.src, this.previousElementSibling.alt)" 
                                 class="absolute top-4 right-4 bg-white bg-opacity-80 hover:bg-opacity-100 rounded-full p-2 transition-all z-10">
