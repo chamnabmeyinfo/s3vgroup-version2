@@ -319,7 +319,7 @@ $navCategories = $categoryModel->getAll(true);
     <!-- Premium Modern Navigation -->
     <nav class="sticky top-0 z-50" id="main-nav">
         <div class="container mx-auto px-4 lg:px-6 xl:px-8">
-            <div class="flex items-center h-20 lg:h-24 gap-2">
+            <div class="flex items-center justify-center md:justify-start h-20 lg:h-24 gap-2">
                 <!-- Logo Section -->
                 <?php
                 // Get site logo from settings
