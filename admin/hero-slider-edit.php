@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'template' => trim($_POST['template'] ?? 'default'),
             'content_layout' => trim($_POST['content_layout'] ?? 'center'),
             'overlay_pattern' => trim($_POST['overlay_pattern'] ?? '') ?: null,
-            'content_transparency' => isset($_POST['content_transparency']) ? (float)$_POST['content_transparency'] : 0.10,
+            'content_transparency' => isset($_POST['content_transparency']) ? (float)$_POST['content_transparency'] : 0.02,
             
             // Badges & Labels
             'badge_text' => trim($_POST['badge_text'] ?? '') ?: null,
@@ -576,11 +576,11 @@ $badgeColors = HeroSliderHelper::getBadgeColors();
                         <div>
                             <label for="content_transparency" class="block text-sm font-medium text-gray-700 mb-2">Content Transparency</label>
                             <input type="range" id="content_transparency" name="content_transparency" min="0" max="1" step="0.01"
-                                   value="<?= escape($slide['content_transparency'] ?? 0.10) ?>" oninput="updateTransparency(this.value)"
+                                   value="<?= escape($slide['content_transparency'] ?? 0.02) ?>" oninput="updateTransparency(this.value)"
                                    class="w-full">
                             <div class="flex justify-between text-xs text-gray-500 mt-1">
                                 <span>0%</span>
-                                <span id="transparency-display"><?= number_format((float)($slide['content_transparency'] ?? 0.10) * 100, 0) ?>%</span>
+                                <span id="transparency-display"><?= number_format((float)($slide['content_transparency'] ?? 0.02) * 100, 0) ?>%</span>
                                 <span>100%</span>
                             </div>
                         </div>

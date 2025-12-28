@@ -124,7 +124,7 @@ foreach ($settingsData as $setting) {
 // Default values
 $defaultSettings = [
     'hero_slider_autoplay_delay' => 5000,
-    'hero_slider_default_transparency' => 0.10,
+    'hero_slider_default_transparency' => 0.02,
     'hero_slider_show_arrows' => 1,
     'hero_slider_show_dots' => 1,
     'hero_slider_show_progress' => 1,

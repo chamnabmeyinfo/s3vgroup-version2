@@ -48,7 +48,7 @@ include __DIR__ . '/includes/header.php';
     // Default values
     $defaultSettings = [
         'hero_slider_autoplay_delay' => 5000,
-        'hero_slider_default_transparency' => 0.10,
+        'hero_slider_default_transparency' => 0.02,
         'hero_slider_show_arrows' => 1,
         'hero_slider_show_dots' => 1,
         'hero_slider_show_progress' => 1,
@@ -89,16 +89,16 @@ include __DIR__ . '/includes/header.php';
                 if ($hasVideo) {
                     // Video background - style will be handled by video element
                 } elseif ($bgImage) {
-                    $bgStyle = "background-image: linear-gradient(135deg, " . 
-                               ($slide['background_gradient_start'] ?? 'rgba(0, 0, 0, 0.4)') . ", " . 
-                               ($slide['background_gradient_end'] ?? 'rgba(0, 0, 0, 0.4)') . "), url('" . 
-                               escape(image_url($bgImage)) . "');";
+                    // Show image only - no gradient overlay
+                    $bgStyle = "background-image: url('" . escape(image_url($bgImage)) . "');";
                 } elseif (!empty($slide['background_gradient_start']) && !empty($slide['background_gradient_end'])) {
+                    // Only use gradient if no image is set
                     $bgStyle = "background-image: linear-gradient(135deg, " . 
                                escape($slide['background_gradient_start']) . ", " . 
                                escape($slide['background_gradient_end']) . ");";
                 } else {
-                    $bgStyle = "background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9));";
+                    // No default gradient - just show the background color
+                    $bgStyle = "";
                 }
                 
                 // Get slide-specific settings
@@ -136,9 +136,6 @@ include __DIR__ . '/includes/header.php';
                            <?= !empty($slide['video_poster']) ? 'poster="' . escape(image_url($slide['video_poster'])) . '"' : '' ?>>
                         <source src="<?= escape(image_url($slide['video_background'])) ?>" type="video/mp4">
                     </video>
-                    <?php if (!empty($slide['background_gradient_start']) && !empty($slide['background_gradient_end'])): ?>
-                        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, <?= escape($slide['background_gradient_start']) ?>, <?= escape($slide['background_gradient_end']) ?>); z-index: 1;"></div>
-                    <?php endif; ?>
                 <?php endif; ?>
                 
                 <?php if ($parallax && $bgImage): ?>
@@ -156,7 +153,7 @@ include __DIR__ . '/includes/header.php';
                 <?php endif; ?>
                 
                 <div class="hero-slide-content layout-<?= escape($layout) ?>" 
-                     style="background: rgba(255, 255, 255, <?= escape($slide['content_transparency'] ?? 0.10) ?>); <?= $customFont ? 'font-family: ' . escape($customFont) . ';' : '' ?>">
+                     style="background: transparent; <?= $customFont ? 'font-family: ' . escape($customFont) . ';' : '' ?>">
                     <h1><?= escape($displayTitle) ?></h1>
                     <?php if (!empty($displayDescription)): ?>
                         <p><?= escape($displayDescription) ?></p>

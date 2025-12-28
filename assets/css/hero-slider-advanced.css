@@ -360,12 +360,10 @@
 .hero-countdown {
     margin-top: 1.5rem;
     padding: 1.25rem;
-    background: rgba(0, 0, 0, 0.25);
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 0.75rem;
     border: 1px solid rgba(255, 255, 255, 0.15);
-    box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.2);
 }
 
 .hero-countdown > div > div {
@@ -390,23 +388,21 @@
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     transition: all 0.25s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .hero-social-share a:hover {
-    background: rgba(255, 255, 255, 0.2);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.4);
     transform: translateY(-2px) scale(1.05);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* Dark Mode */
@@ -452,7 +448,7 @@
 
 /* Template Styles */
 .hero-slide.template-minimal .hero-slide-content {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent;
     border: none;
     box-shadow: none;
 }
@@ -463,15 +459,14 @@
 }
 
 .hero-slide.template-elegant .hero-slide-content {
-    background: rgba(255, 255, 255, 0.15);
+    background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.3);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
 
 .hero-slide.template-modern .hero-slide-content {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
     border-radius: 1rem;
-    backdrop-filter: blur(30px);
 }
 
 .hero-slide.template-corporate .hero-slide-content {
@@ -480,7 +475,7 @@
 }
 
 .hero-slide.template-creative .hero-slide-content {
-    background: rgba(255, 255, 255, 0.1);
+    background: transparent;
     border-radius: 2rem;
     transform: rotate(-1deg);
 }
