@@ -284,25 +284,6 @@ img.lazy-load:not(.loaded)::before {
     }
 }
 
-/* Load More Popup Styles */
-#load-more-popup {
-    animation: slideUp 0.4s ease-out;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translate(-50%, 20px);
-    }
-    to {
-        opacity: 1;
-        transform: translate(-50%, 0);
-    }
-}
-
-.animate-slide-up {
-    animation: slideUp 0.4s ease-out;
-}
 
 /* Line Clamp Utility */
 .line-clamp-2 {
