@@ -20,6 +20,9 @@ $navCategories = $categoryModel->getAll(true);
     <link rel="stylesheet" href="<?= asset('assets/css/product-images.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/mobile-bottom-nav.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/category-modern.css') ?>">
+    <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
+    <link rel="stylesheet" href="<?= asset('assets/css/hero-slider.css') ?>">
+    <?php endif; ?>
     <?php if (basename($_SERVER['PHP_SELF']) === 'products.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/products-responsive.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/app-products.css') ?>">

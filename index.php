@@ -32,6 +32,104 @@ include __DIR__ . '/includes/header.php';
 ?>
 
 <main>
+    <!-- Hero Slider Section -->
+    <section class="hero-slider">
+        <div class="hero-slider-container">
+            <!-- Slide 1 -->
+            <div class="hero-slide active" style="background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
+                <div class="hero-slide-content">
+                    <h1>Premium Forklifts & Industrial Equipment</h1>
+                    <p>Discover our extensive range of high-quality forklifts, material handling equipment, and industrial solutions designed to power your business.</p>
+                    <div class="hero-slide-buttons">
+                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
+                            <i class="fas fa-shopping-bag"></i>
+                            Shop Now
+                        </a>
+                        <a href="<?= url('quote.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                            <i class="fas fa-calculator"></i>
+                            Get Quote
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 2 -->
+            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.9), rgba(5, 150, 105, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
+                <div class="hero-slide-content">
+                    <h1>Expert Support & Maintenance</h1>
+                    <p>24/7 customer support and professional maintenance services to keep your equipment running at peak performance.</p>
+                    <div class="hero-slide-buttons">
+                        <a href="<?= url('contact.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
+                            <i class="fas fa-headset"></i>
+                            Contact Us
+                        </a>
+                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                            <i class="fas fa-box"></i>
+                            Browse Products
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 3 -->
+            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(124, 58, 237, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
+                <div class="hero-slide-content">
+                    <h1>Quality You Can Trust</h1>
+                    <p>All our equipment is thoroughly inspected and certified to meet the highest industry standards for safety and performance.</p>
+                    <div class="hero-slide-buttons">
+                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
+                            <i class="fas fa-check-circle"></i>
+                            Explore Quality
+                        </a>
+                        <a href="<?= url('testimonials.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                            <i class="fas fa-star"></i>
+                            Read Reviews
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Slide 4 -->
+            <div class="hero-slide" style="background-image: linear-gradient(135deg, rgba(236, 72, 153, 0.9), rgba(219, 39, 119, 0.9)), url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1920 1080\'%3E%3Crect fill=\'%23e5e7eb\' width=\'1920\' height=\'1080\'/%3E%3C/svg%3E');">
+                <div class="hero-slide-content">
+                    <h1>Fast Delivery & Installation</h1>
+                    <p>Quick shipping and professional installation services to get your equipment up and running when you need it most.</p>
+                    <div class="hero-slide-buttons">
+                        <a href="<?= url('products.php') ?>" class="hero-slide-btn hero-slide-btn-primary">
+                            <i class="fas fa-shipping-fast"></i>
+                            Shop Now
+                        </a>
+                        <a href="<?= url('contact.php') ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                            <i class="fas fa-phone"></i>
+                            Learn More
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Navigation Arrows -->
+        <button class="hero-slider-nav prev" aria-label="Previous slide">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="hero-slider-nav next" aria-label="Next slide">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+        
+        <!-- Dots Navigation -->
+        <div class="hero-slider-dots">
+            <button class="hero-slider-dot active" aria-label="Slide 1"></button>
+            <button class="hero-slider-dot" aria-label="Slide 2"></button>
+            <button class="hero-slider-dot" aria-label="Slide 3"></button>
+            <button class="hero-slider-dot" aria-label="Slide 4"></button>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="hero-slider-progress">
+            <div class="hero-slider-progress-bar"></div>
+        </div>
+    </section>
+
     <!-- Features Section - Modern Design -->
     <section class="py-16 md:py-20 bg-gradient-to-b from-white to-gray-50">
         <div class="container mx-auto px-4">
