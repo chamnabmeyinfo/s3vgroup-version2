@@ -63,6 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'background_image' => $_POST['background_image'] ?? ($slide['background_image'] ?? null),
         'background_gradient_start' => trim($_POST['background_gradient_start'] ?? '') ?: null,
         'background_gradient_end' => trim($_POST['background_gradient_end'] ?? '') ?: null,
+        'content_transparency' => isset($_POST['content_transparency']) ? (float)$_POST['content_transparency'] : 0.10,
         'is_active' => isset($_POST['is_active']) ? 1 : 0,
         'display_order' => (int)($_POST['display_order'] ?? 0),
     ];
@@ -217,8 +218,39 @@ include __DIR__ . '/includes/header.php';
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
                     <p class="text-xs text-gray-500 mt-1">CSS color value (e.g., rgba(79, 70, 229, 0.9))</p>
                 </div>
+                
+                <div>
+                    <label for="content_transparency" class="block text-sm font-medium text-gray-700 mb-2">
+                        Content Transparency (Glass Effect)
+                    </label>
+                    <div class="space-y-2">
+                        <input type="range" 
+                               id="content_transparency" 
+                               name="content_transparency" 
+                               min="0" 
+                               max="1" 
+                               step="0.01"
+                               value="<?= escape($slide['content_transparency'] ?? 0.10) ?>"
+                               oninput="updateTransparencyDisplay(this.value)"
+                               class="w-full">
+                        <div class="flex justify-between items-center">
+                            <span class="text-xs text-gray-500">0% (Fully Transparent)</span>
+                            <span id="transparency_value" class="text-sm font-semibold text-blue-600">
+                                <?= number_format((float)($slide['content_transparency'] ?? 0.10) * 100, 0) ?>%
+                            </span>
+                            <span class="text-xs text-gray-500">100% (Fully Opaque)</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Adjust the transparency of the glass effect overlay on the slide content</p>
+                    </div>
+                </div>
             </div>
         </div>
+        
+        <script>
+        function updateTransparencyDisplay(value) {
+            document.getElementById('transparency_value').textContent = Math.round(value * 100) + '%';
+        }
+        </script>
         
         <!-- Buttons Section -->
         <div class="mt-8 border-t border-gray-200 pt-6">

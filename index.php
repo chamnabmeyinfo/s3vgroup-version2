@@ -38,6 +38,32 @@ include __DIR__ . '/includes/header.php';
     $heroSliderModel = new HeroSlider();
     $heroSlides = $heroSliderModel->getAll(true); // Get only active slides
     
+    // Get hero slider settings
+    $settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'hero_slider_%'");
+    $sliderSettings = [];
+    foreach ($settingsData as $setting) {
+        $sliderSettings[$setting['key']] = $setting['value'];
+    }
+    
+    // Default values
+    $defaultSettings = [
+        'hero_slider_autoplay_delay' => 5000,
+        'hero_slider_default_transparency' => 0.10,
+        'hero_slider_show_arrows' => 1,
+        'hero_slider_show_dots' => 1,
+        'hero_slider_show_progress' => 1,
+        'hero_slider_pause_on_hover' => 1,
+        'hero_slider_transition_speed' => 800,
+        'hero_slider_enable_keyboard' => 1,
+        'hero_slider_enable_touch' => 1,
+    ];
+    
+    foreach ($defaultSettings as $key => $default) {
+        if (!isset($sliderSettings[$key])) {
+            $sliderSettings[$key] = $default;
+        }
+    }
+    
     if (!empty($heroSlides)):
     ?>
     <section class="hero-slider">
@@ -59,7 +85,7 @@ include __DIR__ . '/includes/header.php';
                 }
             ?>
             <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>" style="<?= $bgStyle ?>">
-                <div class="hero-slide-content">
+                <div class="hero-slide-content" style="background: rgba(255, 255, 255, <?= escape($slide['content_transparency'] ?? 0.10) ?>);">
                     <h1><?= escape($slide['title']) ?></h1>
                     <?php if (!empty($slide['description'])): ?>
                         <p><?= escape($slide['description']) ?></p>
@@ -82,15 +108,17 @@ include __DIR__ . '/includes/header.php';
         </div>
         
         <!-- Navigation Arrows -->
+        <?php if ($sliderSettings['hero_slider_show_arrows']): ?>
         <button class="hero-slider-nav prev" aria-label="Previous slide">
             <i class="fas fa-chevron-left"></i>
         </button>
         <button class="hero-slider-nav next" aria-label="Next slide">
             <i class="fas fa-chevron-right"></i>
         </button>
+        <?php endif; ?>
         
         <!-- Dots Navigation -->
-        <?php if (count($heroSlides) > 1): ?>
+        <?php if ($sliderSettings['hero_slider_show_dots'] && count($heroSlides) > 1): ?>
         <div class="hero-slider-dots">
             <?php foreach ($heroSlides as $index => $slide): ?>
                 <button class="hero-slider-dot <?= $index === 0 ? 'active' : '' ?>" aria-label="Slide <?= $index + 1 ?>"></button>
@@ -99,9 +127,27 @@ include __DIR__ . '/includes/header.php';
         <?php endif; ?>
         
         <!-- Progress Bar -->
+        <?php if ($sliderSettings['hero_slider_show_progress']): ?>
         <div class="hero-slider-progress">
             <div class="hero-slider-progress-bar"></div>
         </div>
+        <?php endif; ?>
+        
+        <!-- Pass settings to JavaScript and CSS -->
+        <style>
+        .hero-slider {
+            --transition-speed: <?= (int)$sliderSettings['hero_slider_transition_speed'] ?>ms;
+        }
+        </style>
+        <script>
+        window.heroSliderSettings = {
+            autoplayDelay: <?= (int)$sliderSettings['hero_slider_autoplay_delay'] ?>,
+            pauseOnHover: <?= $sliderSettings['hero_slider_pause_on_hover'] ? 'true' : 'false' ?>,
+            transitionSpeed: <?= (int)$sliderSettings['hero_slider_transition_speed'] ?>,
+            enableKeyboard: <?= $sliderSettings['hero_slider_enable_keyboard'] ? 'true' : 'false' ?>,
+            enableTouch: <?= $sliderSettings['hero_slider_enable_touch'] ? 'true' : 'false' ?>
+        };
+        </script>
     </section>
     <?php endif; ?>
 

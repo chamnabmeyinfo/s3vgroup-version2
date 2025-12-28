@@ -40,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
             `background_image` VARCHAR(255) DEFAULT NULL,
             `background_gradient_start` VARCHAR(50) DEFAULT NULL,
             `background_gradient_end` VARCHAR(50) DEFAULT NULL,
+            `content_transparency` DECIMAL(3,2) DEFAULT 0.10,
             `is_active` TINYINT(1) DEFAULT 1,
             `display_order` INT(11) DEFAULT 0,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -51,6 +52,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
         ";
         
         db()->query($sql);
+        
+        // Add transparency column if it doesn't exist (for existing tables)
+        try {
+            db()->fetchOne("SELECT content_transparency FROM hero_slides LIMIT 1");
+        } catch (Exception $e) {
+            // Column doesn't exist, add it
+            try {
+                db()->query("ALTER TABLE `hero_slides` ADD COLUMN `content_transparency` DECIMAL(3,2) DEFAULT 0.10 AFTER `background_gradient_end`");
+                db()->query("UPDATE `hero_slides` SET `content_transparency` = 0.10 WHERE `content_transparency` IS NULL");
+            } catch (Exception $e2) {
+                // Ignore if column already exists or other error
+            }
+        }
         
         // Insert default slides if table was just created
         if (!$tableExists) {
@@ -64,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
                     'button2_url' => 'quote.php',
                     'background_gradient_start' => 'rgba(37, 99, 235, 0.9)',
                     'background_gradient_end' => 'rgba(79, 70, 229, 0.9)',
+                    'content_transparency' => 0.10,
                     'display_order' => 1
                 ],
                 [
@@ -75,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
                     'button2_url' => 'products.php',
                     'background_gradient_start' => 'rgba(16, 185, 129, 0.9)',
                     'background_gradient_end' => 'rgba(5, 150, 105, 0.9)',
+                    'content_transparency' => 0.10,
                     'display_order' => 2
                 ],
                 [
@@ -86,6 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
                     'button2_url' => 'testimonials.php',
                     'background_gradient_start' => 'rgba(139, 92, 246, 0.9)',
                     'background_gradient_end' => 'rgba(124, 58, 237, 0.9)',
+                    'content_transparency' => 0.10,
                     'display_order' => 3
                 ],
                 [
@@ -97,6 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_table'])) {
                     'button2_url' => 'contact.php',
                     'background_gradient_start' => 'rgba(236, 72, 153, 0.9)',
                     'background_gradient_end' => 'rgba(219, 39, 119, 0.9)',
+                    'content_transparency' => 0.10,
                     'display_order' => 4
                 ]
             ];

@@ -32,12 +32,12 @@ class HeroSlider
             title, description, button1_text, button1_url, 
             button2_text, button2_url, background_image,
             background_gradient_start, background_gradient_end,
-            is_active, display_order
+            content_transparency, is_active, display_order
         ) VALUES (
             :title, :description, :button1_text, :button1_url,
             :button2_text, :button2_url, :background_image,
             :background_gradient_start, :background_gradient_end,
-            :is_active, :display_order
+            :content_transparency, :is_active, :display_order
         )";
         
         $params = [
@@ -50,6 +50,7 @@ class HeroSlider
             'background_image' => $data['background_image'] ?? null,
             'background_gradient_start' => $data['background_gradient_start'] ?? null,
             'background_gradient_end' => $data['background_gradient_end'] ?? null,
+            'content_transparency' => isset($data['content_transparency']) ? (float)$data['content_transparency'] : 0.10,
             'is_active' => isset($data['is_active']) ? (int)$data['is_active'] : 1,
             'display_order' => isset($data['display_order']) ? (int)$data['display_order'] : 0
         ];
@@ -60,6 +61,15 @@ class HeroSlider
 
     public function update($id, $data)
     {
+        // Check if content_transparency column exists
+        $hasTransparency = false;
+        try {
+            $this->db->fetchOne("SELECT content_transparency FROM hero_slides LIMIT 1");
+            $hasTransparency = true;
+        } catch (Exception $e) {
+            $hasTransparency = false;
+        }
+        
         $sql = "UPDATE hero_slides SET
             title = :title,
             description = :description,
@@ -69,7 +79,13 @@ class HeroSlider
             button2_url = :button2_url,
             background_image = :background_image,
             background_gradient_start = :background_gradient_start,
-            background_gradient_end = :background_gradient_end,
+            background_gradient_end = :background_gradient_end";
+        
+        if ($hasTransparency) {
+            $sql .= ", content_transparency = :content_transparency";
+        }
+        
+        $sql .= ",
             is_active = :is_active,
             display_order = :display_order,
             updated_at = CURRENT_TIMESTAMP
@@ -89,6 +105,10 @@ class HeroSlider
             'is_active' => isset($data['is_active']) ? (int)$data['is_active'] : 1,
             'display_order' => isset($data['display_order']) ? (int)$data['display_order'] : 0
         ];
+        
+        if ($hasTransparency) {
+            $params['content_transparency'] = isset($data['content_transparency']) ? (float)$data['content_transparency'] : 0.10;
+        }
         
         return $this->db->query($sql, $params);
     }

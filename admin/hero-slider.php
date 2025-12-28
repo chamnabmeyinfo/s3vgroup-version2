@@ -57,6 +57,66 @@ if (!empty($_POST['update_order'])) {
     }
 }
 
+// Handle general settings update
+if (!empty($_POST['update_settings'])) {
+    try {
+        $settingsToUpdate = [
+            'hero_slider_autoplay_delay' => (int)($_POST['autoplay_delay'] ?? 5000),
+            'hero_slider_default_transparency' => (float)($_POST['default_transparency'] ?? 0.10),
+            'hero_slider_show_arrows' => isset($_POST['show_arrows']) ? 1 : 0,
+            'hero_slider_show_dots' => isset($_POST['show_dots']) ? 1 : 0,
+            'hero_slider_show_progress' => isset($_POST['show_progress']) ? 1 : 0,
+            'hero_slider_pause_on_hover' => isset($_POST['pause_on_hover']) ? 1 : 0,
+            'hero_slider_transition_speed' => (int)($_POST['transition_speed'] ?? 800),
+            'hero_slider_enable_keyboard' => isset($_POST['enable_keyboard']) ? 1 : 0,
+            'hero_slider_enable_touch' => isset($_POST['enable_touch']) ? 1 : 0,
+        ];
+        
+        foreach ($settingsToUpdate as $key => $value) {
+            $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
+            if ($existing) {
+                db()->update('settings', ['value' => $value], '`key` = :key', ['key' => $key]);
+            } else {
+                db()->insert('settings', [
+                    'key' => $key,
+                    'value' => $value,
+                    'type' => 'text'
+                ]);
+            }
+        }
+        
+        $message = 'General settings updated successfully.';
+    } catch (\Exception $e) {
+        $error = 'Error updating settings: ' . $e->getMessage();
+    }
+}
+
+// Get current settings
+$settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'hero_slider_%'");
+$sliderSettings = [];
+foreach ($settingsData as $setting) {
+    $sliderSettings[$setting['key']] = $setting['value'];
+}
+
+// Default values
+$defaultSettings = [
+    'hero_slider_autoplay_delay' => 5000,
+    'hero_slider_default_transparency' => 0.10,
+    'hero_slider_show_arrows' => 1,
+    'hero_slider_show_dots' => 1,
+    'hero_slider_show_progress' => 1,
+    'hero_slider_pause_on_hover' => 1,
+    'hero_slider_transition_speed' => 800,
+    'hero_slider_enable_keyboard' => 1,
+    'hero_slider_enable_touch' => 1,
+];
+
+foreach ($defaultSettings as $key => $default) {
+    if (!isset($sliderSettings[$key])) {
+        $sliderSettings[$key] = $default;
+    }
+}
+
 // Get all slides
 $slides = $heroSliderModel->getAll();
 
@@ -83,6 +143,185 @@ include __DIR__ . '/includes/header.php';
             <?= escape($error) ?>
         </div>
     <?php endif; ?>
+    
+    <!-- General Settings Section -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold flex items-center">
+                <i class="fas fa-cog mr-2 text-blue-600"></i> General Settings
+            </h2>
+            <button type="button" onclick="toggleSettings()" class="text-blue-600 hover:text-blue-800 text-sm">
+                <i class="fas fa-chevron-down" id="settings-toggle-icon"></i>
+            </button>
+        </div>
+        
+        <form method="POST" id="settings-form" class="hidden">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Auto-play Settings -->
+                <div class="space-y-4">
+                    <h3 class="font-semibold text-gray-700 border-b pb-2">Auto-play Settings</h3>
+                    
+                    <div>
+                        <label for="autoplay_delay" class="block text-sm font-medium text-gray-700 mb-2">
+                            Auto-play Delay (milliseconds)
+                        </label>
+                        <input type="number" 
+                               id="autoplay_delay" 
+                               name="autoplay_delay" 
+                               value="<?= escape($sliderSettings['hero_slider_autoplay_delay']) ?>"
+                               min="1000" 
+                               max="30000" 
+                               step="500"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Time between slides (1000-30000ms)</p>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="pause_on_hover" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_pause_on_hover'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Pause on Hover</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Display Settings -->
+                <div class="space-y-4">
+                    <h3 class="font-semibold text-gray-700 border-b pb-2">Display Settings</h3>
+                    
+                    <div>
+                        <label for="default_transparency" class="block text-sm font-medium text-gray-700 mb-2">
+                            Default Transparency
+                        </label>
+                        <div class="space-y-2">
+                            <input type="range" 
+                                   id="default_transparency" 
+                                   name="default_transparency" 
+                                   min="0" 
+                                   max="1" 
+                                   step="0.01"
+                                   value="<?= escape($sliderSettings['hero_slider_default_transparency']) ?>"
+                                   oninput="updateTransparencyDisplay(this.value)"
+                                   class="w-full">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs text-gray-500">0%</span>
+                                <span id="transparency_display" class="text-sm font-semibold text-blue-600">
+                                    <?= number_format((float)$sliderSettings['hero_slider_default_transparency'] * 100, 0) ?>%
+                                </span>
+                                <span class="text-xs text-gray-500">100%</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Default glass effect transparency for new slides</p>
+                    </div>
+                    
+                    <div>
+                        <label for="transition_speed" class="block text-sm font-medium text-gray-700 mb-2">
+                            Transition Speed (milliseconds)
+                        </label>
+                        <input type="number" 
+                               id="transition_speed" 
+                               name="transition_speed" 
+                               value="<?= escape($sliderSettings['hero_slider_transition_speed']) ?>"
+                               min="200" 
+                               max="2000" 
+                               step="100"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">Animation speed between slides</p>
+                    </div>
+                </div>
+                
+                <!-- Navigation Settings -->
+                <div class="space-y-4">
+                    <h3 class="font-semibold text-gray-700 border-b pb-2">Navigation Settings</h3>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="show_arrows" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_show_arrows'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Show Navigation Arrows</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="show_dots" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_show_dots'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Show Dots Navigation</span>
+                        </label>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="show_progress" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_show_progress'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Show Progress Bar</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Interaction Settings -->
+                <div class="space-y-4">
+                    <h3 class="font-semibold text-gray-700 border-b pb-2">Interaction Settings</h3>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="enable_keyboard" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_enable_keyboard'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Enable Keyboard Navigation</span>
+                        </label>
+                        <p class="text-xs text-gray-500 ml-6">Arrow keys to navigate</p>
+                    </div>
+                    
+                    <div>
+                        <label class="flex items-center">
+                            <input type="checkbox" 
+                                   name="enable_touch" 
+                                   value="1"
+                                   <?= $sliderSettings['hero_slider_enable_touch'] ? 'checked' : '' ?>
+                                   class="mr-2">
+                            <span class="text-sm font-medium text-gray-700">Enable Touch/Swipe</span>
+                        </label>
+                        <p class="text-xs text-gray-500 ml-6">Swipe on mobile devices</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-6 flex justify-end">
+                <button type="submit" name="update_settings" class="btn-primary">
+                    <i class="fas fa-save mr-2"></i> Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    function toggleSettings() {
+        const form = document.getElementById('settings-form');
+        const icon = document.getElementById('settings-toggle-icon');
+        form.classList.toggle('hidden');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+    }
+    
+    function updateTransparencyDisplay(value) {
+        document.getElementById('transparency_display').textContent = Math.round(value * 100) + '%';
+    }
+    </script>
     
     <?php if (empty($slides)): ?>
         <div class="bg-white rounded-lg shadow-md p-8 text-center">

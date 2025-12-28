@@ -16,7 +16,15 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentSlide = 0;
     let autoplayInterval = null;
     let progressInterval = null;
-    const autoplayDelay = 5000; // 5 seconds
+    // Get settings from window object or use defaults
+    const settings = window.heroSliderSettings || {
+        autoplayDelay: 5000,
+        pauseOnHover: true,
+        transitionSpeed: 800,
+        enableKeyboard: true,
+        enableTouch: true
+    };
+    const autoplayDelay = settings.autoplayDelay;
     let isPaused = false;
     let touchStartX = 0;
     let touchEndX = 0;
@@ -25,7 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function initSlider() {
         showSlide(0);
         startAutoplay();
-        setupTouchEvents();
+        if (settings.enableTouch) {
+            setupTouchEvents();
+        }
     }
     
     // Show specific slide
@@ -125,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Setup touch events for swipe
     function setupTouchEvents() {
+        if (!settings.enableTouch) return;
+        
         slider.addEventListener('touchstart', (e) => {
             touchStartX = e.changedTouches[0].screenX;
         }, { passive: true });
@@ -177,35 +189,39 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Pause on hover
-    slider.addEventListener('mouseenter', () => {
-        isPaused = true;
-        stopAutoplay();
-        stopProgress();
-    });
-    
-    slider.addEventListener('mouseleave', () => {
-        isPaused = false;
-        startAutoplay();
-    });
-    
-    // Keyboard navigation
-    document.addEventListener('keydown', (e) => {
-        if (document.activeElement.tagName === 'INPUT' || 
-            document.activeElement.tagName === 'TEXTAREA') {
-            return; // Don't interfere with form inputs
-        }
+    // Pause on hover (if enabled)
+    if (settings.pauseOnHover) {
+        slider.addEventListener('mouseenter', () => {
+            isPaused = true;
+            stopAutoplay();
+            stopProgress();
+        });
         
-        if (e.key === 'ArrowLeft') {
-            prevSlide();
-            stopAutoplay();
-            setTimeout(() => startAutoplay(), 2000);
-        } else if (e.key === 'ArrowRight') {
-            nextSlide();
-            stopAutoplay();
-            setTimeout(() => startAutoplay(), 2000);
-        }
-    });
+        slider.addEventListener('mouseleave', () => {
+            isPaused = false;
+            startAutoplay();
+        });
+    }
+    
+    // Keyboard navigation (if enabled)
+    if (settings.enableKeyboard) {
+        document.addEventListener('keydown', (e) => {
+            if (document.activeElement.tagName === 'INPUT' || 
+                document.activeElement.tagName === 'TEXTAREA') {
+                return; // Don't interfere with form inputs
+            }
+            
+            if (e.key === 'ArrowLeft') {
+                prevSlide();
+                stopAutoplay();
+                setTimeout(() => startAutoplay(), 2000);
+            } else if (e.key === 'ArrowRight') {
+                nextSlide();
+                stopAutoplay();
+                setTimeout(() => startAutoplay(), 2000);
+            }
+        });
+    }
     
     // Pause when tab is not visible
     document.addEventListener('visibilitychange', () => {
