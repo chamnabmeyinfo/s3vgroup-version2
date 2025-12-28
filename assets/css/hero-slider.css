@@ -3,7 +3,7 @@
 .hero-slider {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9; /* 1920x1080 ratio */
+  aspect-ratio: 29 / 24; /* 1920x1080 ratio */
   max-height: 90vh; /* Limit to 90% of viewport height (10% smaller) */
   overflow: hidden;
   background: #0f172a;
