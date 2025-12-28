@@ -14,6 +14,17 @@ $message = '';
 $error = '';
 $success = false;
 
+// Check for success message from redirect
+if (isset($_GET['success'])) {
+    $addedCount = isset($_GET['added']) ? (int)$_GET['added'] : 0;
+    if ($addedCount > 0) {
+        $message = "Advanced features added successfully! $addedCount new column(s) added.";
+    } else {
+        $message = 'All advanced features are already installed!';
+    }
+    $success = true;
+}
+
 // Check if table exists
 $tableExists = false;
 try {
@@ -27,32 +38,136 @@ if (!$tableExists) {
     $error = 'Hero slides table does not exist. Please run the basic setup first.';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_features'])) {
     try {
-        // Read and execute the migration SQL
-        $sqlFile = __DIR__ . '/../database/add-hero-slider-advanced-features.sql';
-        if (file_exists($sqlFile)) {
-            $sql = file_get_contents($sqlFile);
-            // Split by semicolon and execute each statement
-            $statements = array_filter(array_map('trim', explode(';', $sql)));
-            
-            foreach ($statements as $statement) {
-                if (!empty($statement) && !preg_match('/^--/', $statement)) {
-                    try {
-                        db()->query($statement);
-                    } catch (Exception $e) {
-                        // Ignore errors for columns that already exist
-                        if (strpos($e->getMessage(), 'Duplicate column') === false) {
-                            throw $e;
+        // Check which columns already exist
+        $columns = db()->fetchAll("SHOW COLUMNS FROM hero_slides");
+        $existingColumns = array_column($columns, 'Field');
+        
+        // Define all columns to add with their definitions
+        $columnsToAdd = [
+            'transition_effect' => "VARCHAR(50) DEFAULT 'fade'",
+            'text_animation' => "VARCHAR(50) DEFAULT 'fadeInUp'",
+            'video_background' => "VARCHAR(255) DEFAULT NULL",
+            'parallax_effect' => "TINYINT(1) DEFAULT 0",
+            'content_layout' => "VARCHAR(50) DEFAULT 'center'",
+            'mobile_image' => "VARCHAR(255) DEFAULT NULL",
+            'tablet_image' => "VARCHAR(255) DEFAULT NULL",
+            'start_date' => "DATETIME DEFAULT NULL",
+            'end_date' => "DATETIME DEFAULT NULL",
+            'overlay_pattern' => "VARCHAR(50) DEFAULT NULL",
+            'button1_style' => "VARCHAR(50) DEFAULT 'primary'",
+            'button2_style' => "VARCHAR(50) DEFAULT 'secondary'",
+            'social_share_buttons' => "TINYINT(1) DEFAULT 0",
+            'countdown_timer' => "DATETIME DEFAULT NULL",
+            'badge_text' => "VARCHAR(100) DEFAULT NULL",
+            'badge_color' => "VARCHAR(50) DEFAULT NULL",
+            'mobile_content' => "TEXT DEFAULT NULL",
+            'lazy_load' => "TINYINT(1) DEFAULT 1",
+            'auto_height' => "TINYINT(1) DEFAULT 0",
+            'views' => "INT(11) DEFAULT 0",
+            'clicks' => "INT(11) DEFAULT 0",
+        ];
+        
+        $addedCount = 0;
+        $skippedCount = 0;
+        $errors = [];
+        
+        // Define column order and positioning
+        $columnOrder = [
+            'transition_effect' => 'content_transparency',
+            'text_animation' => 'transition_effect',
+            'video_background' => 'background_image',
+            'parallax_effect' => 'video_background',
+            'content_layout' => 'parallax_effect',
+            'mobile_image' => 'background_image',
+            'tablet_image' => 'mobile_image',
+            'start_date' => 'display_order',
+            'end_date' => 'start_date',
+            'overlay_pattern' => 'end_date',
+            'button1_style' => 'button1_url',
+            'button2_style' => 'button1_style',
+            'social_share_buttons' => 'button2_style',
+            'countdown_timer' => 'social_share_buttons',
+            'badge_text' => 'countdown_timer',
+            'badge_color' => 'badge_text',
+            'mobile_content' => 'description',
+            'lazy_load' => 'badge_color',
+            'auto_height' => 'lazy_load',
+            'views' => 'auto_height',
+            'clicks' => 'views',
+        ];
+        
+        // Add each column if it doesn't exist
+        foreach ($columnsToAdd as $columnName => $columnDef) {
+            if (!in_array($columnName, $existingColumns)) {
+                try {
+                    // Determine position - use the order defined above, or fallback to a safe position
+                    $afterColumn = $columnOrder[$columnName] ?? 'display_order';
+                    
+                    // Make sure the after column exists, otherwise use a safe fallback
+                    if (!in_array($afterColumn, $existingColumns)) {
+                        // Try common fallback columns
+                        if (in_array('display_order', $existingColumns)) {
+                            $afterColumn = 'display_order';
+                        } elseif (in_array('updated_at', $existingColumns)) {
+                            $afterColumn = 'updated_at';
+                        } else {
+                            // Last resort: add at the end
+                            $afterColumn = null;
                         }
                     }
+                    
+                    if ($afterColumn) {
+                        $sql = "ALTER TABLE `hero_slides` ADD COLUMN `{$columnName}` {$columnDef} AFTER `{$afterColumn}`";
+                    } else {
+                        $sql = "ALTER TABLE `hero_slides` ADD COLUMN `{$columnName}` {$columnDef}";
+                    }
+                    
+                    db()->query($sql);
+                    $addedCount++;
+                    error_log("Added column: $columnName after $afterColumn");
+                    
+                    // Update existing columns list for next iteration
+                    $existingColumns[] = $columnName;
+                } catch (Exception $e) {
+                    $errorMsg = $e->getMessage();
+                    // Check if it's a duplicate column error (might have been added between checks)
+                    if (strpos($errorMsg, 'Duplicate column') !== false || 
+                        strpos($errorMsg, 'already exists') !== false ||
+                        strpos($errorMsg, 'Duplicate column name') !== false) {
+                        $skippedCount++;
+                        error_log("Column $columnName already exists, skipping.");
+                        $existingColumns[] = $columnName; // Add to list to prevent retry
+                    } else {
+                        $errors[] = "$columnName: " . $errorMsg;
+                        error_log("Error adding column $columnName: " . $errorMsg);
+                        error_log("SQL was: $sql");
+                    }
                 }
+            } else {
+                $skippedCount++;
             }
-            
-            $message = 'Advanced features added successfully! All new fields are now available.';
+        }
+        
+        if (count($errors) > 0) {
+            $error = 'Some columns could not be added: ' . implode(', ', $errors);
+            if ($addedCount > 0) {
+                $error .= " ($addedCount column(s) were added successfully)";
+            }
+        } elseif ($addedCount > 0) {
+            $message = "Advanced features added successfully! $addedCount new column(s) added.";
+            $success = true;
+            // Redirect to prevent form resubmission
+            header('Location: ' . url('admin/setup-hero-slider-advanced.php') . '?success=1&added=' . $addedCount);
+            exit;
+        } elseif ($skippedCount > 0) {
+            $message = 'All advanced features are already installed!';
             $success = true;
         } else {
-            $error = 'Migration file not found.';
+            $error = 'No columns were added. Please check the database connection.';
         }
     } catch (Exception $e) {
+        error_log("Setup Advanced Features Error: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
         $error = 'Error adding features: ' . $e->getMessage();
     }
 }
@@ -68,14 +183,13 @@ if ($tableExists) {
     }
 }
 
+// Define all advanced columns that should exist
 $newColumns = [
-    'transition_effect', 'video_background', 'video_poster', 'template',
-    'image_mobile', 'image_tablet', 'scheduled_start', 'scheduled_end',
-    'text_animation', 'parallax_enabled', 'content_layout', 'overlay_pattern',
-    'button1_style', 'button2_style', 'social_sharing', 'countdown_enabled',
-    'countdown_date', 'badge_text', 'badge_color', 'mobile_title',
-    'mobile_description', 'custom_font', 'slide_group', 'ab_test_variant',
-    'auto_height', 'dark_mode'
+    'transition_effect', 'text_animation', 'video_background', 'parallax_effect',
+    'content_layout', 'mobile_image', 'tablet_image', 'start_date', 'end_date',
+    'overlay_pattern', 'button1_style', 'button2_style', 'social_share_buttons',
+    'countdown_timer', 'badge_text', 'badge_color', 'mobile_content',
+    'lazy_load', 'auto_height', 'views', 'clicks'
 ];
 
 $missingColumns = array_diff($newColumns, $existingColumns);

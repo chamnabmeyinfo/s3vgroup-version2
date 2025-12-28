@@ -16,6 +16,19 @@ $heroSliderModel = new HeroSlider();
 $message = '';
 $error = '';
 
+// Default values (defined early for use in update handler)
+$defaultSettings = [
+    'hero_slider_autoplay_delay' => 5000,
+    'hero_slider_default_transparency' => 0.02,
+    'hero_slider_show_arrows' => 1,
+    'hero_slider_show_dots' => 1,
+    'hero_slider_show_progress' => 1,
+    'hero_slider_pause_on_hover' => 1,
+    'hero_slider_transition_speed' => 800,
+    'hero_slider_enable_keyboard' => 1,
+    'hero_slider_enable_touch' => 1,
+];
+
 // Handle delete
 if (!empty($_GET['delete'])) {
     try {
@@ -83,62 +96,147 @@ if (!empty($_POST['bulk_action']) && !empty($_POST['selected_slides'])) {
 // Handle general settings update
 if (!empty($_POST['update_settings'])) {
     try {
+        // Debug: Log what we received
+        error_log("Hero Slider Settings POST data: " . print_r($_POST, true));
+        
+        // Prepare settings to update with proper type casting and validation
+        // Always use POST values if provided, otherwise use defaults
         $settingsToUpdate = [
-            'hero_slider_autoplay_delay' => (int)($_POST['autoplay_delay'] ?? 5000),
-            'hero_slider_default_transparency' => (float)($_POST['default_transparency'] ?? 0.10),
-            'hero_slider_show_arrows' => isset($_POST['show_arrows']) ? 1 : 0,
-            'hero_slider_show_dots' => isset($_POST['show_dots']) ? 1 : 0,
-            'hero_slider_show_progress' => isset($_POST['show_progress']) ? 1 : 0,
-            'hero_slider_pause_on_hover' => isset($_POST['pause_on_hover']) ? 1 : 0,
-            'hero_slider_transition_speed' => (int)($_POST['transition_speed'] ?? 800),
-            'hero_slider_enable_keyboard' => isset($_POST['enable_keyboard']) ? 1 : 0,
-            'hero_slider_enable_touch' => isset($_POST['enable_touch']) ? 1 : 0,
+            'hero_slider_autoplay_delay' => isset($_POST['autoplay_delay']) && $_POST['autoplay_delay'] !== '' 
+                ? max(1000, min(30000, (int)$_POST['autoplay_delay'])) 
+                : $defaultSettings['hero_slider_autoplay_delay'],
+            'hero_slider_default_transparency' => isset($_POST['default_transparency']) && $_POST['default_transparency'] !== '' 
+                ? max(0, min(1, (float)$_POST['default_transparency'])) 
+                : $defaultSettings['hero_slider_default_transparency'],
+            'hero_slider_show_arrows' => isset($_POST['show_arrows']) && $_POST['show_arrows'] == '1' ? 1 : 0,
+            'hero_slider_show_dots' => isset($_POST['show_dots']) && $_POST['show_dots'] == '1' ? 1 : 0,
+            'hero_slider_show_progress' => isset($_POST['show_progress']) && $_POST['show_progress'] == '1' ? 1 : 0,
+            'hero_slider_pause_on_hover' => isset($_POST['pause_on_hover']) && $_POST['pause_on_hover'] == '1' ? 1 : 0,
+            'hero_slider_transition_speed' => isset($_POST['transition_speed']) && $_POST['transition_speed'] !== '' 
+                ? max(200, min(2000, (int)$_POST['transition_speed'])) 
+                : $defaultSettings['hero_slider_transition_speed'],
+            'hero_slider_enable_keyboard' => isset($_POST['enable_keyboard']) && $_POST['enable_keyboard'] == '1' ? 1 : 0,
+            'hero_slider_enable_touch' => isset($_POST['enable_touch']) && $_POST['enable_touch'] == '1' ? 1 : 0,
         ];
         
+        // Debug: Log what we're about to save
+        error_log("Hero Slider Settings to save: " . print_r($settingsToUpdate, true));
+        
+        // Update or insert each setting
+        $updateCount = 0;
+        $errors = [];
         foreach ($settingsToUpdate as $key => $value) {
-            $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
-            if ($existing) {
-                db()->update('settings', ['value' => $value], '`key` = :key', ['key' => $key]);
-            } else {
-                db()->insert('settings', [
-                    'key' => $key,
-                    'value' => $value,
-                    'type' => 'text'
-                ]);
+            try {
+                $existing = db()->fetchOne("SELECT id, value FROM settings WHERE `key` = :key", ['key' => $key]);
+                if ($existing) {
+                    // Always update, even if value appears the same (handles type conversion)
+                    $oldValue = $existing['value'];
+                    $newValue = (string)$value;
+                    
+                    // Only update if value actually changed
+                    if ((string)$oldValue !== $newValue) {
+                        $result = db()->update('settings', ['value' => $newValue], '`key` = :key', ['key' => $key]);
+                        error_log("Updated setting $key: '$oldValue' -> '$newValue' (rowCount: $result)");
+                        $updateCount++;
+                    } else {
+                        error_log("Setting $key unchanged: '$oldValue'");
+                        $updateCount++; // Count as processed
+                    }
+                } else {
+                    // Insert new setting
+                    $result = db()->insert('settings', [
+                        'key' => $key,
+                        'value' => (string)$value,
+                        'type' => 'text'
+                    ]);
+                    if ($result) {
+                        error_log("Inserted new setting $key: '$value'");
+                        $updateCount++;
+                    } else {
+                        $errors[] = "Failed to insert setting: $key";
+                        error_log("Failed to insert setting: $key = $value");
+                    }
+                }
+            } catch (\Exception $e) {
+                $errors[] = "Error saving $key: " . $e->getMessage();
+                error_log("Error saving setting $key: " . $e->getMessage());
             }
         }
         
-        $message = 'General settings updated successfully.';
+        if (count($errors) > 0) {
+            $error = 'Some settings could not be saved: ' . implode(', ', $errors);
+        } elseif ($updateCount === 0) {
+            $error = 'No settings were processed. Please check your input values.';
+        } else {
+            // Reload settings to show updated values
+            $settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'hero_slider_%'");
+            $sliderSettings = [];
+            foreach ($settingsData as $setting) {
+                $sliderSettings[$setting['key']] = $setting['value'];
+            }
+            
+            // Merge with defaults for any missing settings
+            foreach ($defaultSettings as $key => $default) {
+                if (!isset($sliderSettings[$key])) {
+                    $sliderSettings[$key] = $default;
+                }
+            }
+            
+            // Ensure proper typing for display
+            $sliderSettings['hero_slider_autoplay_delay'] = (int)($sliderSettings['hero_slider_autoplay_delay'] ?? $defaultSettings['hero_slider_autoplay_delay']);
+            $sliderSettings['hero_slider_default_transparency'] = (float)($sliderSettings['hero_slider_default_transparency'] ?? $defaultSettings['hero_slider_default_transparency']);
+            $sliderSettings['hero_slider_show_arrows'] = (int)($sliderSettings['hero_slider_show_arrows'] ?? $defaultSettings['hero_slider_show_arrows']);
+            $sliderSettings['hero_slider_show_dots'] = (int)($sliderSettings['hero_slider_show_dots'] ?? $defaultSettings['hero_slider_show_dots']);
+            $sliderSettings['hero_slider_show_progress'] = (int)($sliderSettings['hero_slider_show_progress'] ?? $defaultSettings['hero_slider_show_progress']);
+            $sliderSettings['hero_slider_pause_on_hover'] = (int)($sliderSettings['hero_slider_pause_on_hover'] ?? $defaultSettings['hero_slider_pause_on_hover']);
+            $sliderSettings['hero_slider_transition_speed'] = (int)($sliderSettings['hero_slider_transition_speed'] ?? $defaultSettings['hero_slider_transition_speed']);
+            $sliderSettings['hero_slider_enable_keyboard'] = (int)($sliderSettings['hero_slider_enable_keyboard'] ?? $defaultSettings['hero_slider_enable_keyboard']);
+            $sliderSettings['hero_slider_enable_touch'] = (int)($sliderSettings['hero_slider_enable_touch'] ?? $defaultSettings['hero_slider_enable_touch']);
+            
+            $message = 'General settings updated successfully. ' . $updateCount . ' setting(s) saved.';
+            
+            // Redirect to prevent form resubmission
+            header('Location: ' . url('admin/hero-slider.php') . '?settings_saved=1');
+            exit;
+        }
     } catch (\Exception $e) {
+        error_log("Hero Slider Settings Error: " . $e->getMessage());
+        error_log("Stack trace: " . $e->getTraceAsString());
         $error = 'Error updating settings: ' . $e->getMessage();
     }
 }
 
-// Get current settings
-$settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'hero_slider_%'");
-$sliderSettings = [];
-foreach ($settingsData as $setting) {
-    $sliderSettings[$setting['key']] = $setting['value'];
+// Check for success message from redirect
+if (isset($_GET['settings_saved'])) {
+    $message = 'General settings updated successfully.';
 }
 
-// Default values
-$defaultSettings = [
-    'hero_slider_autoplay_delay' => 5000,
-    'hero_slider_default_transparency' => 0.02,
-    'hero_slider_show_arrows' => 1,
-    'hero_slider_show_dots' => 1,
-    'hero_slider_show_progress' => 1,
-    'hero_slider_pause_on_hover' => 1,
-    'hero_slider_transition_speed' => 800,
-    'hero_slider_enable_keyboard' => 1,
-    'hero_slider_enable_touch' => 1,
-];
-
-foreach ($defaultSettings as $key => $default) {
-    if (!isset($sliderSettings[$key])) {
-        $sliderSettings[$key] = $default;
+// Get current settings (only if not already set by update handler)
+if (!isset($sliderSettings) || empty($sliderSettings)) {
+    $settingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'hero_slider_%'");
+    $sliderSettings = [];
+    foreach ($settingsData as $setting) {
+        $sliderSettings[$setting['key']] = $setting['value'];
+    }
+    
+    // Merge with defaults for any missing settings
+    foreach ($defaultSettings as $key => $default) {
+        if (!isset($sliderSettings[$key])) {
+            $sliderSettings[$key] = $default;
+        }
     }
 }
+
+// Ensure all values are properly typed for display
+$sliderSettings['hero_slider_autoplay_delay'] = (int)($sliderSettings['hero_slider_autoplay_delay'] ?? $defaultSettings['hero_slider_autoplay_delay']);
+$sliderSettings['hero_slider_default_transparency'] = (float)($sliderSettings['hero_slider_default_transparency'] ?? $defaultSettings['hero_slider_default_transparency']);
+$sliderSettings['hero_slider_show_arrows'] = (int)($sliderSettings['hero_slider_show_arrows'] ?? $defaultSettings['hero_slider_show_arrows']);
+$sliderSettings['hero_slider_show_dots'] = (int)($sliderSettings['hero_slider_show_dots'] ?? $defaultSettings['hero_slider_show_dots']);
+$sliderSettings['hero_slider_show_progress'] = (int)($sliderSettings['hero_slider_show_progress'] ?? $defaultSettings['hero_slider_show_progress']);
+$sliderSettings['hero_slider_pause_on_hover'] = (int)($sliderSettings['hero_slider_pause_on_hover'] ?? $defaultSettings['hero_slider_pause_on_hover']);
+$sliderSettings['hero_slider_transition_speed'] = (int)($sliderSettings['hero_slider_transition_speed'] ?? $defaultSettings['hero_slider_transition_speed']);
+$sliderSettings['hero_slider_enable_keyboard'] = (int)($sliderSettings['hero_slider_enable_keyboard'] ?? $defaultSettings['hero_slider_enable_keyboard']);
+$sliderSettings['hero_slider_enable_touch'] = (int)($sliderSettings['hero_slider_enable_touch'] ?? $defaultSettings['hero_slider_enable_touch']);
 
 // Get all slides
 $slides = $heroSliderModel->getAll();
@@ -185,7 +283,7 @@ include __DIR__ . '/includes/header.php';
             </button>
         </div>
         
-        <form method="POST" id="settings-form" class="hidden">
+        <form method="POST" action="" id="settings-form" class="hidden">
             <div class="grid md:grid-cols-2 gap-6">
                 <!-- Auto-play Settings -->
                 <div class="space-y-4">
@@ -351,6 +449,44 @@ include __DIR__ . '/includes/header.php';
     function updateTransparencyDisplay(value) {
         document.getElementById('transparency_display').textContent = Math.round(value * 100) + '%';
     }
+    
+    // Ensure form is visible and validate before submitting
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('settings-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Make sure form is visible before submitting
+                if (form.classList.contains('hidden')) {
+                    form.classList.remove('hidden');
+                }
+                
+                // Validate all required fields
+                const autoplayDelay = document.getElementById('autoplay_delay');
+                const transitionSpeed = document.getElementById('transition_speed');
+                
+                if (autoplayDelay && (autoplayDelay.value < 1000 || autoplayDelay.value > 30000)) {
+                    e.preventDefault();
+                    alert('Auto-play delay must be between 1000 and 30000 milliseconds.');
+                    autoplayDelay.focus();
+                    return false;
+                }
+                
+                if (transitionSpeed && (transitionSpeed.value < 200 || transitionSpeed.value > 2000)) {
+                    e.preventDefault();
+                    alert('Transition speed must be between 200 and 2000 milliseconds.');
+                    transitionSpeed.focus();
+                    return false;
+                }
+                
+                // Show loading state
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
+                }
+            });
+        }
+    });
     </script>
     
     <?php if (empty($slides)): ?>
