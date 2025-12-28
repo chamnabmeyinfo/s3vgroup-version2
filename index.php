@@ -69,13 +69,30 @@ include __DIR__ . '/includes/header.php';
     <section class="hero-slider">
         <div class="hero-slider-container">
             <?php foreach ($heroSlides as $index => $slide): 
+                // Determine responsive image
+                $isMobile = isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/Mobile|Android|iPhone/i', $_SERVER['HTTP_USER_AGENT']);
+                $isTablet = isset($_SERVER['HTTP_USER_AGENT']) && preg_match('/Tablet|iPad/i', $_SERVER['HTTP_USER_AGENT']);
+                
+                $bgImage = null;
+                if ($isMobile && !empty($slide['image_mobile'])) {
+                    $bgImage = $slide['image_mobile'];
+                } elseif ($isTablet && !empty($slide['image_tablet'])) {
+                    $bgImage = $slide['image_tablet'];
+                } elseif (!empty($slide['background_image'])) {
+                    $bgImage = $slide['background_image'];
+                }
+                
                 // Build background style
                 $bgStyle = '';
-                if (!empty($slide['background_image'])) {
+                $hasVideo = !empty($slide['video_background']);
+                
+                if ($hasVideo) {
+                    // Video background - style will be handled by video element
+                } elseif ($bgImage) {
                     $bgStyle = "background-image: linear-gradient(135deg, " . 
                                ($slide['background_gradient_start'] ?? 'rgba(0, 0, 0, 0.4)') . ", " . 
                                ($slide['background_gradient_end'] ?? 'rgba(0, 0, 0, 0.4)') . "), url('" . 
-                               escape(image_url($slide['background_image'])) . "');";
+                               escape(image_url($bgImage)) . "');";
                 } elseif (!empty($slide['background_gradient_start']) && !empty($slide['background_gradient_end'])) {
                     $bgStyle = "background-image: linear-gradient(135deg, " . 
                                escape($slide['background_gradient_start']) . ", " . 
@@ -83,26 +100,106 @@ include __DIR__ . '/includes/header.php';
                 } else {
                     $bgStyle = "background-image: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(79, 70, 229, 0.9));";
                 }
+                
+                // Get slide-specific settings
+                $transition = $slide['transition_effect'] ?? 'fade';
+                $textAnimation = $slide['text_animation'] ?? 'fadeInUp';
+                $layout = $slide['content_layout'] ?? 'center';
+                $template = $slide['template'] ?? 'default';
+                $parallax = !empty($slide['parallax_enabled']);
+                $overlayPattern = $slide['overlay_pattern'] ?? '';
+                $badgeText = $slide['badge_text'] ?? '';
+                $badgeColor = $slide['badge_color'] ?? 'blue';
+                $countdownEnabled = !empty($slide['countdown_enabled']);
+                $countdownDate = $slide['countdown_date'] ?? '';
+                $socialSharing = !empty($slide['social_sharing']);
+                $darkMode = !empty($slide['dark_mode']);
+                $customFont = $slide['custom_font'] ?? '';
+                
+                // Use mobile content if on mobile
+                $displayTitle = ($isMobile && !empty($slide['mobile_title'])) ? $slide['mobile_title'] : $slide['title'];
+                $displayDescription = ($isMobile && !empty($slide['mobile_description'])) ? $slide['mobile_description'] : ($slide['description'] ?? '');
+                
+                // Button styles
+                $button1Style = $slide['button1_style'] ?? 'primary';
+                $button2Style = $slide['button2_style'] ?? 'secondary';
             ?>
-            <div class="hero-slide <?= $index === 0 ? 'active' : '' ?>" style="<?= $bgStyle ?>">
-                <div class="hero-slide-content" style="background: rgba(255, 255, 255, <?= escape($slide['content_transparency'] ?? 0.10) ?>);">
-                    <h1><?= escape($slide['title']) ?></h1>
-                    <?php if (!empty($slide['description'])): ?>
-                        <p><?= escape($slide['description']) ?></p>
+            <div class="hero-slide <?= $index === 0 ? 'active' : '' ?> template-<?= escape($template) ?> <?= $darkMode ? 'dark-mode' : '' ?>"
+                 data-transition="<?= escape($transition) ?>"
+                 data-text-animation="<?= escape($textAnimation) ?>"
+                 data-parallax="<?= $parallax ? 'true' : 'false' ?>"
+                 data-slide-id="<?= $slide['id'] ?>"
+                 style="<?= $bgStyle ?>">
+                
+                <?php if ($hasVideo): ?>
+                    <video class="hero-video-background" autoplay muted loop playsinline
+                           <?= !empty($slide['video_poster']) ? 'poster="' . escape(image_url($slide['video_poster'])) . '"' : '' ?>>
+                        <source src="<?= escape(image_url($slide['video_background'])) ?>" type="video/mp4">
+                    </video>
+                    <?php if (!empty($slide['background_gradient_start']) && !empty($slide['background_gradient_end'])): ?>
+                        <div style="position: absolute; inset: 0; background: linear-gradient(135deg, <?= escape($slide['background_gradient_start']) ?>, <?= escape($slide['background_gradient_end']) ?>); z-index: 1;"></div>
                     <?php endif; ?>
+                <?php endif; ?>
+                
+                <?php if ($parallax && $bgImage): ?>
+                    <div class="hero-slide-bg" style="background-image: url('<?= escape(image_url($bgImage)) ?>');"></div>
+                <?php endif; ?>
+                
+                <?php if ($overlayPattern): ?>
+                    <div class="hero-slide-overlay <?= escape($overlayPattern) ?>" style="position: absolute; inset: 0; z-index: 1;"></div>
+                <?php endif; ?>
+                
+                <?php if ($badgeText): ?>
+                    <div class="hero-slide-badge badge-<?= escape($badgeColor) ?>">
+                        <?= escape($badgeText) ?>
+                    </div>
+                <?php endif; ?>
+                
+                <div class="hero-slide-content layout-<?= escape($layout) ?>" 
+                     style="background: rgba(255, 255, 255, <?= escape($slide['content_transparency'] ?? 0.10) ?>); <?= $customFont ? 'font-family: ' . escape($customFont) . ';' : '' ?>">
+                    <h1><?= escape($displayTitle) ?></h1>
+                    <?php if (!empty($displayDescription)): ?>
+                        <p><?= escape($displayDescription) ?></p>
+                    <?php endif; ?>
+                    
+                    <?php if ($countdownEnabled && $countdownDate): ?>
+                        <div class="hero-countdown" data-countdown-to="<?= escape($countdownDate) ?>">
+                            <!-- Countdown will be populated by JavaScript -->
+                        </div>
+                    <?php endif; ?>
+                    
                     <div class="hero-slide-buttons">
                         <?php if (!empty($slide['button1_text']) && !empty($slide['button1_url'])): ?>
-                            <a href="<?= url($slide['button1_url']) ?>" class="hero-slide-btn hero-slide-btn-primary">
+                            <a href="<?= url($slide['button1_url']) ?>" 
+                               class="hero-slide-btn hero-slide-btn-<?= escape($button1Style) ?>">
                                 <?= escape($slide['button1_text']) ?>
                             </a>
                         <?php endif; ?>
                         <?php if (!empty($slide['button2_text']) && !empty($slide['button2_url'])): ?>
-                            <a href="<?= url($slide['button2_url']) ?>" class="hero-slide-btn hero-slide-btn-secondary">
+                            <a href="<?= url($slide['button2_url']) ?>" 
+                               class="hero-slide-btn hero-slide-btn-<?= escape($button2Style) ?>">
                                 <?= escape($slide['button2_text']) ?>
                             </a>
                         <?php endif; ?>
                     </div>
                 </div>
+                
+                <?php if ($socialSharing): ?>
+                    <div class="hero-social-share">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<?= urlencode(url()) ?>" target="_blank" title="Share on Facebook">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url=<?= urlencode(url()) ?>" target="_blank" title="Share on Twitter">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode(url()) ?>" target="_blank" title="Share on LinkedIn">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://wa.me/?text=<?= urlencode($displayTitle . ' - ' . url()) ?>" target="_blank" title="Share on WhatsApp">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
             <?php endforeach; ?>
         </div>

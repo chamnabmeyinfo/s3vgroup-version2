@@ -57,6 +57,29 @@ if (!empty($_POST['update_order'])) {
     }
 }
 
+// Handle bulk operations
+if (!empty($_POST['bulk_action']) && !empty($_POST['selected_slides'])) {
+    try {
+        $action = $_POST['bulk_action'];
+        $selectedIds = array_map('intval', $_POST['selected_slides']);
+        
+        if ($action === 'activate') {
+            $heroSliderModel->bulkUpdate($selectedIds, ['is_active' => 1]);
+            $message = count($selectedIds) . ' slide(s) activated.';
+        } elseif ($action === 'deactivate') {
+            $heroSliderModel->bulkUpdate($selectedIds, ['is_active' => 0]);
+            $message = count($selectedIds) . ' slide(s) deactivated.';
+        } elseif ($action === 'delete') {
+            foreach ($selectedIds as $id) {
+                $heroSliderModel->delete($id);
+            }
+            $message = count($selectedIds) . ' slide(s) deleted.';
+        }
+    } catch (\Exception $e) {
+        $error = 'Error performing bulk action: ' . $e->getMessage();
+    }
+}
+
 // Handle general settings update
 if (!empty($_POST['update_settings'])) {
     try {
@@ -126,7 +149,14 @@ include __DIR__ . '/includes/header.php';
 
 <div class="p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">Hero Slider</h1>
+        <div>
+            <h1 class="text-2xl font-bold">Hero Slider</h1>
+            <p class="text-sm text-gray-500 mt-1">
+                <a href="setup-hero-slider-advanced.php" class="text-blue-600 hover:underline">
+                    <i class="fas fa-magic mr-1"></i> Setup Advanced Features
+                </a>
+            </p>
+        </div>
         <a href="hero-slider-edit.php" class="btn-primary">
             <i class="fas fa-plus mr-2"></i> Add New Slide
         </a>
@@ -333,15 +363,37 @@ include __DIR__ . '/includes/header.php';
             </a>
         </div>
     <?php else: ?>
-        <form method="POST" action="">
+        <form method="POST" action="" id="slides-form">
+            <!-- Bulk Actions Bar -->
+            <div class="bg-gray-50 border border-gray-200 rounded-t-lg p-4 flex items-center justify-between mb-0" id="bulk-actions-bar" style="display: none;">
+                <div class="flex items-center gap-4">
+                    <span id="selected-count" class="text-sm font-medium text-gray-700">0 selected</span>
+                    <select name="bulk_action" id="bulk_action" class="px-4 py-2 border border-gray-300 rounded-lg text-sm">
+                        <option value="">Choose action...</option>
+                        <option value="activate">Activate</option>
+                        <option value="deactivate">Deactivate</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                    <button type="submit" class="btn-primary btn-sm">
+                        <i class="fas fa-check mr-2"></i> Apply
+                    </button>
+                    <button type="button" onclick="clearSelection()" class="btn-secondary btn-sm">
+                        <i class="fas fa-times mr-2"></i> Clear
+                    </button>
+                </div>
+            </div>
+            
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
+                            <th class="px-6 py-3 text-left">
+                                <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)">
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buttons</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Template</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                         </tr>
@@ -349,6 +401,10 @@ include __DIR__ . '/includes/header.php';
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($slides as $slide): ?>
                         <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <input type="checkbox" name="selected_slides[]" value="<?= $slide['id'] ?>" 
+                                       class="slide-checkbox" onchange="updateBulkActions()">
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <input type="number" 
                                        name="order[<?= $slide['id'] ?>]" 
@@ -365,14 +421,12 @@ include __DIR__ . '/includes/header.php';
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                <?php if ($slide['button1_text']): ?>
-                                    <span class="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs mr-1">
-                                        <?= escape($slide['button1_text']) ?>
-                                    </span>
-                                <?php endif; ?>
-                                <?php if ($slide['button2_text']): ?>
-                                    <span class="inline-block px-2 py-1 bg-gray-100 text-gray-800 rounded text-xs">
-                                        <?= escape($slide['button2_text']) ?>
+                                <span class="px-2 py-1 bg-purple-100 text-purple-800 rounded text-xs">
+                                    <?= escape(ucfirst($slide['template'] ?? 'default')) ?>
+                                </span>
+                                <?php if (!empty($slide['transition_effect']) && $slide['transition_effect'] !== 'fade'): ?>
+                                    <span class="px-2 py-1 bg-indigo-100 text-indigo-800 rounded text-xs ml-1">
+                                        <?= escape(ucfirst($slide['transition_effect'])) ?>
                                     </span>
                                 <?php endif; ?>
                             </td>
@@ -399,12 +453,48 @@ include __DIR__ . '/includes/header.php';
                 </table>
             </div>
             
-            <div class="mt-4 flex justify-end">
+            <div class="mt-4 flex justify-between">
                 <button type="submit" name="update_order" class="btn-primary">
                     <i class="fas fa-save mr-2"></i> Update Order
                 </button>
             </div>
         </form>
+        
+        <script>
+        function toggleSelectAll(checkbox) {
+            const checkboxes = document.querySelectorAll('.slide-checkbox');
+            checkboxes.forEach(cb => cb.checked = checkbox.checked);
+            updateBulkActions();
+        }
+        
+        function updateBulkActions() {
+            const checked = document.querySelectorAll('.slide-checkbox:checked');
+            const bulkBar = document.getElementById('bulk-actions-bar');
+            const countEl = document.getElementById('selected-count');
+            
+            if (checked.length > 0) {
+                bulkBar.style.display = 'flex';
+                countEl.textContent = checked.length + ' selected';
+            } else {
+                bulkBar.style.display = 'none';
+            }
+        }
+        
+        function clearSelection() {
+            document.querySelectorAll('.slide-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            updateBulkActions();
+        }
+        
+        // Confirm bulk delete
+        document.getElementById('slides-form').addEventListener('submit', function(e) {
+            if (document.getElementById('bulk_action').value === 'delete') {
+                if (!confirm('Are you sure you want to delete the selected slides? This cannot be undone.')) {
+                    e.preventDefault();
+                }
+            }
+        });
+        </script>
     <?php endif; ?>
 </div>
 
