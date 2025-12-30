@@ -278,7 +278,7 @@ $syncLog = $syncService->getLog();
                                 <h6>Make Changes Locally</h6>
                                 <p class="text-muted small">
                                     Edit products, add data, make updates on your local database.
-                                    Test everything on localhost:8080 before deploying.
+                                    Test everything locally before deploying.
                                 </p>
                             </div>
                         </div>

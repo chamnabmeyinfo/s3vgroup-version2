@@ -2,7 +2,7 @@
 /**
  * Sample Products Generator
  * This script adds sample products to the database for testing
- * Access via: http://localhost:8080/admin/add-sample-products.php
+ * Access via: [base_url]/admin/add-sample-products.php
  */
 
 require_once __DIR__ . '/../bootstrap/app.php';

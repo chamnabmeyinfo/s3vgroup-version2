@@ -52,6 +52,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 exit;
             }
+            
+            if ($data['action'] === 'get_item') {
+                $itemId = (int)($data['item_id'] ?? 0);
+                if ($itemId > 0) {
+                    $item = $itemModel->getById($itemId);
+                    if ($item) {
+                        echo json_encode(['success' => true, 'item' => $item]);
+                    } else {
+                        echo json_encode(['success' => false, 'error' => 'Item not found']);
+                    }
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Invalid item ID']);
+                }
+                exit;
+            }
         }
     }
     
@@ -179,6 +194,143 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $itemId = $itemModel->create($data);
         echo json_encode(['success' => $itemId > 0, 'item_id' => $itemId]);
+        exit;
+    }
+    
+    // Handle form submission for update item
+    if (!empty($_POST['action']) && $_POST['action'] === 'update_item') {
+        header('Content-Type: application/json');
+        
+        $itemId = (int)($_POST['item_id'] ?? 0);
+        if ($itemId <= 0) {
+            echo json_encode(['success' => false, 'error' => 'Invalid item ID']);
+            exit;
+        }
+        
+        $data = [
+            'type' => $_POST['item_type'] ?? 'custom',
+            'object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
+            'target' => $_POST['target'] ?? '_self',
+            'icon' => trim($_POST['icon'] ?? '')
+        ];
+        
+        // Get custom title/URL from form (may come from custom fields or type-specific fields)
+        $customTitle = null;
+        $customUrl = null;
+        
+        // Check for custom title/URL fields (used when type is not custom, but user wants to override)
+        if (isset($_POST['title']) && !empty(trim($_POST['title']))) {
+            $customTitle = trim($_POST['title']);
+        }
+        if (isset($_POST['url']) && !empty(trim($_POST['url']))) {
+            $customUrl = trim($_POST['url']);
+        }
+        
+        // Validate based on type
+        if ($data['type'] === 'custom') {
+            if (empty($data['title'])) {
+                echo json_encode(['success' => false, 'error' => 'Title is required for custom links']);
+                exit;
+            }
+            if (empty($data['url'])) {
+                $data['url'] = '#';
+            }
+        } elseif ($data['type'] === 'category') {
+            if (empty($data['object_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Please select a category']);
+                exit;
+            }
+            $cat = $categoryModel->getById($data['object_id']);
+            if ($cat) {
+                // Use custom title if provided, otherwise use category name
+                $data['title'] = !empty($customTitle) ? $customTitle : $cat['name'];
+                // Use custom URL if provided, otherwise generate from category
+                $data['url'] = !empty($customUrl) ? $customUrl : url('products.php?category=' . $cat['slug']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Category not found']);
+                exit;
+            }
+        } elseif ($data['type'] === 'product') {
+            if (empty($data['object_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Please select a product']);
+                exit;
+            }
+            $prod = $productModel->getById($data['object_id']);
+            if ($prod) {
+                // Use custom title if provided, otherwise use product name
+                $data['title'] = !empty($customTitle) ? $customTitle : $prod['name'];
+                // Use custom URL if provided, otherwise generate from product
+                $data['url'] = !empty($customUrl) ? $customUrl : url('product.php?slug=' . $prod['slug']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Product not found']);
+                exit;
+            }
+        } elseif ($data['type'] === 'page') {
+            if (empty($data['object_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Please select a page']);
+                exit;
+            }
+            try {
+                $page = db()->fetchOne("SELECT id, title, slug FROM pages WHERE id = :id AND is_active = 1", ['id' => $data['object_id']]);
+                if ($page) {
+                    // Use custom title if provided, otherwise use page title
+                    $data['title'] = !empty($customTitle) ? $customTitle : $page['title'];
+                    // Use custom URL if provided, otherwise generate from page
+                    $data['url'] = !empty($customUrl) ? $customUrl : url('page.php?slug=' . $page['slug']);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Page not found']);
+                    exit;
+                }
+            } catch (\Exception $e) {
+                echo json_encode(['success' => false, 'error' => 'Pages table not available']);
+                exit;
+            }
+        } elseif ($data['type'] === 'post') {
+            if (empty($data['object_id'])) {
+                echo json_encode(['success' => false, 'error' => 'Please select a blog post']);
+                exit;
+            }
+            try {
+                $post = db()->fetchOne("SELECT id, title, slug FROM blog_posts WHERE id = :id AND is_published = 1", ['id' => $data['object_id']]);
+                if ($post) {
+                    // Use custom title if provided, otherwise use post title
+                    $data['title'] = !empty($customTitle) ? $customTitle : $post['title'];
+                    // Use custom URL if provided, otherwise generate from post
+                    $data['url'] = !empty($customUrl) ? $customUrl : url('blog-post.php?slug=' . urlencode($post['slug']));
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Blog post not found']);
+                    exit;
+                }
+            } catch (\Exception $e) {
+                echo json_encode(['success' => false, 'error' => 'Blog posts table not available']);
+                exit;
+            }
+        } elseif ($data['type'] === 'post_category') {
+            if (empty($_POST['category_name'])) {
+                echo json_encode(['success' => false, 'error' => 'Please select a blog category']);
+                exit;
+            }
+            $categoryName = trim($_POST['category_name']);
+            try {
+                $categoryExists = db()->fetchOne("SELECT DISTINCT category FROM blog_posts WHERE category = :cat AND is_published = 1 LIMIT 1", ['cat' => $categoryName]);
+                if ($categoryExists) {
+                    // Use custom title if provided, otherwise use category name
+                    $data['title'] = !empty($customTitle) ? $customTitle : $categoryName;
+                    // Use custom URL if provided, otherwise generate from category
+                    $data['url'] = !empty($customUrl) ? $customUrl : url('blog.php?category=' . urlencode($categoryName));
+                    $data['object_id'] = null;
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Blog category not found']);
+                    exit;
+                }
+            } catch (\Exception $e) {
+                echo json_encode(['success' => false, 'error' => 'Blog posts table not available']);
+                exit;
+            }
+        }
+        
+        $updated = $itemModel->update($itemId, $data);
+        echo json_encode(['success' => $updated]);
         exit;
     }
 }
@@ -419,6 +571,224 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
     <?php endif; ?>
+</div>
+
+<!-- Edit Item Modal -->
+<div id="editItemModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div class="p-6 border-b bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold">Edit Menu Item</h3>
+                <button onclick="closeEditItemModal()" class="text-white hover:text-gray-200 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <form id="editItemForm" class="p-6">
+            <input type="hidden" name="item_id" id="edit_item_id">
+            <input type="hidden" name="action" value="update_item">
+            <input type="hidden" name="item_type" id="edit_item_type" value="custom">
+            
+            <!-- Item Type Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-3">
+                    <i class="fas fa-tag mr-2 text-green-600"></i>Item Type *
+                </label>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <button type="button" onclick="selectEditItemType('custom')" class="edit-item-type-btn bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-4 text-center transition-all" data-type="custom">
+                        <i class="fas fa-link text-blue-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Custom Link</div>
+                        <div class="text-xs text-gray-500 mt-1">Any URL</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('category')" class="edit-item-type-btn bg-indigo-50 hover:bg-indigo-100 border-2 border-indigo-200 rounded-lg p-4 text-center transition-all" data-type="category">
+                        <i class="fas fa-folder text-indigo-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Category</div>
+                        <div class="text-xs text-gray-500 mt-1">Product Category</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('product')" class="edit-item-type-btn bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 rounded-lg p-4 text-center transition-all" data-type="product">
+                        <i class="fas fa-box text-purple-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Product</div>
+                        <div class="text-xs text-gray-500 mt-1">Single Product</div>
+                    </button>
+                    <?php if (!empty($pages)): ?>
+                    <button type="button" onclick="selectEditItemType('page')" class="edit-item-type-btn bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-lg p-4 text-center transition-all" data-type="page">
+                        <i class="fas fa-file-alt text-green-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Page</div>
+                        <div class="text-xs text-gray-500 mt-1">CMS Page</div>
+                    </button>
+                    <?php endif; ?>
+                    <?php if (!empty($posts)): ?>
+                    <button type="button" onclick="selectEditItemType('post')" class="edit-item-type-btn bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 rounded-lg p-4 text-center transition-all" data-type="post">
+                        <i class="fas fa-newspaper text-orange-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Blog Post</div>
+                        <div class="text-xs text-gray-500 mt-1">Single Post</div>
+                    </button>
+                    <?php endif; ?>
+                    <?php if (!empty($postCategories)): ?>
+                    <button type="button" onclick="selectEditItemType('post_category')" class="edit-item-type-btn bg-yellow-50 hover:bg-yellow-100 border-2 border-yellow-200 rounded-lg p-4 text-center transition-all" data-type="post_category">
+                        <i class="fas fa-tags text-yellow-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Blog Category</div>
+                        <div class="text-xs text-gray-500 mt-1">Post Category</div>
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Dynamic Fields Based on Type (same as add modal) -->
+            <div id="editItemTypeFields">
+                <!-- Custom Link Fields -->
+                <div id="editCustomLinkFields" class="item-type-fields">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-gray-400"></i>Title *
+                        </label>
+                        <input type="text" name="title" id="edit_custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Menu Item Title">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-gray-400"></i>URL
+                        </label>
+                        <input type="text" name="url" id="edit_custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="/ or /page.php or https://example.com">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Leave empty to use # as URL
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Category Fields -->
+                <div id="editCategoryFields" class="item-type-fields hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-folder mr-2 text-indigo-600"></i>Select Category *
+                        </label>
+                        <select name="object_id" id="edit_category_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                            <option value="">-- Select Category --</option>
+                            <?php 
+                            $categoryTree = $categoryModel->getFlatTree(null, true);
+                            foreach ($categoryTree as $cat): 
+                                $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $cat['level'] ?? 0);
+                                $prefix = ($cat['level'] ?? 0) > 0 ? '└─ ' : '';
+                            ?>
+                                <option value="<?= $cat['id'] ?>"><?= $indent . $prefix . escape($cat['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Product Fields -->
+                <div id="editProductFields" class="item-type-fields hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-box mr-2 text-purple-600"></i>Select Product *
+                        </label>
+                        <select name="object_id" id="edit_product_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500" required>
+                            <option value="">-- Select Product --</option>
+                            <?php foreach ($products as $prod): ?>
+                                <option value="<?= $prod['id'] ?>"><?= escape($prod['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- Page Fields -->
+                <?php if (!empty($pages)): ?>
+                <div id="editPageFields" class="item-type-fields hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-file-alt mr-2 text-green-600"></i>Select Page *
+                        </label>
+                        <select name="object_id" id="edit_page_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" required>
+                            <option value="">-- Select Page --</option>
+                            <?php foreach ($pages as $page): ?>
+                                <option value="<?= $page['id'] ?>"><?= escape($page['title']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Post Fields -->
+                <?php if (!empty($posts)): ?>
+                <div id="editPostFields" class="item-type-fields hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-newspaper mr-2 text-orange-600"></i>Select Blog Post *
+                        </label>
+                        <select name="object_id" id="edit_post_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500" required>
+                            <option value="">-- Select Blog Post --</option>
+                            <?php foreach ($posts as $post): ?>
+                                <option value="<?= $post['id'] ?>"><?= escape($post['title']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Post Category Fields -->
+                <?php if (!empty($postCategories)): ?>
+                <div id="editPostCategoryFields" class="item-type-fields hidden">
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-tags mr-2 text-yellow-600"></i>Select Blog Category *
+                        </label>
+                        <select name="category_name" id="edit_post_category_name" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500" required>
+                            <option value="">-- Select Blog Category --</option>
+                            <?php foreach ($postCategories as $postCat): ?>
+                                <option value="<?= escape($postCat) ?>"><?= escape($postCat) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Common Fields -->
+            <div class="border-t pt-4 mt-4">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-icons mr-2 text-gray-400"></i>Icon
+                    </label>
+                    <div class="flex gap-3">
+                        <div class="flex-1">
+                            <input type="text" name="icon" id="edit_iconInput" placeholder="Click to choose an icon" readonly
+                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg bg-gray-50 cursor-pointer"
+                                   onclick="openEditIconPicker()">
+                        </div>
+                        <button type="button" onclick="openEditIconPicker()" 
+                                class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold">
+                            <i class="fas fa-icons mr-2"></i>Choose Icon
+                        </button>
+                        <button type="button" onclick="clearEditIcon()" 
+                                class="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
+                                title="Clear icon">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="editSelectedIconPreview" class="mt-2 text-center"></div>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <i class="fas fa-external-link-alt mr-2 text-gray-400"></i>Link Target
+                    </label>
+                    <select name="target" id="edit_target" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <option value="_self">Same Window (_self)</option>
+                        <option value="_blank">New Window/Tab (_blank)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-3 pt-4 border-t mt-4">
+                <button type="button" onclick="closeEditItemModal()" class="btn-secondary">
+                    <i class="fas fa-times"></i>Cancel
+                </button>
+                <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-save"></i>Update Item
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Add Item Modal -->
@@ -674,6 +1044,23 @@ include __DIR__ . '/includes/header.php';
 .item-type-btn.active i,
 .item-type-btn.active .font-semibold,
 .item-type-btn.active .text-xs {
+    color: white !important;
+}
+
+.edit-item-type-btn {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.edit-item-type-btn.active {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    border-color: #10b981;
+    color: white;
+}
+
+.edit-item-type-btn.active i,
+.edit-item-type-btn.active .font-semibold,
+.edit-item-type-btn.active .text-xs {
     color: white !important;
 }
 
@@ -1094,16 +1481,322 @@ function saveMenuOrder() {
     }
 }
 
-function editItem(id) {
-    // TODO: Implement edit modal
-    // For now, redirect to edit page or show alert
-    customConfirm('Edit menu item? This will reload the page.', 'Edit Menu Item').then((confirmed) => {
-        if (confirmed) {
-            // Could implement inline editing modal here
-            customAlert('Edit functionality coming soon. For now, delete and recreate the item.', 'Information', 'info').then(() => {});
+async function editItem(id) {
+    try {
+        // Fetch item data
+        const response = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'get_item',
+                item_id: id
+            })
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const result = await response.json();
+        if (!result.success || !result.item) {
+            customAlert('Error loading item: ' + (result.error || 'Unknown error'), 'Error', 'error').then(() => {});
+            return;
+        }
+        
+        const item = result.item;
+        
+        // Populate edit form
+        document.getElementById('edit_item_id').value = item.id;
+        
+        // Select the item type
+        selectEditItemType(item.type);
+        
+        // Populate fields based on current type
+        switch(item.type) {
+            case 'custom':
+                document.getElementById('edit_custom_title').value = item.title || '';
+                document.getElementById('edit_custom_url').value = item.url || '';
+                break;
+            case 'category':
+                document.getElementById('edit_category_object_id').value = item.object_id || '';
+                break;
+            case 'product':
+                document.getElementById('edit_product_object_id').value = item.object_id || '';
+                break;
+            case 'page':
+                document.getElementById('edit_page_object_id').value = item.object_id || '';
+                break;
+            case 'post':
+                document.getElementById('edit_post_object_id').value = item.object_id || '';
+                break;
+            case 'post_category':
+                document.getElementById('edit_post_category_name').value = item.title || '';
+                break;
+        }
+        
+        // For non-custom types, also populate title and URL fields if they exist (for custom link override)
+        if (item.type !== 'custom') {
+            // Store original values for reference
+            if (document.getElementById('edit_custom_title')) {
+                // Keep the title field available for editing
+                document.getElementById('edit_custom_title').value = item.title || '';
+            }
+            if (document.getElementById('edit_custom_url')) {
+                // Allow custom URL override
+                document.getElementById('edit_custom_url').value = item.url || '';
+            }
+        }
+        
+        // Set common fields
+        document.getElementById('edit_iconInput').value = item.icon || '';
+        document.getElementById('edit_target').value = item.target || '_self';
+        updateEditIconPreview();
+        
+        // Show modal
+        document.getElementById('editItemModal').classList.remove('hidden');
+    } catch (error) {
+        customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
+    }
+}
+
+function selectEditItemType(type) {
+    const form = document.getElementById('editItemForm');
+    if (!form) return;
+    
+    // Set the item type
+    document.getElementById('edit_item_type').value = type;
+    
+    // Update button states
+    document.querySelectorAll('.edit-item-type-btn').forEach(btn => {
+        if (btn.getAttribute('data-type') === type) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Hide all fields
+    document.querySelectorAll('#editItemTypeFields .item-type-fields').forEach(field => {
+        field.classList.add('hidden');
+    });
+    
+    // Remove required from all inputs
+    form.querySelectorAll('input, select').forEach(input => {
+        input.removeAttribute('required');
+    });
+    
+    // Show relevant fields based on type
+    let fieldsToShow = [];
+    let requiredFields = [];
+    
+    switch(type) {
+        case 'custom':
+            fieldsToShow = ['editCustomLinkFields'];
+            requiredFields = ['edit_custom_title'];
+            break;
+        case 'category':
+            fieldsToShow = ['editCategoryFields'];
+            requiredFields = ['edit_category_object_id'];
+            break;
+        case 'product':
+            fieldsToShow = ['editProductFields'];
+            requiredFields = ['edit_product_object_id'];
+            break;
+        case 'page':
+            fieldsToShow = ['editPageFields'];
+            requiredFields = ['edit_page_object_id'];
+            break;
+        case 'post':
+            fieldsToShow = ['editPostFields'];
+            requiredFields = ['edit_post_object_id'];
+            break;
+        case 'post_category':
+            fieldsToShow = ['editPostCategoryFields'];
+            requiredFields = ['edit_post_category_name'];
+            break;
+    }
+    
+    // Show the relevant fields
+    fieldsToShow.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.classList.remove('hidden');
+        }
+    });
+    
+    // Set required attributes
+    requiredFields.forEach(fieldName => {
+        const field = document.getElementById(fieldName);
+        if (field) {
+            field.setAttribute('required', 'required');
+        }
+    });
+    
+    // Always show custom link fields as an option (for URL override)
+    // But make them optional when not in custom mode
+    if (type !== 'custom') {
+        const customFields = document.getElementById('editCustomLinkFields');
+        if (customFields) {
+            customFields.classList.remove('hidden');
+            // Make title optional when not custom type
+            const titleField = document.getElementById('edit_custom_title');
+            if (titleField) {
+                titleField.removeAttribute('required');
+                titleField.placeholder = 'Title (optional - will use default if empty)';
+            }
+            const urlField = document.getElementById('edit_custom_url');
+            if (urlField) {
+                urlField.placeholder = 'Custom URL (optional - will use default if empty)';
+            }
+        }
+    }
+}
+
+function closeEditItemModal() {
+    document.getElementById('editItemModal').classList.add('hidden');
+    document.getElementById('editItemForm').reset();
+}
+
+// Handle edit form submission
+const editItemForm = document.getElementById('editItemForm');
+if (editItemForm) {
+    editItemForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validate form based on item type
+        const itemType = document.getElementById('edit_item_type').value;
+        let validationError = '';
+        
+        if (itemType === 'custom') {
+            const title = document.getElementById('edit_custom_title')?.value.trim();
+            if (!title) {
+                validationError = 'Title is required for custom links';
+            }
+        } else if (itemType === 'category') {
+            const objectId = document.getElementById('edit_category_object_id')?.value;
+            if (!objectId) {
+                validationError = 'Please select a category';
+            }
+        } else if (itemType === 'product') {
+            const objectId = document.getElementById('edit_product_object_id')?.value;
+            if (!objectId) {
+                validationError = 'Please select a product';
+            }
+        } else if (itemType === 'page') {
+            const objectId = document.getElementById('edit_page_object_id')?.value;
+            if (!objectId) {
+                validationError = 'Please select a page';
+            }
+        } else if (itemType === 'post') {
+            const objectId = document.getElementById('edit_post_object_id')?.value;
+            if (!objectId) {
+                validationError = 'Please select a blog post';
+            }
+        } else if (itemType === 'post_category') {
+            const categoryName = document.getElementById('edit_post_category_name')?.value;
+            if (!categoryName) {
+                validationError = 'Please select a blog category';
+            }
+        }
+        
+        if (validationError) {
+            customAlert(validationError, 'Validation Error', 'error').then(() => {});
+            return;
+        }
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Updating...';
+        
+        try {
+            const response = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            
+            const result = await response.json();
+            if (result.success) {
+                closeEditItemModal();
+                customAlert('Menu item updated successfully!', 'Success', 'success').then(() => {
+                    location.reload();
+                });
+            } else {
+                customAlert('Error updating item: ' + (result.error || 'Unknown error'), 'Error', 'error').then(() => {});
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        } catch (error) {
+            customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     });
 }
+
+// Icon picker functions for edit modal
+function openEditIconPicker() {
+    const modal = document.getElementById('iconPickerModal');
+    const currentIcon = document.getElementById('edit_iconInput').value;
+    selectedIconClass = currentIcon;
+    
+    renderIcons();
+    
+    if (currentIcon) {
+        setTimeout(() => {
+            const selectedItem = document.querySelector(`.icon-item[data-icon="${currentIcon}"]`);
+            if (selectedItem) {
+                selectedItem.classList.add('selected');
+                selectedItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }, 100);
+    }
+    
+    modal.classList.remove('hidden');
+    document.getElementById('iconSearch').focus();
+    
+    // Store that we're editing (not adding)
+    window.iconPickerMode = 'edit';
+}
+
+function clearEditIcon() {
+    document.getElementById('edit_iconInput').value = '';
+    selectedIconClass = '';
+    updateEditIconPreview();
+}
+
+function updateEditIconPreview() {
+    const preview = document.getElementById('editSelectedIconPreview');
+    const iconValue = document.getElementById('edit_iconInput').value;
+    
+    if (iconValue) {
+        preview.innerHTML = `
+            <div class="inline-flex items-center gap-2 px-4 py-2 bg-green-50 rounded-lg border border-green-200">
+                <i class="${iconValue} text-green-600 text-xl"></i>
+                <span class="text-sm text-gray-700 font-medium">${iconValue}</span>
+            </div>
+        `;
+    } else {
+        preview.innerHTML = '<span class="text-sm text-gray-400 italic">No icon selected</span>';
+    }
+}
+
+// Icon picker will use window.iconPickerMode to determine which input to update
+
+// Update preview when edit icon input changes
+document.addEventListener('DOMContentLoaded', function() {
+    const editIconInput = document.getElementById('edit_iconInput');
+    if (editIconInput) {
+        editIconInput.addEventListener('input', updateEditIconPreview);
+    }
+});
 
 async function deleteItem(id) {
     const confirmed = await customConfirm('Delete this menu item? This will also delete all sub-items.', 'Delete Menu Item');
@@ -1225,6 +1918,7 @@ function openIconPicker() {
     const modal = document.getElementById('iconPickerModal');
     const currentIcon = document.getElementById('iconInput').value;
     selectedIconClass = currentIcon;
+    window.iconPickerMode = 'add';
     
     // Render icons
     renderIcons();
@@ -1285,9 +1979,15 @@ function selectIcon(iconClass) {
 }
 
 function confirmIconSelection() {
-    document.getElementById('iconInput').value = selectedIconClass;
-    updateIconPreview();
+    if (window.iconPickerMode === 'edit') {
+        document.getElementById('edit_iconInput').value = selectedIconClass;
+        updateEditIconPreview();
+    } else {
+        document.getElementById('iconInput').value = selectedIconClass;
+        updateIconPreview();
+    }
     closeIconPicker();
+    window.iconPickerMode = null;
 }
 
 function clearIcon() {

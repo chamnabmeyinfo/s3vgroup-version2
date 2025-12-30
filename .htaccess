@@ -22,6 +22,8 @@ AddHandler application/x-httpd-php .php .php5 .phtml
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    # RewriteBase for root level access
+    # s3vgroup is now accessible at http://localhost:8080/
     RewriteBase /
     
     # Redirect root domain to www
@@ -31,7 +33,7 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     RewriteCond %{REQUEST_URI} !^/api [NC]
     RewriteRule ^(.*)$ https://www.s3vtgroup.com.kh/$1 [R=301,L]
     
-    # Redirect to remove .php extension (optional)
+    # Redirect to remove .php extension
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^([^\.]+)$ $1.php [NC,L]

@@ -8,6 +8,35 @@ if (!isset($menu) || !isset($items)) {
     return '';
 }
 
+// Helper function to process menu item URLs
+function processMenuUrl($url) {
+    if (empty($url) || $url === '#') {
+        return '#';
+    }
+    
+    // If it's already a full URL (http:// or https://), return as is
+    if (preg_match('/^https?:\/\//', $url)) {
+        return $url;
+    }
+    
+    // If it starts with /, it's an absolute path from root
+    // Remove leading slash and process through url() function
+    if (strpos($url, '/') === 0) {
+        return url(ltrim($url, '/'));
+    }
+    
+    // Otherwise, treat as relative path and process through url() function
+    return url($url);
+}
+
+// Process all menu item URLs before building tree
+foreach ($items as &$item) {
+    if (isset($item['url'])) {
+        $item['url'] = processMenuUrl($item['url']);
+    }
+}
+unset($item); // Unset reference to avoid issues
+
 // Build hierarchical structure
 function buildMenuTree($items, $parentId = null) {
     $tree = [];

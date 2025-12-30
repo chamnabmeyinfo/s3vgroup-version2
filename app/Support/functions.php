@@ -31,31 +31,51 @@ if (!function_exists('db')) {
 if (!function_exists('asset')) {
     function asset($path)
     {
-        // Try to get base URL from config
-        $baseUrl = config('app.url', null);
-        
-        // If not in config, auto-detect from current request
-        if (empty($baseUrl)) {
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $baseUrl = $protocol . $host;
-        }
-        
-        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
+        // Use url() function which handles base path correctly
+        return url($path);
     }
 }
 
 if (!function_exists('url')) {
     function url($path = '')
     {
-        // Try to get base URL from config
+        // Try to get base URL from config (this should be the project root)
         $baseUrl = config('app.url', null);
         
         // If not in config, auto-detect from current request
+        // Use the same logic as detectBasePath() in config
         if (empty($baseUrl)) {
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $baseUrl = $protocol . $host;
+            
+            // Get the project root directory
+            $configFile = __DIR__ . '/../../config/app.php';
+            $configDir = dirname($configFile);
+            $projectRoot = dirname($configDir);
+            
+            // Get the document root
+            $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? '';
+            
+            // Normalize paths
+            $projectPath = str_replace('\\', '/', $projectRoot);
+            $docRootPath = str_replace('\\', '/', $docRoot);
+            
+            $basePath = '';
+            if (!empty($docRoot) && strpos($projectPath, $docRootPath) === 0) {
+                $relativePath = substr($projectPath, strlen($docRootPath));
+                $basePath = rtrim($relativePath, '/');
+            }
+            
+            if ($basePath === '' || $basePath === '.') {
+                $basePath = '';
+            }
+            
+            $baseUrl = $protocol . $host . $basePath;
+        }
+        
+        // If path is empty, return base URL without trailing slash
+        if (empty($path)) {
+            return rtrim($baseUrl, '/');
         }
         
         return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');

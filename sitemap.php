@@ -9,7 +9,20 @@ use App\Models\Category;
 
 header('Content-Type: application/xml; charset=utf-8');
 
-$baseUrl = config('app.url', 'http://localhost:8080');
+// Get base URL from config (auto-detects based on current directory)
+$baseUrl = config('app.url');
+if (empty($baseUrl)) {
+    // Fallback: auto-detect if config doesn't provide it
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptPath = $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '';
+    $basePath = dirname($scriptPath);
+    $basePath = rtrim($basePath, '/');
+    if ($basePath === '' || $basePath === '.' || $basePath === '/') {
+        $basePath = '';
+    }
+    $baseUrl = $protocol . $host . $basePath;
+}
 
 $productModel = new Product();
 $categoryModel = new Category();
