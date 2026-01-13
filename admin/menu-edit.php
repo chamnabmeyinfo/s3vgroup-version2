@@ -228,11 +228,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Validate based on type
         if ($data['type'] === 'custom') {
-            if (empty($data['title'])) {
+            // For custom links, use the title from POST data
+            if (!empty($customTitle)) {
+                $data['title'] = $customTitle;
+            } elseif (isset($_POST['title']) && !empty(trim($_POST['title']))) {
+                $data['title'] = trim($_POST['title']);
+            } else {
                 echo json_encode(['success' => false, 'error' => 'Title is required for custom links']);
                 exit;
             }
-            if (empty($data['url'])) {
+            
+            // Use custom URL if provided, otherwise default to #
+            if (!empty($customUrl)) {
+                $data['url'] = $customUrl;
+            } elseif (isset($_POST['url']) && !empty(trim($_POST['url']))) {
+                $data['url'] = trim($_POST['url']);
+            } else {
                 $data['url'] = '#';
             }
         } elseif ($data['type'] === 'category') {
