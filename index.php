@@ -282,6 +282,38 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
+    <!-- Partners & Clients Section -->
+    <?php
+    use App\Models\Partner;
+    $partnerModel = new Partner();
+    $partners = $partnerModel->getAll(true); // Get only active partners
+    if (!empty($partners)):
+    ?>
+    <section class="partners-slider">
+        <div class="partners-slider-container">
+            <div class="partners-slider-header">
+                <h2>Our Partners & Clients</h2>
+                <p>Trusted by leading companies worldwide</p>
+            </div>
+            <div class="partners-slider-wrapper">
+                <div class="partners-slider-track">
+                    <?php foreach ($partners as $partner): ?>
+                    <div class="partners-slider-item">
+                        <?php if (!empty($partner['website_url'])): ?>
+                        <a href="<?= escape($partner['website_url']) ?>" target="_blank" rel="noopener noreferrer" title="<?= escape($partner['name']) ?>">
+                            <img src="<?= escape(image_url($partner['logo'])) ?>" alt="<?= escape($partner['name']) ?>">
+                        </a>
+                        <?php else: ?>
+                        <img src="<?= escape(image_url($partner['logo'])) ?>" alt="<?= escape($partner['name']) ?>">
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <!-- Categories Section - Minimal Design -->
     <?php if (!empty($categories)): ?>
     <section class="py-16 bg-white">

@@ -29,6 +29,9 @@ $navCategories = $categoryModel->getAll(true);
     <link rel="stylesheet" href="<?= asset('assets/css/app-products.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/advanced-filters.css') ?>">
     <?php endif; ?>
+    <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
+    <link rel="stylesheet" href="<?= asset('assets/css/partners-slider.css') ?>">
+    <?php endif; ?>
     
     <!-- Dynamic Logo Colors -->
     <?php 

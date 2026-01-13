@@ -349,6 +349,7 @@
     <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
     <script src="<?= asset('assets/js/hero-slider.js') ?>"></script>
     <script src="<?= asset('assets/js/hero-slider-advanced.js') ?>"></script>
+    <script src="<?= asset('assets/js/partners-slider.js') ?>"></script>
     <?php endif; ?>
 </body>
 </html>
