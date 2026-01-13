@@ -60,8 +60,8 @@ function isInViewport(element, margin = 300) {
 
 // Initialize lazy loading - can be called multiple times
 function initLazyLoading() {
-    // Lazy load images
-    const lazyImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded), img[data-src]:not(.loaded)');
+    // Lazy load images - include app-product-image class
+    const lazyImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded), img[data-src]:not(.loaded), .app-product-image[data-src]:not(.loaded)');
     
     if (lazyImages.length === 0) return;
     
@@ -111,9 +111,21 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize lazy loading immediately
     initLazyLoading();
     
+    // Immediate check: Load all images that are currently visible (including app-product-image)
+    setTimeout(function() {
+        const visibleImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded), .app-product-image[data-src]:not(.loaded), img[data-src]:not(.loaded)');
+        visibleImages.forEach(img => {
+            const rect = img.getBoundingClientRect();
+            // Load if visible on screen or within viewport
+            if (rect.top < window.innerHeight + 100 && rect.bottom > -100) {
+                loadLazyImage(img);
+            }
+        });
+    }, 50);
+    
     // Also load images on window load - load all visible images immediately
     window.addEventListener('load', function() {
-        const remainingLazyImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded)');
+        const remainingLazyImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded), .app-product-image[data-src]:not(.loaded), img[data-src]:not(.loaded)');
         remainingLazyImages.forEach(img => {
             const rect = img.getBoundingClientRect();
             // Load immediately if in viewport or near viewport
@@ -122,18 +134,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-    
-    // Immediate check: Load all images that are currently visible
-    setTimeout(function() {
-        const visibleImages = document.querySelectorAll('img.lazy-load[data-src]:not(.loaded)');
-        visibleImages.forEach(img => {
-            const rect = img.getBoundingClientRect();
-            // Load if visible on screen
-            if (rect.top < window.innerHeight && rect.bottom > 0) {
-                loadLazyImage(img);
-            }
-        });
-    }, 100);
     
     // Load More Products Functionality
     const loadMoreBtn = document.getElementById('load-more-btn');

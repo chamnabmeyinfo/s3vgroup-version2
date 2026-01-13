@@ -679,12 +679,21 @@ include __DIR__ . '/includes/header.php';
                                 <!-- Product Image -->
                                 <div class="app-product-image-wrapper">
                                     <?php if (!empty($product['image'])): ?>
+                                        <?php
+                                        // Ensure image path is correct
+                                        $imagePath = $product['image'];
+                                        // If image doesn't start with storage/uploads/, add it
+                                        if (strpos($imagePath, 'storage/uploads/') !== 0 && strpos($imagePath, '/') !== 0 && !preg_match('/^https?:\/\//', $imagePath)) {
+                                            $imagePath = 'storage/uploads/' . ltrim($imagePath, '/');
+                                        }
+                                        $imageUrl = image_url($imagePath);
+                                        ?>
                                         <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23e5e7eb' width='400' height='300'/%3E%3C/svg%3E" 
-                                             data-src="<?= escape(image_url($product['image'])) ?>"
+                                             data-src="<?= escape($imageUrl) ?>"
                                              alt="<?= escape($product['name']) ?>" 
                                              class="app-product-image lazy-load"
                                              loading="lazy"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                             onerror="this.onerror=null; this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
                                         <div class="app-image-fallback" style="display: none;">
                                             <i class="fas fa-image"></i>
                                         </div>
