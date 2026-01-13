@@ -432,6 +432,10 @@
                     <i class="fas fa-concierge-bell w-5"></i>
                     <span>Services</span>
                 </a>
+                <a href="<?= url('admin/ceo-message.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'ceo-message.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-user-tie w-5"></i>
+                    <span>CEO Message</span>
+                </a>
                 <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php'])) ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-bars w-5"></i>
                     <span>Menus</span>
