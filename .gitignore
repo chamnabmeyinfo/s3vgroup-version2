@@ -8,6 +8,8 @@ php.ini
 # Only ignore actual config files with sensitive data, keep examples
 config/database.php
 !config/database.php.example
+# database.local.php is tracked (local dev config, not sensitive)
+# config/database.local.php
 config/app.php
 !config/app.php.example
 config/under-construction.php
@@ -21,6 +23,9 @@ config/under-construction.php
 !*.env.example
 deploy-config.json
 !deploy-config.example.json
+.database-env
+config/database.live.php
+!config/database.live.php.example
 
 # Storage - Only ignore runtime/generated files, keep uploads and assets
 # Cache files (generated at runtime)
@@ -34,6 +39,10 @@ storage/logs/*
 # Backup files (generated, can be large)
 storage/backups/*
 !storage/backups/.gitkeep
+# File backups from pull operations
+storage/backups/file-backups/
+# Database exports
+storage/exports/
 
 # Note: storage/uploads/ is now INCLUDED in Git to track all images and assets
 # Design backups can be included if needed
@@ -70,7 +79,8 @@ yarn.lock
 
 # Composer
 vendor/
-composer.lock
+# Note: composer.lock should be committed for consistency, but if you want to ignore it, uncomment:
+# composer.lock
 
 # Temporary files
 *.tmp
