@@ -314,6 +314,42 @@ include __DIR__ . '/includes/header.php';
     </section>
     <?php endif; ?>
 
+    <!-- Quality Certifications Section -->
+    <?php
+    use App\Models\QualityCertification;
+    $certModel = new QualityCertification();
+    $certifications = $certModel->getAll(true); // Get only active certifications
+    if (!empty($certifications)):
+    ?>
+    <section class="quality-certifications-slider">
+        <div class="quality-certifications-slider-container">
+            <div class="quality-certifications-slider-header">
+                <h2>Quality Certifications</h2>
+                <p>Certified quality standards and compliance</p>
+            </div>
+            <div class="quality-certifications-slider-wrapper">
+                <div class="quality-certifications-slider-track">
+                    <?php foreach ($certifications as $cert): ?>
+                    <div class="quality-certifications-slider-item">
+                        <?php if (!empty($cert['reference_url'])): ?>
+                        <a href="<?= escape($cert['reference_url']) ?>" target="_blank" rel="noopener noreferrer" title="<?= escape($cert['name']) ?>">
+                            <img src="<?= escape(image_url($cert['logo'])) ?>" alt="<?= escape($cert['name']) ?>">
+                            <span class="cert-name"><?= escape($cert['name']) ?></span>
+                        </a>
+                        <?php else: ?>
+                        <div>
+                            <img src="<?= escape(image_url($cert['logo'])) ?>" alt="<?= escape($cert['name']) ?>">
+                            <span class="cert-name"><?= escape($cert['name']) ?></span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <!-- Categories Section - Minimal Design -->
     <?php if (!empty($categories)): ?>
     <section class="py-16 bg-white">

@@ -31,6 +31,7 @@ $navCategories = $categoryModel->getAll(true);
     <?php endif; ?>
     <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/partners-slider.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/quality-certifications-slider.css') ?>">
     <?php endif; ?>
     
     <!-- Dynamic Logo Colors -->
