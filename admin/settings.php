@@ -130,7 +130,11 @@ $defaults = [
     'site_email' => 'info@example.com',
     'site_phone' => '+1 (555) 123-4567',
     'site_address' => '123 Industrial Way, City, State 12345',
-    'footer_text' => '© 2024 Forklift & Equipment Pro. All rights reserved.'
+    'footer_text' => '© 2024 Forklift & Equipment Pro. All rights reserved.',
+    'logo_height_mobile' => '40',
+    'logo_height_tablet' => '56',
+    'logo_height_desktop' => '64',
+    'logo_max_width' => ''
 ];
 
 foreach ($defaults as $key => $default) {
@@ -251,6 +255,127 @@ include __DIR__ . '/includes/header.php';
                     </p>
                 </div>
             </div>
+            
+            <!-- Logo Size Settings -->
+            <div class="mt-6 pt-6 border-t border-blue-200">
+                <label class="block text-sm font-semibold text-gray-700 mb-4">
+                    <i class="fas fa-ruler text-blue-600 mr-2"></i> Logo Size Settings
+                </label>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Logo Height (Mobile) -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-2">
+                            <i class="fas fa-mobile-alt text-gray-400 mr-1"></i> Mobile Height (px)
+                        </label>
+                        <input type="number" 
+                               name="logo_height_mobile" 
+                               value="<?= escape($settings['logo_height_mobile'] ?? '40') ?>"
+                               min="20" 
+                               max="200" 
+                               step="1"
+                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm">
+                        <p class="text-xs text-gray-500 mt-1">Default: 40px</p>
+                    </div>
+                    
+                    <!-- Logo Height (Tablet) -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-2">
+                            <i class="fas fa-tablet-alt text-gray-400 mr-1"></i> Tablet Height (px)
+                        </label>
+                        <input type="number" 
+                               name="logo_height_tablet" 
+                               value="<?= escape($settings['logo_height_tablet'] ?? '56') ?>"
+                               min="20" 
+                               max="200" 
+                               step="1"
+                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm">
+                        <p class="text-xs text-gray-500 mt-1">Default: 56px</p>
+                    </div>
+                    
+                    <!-- Logo Height (Desktop) -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 mb-2">
+                            <i class="fas fa-desktop text-gray-400 mr-1"></i> Desktop Height (px)
+                        </label>
+                        <input type="number" 
+                               name="logo_height_desktop" 
+                               value="<?= escape($settings['logo_height_desktop'] ?? '64') ?>"
+                               min="20" 
+                               max="200" 
+                               step="1"
+                               class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm">
+                        <p class="text-xs text-gray-500 mt-1">Default: 64px</p>
+                    </div>
+                </div>
+                
+                <!-- Logo Width (Optional - Auto if not set) -->
+                <div class="mt-4">
+                    <label class="block text-xs font-medium text-gray-600 mb-2">
+                        <i class="fas fa-arrows-alt-h text-gray-400 mr-1"></i> Max Width (px) - Optional
+                    </label>
+                    <input type="number" 
+                           name="logo_max_width" 
+                           value="<?= escape($settings['logo_max_width'] ?? '') ?>"
+                           min="0" 
+                           max="500" 
+                           step="1"
+                           placeholder="Auto (maintain aspect ratio)"
+                           class="w-full md:w-1/3 px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-sm">
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        Leave empty for auto width (maintains aspect ratio). Set a value to limit maximum width.
+                    </p>
+                </div>
+                
+                <!-- Preview -->
+                <div class="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <p class="text-xs font-semibold text-gray-700 mb-3">
+                        <i class="fas fa-eye text-blue-600 mr-1"></i> Size Preview
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 mb-2">Mobile</p>
+                            <div class="bg-white border-2 border-gray-300 rounded p-2 inline-block logo-preview-mobile">
+                                <?php if ($logoUrl): ?>
+                                    <img src="<?= escape($logoUrl) ?>" 
+                                         alt="Logo Preview" 
+                                         style="height: <?= escape($settings['logo_height_mobile'] ?? '40') ?>px; <?= !empty($settings['logo_max_width']) ? 'max-width: ' . escape($settings['logo_max_width']) . 'px;' : '' ?> width: auto; object-fit: contain;">
+                                <?php else: ?>
+                                    <div class="bg-gray-200 rounded" style="width: <?= escape($settings['logo_height_mobile'] ?? '40') ?>px; height: <?= escape($settings['logo_height_mobile'] ?? '40') ?>px;"></div>
+                                <?php endif; ?>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 logo-size-mobile"><?= escape($settings['logo_height_mobile'] ?? '40') ?>px</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 mb-2">Tablet</p>
+                            <div class="bg-white border-2 border-gray-300 rounded p-2 inline-block logo-preview-tablet">
+                                <?php if ($logoUrl): ?>
+                                    <img src="<?= escape($logoUrl) ?>" 
+                                         alt="Logo Preview" 
+                                         style="height: <?= escape($settings['logo_height_tablet'] ?? '56') ?>px; <?= !empty($settings['logo_max_width']) ? 'max-width: ' . escape($settings['logo_max_width']) . 'px;' : '' ?> width: auto; object-fit: contain;">
+                                <?php else: ?>
+                                    <div class="bg-gray-200 rounded" style="width: <?= escape($settings['logo_height_tablet'] ?? '56') ?>px; height: <?= escape($settings['logo_height_tablet'] ?? '56') ?>px;"></div>
+                                <?php endif; ?>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 logo-size-tablet"><?= escape($settings['logo_height_tablet'] ?? '56') ?>px</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-600 mb-2">Desktop</p>
+                            <div class="bg-white border-2 border-gray-300 rounded p-2 inline-block logo-preview-desktop">
+                                <?php if ($logoUrl): ?>
+                                    <img src="<?= escape($logoUrl) ?>" 
+                                         alt="Logo Preview" 
+                                         style="height: <?= escape($settings['logo_height_desktop'] ?? '64') ?>px; <?= !empty($settings['logo_max_width']) ? 'max-width: ' . escape($settings['logo_max_width']) . 'px;' : '' ?> width: auto; object-fit: contain;">
+                                <?php else: ?>
+                                    <div class="bg-gray-200 rounded" style="width: <?= escape($settings['logo_height_desktop'] ?? '64') ?>px; height: <?= escape($settings['logo_height_desktop'] ?? '64') ?>px;"></div>
+                                <?php endif; ?>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 logo-size-desktop"><?= escape($settings['logo_height_desktop'] ?? '64') ?>px</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -330,12 +455,101 @@ include __DIR__ . '/includes/header.php';
                     preview.style.display = 'block';
                 } else {
                     const container = input.closest('.bg-gradient-to-br').querySelector('.w-32');
-                    container.innerHTML = '<img src="' + e.target.result + '" alt="Logo Preview" class="max-w-full max-h-full object-contain" id="logo-preview">';
+                    if (container) {
+                        container.innerHTML = '<img src="' + e.target.result + '" alt="Logo Preview" class="max-w-full max-h-full object-contain" id="logo-preview">';
+                    }
                 }
+                // Update size previews after a short delay to ensure preview is loaded
+                setTimeout(updateLogoSizePreview, 100);
             };
             reader.readAsDataURL(input.files[0]);
         }
     }
+    
+    function updateLogoSizePreview() {
+        const mobileHeight = document.querySelector('input[name="logo_height_mobile"]')?.value || '40';
+        const tabletHeight = document.querySelector('input[name="logo_height_tablet"]')?.value || '56';
+        const desktopHeight = document.querySelector('input[name="logo_height_desktop"]')?.value || '64';
+        const maxWidth = document.querySelector('input[name="logo_max_width"]')?.value || '';
+        
+        // Get logo URL from preview or file input
+        let logoUrl = '';
+        const logoPreview = document.getElementById('logo-preview');
+        if (logoPreview && logoPreview.src) {
+            logoUrl = logoPreview.src;
+        } else {
+            const fileInput = document.getElementById('site_logo');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                // Will be updated when file is selected
+                return;
+            }
+        }
+        
+        const maxWidthStyle = maxWidth ? `max-width: ${maxWidth}px;` : '';
+        
+        // Update mobile preview
+        const mobilePreview = document.querySelector('.logo-preview-mobile');
+        const mobileSize = document.querySelector('.logo-size-mobile');
+        if (mobilePreview) {
+            if (logoUrl && logoUrl !== '' && !logoUrl.includes('data:image/svg+xml')) {
+                const img = mobilePreview.querySelector('img');
+                if (img) {
+                    img.style.height = mobileHeight + 'px';
+                    if (maxWidth) img.style.maxWidth = maxWidth + 'px';
+                } else {
+                    mobilePreview.innerHTML = `<img src="${logoUrl}" alt="Logo Preview" style="height: ${mobileHeight}px; ${maxWidthStyle} width: auto; object-fit: contain;">`;
+                }
+            } else {
+                mobilePreview.innerHTML = `<div class="bg-gray-200 rounded" style="width: ${mobileHeight}px; height: ${mobileHeight}px;"></div>`;
+            }
+            if (mobileSize) mobileSize.textContent = mobileHeight + 'px';
+        }
+        
+        // Update tablet preview
+        const tabletPreview = document.querySelector('.logo-preview-tablet');
+        const tabletSize = document.querySelector('.logo-size-tablet');
+        if (tabletPreview) {
+            if (logoUrl && logoUrl !== '' && !logoUrl.includes('data:image/svg+xml')) {
+                const img = tabletPreview.querySelector('img');
+                if (img) {
+                    img.style.height = tabletHeight + 'px';
+                    if (maxWidth) img.style.maxWidth = maxWidth + 'px';
+                } else {
+                    tabletPreview.innerHTML = `<img src="${logoUrl}" alt="Logo Preview" style="height: ${tabletHeight}px; ${maxWidthStyle} width: auto; object-fit: contain;">`;
+                }
+            } else {
+                tabletPreview.innerHTML = `<div class="bg-gray-200 rounded" style="width: ${tabletHeight}px; height: ${tabletHeight}px;"></div>`;
+            }
+            if (tabletSize) tabletSize.textContent = tabletHeight + 'px';
+        }
+        
+        // Update desktop preview
+        const desktopPreview = document.querySelector('.logo-preview-desktop');
+        const desktopSize = document.querySelector('.logo-size-desktop');
+        if (desktopPreview) {
+            if (logoUrl && logoUrl !== '' && !logoUrl.includes('data:image/svg+xml')) {
+                const img = desktopPreview.querySelector('img');
+                if (img) {
+                    img.style.height = desktopHeight + 'px';
+                    if (maxWidth) img.style.maxWidth = maxWidth + 'px';
+                } else {
+                    desktopPreview.innerHTML = `<img src="${logoUrl}" alt="Logo Preview" style="height: ${desktopHeight}px; ${maxWidthStyle} width: auto; object-fit: contain;">`;
+                }
+            } else {
+                desktopPreview.innerHTML = `<div class="bg-gray-200 rounded" style="width: ${desktopHeight}px; height: ${desktopHeight}px;"></div>`;
+            }
+            if (desktopSize) desktopSize.textContent = desktopHeight + 'px';
+        }
+    }
+    
+    // Update preview when size inputs change
+    document.addEventListener('DOMContentLoaded', function() {
+        const sizeInputs = document.querySelectorAll('input[name^="logo_height"], input[name="logo_max_width"]');
+        sizeInputs.forEach(input => {
+            input.addEventListener('input', updateLogoSizePreview);
+            input.addEventListener('change', updateLogoSizePreview);
+        });
+    });
     </script>
 </div>
 

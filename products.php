@@ -94,7 +94,7 @@ include __DIR__ . '/includes/header.php';
         
         <div class="products-page-main">
             <!-- Sidebar Filters - Desktop Design -->
-            <aside class="sidebar-filters desktop-sidebar md:w-64 flex-shrink-0 transition-all duration-300 ease-in-out hidden md:block" id="sidebar-filters-desktop">
+            <aside class="sidebar-filters desktop-sidebar flex-shrink-0 transition-all duration-300 ease-in-out" id="sidebar-filters-desktop">
                 <div class="bg-white rounded-2xl shadow-xl border border-gray-100 sticky top-24 overflow-hidden" id="sidebar-content">
                     <!-- Toggle Button - Attached to Sidebar -->
                     <button onclick="toggleSidebar()" 
@@ -137,6 +137,9 @@ include __DIR__ . '/includes/header.php';
                         <form method="GET" id="filter-form" class="space-y-6">
                         <!-- Preserve existing params -->
                         <input type="hidden" name="page" value="1">
+                        <?php if (!empty($_GET['sort'])): ?>
+                            <input type="hidden" name="sort" value="<?= escape($_GET['sort']) ?>">
+                        <?php endif; ?>
                         
                         <!-- Search -->
                         <div class="filter-section">
@@ -194,10 +197,10 @@ include __DIR__ . '/includes/header.php';
                                 <i class="fas fa-chevron-down text-blue-600 transform transition-transform duration-300" id="category-chevron"></i>
                             </button>
                             <div class="category-filter-content hidden mt-3 space-y-1.5" id="category-filter-content">
-                                <label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200">
+                                <label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200" onclick="handleCategoryClick(event, '')">
                                     <input type="radio" name="category" value="" 
                                            <?= empty($_GET['category']) ? 'checked' : '' ?>
-                                           onchange="applyFilters()"
+                                           onchange="applyFilters(event)"
                                            class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer">
                                     <span class="text-sm font-medium text-gray-700 group-hover/item:text-blue-600 transition-colors flex items-center">
                                         <i class="fas fa-th mr-2 text-blue-600"></i>All Categories
@@ -234,10 +237,10 @@ include __DIR__ . '/includes/header.php';
                                                 $indent = str_repeat('&nbsp;&nbsp;&nbsp;', $level);
                                                 $prefix = $level > 0 ? '└─ ' : '';
                                                 
-                                                $html .= '<label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200 ' . ($isSelected ? 'bg-blue-50 border-blue-200' : '') . '">';
+                                                $html .= '<label class="flex items-center p-2.5 rounded-lg hover:bg-blue-50 transition-all cursor-pointer group/item border border-transparent hover:border-blue-200 ' . ($isSelected ? 'bg-blue-50 border-blue-200' : '') . '" onclick="handleCategoryClick(event, \'' . escape($cat['slug']) . '\')">';
                                                 $html .= '<input type="radio" name="category" value="' . escape($cat['slug']) . '" ';
                                                 $html .= $isSelected ? 'checked' : '';
-                                                $html .= ' onchange="applyFilters()" class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer">';
+                                                $html .= ' onchange="applyFilters(event)" class="mr-3 w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer">';
                                                 $html .= '<span class="text-sm text-gray-700 group-hover/item:text-blue-600 transition-colors flex items-center flex-1">';
                                                 if ($level > 0) {
                                                     $html .= '<i class="fas fa-folder-open mr-2 text-indigo-500"></i>';
@@ -1041,6 +1044,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const content = document.getElementById('category-filter-content');
     const chevron = document.getElementById('category-chevron');
     
+    if (!content || !chevron) return;
+    
     // Default to expanded if a category is selected
     const hasCategory = '<?= !empty($_GET['category']) ? 'true' : 'false' ?>' === 'true';
     
@@ -1050,6 +1055,12 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (savedState === 'false') {
         content.classList.add('hidden');
         chevron.classList.remove('rotate-180');
+    }
+    
+    // Ensure sidebar is visible on desktop
+    const desktopSidebar = document.getElementById('sidebar-filters-desktop');
+    if (desktopSidebar && window.innerWidth >= 641) {
+        desktopSidebar.style.display = 'block';
     }
 });
 
@@ -1119,15 +1130,93 @@ function debounceFilter() {
     }, 500);
 }
 
-function applyFilters() {
-    // Try advanced filters form first (top section), then fallback to sidebar form
-    const advancedForm = document.getElementById('advanced-filters-form');
-    const sidebarForm = document.getElementById('filter-form');
+// Handle category click - ensures immediate filtering
+function handleCategoryClick(event, categorySlug) {
+    // Prevent double-triggering if clicking directly on radio
+    if (event.target.type === 'radio') {
+        return; // Let the radio button's onchange handle it
+    }
     
-    if (advancedForm) {
-        advancedForm.submit();
-    } else if (sidebarForm) {
-        sidebarForm.submit();
+    // Stop event propagation to prevent label's default behavior
+    event.stopPropagation();
+    
+    // Find and check the radio button
+    const form = event.currentTarget.closest('form') || document.getElementById('filter-form');
+    if (form) {
+        const radio = form.querySelector(`input[name="category"][value="${categorySlug}"]`);
+        if (radio && !radio.checked) {
+            radio.checked = true;
+            // Trigger change event to apply filters
+            const changeEvent = new Event('change', { bubbles: true });
+            radio.dispatchEvent(changeEvent);
+        } else if (radio && radio.checked) {
+            // If already checked, just apply filters
+            applyFilters(event);
+        }
+    }
+}
+
+function applyFilters(event) {
+    // Determine which form triggered this
+    let targetForm = null;
+    
+    // Priority 1: Find the form that contains the triggering element
+    if (event && event.target) {
+        const form = event.target.closest('form');
+        if (form && (form.id === 'filter-form' || form.id === 'advanced-filters-form' || form.id === 'mobile-filter-form')) {
+            targetForm = form;
+        }
+    }
+    
+    // Priority 2: If category was clicked, use sidebar form
+    if (!targetForm) {
+        const sidebarForm = document.getElementById('filter-form');
+        if (sidebarForm) {
+            const sidebarCategory = sidebarForm.querySelector('input[name="category"]:checked');
+            // If a category is selected in sidebar, use sidebar form
+            if (sidebarCategory !== null) {
+                targetForm = sidebarForm;
+            }
+        }
+    }
+    
+    // Priority 3: Check advanced filters form
+    if (!targetForm) {
+        const advancedForm = document.getElementById('advanced-filters-form');
+        if (advancedForm) {
+            targetForm = advancedForm;
+        }
+    }
+    
+    // Priority 4: Check mobile form
+    if (!targetForm) {
+        const mobileForm = document.getElementById('mobile-filter-form');
+        if (mobileForm) {
+            targetForm = mobileForm;
+        }
+    }
+    
+    // Priority 5: Fallback to sidebar form
+    if (!targetForm) {
+        targetForm = document.getElementById('filter-form');
+    }
+    
+    if (targetForm) {
+        // Preserve sort parameter if it exists
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect && sortSelect.value) {
+            let sortInput = targetForm.querySelector('input[name="sort"]');
+            if (!sortInput) {
+                sortInput = document.createElement('input');
+                sortInput.type = 'hidden';
+                sortInput.name = 'sort';
+                targetForm.appendChild(sortInput);
+            }
+            sortInput.value = sortSelect.value;
+        }
+        
+        // Submit the form
+        targetForm.submit();
     }
 }
 

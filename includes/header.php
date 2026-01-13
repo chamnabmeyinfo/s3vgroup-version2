@@ -327,13 +327,43 @@ $navCategories = $categoryModel->getAll(true);
                 $siteLogo = $logoSetting ? $logoSetting['value'] : null;
                 $siteName = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'site_name'");
                 $siteNameText = $siteName ? $siteName['value'] : 'ForkliftPro';
+                
+                // Get logo size settings
+                $logoHeightMobile = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'logo_height_mobile'");
+                $logoHeightTablet = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'logo_height_tablet'");
+                $logoHeightDesktop = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'logo_height_desktop'");
+                $logoMaxWidth = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'logo_max_width'");
+                
+                $logoHeightMobile = $logoHeightMobile ? (int)$logoHeightMobile['value'] : 40;
+                $logoHeightTablet = $logoHeightTablet ? (int)$logoHeightTablet['value'] : 56;
+                $logoHeightDesktop = $logoHeightDesktop ? (int)$logoHeightDesktop['value'] : 64;
+                $logoMaxWidth = $logoMaxWidth && !empty($logoMaxWidth['value']) ? (int)$logoMaxWidth['value'] : null;
                 ?>
                 <!-- Logo Section - Enhanced -->
                 <a href="<?= url() ?>" class="flex items-center gap-3 group flex-shrink-0 z-10">
                     <?php if ($siteLogo): ?>
+                        <style>
+                            #site-logo {
+                                height: <?= escape($logoHeightMobile) ?>px;
+                                <?= $logoMaxWidth ? 'max-width: ' . escape($logoMaxWidth) . 'px;' : '' ?>
+                                width: auto;
+                                object-fit: contain;
+                            }
+                            @media (min-width: 768px) {
+                                #site-logo {
+                                    height: <?= escape($logoHeightTablet) ?>px;
+                                }
+                            }
+                            @media (min-width: 1024px) {
+                                #site-logo {
+                                    height: <?= escape($logoHeightDesktop) ?>px;
+                                }
+                            }
+                        </style>
                         <img src="<?= escape(image_url($siteLogo)) ?>" 
                              alt="<?= escape($siteNameText) ?>" 
-                             class="h-10 md:h-14 lg:h-16 w-auto object-contain transform group-hover:scale-105 transition-transform duration-300">
+                             id="site-logo"
+                             class="object-contain transform group-hover:scale-105 transition-transform duration-300">
                     <?php else: ?>
                         <div class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 p-2.5 md:p-3 rounded-xl transform group-hover:scale-105 group-hover:rotate-2 transition-all duration-300 shadow-md group-hover:shadow-lg">
                             <i class="fas fa-industry text-white text-lg md:text-xl lg:text-2xl"></i>
