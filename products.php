@@ -321,6 +321,9 @@ include __DIR__ . '/includes/header.php';
                     <div class="mobile-sidebar-body">
                         <form method="GET" id="mobile-filter-form" class="mobile-filter-form">
                             <input type="hidden" name="page" value="1">
+                            <?php if (!empty($_GET['sort'])): ?>
+                                <input type="hidden" name="sort" value="<?= escape($_GET['sort']) ?>">
+                            <?php endif; ?>
                             
                             <!-- Search - Mobile -->
                             <div class="mobile-filter-section">
@@ -631,7 +634,8 @@ include __DIR__ . '/includes/header.php';
                                     <span class="hidden sm:inline">Sort</span>
                                 </label>
                                 <select id="sort-select" onchange="applyFilters()" class="app-sort-select">
-                                    <option value="name" <?= ($_GET['sort'] ?? 'name') === 'name' ? 'selected' : '' ?>>Name A-Z</option>
+                                    <option value="" <?= empty($_GET['sort']) ? 'selected' : '' ?>>Featured First (Default)</option>
+                                    <option value="name" <?= ($_GET['sort'] ?? '') === 'name' ? 'selected' : '' ?>>Name A-Z</option>
                                     <option value="name_desc" <?= ($_GET['sort'] ?? '') === 'name_desc' ? 'selected' : '' ?>>Name Z-A</option>
                                     <option value="price_asc" <?= ($_GET['sort'] ?? '') === 'price_asc' ? 'selected' : '' ?>>Price: Low to High</option>
                                     <option value="price_desc" <?= ($_GET['sort'] ?? '') === 'price_desc' ? 'selected' : '' ?>>Price: High to Low</option>
@@ -676,7 +680,7 @@ include __DIR__ . '/includes/header.php';
                                 <div class="app-product-image-wrapper">
                                     <?php if (!empty($product['image'])): ?>
                                         <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 300'%3E%3Crect fill='%23e5e7eb' width='400' height='300'/%3E%3C/svg%3E" 
-                                             data-src="<?= asset('storage/uploads/' . escape($product['image'])) ?>"
+                                             data-src="<?= escape(image_url($product['image'])) ?>"
                                              alt="<?= escape($product['name']) ?>" 
                                              class="app-product-image lazy-load"
                                              loading="lazy"
@@ -1209,18 +1213,36 @@ function applyFilters(event) {
     }
     
     if (targetForm) {
-        // Preserve sort parameter if it exists
+        // Preserve sort parameter from dropdown (apply to all forms)
         const sortSelect = document.getElementById('sort-select');
-        if (sortSelect && sortSelect.value) {
+        if (sortSelect) {
+            // Update sort in the target form
             let sortInput = targetForm.querySelector('input[name="sort"]');
-            if (!sortInput) {
-                sortInput = document.createElement('input');
-                sortInput.type = 'hidden';
-                sortInput.name = 'sort';
-                targetForm.appendChild(sortInput);
+            if (sortSelect.value) {
+                if (!sortInput) {
+                    sortInput = document.createElement('input');
+                    sortInput.type = 'hidden';
+                    sortInput.name = 'sort';
+                    targetForm.appendChild(sortInput);
+                }
+                sortInput.value = sortSelect.value;
+            } else {
+                // If sort is empty, remove the input to use default (featured first)
+                if (sortInput) {
+                    sortInput.remove();
+                }
             }
-            sortInput.value = sortSelect.value;
         }
+        
+        // Reset page to 1 when filters change
+        let pageInput = targetForm.querySelector('input[name="page"]');
+        if (!pageInput) {
+            pageInput = document.createElement('input');
+            pageInput.type = 'hidden';
+            pageInput.name = 'page';
+            targetForm.appendChild(pageInput);
+        }
+        pageInput.value = '1';
         
         // Submit the form
         targetForm.submit();

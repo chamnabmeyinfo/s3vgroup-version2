@@ -102,29 +102,36 @@ class Product
         $page = (int)($filters['page'] ?? 1);
         $offset = ($page - 1) * $limit;
 
-        // Sorting
-        $orderBy = "p.is_featured DESC, p.created_at DESC";
+        // Sorting - Always show featured products first, then apply sort within each group
+        $orderBy = "p.is_featured DESC"; // Featured products always first
         if (!empty($filters['sort'])) {
             switch ($filters['sort']) {
                 case 'name':
-                    $orderBy = "p.name ASC";
+                    $orderBy = "p.is_featured DESC, p.name ASC";
                     break;
                 case 'name_desc':
-                    $orderBy = "p.name DESC";
+                    $orderBy = "p.is_featured DESC, p.name DESC";
                     break;
                 case 'price_asc':
-                    $orderBy = "COALESCE(p.sale_price, p.price, 0) ASC";
+                    $orderBy = "p.is_featured DESC, COALESCE(p.sale_price, p.price, 0) ASC";
                     break;
                 case 'price_desc':
-                    $orderBy = "COALESCE(p.sale_price, p.price, 0) DESC";
+                    $orderBy = "p.is_featured DESC, COALESCE(p.sale_price, p.price, 0) DESC";
                     break;
                 case 'newest':
-                    $orderBy = "p.created_at DESC";
+                    $orderBy = "p.is_featured DESC, p.created_at DESC";
                     break;
                 case 'featured':
                     $orderBy = "p.is_featured DESC, p.created_at DESC";
                     break;
+                default:
+                    // Default: featured first, then by creation date
+                    $orderBy = "p.is_featured DESC, p.created_at DESC";
+                    break;
             }
+        } else {
+            // Default: featured first, then by creation date
+            $orderBy = "p.is_featured DESC, p.created_at DESC";
         }
 
         $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug
@@ -175,12 +182,56 @@ class Product
 
     public function count($filters = [])
     {
-        $where = ["is_active = 1"];
+        $where = [];
         $params = [];
+        
+        // Match the same filtering logic as getAll()
+        if (isset($filters['is_active'])) {
+            $where[] = "is_active = :is_active";
+            $params['is_active'] = (int)$filters['is_active'];
+        } elseif (!isset($filters['include_inactive']) || !$filters['include_inactive']) {
+            $where[] = "is_active = 1";
+        }
 
         if (!empty($filters['category_id'])) {
-            $where[] = "category_id = :category_id";
-            $params['category_id'] = $filters['category_id'];
+            // Support sub-categories: include products from sub-categories
+            $includeSubcategories = $filters['include_subcategories'] ?? true;
+            
+            if ($includeSubcategories) {
+                // Get all descendant category IDs
+                $categoryModel = new \App\Models\Category();
+                $descendants = $categoryModel->getDescendants($filters['category_id'], false);
+                $descendants[] = (int)$filters['category_id']; // Include the category itself
+                $descendants = array_filter($descendants); // Remove any null/empty values
+                $descendants = array_unique($descendants);
+                
+                if (count($descendants) > 1) {
+                    // Multiple categories - use IN clause
+                    $placeholders = [];
+                    foreach ($descendants as $idx => $catId) {
+                        $key = 'cat_id_' . $idx;
+                        $placeholders[] = ':' . $key;
+                        $params[$key] = $catId;
+                    }
+                    $where[] = "category_id IN (" . implode(',', $placeholders) . ")";
+                } else {
+                    // Single category - use equality
+                    $where[] = "category_id = :category_id";
+                    $params['category_id'] = $filters['category_id'];
+                }
+            } else {
+                // Only direct category
+                $where[] = "category_id = :category_id";
+                $params['category_id'] = $filters['category_id'];
+            }
+        }
+
+        if (!empty($filters['is_featured'])) {
+            $where[] = "is_featured = :is_featured";
+            $params['is_featured'] = (int)$filters['is_featured'];
+        } elseif (!empty($filters['featured'])) {
+            // Legacy support for 'featured' filter
+            $where[] = "is_featured = 1";
         }
 
         if (!empty($filters['search'])) {
@@ -189,10 +240,6 @@ class Product
             $params['search_name'] = $searchTerm;
             $params['search_desc'] = $searchTerm;
             $params['search_short'] = $searchTerm;
-        }
-
-        if (!empty($filters['featured'])) {
-            $where[] = "is_featured = 1";
         }
 
         // Price filtering
@@ -211,11 +258,11 @@ class Product
             $where[] = "stock_status = 'in_stock'";
         }
 
-        $whereClause = implode(' AND ', $where);
-        $sql = "SELECT COUNT(*) as total FROM products WHERE $whereClause";
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : 'WHERE 1=1';
+        $sql = "SELECT COUNT(*) as total FROM products $whereClause";
         
         $result = $this->db->fetchOne($sql, $params);
-        return $result['total'] ?? 0;
+        return (int)($result['total'] ?? 0);
     }
 
     public function create($data)
