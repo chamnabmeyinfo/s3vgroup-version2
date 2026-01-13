@@ -1,6 +1,5 @@
 -- Partners and Clients Logo Slider
 -- This table stores partner and client logos for display in a slider
-
 CREATE TABLE IF NOT EXISTS partners (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -14,4 +13,4 @@ CREATE TABLE IF NOT EXISTS partners (
     INDEX idx_type (type),
     INDEX idx_active (is_active),
     INDEX idx_sort (sort_order)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_unicode_ci;

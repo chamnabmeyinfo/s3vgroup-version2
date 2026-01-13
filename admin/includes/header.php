@@ -420,6 +420,10 @@
                     <i class="fas fa-images w-5"></i>
                     <span>Hero Slider</span>
                 </a>
+                <a href="<?= url('admin/partners.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'partners.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-handshake w-5"></i>
+                    <span>Partners & Clients</span>
+                </a>
                 <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php'])) ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-bars w-5"></i>
                     <span>Menus</span>

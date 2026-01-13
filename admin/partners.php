@@ -188,9 +188,14 @@ include __DIR__ . '/includes/header.php';
                 </h1>
                 <p class="text-gray-300 text-sm md:text-lg">Manage partner and client logos</p>
             </div>
-            <a href="<?= url('admin/partners.php') ?>" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-plus mr-2"></i>Add New
-            </a>
+            <div class="flex gap-2">
+                <a href="<?= url('admin/partners-add-demo.php') ?>" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-database mr-2"></i>Add Demo Data
+                </a>
+                <a href="<?= url('admin/partners.php') ?>" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New
+                </a>
+            </div>
         </div>
     </div>
 
@@ -298,9 +303,14 @@ include __DIR__ . '/includes/header.php';
     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8">
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-xl font-bold">All Partners & Clients</h2>
-            <a href="<?= url('admin/partners.php?add=1') ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-                <i class="fas fa-plus mr-2"></i>Add New
-            </a>
+            <div class="flex gap-2">
+                <a href="<?= url('admin/partners-add-demo.php') ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-database mr-2"></i>Add Demo
+                </a>
+                <a href="<?= url('admin/partners.php?add=1') ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New
+                </a>
+            </div>
         </div>
 
         <?php if (empty($partners)): ?>
