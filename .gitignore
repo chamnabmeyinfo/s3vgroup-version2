@@ -44,6 +44,11 @@ storage/backups/file-backups/
 # Database exports
 storage/exports/
 
+# Storage uploads - Currently TRACKED in Git
+# If you want to ignore uploads, uncomment the next 3 lines:
+# storage/uploads/*
+# !storage/uploads/.gitkeep
+# !storage/uploads/.htaccess
 # Note: storage/uploads/ is now INCLUDED in Git to track all images and assets
 # Design backups can be included if needed
 # storage/design-backups/ is included
