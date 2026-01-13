@@ -428,6 +428,10 @@
                     <i class="fas fa-certificate w-5"></i>
                     <span>Quality Certifications</span>
                 </a>
+                <a href="<?= url('admin/services.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'services.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-concierge-bell w-5"></i>
+                    <span>Services</span>
+                </a>
                 <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php'])) ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-bars w-5"></i>
                     <span>Menus</span>

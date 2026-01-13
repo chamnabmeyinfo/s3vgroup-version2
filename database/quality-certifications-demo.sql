@@ -1,6 +1,5 @@
 -- Demo/Sample Data for Quality Certifications
 -- Run this after creating the quality_certifications table
-
 -- Sample Quality Certifications
 INSERT INTO quality_certifications (
         name,

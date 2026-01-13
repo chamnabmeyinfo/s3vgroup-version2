@@ -76,33 +76,97 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../storage/uploads/';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-
-            $file = $_FILES['logo'];
-            $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
-            $maxSize = 2 * 1024 * 1024; // 2MB
-
-            if (!in_array($file['type'], $allowedTypes)) {
-                $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
-            } elseif ($file['size'] > $maxSize) {
-                $error = 'File size exceeds 2MB limit.';
-            } else {
-                // Delete old logo
-                $oldPartner = $partnerModel->getById($partnerId);
-                if ($oldPartner && !empty($oldPartner['logo']) && file_exists(__DIR__ . '/../' . $oldPartner['logo'])) {
-                    @unlink(__DIR__ . '/../' . $oldPartner['logo']);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    $error = 'Failed to create upload directory. Please check permissions.';
                 }
+            }
+            
+            // Ensure directory is writable
+            if (empty($error) && !is_writable($uploadDir)) {
+                @chmod($uploadDir, 0755);
+                if (!is_writable($uploadDir)) {
+                    $error = 'Upload directory is not writable. Please check permissions.';
+                }
+            }
+            
+            if (empty($error)) {
+                $file = $_FILES['logo'];
+                $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+                $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
+                $maxSize = 2 * 1024 * 1024; // 2MB
 
-                // Upload new logo
-                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
-                $filename = 'partner_' . time() . '_' . uniqid() . '.' . $extension;
-                $filepath = $uploadDir . $filename;
+                // Get file extension
+                $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+                
+                // Validate extension
+                if (!in_array($extension, $allowedExtensions)) {
+                    $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
+                } 
+                // Validate MIME type
+                elseif (!in_array($file['type'], $allowedTypes)) {
+                    // Double-check with file info for better security
+                    if (function_exists('finfo_open')) {
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $mimeType = finfo_file($finfo, $file['tmp_name']);
+                        finfo_close($finfo);
+                        
+                        if (!in_array($mimeType, $allowedTypes)) {
+                            $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
+                        }
+                    } else {
+                        // If finfo is not available, just check extension (less secure but works)
+                        $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
+                    }
+                }
+                // Validate file size
+                elseif ($file['size'] > $maxSize) {
+                    $error = 'File size exceeds 2MB limit.';
+                }
+                // Check for upload errors
+                elseif ($file['error'] !== UPLOAD_ERR_OK) {
+                    $uploadErrors = [
+                        UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize directive.',
+                        UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE directive.',
+                        UPLOAD_ERR_PARTIAL => 'File was only partially uploaded.',
+                        UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
+                        UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder.',
+                        UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+                        UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.'
+                    ];
+                    $error = 'Upload error: ' . ($uploadErrors[$file['error']] ?? 'Unknown error');
+                }
+                // Validate file is actually an image (for non-SVG)
+                elseif ($extension !== 'svg' && !@getimagesize($file['tmp_name'])) {
+                    $error = 'File is not a valid image.';
+                }
+                else {
+                    // Delete old logo first (only for updates)
+                    if (!empty($partnerId)) {
+                        $oldPartner = $partnerModel->getById($partnerId);
+                        if ($oldPartner && !empty($oldPartner['logo'])) {
+                            $oldLogoPath = __DIR__ . '/../' . $oldPartner['logo'];
+                            if (file_exists($oldLogoPath)) {
+                                @unlink($oldLogoPath);
+                            }
+                        }
+                    }
 
-                if (move_uploaded_file($file['tmp_name'], $filepath)) {
-                    $data['logo'] = 'storage/uploads/' . $filename;
-                } else {
-                    $error = 'Failed to upload logo.';
+                    // Generate unique filename
+                    $filename = 'partner_' . time() . '_' . uniqid() . '.' . $extension;
+                    $filepath = $uploadDir . $filename;
+
+                    // Move uploaded file
+                    if (move_uploaded_file($file['tmp_name'], $filepath)) {
+                        // Verify file was actually uploaded
+                        if (file_exists($filepath) && filesize($filepath) > 0) {
+                            $data['logo'] = 'storage/uploads/' . $filename;
+                        } else {
+                            $error = 'File upload failed. File may be corrupted.';
+                            @unlink($filepath); // Clean up
+                        }
+                    } else {
+                        $error = 'Failed to upload logo. Please check directory permissions.';
+                    }
                 }
             }
         }
@@ -129,26 +193,90 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_FILES['logo']) && $_FILES['logo']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../storage/uploads/';
             if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
+                if (!mkdir($uploadDir, 0755, true)) {
+                    $error = 'Failed to create upload directory. Please check permissions.';
+                }
             }
+            
+            // Ensure directory is writable
+            if (empty($error) && !is_writable($uploadDir)) {
+                @chmod($uploadDir, 0755);
+                if (!is_writable($uploadDir)) {
+                    $error = 'Upload directory is not writable. Please check permissions.';
+                }
+            }
+            
+            if (empty($error)) {
 
             $file = $_FILES['logo'];
             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml'];
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
             $maxSize = 2 * 1024 * 1024; // 2MB
 
-            if (!in_array($file['type'], $allowedTypes)) {
+            // Get file extension
+            $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            
+            // Validate extension
+            if (!in_array($extension, $allowedExtensions)) {
                 $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
-            } elseif ($file['size'] > $maxSize) {
+            } 
+            // Validate MIME type
+            elseif (!in_array($file['type'], $allowedTypes)) {
+                // Double-check with file info for better security
+                if (function_exists('finfo_open')) {
+                    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                    $mimeType = finfo_file($finfo, $file['tmp_name']);
+                    finfo_close($finfo);
+                    
+                    if (!in_array($mimeType, $allowedTypes)) {
+                        $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
+                    }
+                } else {
+                    // If finfo is not available, just check extension (less secure but works)
+                    $error = 'Invalid file type. Please upload JPG, PNG, GIF, WebP, or SVG.';
+                }
+            }
+            // Validate file size
+            elseif ($file['size'] > $maxSize) {
                 $error = 'File size exceeds 2MB limit.';
-            } else {
-                $extension = pathinfo($file['name'], PATHINFO_EXTENSION);
+            }
+            // Check for upload errors
+            elseif ($file['error'] !== UPLOAD_ERR_OK) {
+                $uploadErrors = [
+                    UPLOAD_ERR_INI_SIZE => 'File exceeds upload_max_filesize directive.',
+                    UPLOAD_ERR_FORM_SIZE => 'File exceeds MAX_FILE_SIZE directive.',
+                    UPLOAD_ERR_PARTIAL => 'File was only partially uploaded.',
+                    UPLOAD_ERR_NO_FILE => 'No file was uploaded.',
+                    UPLOAD_ERR_NO_TMP_DIR => 'Missing temporary folder.',
+                    UPLOAD_ERR_CANT_WRITE => 'Failed to write file to disk.',
+                    UPLOAD_ERR_EXTENSION => 'A PHP extension stopped the file upload.'
+                ];
+                $error = 'Upload error: ' . ($uploadErrors[$file['error']] ?? 'Unknown error');
+            }
+            // Validate file is actually an image (for non-SVG)
+            elseif ($extension !== 'svg' && !@getimagesize($file['tmp_name'])) {
+                $error = 'File is not a valid image.';
+            }
+            else {
+                // Generate unique filename
                 $filename = 'partner_' . time() . '_' . uniqid() . '.' . $extension;
                 $filepath = $uploadDir . $filename;
 
-                if (move_uploaded_file($file['tmp_name'], $filepath)) {
-                    $data['logo'] = 'storage/uploads/' . $filename;
+                // Ensure directory is writable
+                if (!is_writable($uploadDir)) {
+                    $error = 'Upload directory is not writable. Please check permissions.';
+                }
+                // Move uploaded file
+                elseif (move_uploaded_file($file['tmp_name'], $filepath)) {
+                    // Verify file was actually uploaded
+                    if (file_exists($filepath) && filesize($filepath) > 0) {
+                        $data['logo'] = 'storage/uploads/' . $filename;
+                    } else {
+                        $error = 'File upload failed. File may be corrupted.';
+                        @unlink($filepath); // Clean up
+                    }
                 } else {
-                    $error = 'Failed to upload logo.';
+                    $error = 'Failed to upload logo. Please check directory permissions.';
                 }
             }
         } else {

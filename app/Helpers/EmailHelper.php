@@ -98,5 +98,94 @@ class EmailHelper {
             return false;
         }
     }
+    
+    /**
+     * Queue email with attachment
+     */
+    public static function queueWithAttachment($to, $subject, $body, $attachmentPath) {
+        try {
+            // Check if attachment_path column exists
+            $columns = db()->fetchAll("SHOW COLUMNS FROM email_queue LIKE 'attachment_path'");
+            $hasAttachmentColumn = !empty($columns);
+            
+            $attachmentPath = (is_file($attachmentPath) && file_exists($attachmentPath)) ? $attachmentPath : null;
+            
+            if ($hasAttachmentColumn && $attachmentPath) {
+                db()->insert('email_queue', [
+                    'to_email' => $to,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'status' => 'pending',
+                    'attachment_path' => $attachmentPath
+                ]);
+            } else {
+                // Store without attachment column, attachment will be handled during sending
+                db()->insert('email_queue', [
+                    'to_email' => $to,
+                    'subject' => $subject,
+                    'body' => $body . ($attachmentPath ? "\n\n<!-- ATTACHMENT: " . basename($attachmentPath) . " -->" : ''),
+                    'status' => 'pending'
+                ]);
+            }
+            return true;
+        } catch (Exception $e) {
+            // Fallback: try without attachment
+            try {
+                db()->insert('email_queue', [
+                    'to_email' => $to,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'status' => 'pending'
+                ]);
+                return true;
+            } catch (Exception $e2) {
+                return false;
+            }
+        }
+    }
+    
+    /**
+     * Send email directly with attachment
+     */
+    public static function sendWithAttachment($to, $subject, $body, $attachmentPath, $attachmentName = null) {
+        $settingModel = new \App\Models\Setting();
+        $siteName = $settingModel->get('site_name', 'Forklift & Equipment Pro');
+        $siteEmail = $settingModel->get('site_email', 'noreply@example.com');
+        
+        if (!file_exists($attachmentPath)) {
+            return false;
+        }
+        
+        $attachmentName = $attachmentName ?: basename($attachmentPath);
+        $fileContent = file_get_contents($attachmentPath);
+        $fileEncoded = chunk_split(base64_encode($fileContent));
+        $fileSize = filesize($attachmentPath);
+        $fileType = mime_content_type($attachmentPath);
+        
+        // Generate boundary
+        $boundary = md5(time());
+        
+        // Email headers
+        $headers = "MIME-Version: 1.0\r\n";
+        $headers .= "From: {$siteName} <{$siteEmail}>\r\n";
+        $headers .= "Reply-To: {$siteEmail}\r\n";
+        $headers .= "Content-Type: multipart/mixed; boundary=\"{$boundary}\"\r\n";
+        
+        // Email body
+        $message = "--{$boundary}\r\n";
+        $message .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $message .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
+        $message .= $body . "\r\n\r\n";
+        
+        // Attachment
+        $message .= "--{$boundary}\r\n";
+        $message .= "Content-Type: {$fileType}; name=\"{$attachmentName}\"\r\n";
+        $message .= "Content-Disposition: attachment; filename=\"{$attachmentName}\"\r\n";
+        $message .= "Content-Transfer-Encoding: base64\r\n\r\n";
+        $message .= $fileEncoded . "\r\n";
+        $message .= "--{$boundary}--";
+        
+        return mail($to, $subject, $message, $headers);
+    }
 }
 

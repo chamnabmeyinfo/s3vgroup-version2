@@ -617,6 +617,13 @@ include __DIR__ . '/includes/header.php';
                         </div>
                         
                         <div class="app-header-controls">
+                            <!-- Request Catalog Button -->
+                            <a href="<?= url('request-catalog.php') ?>" 
+                               class="app-btn-secondary mr-3"
+                               title="Request PDF Catalog">
+                                <i class="fas fa-file-pdf"></i>
+                                <span class="hidden sm:inline">Request Catalog</span>
+                            </a>
                             <!-- Sort Dropdown - App Style -->
                             <div class="app-sort-container">
                                 <label class="app-sort-label">

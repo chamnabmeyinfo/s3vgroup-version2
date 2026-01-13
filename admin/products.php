@@ -407,6 +407,11 @@ $defaultColumns = array_keys($availableColumns);
                 
                 <!-- Action Buttons -->
                 <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                    <a href="<?= url('admin/send-catalog.php') ?>" 
+                       class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-5 py-3 rounded-xl transition-all duration-300 text-center font-medium hover:scale-105 hover:shadow-lg">
+                        <i class="fas fa-file-pdf mr-2 group-hover:scale-110 transition-transform"></i>
+                    Send Catalog
+                </a>
                     <a href="<?= url('admin/products-export.php') ?>" 
                        class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 px-5 py-3 rounded-xl transition-all duration-300 text-center font-medium hover:scale-105 hover:shadow-lg">
                         <i class="fas fa-download mr-2 group-hover:scale-110 transition-transform"></i>
