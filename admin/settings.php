@@ -129,6 +129,7 @@ $defaults = [
     'site_name' => 'Forklift & Equipment Pro',
     'site_email' => 'info@example.com',
     'site_phone' => '+1 (555) 123-4567',
+    'hotline' => '012 345 678',
     'site_address' => '123 Industrial Way, City, State 12345',
     'footer_text' => '© 2024 Forklift & Equipment Pro. All rights reserved.',
     'logo_height_mobile' => '40',
@@ -401,6 +402,16 @@ include __DIR__ . '/includes/header.php';
                 </label>
                 <input type="text" name="site_phone" value="<?= escape($settings['site_phone']) ?>"
                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    <i class="fas fa-phone-alt text-red-400 mr-2"></i> Hotline (Header Display)
+                </label>
+                <input type="text" name="hotline" value="<?= escape($settings['hotline'] ?? '') ?>"
+                       placeholder="e.g., 012 345 678 or +855 12 345 678"
+                       class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
+                <p class="text-xs text-gray-500 mt-1">This number will be displayed in the header hotline button</p>
             </div>
             
             <div>

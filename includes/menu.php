@@ -88,11 +88,11 @@ if ($location === 'header'): ?>
         ?>
             <?php if ($hasChildren): ?>
                 <div class="relative group" id="menu-<?= $item['id'] ?>">
-                    <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>">
+                    <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <?php if ($itemIcon): ?>
                             <i class="<?= escape($itemIcon) ?> mr-2"></i>
                         <?php endif; ?>
-                        <?= $itemTitle ?>
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%;"><?= $itemTitle ?></span>
                         <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                         <span class="nav-link-indicator"></span>
                     </button>
@@ -123,11 +123,12 @@ if ($location === 'header'): ?>
             <?php else: ?>
                 <a href="<?= escape($itemUrl) ?>" 
                    target="<?= escape($itemTarget) ?>"
-                   class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>">
+                   class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>"
+                   style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                     <?php if ($itemIcon): ?>
                         <i class="<?= escape($itemIcon) ?> mr-2"></i>
                     <?php endif; ?>
-                    <?= $itemTitle ?>
+                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%;"><?= $itemTitle ?></span>
                     <span class="nav-link-indicator"></span>
                 </a>
             <?php endif; ?>

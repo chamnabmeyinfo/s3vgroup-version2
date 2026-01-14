@@ -125,6 +125,19 @@ $navCategories = $categoryModel->getAll(true);
             color: var(--logo-primary) !important;
         }
         
+        /* Ensure menu items stay on one line */
+        .nav-link-ultra {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .nav-action-btn {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
         /* Buttons */
         button.btn-primary,
         a.btn-primary {
@@ -183,6 +196,9 @@ $navCategories = $categoryModel->getAll(true);
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .nav-link-modern:hover {
@@ -339,14 +355,14 @@ $navCategories = $categoryModel->getAll(true);
                         // Fallback to old menu
                 ?>
                     <div class="hidden xl:flex items-center space-x-1 ml-auto">
-                        <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
+                        <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative" style="white-space: nowrap;">
                             <i class="fas fa-home mr-2"></i>Home
                             <span class="nav-link-indicator"></span>
                         </a>
                         
                         <!-- Products Mega Menu -->
                         <div class="nav-dropdown-group relative" id="products-dropdown">
-                            <button class="nav-link-modern">
+                            <button class="nav-link-modern" style="white-space: nowrap;">
                                 <i class="fas fa-box"></i>
                                 <span>Products</span>
                                 <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
@@ -377,25 +393,25 @@ $navCategories = $categoryModel->getAll(true);
                         </div>
                         
                         <!-- Quick Actions -->
-                        <a href="<?= url('compare.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-blue-600">
+                        <a href="<?= url('compare.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-blue-600" style="white-space: nowrap;">
                             <i class="fas fa-balance-scale"></i>
                             <span class="hidden 2xl:inline">Compare</span>
                             <span id="compare-count" class="nav-badge hidden bg-gradient-to-r from-blue-500 to-indigo-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('wishlist.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-red-600">
+                        <a href="<?= url('wishlist.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-red-600" style="white-space: nowrap;">
                             <i class="fas fa-heart"></i>
                             <span class="hidden 2xl:inline">Wishlist</span>
                             <span id="wishlist-count" class="nav-badge hidden bg-gradient-to-r from-red-500 to-pink-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('cart.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-green-600">
+                        <a href="<?= url('cart.php') ?>" class="nav-action-btn relative text-gray-600 hover:text-green-600" style="white-space: nowrap;">
                             <i class="fas fa-shopping-cart"></i>
                             <span class="hidden 2xl:inline">Cart</span>
                             <span id="cart-count" class="nav-badge hidden bg-gradient-to-r from-green-500 to-emerald-500 text-white">0</span>
                         </a>
                         
-                        <a href="<?= url('contact.php') ?>" class="nav-link-modern">
+                        <a href="<?= url('contact.php') ?>" class="nav-link-modern" style="white-space: nowrap;">
                             <i class="fas fa-envelope"></i>
                             <span>Contact</span>
                         </a>
@@ -406,15 +422,15 @@ $navCategories = $categoryModel->getAll(true);
                     // Fallback to old menu on error
                 ?>
                     <div class="hidden xl:flex items-center gap-0.5">
-                        <a href="<?= url() ?>" class="nav-link-modern">
+                        <a href="<?= url() ?>" class="nav-link-modern" style="white-space: nowrap;">
                             <i class="fas fa-home"></i>
                             <span>Home</span>
                         </a>
-                        <a href="<?= url('products.php') ?>" class="nav-link-modern">
+                        <a href="<?= url('products.php') ?>" class="nav-link-modern" style="white-space: nowrap;">
                             <i class="fas fa-box"></i>
                             <span>Products</span>
                         </a>
-                        <a href="<?= url('contact.php') ?>" class="nav-link-modern">
+                        <a href="<?= url('contact.php') ?>" class="nav-link-modern" style="white-space: nowrap;">
                             <i class="fas fa-envelope"></i>
                             <span>Contact</span>
                         </a>
@@ -425,15 +441,12 @@ $navCategories = $categoryModel->getAll(true);
                 <div class="ml-auto flex items-center gap-2 lg:gap-3">
                     <!-- Hotline -->
                     <?php
-                    // Get hotline from settings - try multiple keys
+                    // Get hotline from settings - prioritize 'hotline' key, fallback to 'site_phone'
                     $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'hotline'");
-                    if (!$hotlineSetting) {
+                    if (!$hotlineSetting || empty($hotlineSetting['value'])) {
                         $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'site_phone'");
                     }
-                    if (!$hotlineSetting) {
-                        $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'contact_phone'");
-                    }
-                    $hotline = $hotlineSetting ? $hotlineSetting['value'] : '012 345 678';
+                    $hotline = ($hotlineSetting && !empty($hotlineSetting['value'])) ? $hotlineSetting['value'] : '012 345 678';
                     ?>
                     <a href="tel:<?= preg_replace('/[^0-9+]/', '', $hotline) ?>" 
                        class="hidden lg:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 group"
@@ -456,7 +469,7 @@ $navCategories = $categoryModel->getAll(true);
                     
                     <?php if (isset($_SESSION['customer_id'])): ?>
                         <div class="nav-dropdown-group relative" id="account-dropdown">
-                            <button class="nav-link-modern">
+                            <button class="nav-link-modern" style="white-space: nowrap;">
                                 <i class="fas fa-user-circle"></i>
                                 <span class="hidden xl:inline">Account</span>
                                 <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
