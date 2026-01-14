@@ -323,7 +323,7 @@ $navCategories = $categoryModel->getAll(true);
     <!-- Premium Modern Navigation -->
     <nav class="sticky top-0 z-50" id="main-nav">
         <div class="container mx-auto px-4 lg:px-6 xl:px-8">
-            <div class="flex items-center justify-center md:justify-start h-20 lg:h-24 gap-2">
+            <div class="flex items-center justify-between h-20 lg:h-24 gap-2">
                 <!-- Logo Section -->
                 <?php
                 // Get site logo from settings
@@ -433,7 +433,7 @@ $navCategories = $categoryModel->getAll(true);
                     else:
                         // Fallback to old menu
                 ?>
-                    <div class="hidden xl:flex items-center space-x-1">
+                    <div class="hidden xl:flex items-center space-x-1 ml-auto">
                         <a href="<?= url() ?>" class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative">
                             <i class="fas fa-home mr-2"></i>Home
                             <span class="nav-link-indicator"></span>
@@ -515,12 +515,45 @@ $navCategories = $categoryModel->getAll(true);
                         </a>
                     </div>
                 <?php } ?>
+                
+                <!-- Right Section: Hotline & Account -->
+                <div class="ml-auto flex items-center gap-2 lg:gap-3">
+                    <!-- Hotline -->
+                    <?php
+                    // Get hotline from settings - try multiple keys
+                    $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'hotline'");
+                    if (!$hotlineSetting) {
+                        $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'site_phone'");
+                    }
+                    if (!$hotlineSetting) {
+                        $hotlineSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'contact_phone'");
+                    }
+                    $hotline = $hotlineSetting ? $hotlineSetting['value'] : '012 345 678';
+                    ?>
+                    <a href="tel:<?= preg_replace('/[^0-9+]/', '', $hotline) ?>" 
+                       class="hidden lg:flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200 group"
+                       title="Call Hotline: <?= escape($hotline) ?>">
+                        <div class="bg-white/20 rounded-full p-1.5 group-hover:bg-white/30 transition-colors">
+                            <i class="fas fa-phone-alt text-sm"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <span class="text-xs font-medium opacity-90">Hot Line</span>
+                            <span class="text-sm font-bold leading-tight"><?= escape($hotline) ?></span>
+                        </div>
+                    </a>
+                    
+                    <!-- Mobile Hotline Icon -->
+                    <a href="tel:<?= preg_replace('/[^0-9+]/', '', $hotline) ?>" 
+                       class="lg:hidden p-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg shadow-md transition-all duration-200"
+                       title="Call Hotline: <?= escape($hotline) ?>">
+                        <i class="fas fa-phone-alt"></i>
+                    </a>
                     
                     <?php if (isset($_SESSION['customer_id'])): ?>
-                        <div class="nav-dropdown-group relative ml-2" id="account-dropdown">
+                        <div class="nav-dropdown-group relative" id="account-dropdown">
                             <button class="nav-link-modern">
                                 <i class="fas fa-user-circle"></i>
-                                <span>Account</span>
+                                <span class="hidden xl:inline">Account</span>
                                 <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                             </button>
                             <div class="nav-dropdown right-0 left-auto w-56">
