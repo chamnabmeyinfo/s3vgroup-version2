@@ -771,7 +771,7 @@ include __DIR__ . '/includes/header.php';
                                     <?php endif; ?>
                                     
                                     <!-- Quick Actions Overlay -->
-                                    <div class="app-product-overlay" style="position: relative;">
+                                    <div class="app-product-overlay">
                                         <button onclick="event.preventDefault(); event.stopPropagation(); openQuickView(<?= $product['id'] ?>)" 
                                                 class="app-overlay-btn"
                                                 title="Quick View">
@@ -1588,6 +1588,36 @@ document.addEventListener('DOMContentLoaded', function() {
                                 });
                             }, 100);
                         }
+                        
+                        // Ensure overlay functionality works for newly loaded products
+                        // All overlay buttons use inline onclick handlers, so they should work automatically
+                        // But we can verify the overlay structure is correct
+                        setTimeout(() => {
+                            const newProductCards = productsGrid.querySelectorAll('.app-product-card:not([data-overlay-checked])');
+                            newProductCards.forEach(card => {
+                                // Mark as checked
+                                card.setAttribute('data-overlay-checked', 'true');
+                                
+                                // Verify overlay exists and is properly positioned
+                                const imageWrapper = card.querySelector('.app-product-image-wrapper');
+                                const overlay = card.querySelector('.app-product-overlay');
+                                
+                                if (imageWrapper && overlay) {
+                                    // Ensure image wrapper has position relative (should be from CSS)
+                                    const computedStyle = window.getComputedStyle(imageWrapper);
+                                    if (computedStyle.position === 'static') {
+                                        imageWrapper.style.position = 'relative';
+                                    }
+                                    
+                                    // Ensure overlay has position absolute (should be from CSS)
+                                    const overlayStyle = window.getComputedStyle(overlay);
+                                    if (overlayStyle.position !== 'absolute') {
+                                        overlay.style.position = 'absolute';
+                                        overlay.style.inset = '0';
+                                    }
+                                }
+                            });
+                        }, 200);
                         
                         // Update button state
                         loadMoreBtn.setAttribute('data-current-page', nextPage);

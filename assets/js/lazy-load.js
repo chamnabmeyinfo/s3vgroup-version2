@@ -316,6 +316,32 @@ document.addEventListener('DOMContentLoaded', function() {
                                 // Initialize lazy loading for any future images
                                 initLazyLoading();
                                 
+                                // Ensure overlay functionality works for newly loaded products
+                                const newProductCards = productsGrid.querySelectorAll('.app-product-card:not([data-overlay-checked])');
+                                newProductCards.forEach(card => {
+                                    // Mark as checked
+                                    card.setAttribute('data-overlay-checked', 'true');
+                                    
+                                    // Verify overlay exists and is properly positioned
+                                    const imageWrapper = card.querySelector('.app-product-image-wrapper');
+                                    const overlay = card.querySelector('.app-product-overlay');
+                                    
+                                    if (imageWrapper && overlay) {
+                                        // Ensure image wrapper has position relative (should be from CSS)
+                                        const computedStyle = window.getComputedStyle(imageWrapper);
+                                        if (computedStyle.position === 'static') {
+                                            imageWrapper.style.position = 'relative';
+                                        }
+                                        
+                                        // Ensure overlay has position absolute (should be from CSS)
+                                        const overlayStyle = window.getComputedStyle(overlay);
+                                        if (overlayStyle.position !== 'absolute') {
+                                            overlay.style.position = 'absolute';
+                                            overlay.style.inset = '0';
+                                        }
+                                    }
+                                });
+                                
                                 // Ensure feature buttons are properly initialized on newly loaded products
                                 // The toggleFeatured function is defined globally in products.php
                                 // All feature buttons should work automatically since they're in the HTML
