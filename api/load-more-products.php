@@ -136,25 +136,24 @@ foreach ($products as $product):
                 <button onclick="event.preventDefault(); event.stopPropagation(); toggleFeatured(<?= $product['id'] ?>, this)" 
                         class="app-overlay-btn app-overlay-btn-feature <?= $product['is_featured'] ? 'active' : '' ?>"
                         id="feature-btn-<?= $product['id'] ?>"
-                        title="<?= $product['is_featured'] ? 'Remove from Featured' : 'Mark as Featured' ?>">
+                        title="<?= $product['is_featured'] ? 'Click to Unfeature' : 'Click to Feature' ?>">
                     <i class="<?= $product['is_featured'] ? 'fas fa-star' : 'far fa-star' ?>"></i>
+                    <?php if ($product['is_featured']): ?>
+                    <span class="feature-btn-text">Unfeature</span>
+                    <?php else: ?>
+                    <span class="feature-btn-text">Feature</span>
+                    <?php endif; ?>
+                </button>
+                <?php if ($product['is_featured']): ?>
+                <button onclick="event.preventDefault(); event.stopPropagation(); openFeaturedOrderDialog(<?= $product['id'] ?>, <?= (int)($product['featured_order'] ?? 0) ?>, '<?= escape($product['name']) ?>')" 
+                        class="app-overlay-btn app-overlay-btn-order"
+                        id="order-btn-<?= $product['id'] ?>"
+                        title="Set Featured Order (current: <?= (int)($product['featured_order'] ?? 0) ?>)">
+                    <i class="fas fa-sort-numeric-down"></i>
                 </button>
                 <?php endif; ?>
+                <?php endif; ?>
             </div>
-            <?php if ($isAdmin && $product['is_featured']): ?>
-            <div class="app-featured-order-input" onclick="event.preventDefault(); event.stopPropagation();">
-                <input type="number" 
-                       value="<?= (int)($product['featured_order'] ?? 0) ?>" 
-                       min="0" 
-                       step="1"
-                       class="featured-order-input"
-                       data-product-id="<?= $product['id'] ?>"
-                       data-original-value="<?= (int)($product['featured_order'] ?? 0) ?>"
-                       onchange="updateFeaturedOrder(<?= $product['id'] ?>, this.value)"
-                       onclick="event.stopPropagation();"
-                       title="Featured Order (lower numbers appear first)">
-            </div>
-            <?php endif; ?>
         </div>
         
         <!-- Product Info -->

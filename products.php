@@ -785,25 +785,24 @@ include __DIR__ . '/includes/header.php';
                                         <button onclick="event.preventDefault(); event.stopPropagation(); toggleFeatured(<?= $product['id'] ?>, this)" 
                                                 class="app-overlay-btn app-overlay-btn-feature <?= $product['is_featured'] ? 'active' : '' ?>"
                                                 id="feature-btn-<?= $product['id'] ?>"
-                                                title="<?= $product['is_featured'] ? 'Remove from Featured' : 'Mark as Featured' ?>">
+                                                title="<?= $product['is_featured'] ? 'Click to Unfeature' : 'Click to Feature' ?>">
                                             <i class="<?= $product['is_featured'] ? 'fas fa-star' : 'far fa-star' ?>"></i>
+                                            <?php if ($product['is_featured']): ?>
+                                            <span class="feature-btn-text">Unfeature</span>
+                                            <?php else: ?>
+                                            <span class="feature-btn-text">Feature</span>
+                                            <?php endif; ?>
+                                        </button>
+                                        <?php if ($product['is_featured']): ?>
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); openFeaturedOrderDialog(<?= $product['id'] ?>, <?= (int)($product['featured_order'] ?? 0) ?>, '<?= escape($product['name']) ?>')" 
+                                                class="app-overlay-btn app-overlay-btn-order"
+                                                id="order-btn-<?= $product['id'] ?>"
+                                                title="Set Featured Order (current: <?= (int)($product['featured_order'] ?? 0) ?>)">
+                                            <i class="fas fa-sort-numeric-down"></i>
                                         </button>
                                         <?php endif; ?>
+                                        <?php endif; ?>
                                     </div>
-                                    <?php if (session('admin_logged_in') && $product['is_featured']): ?>
-                                    <div class="app-featured-order-input" onclick="event.preventDefault(); event.stopPropagation();">
-                                        <input type="number" 
-                                               value="<?= (int)($product['featured_order'] ?? 0) ?>" 
-                                               min="0" 
-                                               step="1"
-                                               class="featured-order-input"
-                                               data-product-id="<?= $product['id'] ?>"
-                                               data-original-value="<?= (int)($product['featured_order'] ?? 0) ?>"
-                                               onchange="updateFeaturedOrder(<?= $product['id'] ?>, this.value)"
-                                               onclick="event.stopPropagation();"
-                                               title="Featured Order (lower numbers appear first)">
-                                    </div>
-                                    <?php endif; ?>
                                 </div>
                                 
                                 <!-- Product Info -->
@@ -1380,14 +1379,30 @@ function toggleFeatured(productId, buttonElement) {
         if (data.success) {
             // Update button state
             if (buttonElement) {
-                buttonElement.classList.toggle('active');
-                buttonElement.title = data.is_featured ? 'Remove from Featured' : 'Mark as Featured';
+                // Update active class
+                if (data.is_featured) {
+                    buttonElement.classList.add('active');
+                } else {
+                    buttonElement.classList.remove('active');
+                }
+                
+                // Update title
+                buttonElement.title = data.is_featured ? 'Click to Unfeature' : 'Click to Feature';
                 
                 // Update icon
                 const icon = buttonElement.querySelector('i');
                 if (icon) {
                     icon.className = data.is_featured ? 'fas fa-star' : 'far fa-star';
                 }
+                
+                // Update button text
+                let textSpan = buttonElement.querySelector('.feature-btn-text');
+                if (!textSpan) {
+                    textSpan = document.createElement('span');
+                    textSpan.className = 'feature-btn-text';
+                    buttonElement.appendChild(textSpan);
+                }
+                textSpan.textContent = data.is_featured ? 'Unfeature' : 'Feature';
                 
                 // Update featured badge and order input on product card
                 const productCard = buttonElement.closest('.app-product-card');
@@ -1403,33 +1418,34 @@ function toggleFeatured(productId, buttonElement) {
                             imageWrapper.appendChild(featuredBadge);
                         }
                         
-                        // Show featured order input if it doesn't exist
-                        let orderInput = productCard.querySelector('.app-featured-order-input');
-                        if (!orderInput && imageWrapper) {
-                            orderInput = document.createElement('div');
-                            orderInput.className = 'app-featured-order-input';
-                            orderInput.onclick = function(e) { e.preventDefault(); e.stopPropagation(); };
-                            orderInput.innerHTML = `<input type="number" 
-                                                           value="0" 
-                                                           min="0" 
-                                                           step="1"
-                                                           class="featured-order-input"
-                                                           data-product-id="${productId}"
-                                                           data-original-value="0"
-                                                           onchange="updateFeaturedOrder(${productId}, this.value)"
-                                                           onclick="event.stopPropagation();"
-                                                           title="Featured Order (lower numbers appear first)">`;
-                            imageWrapper.appendChild(orderInput);
+                        // Show featured order button if it doesn't exist
+                        let orderBtn = productCard.querySelector('.app-overlay-btn-order');
+                        if (!orderBtn) {
+                            const overlay = productCard.querySelector('.app-product-overlay');
+                            if (overlay) {
+                                orderBtn = document.createElement('button');
+                                orderBtn.className = 'app-overlay-btn app-overlay-btn-order';
+                                orderBtn.id = `order-btn-${productId}`;
+                                orderBtn.title = 'Set Featured Order (current: 0)';
+                                orderBtn.onclick = function(e) {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    const productName = productCard.querySelector('.app-product-title')?.textContent || 'Product';
+                                    openFeaturedOrderDialog(productId, 0, productName);
+                                };
+                                orderBtn.innerHTML = '<i class="fas fa-sort-numeric-down"></i>';
+                                overlay.appendChild(orderBtn);
+                            }
                         }
                     } else {
                         if (featuredBadge) {
                             featuredBadge.remove();
                         }
                         
-                        // Hide featured order input
-                        const orderInput = productCard.querySelector('.app-featured-order-input');
-                        if (orderInput) {
-                            orderInput.remove();
+                        // Hide featured order button
+                        const orderBtn = productCard.querySelector('.app-overlay-btn-order');
+                        if (orderBtn) {
+                            orderBtn.remove();
                         }
                     }
                 }
@@ -1710,25 +1726,137 @@ function featureCategory(categorySlug, categoryId) {
     });
 }
 
-// Update Featured Order
-function updateFeaturedOrder(productId, orderValue) {
-    const orderInput = document.querySelector(`.featured-order-input[data-product-id="${productId}"]`);
+// Open Featured Order Dialog
+function openFeaturedOrderDialog(productId, currentOrder, productName) {
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.className = 'featured-order-modal-overlay';
+    modal.innerHTML = `
+        <div class="featured-order-modal" onclick="event.stopPropagation();">
+            <div class="featured-order-modal-header">
+                <h3 class="featured-order-modal-title">
+                    <i class="fas fa-sort-numeric-down"></i>
+                    Set Featured Order
+                </h3>
+                <button onclick="closeFeaturedOrderDialog()" class="featured-order-modal-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="featured-order-modal-body">
+                <p class="featured-order-product-name">
+                    <i class="fas fa-box"></i>
+                    <strong>${productName}</strong>
+                </p>
+                <div class="featured-order-input-group">
+                    <label class="featured-order-label">
+                        <i class="fas fa-hashtag"></i>
+                        Featured Order Number
+                    </label>
+                    <input type="number" 
+                           id="featured-order-input-${productId}"
+                           value="${currentOrder}" 
+                           min="0" 
+                           step="1"
+                           class="featured-order-input-field"
+                           placeholder="0 (lower numbers appear first)">
+                    <p class="featured-order-hint">
+                        <i class="fas fa-info-circle"></i>
+                        Lower numbers appear first. Set to 0 for default order.
+                    </p>
+                </div>
+            </div>
+            <div class="featured-order-modal-footer">
+                <button onclick="closeFeaturedOrderDialog()" class="featured-order-btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </button>
+                <button onclick="saveFeaturedOrder(${productId})" class="featured-order-btn-save">
+                    <i class="fas fa-check"></i>
+                    Save Order
+                </button>
+            </div>
+        </div>
+    `;
     
-    if (!orderInput) {
-        console.error('Featured order input not found');
+    // Add to body
+    document.body.appendChild(modal);
+    
+    // Focus input
+    setTimeout(() => {
+        const input = document.getElementById(`featured-order-input-${productId}`);
+        if (input) {
+            input.focus();
+            input.select();
+        }
+    }, 100);
+    
+    // Close on overlay click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeFeaturedOrderDialog();
+        }
+    });
+    
+    // Close on Escape key
+    const escapeHandler = function(e) {
+        if (e.key === 'Escape') {
+            closeFeaturedOrderDialog();
+            document.removeEventListener('keydown', escapeHandler);
+        }
+    };
+    document.addEventListener('keydown', escapeHandler);
+    
+    // Store handler for cleanup
+    modal.dataset.escapeHandler = 'true';
+}
+
+// Close Featured Order Dialog
+function closeFeaturedOrderDialog() {
+    const modal = document.querySelector('.featured-order-modal-overlay');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+// Save Featured Order
+function saveFeaturedOrder(productId) {
+    const input = document.getElementById(`featured-order-input-${productId}`);
+    if (!input) {
+        closeFeaturedOrderDialog();
         return;
     }
     
+    const orderValue = parseInt(input.value) || 0;
+    if (orderValue < 0) {
+        if (typeof showNotification === 'function') {
+            showNotification('Order must be 0 or greater', 'error');
+        } else {
+            alert('Order must be 0 or greater');
+        }
+        return;
+    }
+    
+    // Close dialog first
+    closeFeaturedOrderDialog();
+    
+    // Update order
+    updateFeaturedOrder(productId, orderValue);
+}
+
+// Update Featured Order (enhanced version)
+function updateFeaturedOrder(productId, orderValue) {
     // Validate order value
     const order = parseInt(orderValue) || 0;
     if (order < 0) {
-        orderInput.value = 0;
-        return;
+        order = 0;
     }
     
-    // Disable input during request
-    orderInput.disabled = true;
-    orderInput.style.opacity = '0.6';
+    // Show loading state
+    const orderBtn = document.getElementById('order-btn-' + productId);
+    if (orderBtn) {
+        orderBtn.disabled = true;
+        orderBtn.style.opacity = '0.6';
+    }
     
     fetch('<?= url('api/update-featured-order.php') ?>', {
         method: 'POST',
@@ -1740,14 +1868,20 @@ function updateFeaturedOrder(productId, orderValue) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Show success message (optional, can be subtle)
+            // Show success message
             if (typeof showNotification === 'function') {
-                showNotification('Featured order updated', 'success');
+                showNotification(`Featured order updated to ${data.featured_order}`, 'success');
+            } else {
+                alert(`Featured order updated to ${data.featured_order}`);
             }
             
-            // Optionally reload the page to reorder products
-            // Or just update the order value
-            orderInput.value = data.featured_order;
+            // Update button title
+            if (orderBtn) {
+                orderBtn.title = `Set Featured Order (current: ${data.featured_order})`;
+            }
+            
+            // Note: Products will reorder on next page load/filter
+            // Optionally, we could reload the page to see the new order immediately
         } else {
             // Show error
             if (typeof showNotification === 'function') {
@@ -1755,9 +1889,6 @@ function updateFeaturedOrder(productId, orderValue) {
             } else {
                 alert(data.message || 'Error updating featured order');
             }
-            
-            // Revert to original value
-            orderInput.value = orderInput.getAttribute('data-original-value') || 0;
         }
     })
     .catch(error => {
@@ -1767,26 +1898,214 @@ function updateFeaturedOrder(productId, orderValue) {
         } else {
             alert('Error updating featured order');
         }
-        
-        // Revert to original value
-        orderInput.value = orderInput.getAttribute('data-original-value') || 0;
     })
     .finally(() => {
-        // Re-enable input
-        orderInput.disabled = false;
-        orderInput.style.opacity = '1';
+        // Re-enable button
+        if (orderBtn) {
+            orderBtn.disabled = false;
+            orderBtn.style.opacity = '1';
+        }
     });
 }
-
-// Initialize featured order inputs on page load
-document.addEventListener('DOMContentLoaded', function() {
-    const orderInputs = document.querySelectorAll('.featured-order-input');
-    orderInputs.forEach(input => {
-        // Store original value
-        input.setAttribute('data-original-value', input.value);
-    });
-});
 </script>
+
+<style>
+/* Featured Order Modal Styles */
+.featured-order-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.featured-order-modal {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 450px;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.featured-order-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.featured-order-modal-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.featured-order-modal-title i {
+    color: #8b5cf6;
+}
+
+.featured-order-modal-close {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: #f3f4f6;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #6b7280;
+}
+
+.featured-order-modal-close:hover {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.featured-order-modal-body {
+    padding: 1.5rem;
+}
+
+.featured-order-product-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    color: #4b5563;
+    font-size: 0.875rem;
+}
+
+.featured-order-product-name i {
+    color: #8b5cf6;
+}
+
+.featured-order-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.featured-order-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.featured-order-label i {
+    color: #8b5cf6;
+}
+
+.featured-order-input-field {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    -moz-appearance: textfield;
+}
+
+.featured-order-input-field::-webkit-outer-spin-button,
+.featured-order-input-field::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.featured-order-input-field:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.featured-order-hint {
+    font-size: 0.75rem;
+    color: #6b7280;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-top: 0.25rem;
+}
+
+.featured-order-hint i {
+    color: #9ca3af;
+}
+
+.featured-order-modal-footer {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+    justify-content: flex-end;
+}
+
+.featured-order-btn-cancel,
+.featured-order-btn-save {
+    padding: 0.625rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+}
+
+.featured-order-btn-cancel {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.featured-order-btn-cancel:hover {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.featured-order-btn-save {
+    background: #8b5cf6;
+    color: white;
+}
+
+.featured-order-btn-save:hover {
+    background: #7c3aed;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+</style>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
 
