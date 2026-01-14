@@ -444,8 +444,21 @@ include __DIR__ . '/includes/header.php';
                         <i class="fas fa-user-shield"></i>
                         <span class="font-semibold">Admin Mode:</span>
                         <span>You can feature/unfeature products directly from the product cards</span>
+                        <?php if (!empty($categoryName) && !empty($category)): ?>
+                            <span class="mx-2">•</span>
+                            <span>or feature all products in this category</span>
+                        <?php endif; ?>
                     </div>
                     <div class="flex items-center gap-2">
+                        <?php if (!empty($categoryName) && !empty($category)): ?>
+                            <button onclick="featureCategory('<?= escape($category['slug']) ?>', <?= $category['id'] ?>)" 
+                                    class="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                    id="feature-category-btn-admin"
+                                    title="Feature all products in '<?= escape($categoryName) ?>' category">
+                                <i class="fas fa-star"></i>
+                                <span>Feature All in Category</span>
+                            </button>
+                        <?php endif; ?>
                         <a href="<?= url('admin/products.php') ?>" 
                            class="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center gap-1 transition-colors">
                             <i class="fas fa-list"></i>
@@ -620,11 +633,20 @@ include __DIR__ . '/includes/header.php';
                                     </ol>
                                 </nav>
                             <?php endif; ?>
-                            <h1 class="app-page-title">
+                            <h1 class="app-page-title flex items-center gap-3">
                                 <?php if (!empty($categoryName)): ?>
-                                    <?= escape($categoryName) ?>
+                                    <span><?= escape($categoryName) ?></span>
                                     <?php if (!empty($subCategories)): ?>
-                                        <span class="text-sm text-gray-500 font-normal ml-2">(<?= count($subCategories) ?> sub-categories)</span>
+                                        <span class="text-sm text-gray-500 font-normal">(<?= count($subCategories) ?> sub-categories)</span>
+                                    <?php endif; ?>
+                                    <?php if (session('admin_logged_in') && !empty($category)): ?>
+                                        <button onclick="featureCategory('<?= escape($category['slug']) ?>', <?= $category['id'] ?>)" 
+                                                class="ml-2 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                                id="feature-category-btn"
+                                                title="Feature all products in this category">
+                                            <i class="fas fa-star"></i>
+                                            <span>Feature All</span>
+                                        </button>
                                     <?php endif; ?>
                                 <?php else: ?>
                                     All Products
@@ -1535,6 +1557,120 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Feature All Products in Category
+function featureCategory(categorySlug, categoryId) {
+    const btn = document.getElementById('feature-category-btn') || document.getElementById('feature-category-btn-admin');
+    
+    if (!btn) {
+        console.error('Feature category button not found');
+        return;
+    }
+    
+    // Confirm action
+    const categoryName = btn.getAttribute('title')?.replace("Feature all products in '", '').replace("' category", '') || 'this category';
+    if (!confirm(`Are you sure you want to feature ALL products in "${categoryName}"?\n\nThis will mark all products in this category (including subcategories) as featured.`)) {
+        return;
+    }
+    
+    // Disable button during request
+    btn.disabled = true;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+    btn.style.opacity = '0.7';
+    
+    // Prepare request data
+    const formData = new URLSearchParams();
+    if (categorySlug) {
+        formData.append('category_slug', categorySlug);
+    }
+    if (categoryId) {
+        formData.append('category_id', categoryId);
+    }
+    
+    fetch('<?= url('api/feature-category.php') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            if (typeof showNotification === 'function') {
+                showNotification(data.message, 'success');
+            } else {
+                alert(data.message);
+            }
+            
+            // Update all product cards on the page to show featured status
+            const productCards = document.querySelectorAll('.app-product-card');
+            productCards.forEach(card => {
+                // Update featured badge
+                let featuredBadge = card.querySelector('.app-featured-badge');
+                if (!featuredBadge) {
+                    const imageWrapper = card.querySelector('.app-product-image-wrapper');
+                    if (imageWrapper) {
+                        featuredBadge = document.createElement('div');
+                        featuredBadge.className = 'app-featured-badge';
+                        featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
+                        imageWrapper.appendChild(featuredBadge);
+                    }
+                }
+                
+                // Update feature button
+                const featureBtn = card.querySelector('.app-overlay-btn-feature');
+                if (featureBtn) {
+                    featureBtn.classList.add('active');
+                    featureBtn.title = 'Remove from Featured';
+                    const icon = featureBtn.querySelector('i');
+                    if (icon) {
+                        icon.className = 'fas fa-star';
+                    }
+                }
+            });
+            
+            // Update button text
+            btn.innerHTML = '<i class="fas fa-check"></i> <span>All Featured!</span>';
+            btn.style.background = '#10b981';
+            btn.style.opacity = '1';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = '';
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            // Show error
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error featuring category products', 'error');
+            } else {
+                alert(data.message || 'Error featuring category products');
+            }
+            
+            // Reset button
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Error featuring category products', 'error');
+        } else {
+            alert('Error featuring category products');
+        }
+        
+        // Reset button
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    });
+}
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>
