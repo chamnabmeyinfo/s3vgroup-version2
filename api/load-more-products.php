@@ -101,7 +101,7 @@ foreach ($products as $product):
             
             <!-- Featured Badge -->
             <?php if ($product['is_featured']): ?>
-                <div class="app-featured-badge">
+                <div class="app-featured-badge" title="Featured Product">
                     <i class="fas fa-star"></i>
                     <span>Featured</span>
                 </div>

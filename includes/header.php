@@ -138,6 +138,41 @@ $navCategories = $categoryModel->getAll(true);
             text-overflow: ellipsis;
         }
         
+        /* Ultra Modern Navigation Link Styles */
+        .nav-link-ultra {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .nav-link-ultra:hover {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        
+        .nav-link-ultra.active {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(79, 70, 229, 0.15));
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.25);
+        }
+        
+        .nav-link-ultra .nav-link-indicator {
+            background: linear-gradient(90deg, var(--logo-primary, #2563eb), var(--logo-accent, #4f46e5), var(--logo-tertiary, #7c3aed));
+            height: 3px;
+            border-radius: 2px;
+        }
+        
+        .nav-link-ultra:hover .nav-link-indicator {
+            width: 80%;
+            opacity: 1;
+        }
+        
         /* Buttons */
         button.btn-primary,
         a.btn-primary {
@@ -184,50 +219,99 @@ $navCategories = $categoryModel->getAll(true);
             }
         }
         
-        /* Enhanced Navigation Links */
+        /* Enhanced Navigation Links - Ultra Modern */
         .nav-link-modern {
             position: relative;
             color: #4b5563;
             font-weight: 500;
             font-size: 0.9375rem;
-            padding: 0.625rem 1rem;
-            border-radius: 0.625rem;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.625rem;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            background: transparent;
+            border: 1px solid transparent;
+        }
+        
+        .nav-link-modern::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 0.75rem;
+            padding: 1px;
+            background: linear-gradient(135deg, var(--logo-primary, #2563eb), var(--logo-accent, #4f46e5));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .nav-link-modern:hover {
             color: var(--logo-primary, #2563eb);
-            background: rgba(59, 130, 246, 0.08);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(79, 70, 229, 0.08));
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+        }
+        
+        .nav-link-modern:hover::before {
+            opacity: 1;
         }
         
         .nav-link-modern.active {
             color: var(--logo-primary, #2563eb);
-            background: rgba(59, 130, 246, 0.1);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.12), rgba(79, 70, 229, 0.12));
             font-weight: 600;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
         }
         
-        /* Modern Action Buttons */
+        .nav-link-modern.active::before {
+            opacity: 1;
+        }
+        
+        .nav-link-modern i {
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-link-modern:hover i {
+            transform: scale(1.1);
+        }
+        
+        /* Modern Action Buttons - Enhanced */
         .nav-action-btn {
             position: relative;
-            padding: 0.625rem 1rem;
-            border-radius: 0.625rem;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
             font-weight: 500;
             font-size: 0.9375rem;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.625rem;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(229, 231, 235, 0.5);
         }
         
         .nav-action-btn:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+        
+        .nav-action-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-action-btn:hover i {
+            transform: scale(1.15) rotate(5deg);
         }
         
         /* Badge styling */
@@ -248,31 +332,68 @@ $navCategories = $categoryModel->getAll(true);
             border: 2px solid white;
         }
         
-        /* Enhanced Dropdown Menus */
+        /* Enhanced Dropdown Menus - Ultra Modern */
         .nav-dropdown {
             position: absolute;
-            top: calc(100% + 0.75rem);
+            top: calc(100% + 1rem);
             left: 0;
-            min-width: 20rem;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px) saturate(200%);
-            -webkit-backdrop-filter: blur(20px) saturate(200%);
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1),
-                        0 8px 10px -6px rgba(0, 0, 0, 0.1),
-                        0 0 0 1px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(229, 231, 235, 0.5);
+            min-width: 22rem;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-radius: 1.25rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15),
+                        0 8px 16px -4px rgba(0, 0, 0, 0.1),
+                        0 0 0 1px rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             opacity: 0;
             visibility: hidden;
-            transform: translateY(-0.5rem);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(-0.75rem) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             z-index: 50;
+            overflow: hidden;
+        }
+        
+        .nav-dropdown::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--logo-primary, #2563eb), var(--logo-accent, #4f46e5), var(--logo-tertiary, #7c3aed));
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .nav-dropdown-group:hover .nav-dropdown {
             opacity: 1;
             visibility: visible;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+        }
+        
+        .nav-dropdown-group:hover .nav-dropdown::before {
+            opacity: 1;
+        }
+        
+        .nav-dropdown a {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .nav-dropdown a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 0;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(79, 70, 229, 0.1));
+            transition: width 0.3s ease;
+        }
+        
+        .nav-dropdown a:hover::before {
+            width: 100%;
         }
         
     </style>
@@ -368,23 +489,28 @@ $navCategories = $categoryModel->getAll(true);
                                 <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                             </button>
                             <div class="nav-dropdown w-80 overflow-hidden">
-                                <div class="p-4 bg-gradient-to-r from-blue-50/60 to-indigo-50/60 border-b border-gray-100/50">
-                                    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider">Browse Categories</h3>
+                                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                                <div class="p-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border-b border-gray-100/50 relative">
+                                    <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                                        <i class="fas fa-th-large text-blue-500"></i>
+                                        Browse Categories
+                                    </h3>
                                 </div>
-                                <div class="p-2 max-h-96 overflow-y-auto">
+                                <div class="p-3 max-h-96 overflow-y-auto">
                                     <?php if (!empty($navCategories)): ?>
                                         <?php foreach (array_slice($navCategories, 0, 8) as $cat): ?>
                                         <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                                           class="group/item block px-4 py-2.5 rounded-lg hover:bg-blue-50/50 transition-all duration-200 border-l-2 border-transparent hover:border-blue-500 mb-0.5">
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-sm font-medium text-gray-700 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
-                                                <i class="fas fa-arrow-right text-xs text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-1 transition-all duration-200"></i>
+                                           class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg mb-1.5 relative overflow-hidden">
+                                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
+                                            <div class="flex items-center justify-between relative z-10">
+                                                <span class="text-sm font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
+                                                <i class="fas fa-arrow-right text-xs text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
                                             </div>
                                         </a>
                                         <?php endforeach; ?>
                                     <?php endif; ?>
-                                    <div class="mt-2 pt-2 border-t border-gray-100 p-2">
-                                        <a href="<?= url('products.php') ?>" class="block px-4 py-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-200 font-semibold text-sm text-center shadow-md hover:shadow-lg">
+                                    <div class="mt-3 pt-3 border-t border-gray-200/50 p-2">
+                                        <a href="<?= url('products.php') ?>" class="block px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white transition-all duration-300 font-semibold text-sm text-center shadow-lg hover:shadow-xl transform hover:scale-105">
                                             <i class="fas fa-th mr-2"></i>View All Products
                                         </a>
                                     </div>

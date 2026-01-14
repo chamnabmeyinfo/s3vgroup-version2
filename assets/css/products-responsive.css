@@ -601,10 +601,14 @@
 
   /* Featured Badge - Mobile */
   .app-featured-badge {
+    width: 2rem;
+    height: 2rem;
     top: 0.5rem;
     left: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.625rem;
+  }
+  
+  .app-featured-badge i {
+    font-size: 0.875rem;
   }
 
   /* Discount Badge - Mobile */

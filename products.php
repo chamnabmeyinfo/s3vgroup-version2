@@ -764,7 +764,7 @@ include __DIR__ . '/includes/header.php';
                                     
                                     <!-- Featured Badge -->
                                     <?php if ($product['is_featured']): ?>
-                                        <div class="app-featured-badge">
+                                        <div class="app-featured-badge" title="Featured Product">
                                             <i class="fas fa-star"></i>
                                             <span>Featured</span>
                                         </div>
@@ -1435,6 +1435,7 @@ function toggleFeatured(productId, buttonElement) {
                         if (!featuredBadge && imageWrapper) {
                             featuredBadge = document.createElement('div');
                             featuredBadge.className = 'app-featured-badge';
+                            featuredBadge.title = 'Featured Product';
                             featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
                             imageWrapper.appendChild(featuredBadge);
                         }
@@ -1726,6 +1727,7 @@ function featureCategory(categorySlug, categoryId) {
                     if (imageWrapper) {
                         featuredBadge = document.createElement('div');
                         featuredBadge.className = 'app-featured-badge';
+                        featuredBadge.title = 'Featured Product';
                         featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
                         imageWrapper.appendChild(featuredBadge);
                     }
