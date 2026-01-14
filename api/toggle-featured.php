@@ -54,23 +54,23 @@ try {
         'is_featured' => $newFeaturedStatus
     ];
     
-    // If featuring a product, set it to order 0 (first position)
-    // This ensures newly featured products appear at the top of the featured list
+    // If featuring a product, set it to the next available order (last position)
+    // This ensures the first clicked product stays at order 0, and subsequent products get 1, 2, 3, etc.
     if ($newFeaturedStatus == 1) {
-        // Get the minimum featured_order value from other featured products
-        $minOrder = db()->fetchOne("SELECT MIN(featured_order) as min_order FROM products WHERE is_featured = 1 AND id != :id", ['id' => $productId]);
-        $minOrderValue = $minOrder && isset($minOrder['min_order']) && $minOrder['min_order'] !== null ? (int)$minOrder['min_order'] : 0;
+        // Get the maximum featured_order value from other featured products
+        $maxOrder = db()->fetchOne("SELECT MAX(featured_order) as max_order FROM products WHERE is_featured = 1 AND id != :id", ['id' => $productId]);
+        $maxOrderValue = $maxOrder && isset($maxOrder['max_order']) && $maxOrder['max_order'] !== null ? (int)$maxOrder['max_order'] : -1;
         
-        // Set new featured product to appear first
-        // If minimum is 0 or less, set to 0. Otherwise, set to min - 1 to ensure it's first
-        $newOrder = ($minOrderValue <= 0) ? 0 : ($minOrderValue - 1);
+        // Set new featured product to appear last (after all existing featured products)
+        // First product gets 0, second gets 1, third gets 2, etc.
+        $newOrder = $maxOrderValue + 1;
         $updateData['featured_order'] = $newOrder;
     }
     
     $productModel->update($productId, $updateData);
     
     $response['success'] = true;
-    $response['message'] = $newFeaturedStatus ? 'Product marked as featured and ordered first.' : 'Product unmarked as featured.';
+    $response['message'] = $newFeaturedStatus ? 'Product marked as featured.' : 'Product unmarked as featured.';
     $response['is_featured'] = (bool)$newFeaturedStatus;
     if ($newFeaturedStatus == 1) {
         $response['featured_order'] = $updateData['featured_order'];
