@@ -437,6 +437,29 @@ include __DIR__ . '/includes/header.php';
             
             <!-- Products Grid -->
             <div class="flex-1 transition-all duration-300" id="products-container">
+                <!-- Admin Bar (if logged in) -->
+                <?php if (session('admin_logged_in')): ?>
+                <div class="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg shadow-sm flex items-center justify-between">
+                    <div class="flex items-center gap-2 text-sm text-yellow-800">
+                        <i class="fas fa-user-shield"></i>
+                        <span class="font-semibold">Admin Mode:</span>
+                        <span>You can feature/unfeature products directly from the product cards</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <a href="<?= url('admin/products.php') ?>" 
+                           class="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center gap-1 transition-colors">
+                            <i class="fas fa-list"></i>
+                            <span>Manage Products</span>
+                        </a>
+                        <a href="<?= url('admin/index.php') ?>" 
+                           class="px-3 py-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm flex items-center gap-1 transition-colors">
+                            <i class="fas fa-tachometer-alt"></i>
+                            <span class="hidden sm:inline">Dashboard</span>
+                        </a>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
                 <!-- Advanced Filters - Top Section (Toggleable) -->
                 <div class="advanced-filters-top">
                     <button onclick="toggleAdvancedFilters()" 
@@ -741,7 +764,7 @@ include __DIR__ . '/includes/header.php';
                                                 class="app-overlay-btn app-overlay-btn-feature <?= $product['is_featured'] ? 'active' : '' ?>"
                                                 id="feature-btn-<?= $product['id'] ?>"
                                                 title="<?= $product['is_featured'] ? 'Remove from Featured' : 'Mark as Featured' ?>">
-                                            <i class="fas <?= $product['is_featured'] ? 'fa-star' : 'fa-star' ?>"></i>
+                                            <i class="<?= $product['is_featured'] ? 'fas fa-star' : 'far fa-star' ?>"></i>
                                         </button>
                                         <?php endif; ?>
                                     </div>
@@ -1327,7 +1350,7 @@ function toggleFeatured(productId, buttonElement) {
                 // Update icon
                 const icon = buttonElement.querySelector('i');
                 if (icon) {
-                    icon.className = 'fas fa-star';
+                    icon.className = data.is_featured ? 'fas fa-star' : 'far fa-star';
                 }
                 
                 // Update featured badge on product card
