@@ -185,6 +185,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode(['success' => false, 'error' => 'Blog posts table not available']);
                 exit;
             }
+        } elseif ($data['type'] === 'services') {
+            // Services page
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Services';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('services.php');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'ceo_message') {
+            // CEO Message page
+            $data['title'] = !empty($customTitle) ? $customTitle : 'CEO Message';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'partners') {
+            // Partners & Clients - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners & Clients';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#partners');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'quality_certifications') {
+            // Quality Certifications - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Quality Certifications';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#quality-certifications');
+            $data['object_id'] = null;
         } elseif ($data['type'] === 'custom') {
             // URL is optional for custom links, default to #
             if (empty($data['url'])) {
@@ -338,6 +358,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo json_encode(['success' => false, 'error' => 'Blog posts table not available']);
                 exit;
             }
+        } elseif ($data['type'] === 'services') {
+            // Services page
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Services';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('services.php');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'ceo_message') {
+            // CEO Message page
+            $data['title'] = !empty($customTitle) ? $customTitle : 'CEO Message';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'partners') {
+            // Partners & Clients - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners & Clients';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#partners');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'quality_certifications') {
+            // Quality Certifications - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Quality Certifications';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#quality-certifications');
+            $data['object_id'] = null;
         }
         
         $updated = $itemModel->update($itemId, $data);
@@ -605,7 +645,7 @@ include __DIR__ . '/includes/header.php';
                 <label class="block text-sm font-semibold text-gray-700 mb-3">
                     <i class="fas fa-tag mr-2 text-green-600"></i>Item Type *
                 </label>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     <button type="button" onclick="selectEditItemType('custom')" class="edit-item-type-btn bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-4 text-center transition-all" data-type="custom">
                         <i class="fas fa-link text-blue-600 text-2xl mb-2"></i>
                         <div class="font-semibold text-gray-800">Custom Link</div>
@@ -642,6 +682,27 @@ include __DIR__ . '/includes/header.php';
                         <div class="text-xs text-gray-500 mt-1">Post Category</div>
                     </button>
                     <?php endif; ?>
+                    <!-- New Feature Types -->
+                    <button type="button" onclick="selectEditItemType('services')" class="edit-item-type-btn bg-teal-50 hover:bg-teal-100 border-2 border-teal-200 rounded-lg p-4 text-center transition-all" data-type="services">
+                        <i class="fas fa-concierge-bell text-teal-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Services</div>
+                        <div class="text-xs text-gray-500 mt-1">Services Page</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('ceo_message')" class="edit-item-type-btn bg-pink-50 hover:bg-pink-100 border-2 border-pink-200 rounded-lg p-4 text-center transition-all" data-type="ceo_message">
+                        <i class="fas fa-user-tie text-pink-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">CEO Message</div>
+                        <div class="text-xs text-gray-500 mt-1">CEO Message Page</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('partners')" class="edit-item-type-btn bg-cyan-50 hover:bg-cyan-100 border-2 border-cyan-200 rounded-lg p-4 text-center transition-all" data-type="partners">
+                        <i class="fas fa-handshake text-cyan-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Partners & Clients</div>
+                        <div class="text-xs text-gray-500 mt-1">Partners Section</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('quality_certifications')" class="edit-item-type-btn bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-lg p-4 text-center transition-all" data-type="quality_certifications">
+                        <i class="fas fa-certificate text-amber-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Quality Certifications</div>
+                        <div class="text-xs text-gray-500 mt-1">Certifications Section</div>
+                    </button>
                 </div>
             </div>
             
@@ -752,6 +813,114 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 <?php endif; ?>
+                
+                <!-- Services Fields -->
+                <div id="editServicesFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-teal-50 border border-teal-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-teal-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-teal-800 font-medium mb-2">Services Page</p>
+                                <p class="text-xs text-teal-700">This will link to the Services page. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-teal-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="edit_services_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Services (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Services" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-teal-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="edit_services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="<?= url('services.php') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default Services page URL</p>
+                    </div>
+                </div>
+                
+                <!-- CEO Message Fields -->
+                <div id="editCeoMessageFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-pink-50 border border-pink-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-pink-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-pink-800 font-medium mb-2">CEO Message Page</p>
+                                <p class="text-xs text-pink-700">This will link to the CEO Message page. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-pink-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="edit_ceo_message_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="CEO Message (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "CEO Message" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-pink-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="edit_ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="<?= url('ceo-message.php') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default CEO Message page URL</p>
+                    </div>
+                </div>
+                
+                <!-- Partners Fields -->
+                <div id="editPartnersFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-cyan-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners & Clients</p>
+                                <p class="text-xs text-cyan-700">This will link to the Partners & Clients section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-cyan-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="edit_partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners & Clients (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners & Clients" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-cyan-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="edit_partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="<?= url('index.php#partners') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                    </div>
+                </div>
+                
+                <!-- Quality Certifications Fields -->
+                <div id="editQualityCertificationsFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-amber-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-amber-800 font-medium mb-2">Quality Certifications</p>
+                                <p class="text-xs text-amber-700">This will link to the Quality Certifications section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-amber-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="edit_quality_certifications_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="Quality Certifications (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Quality Certifications" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-amber-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="edit_quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="<?= url('index.php#quality-certifications') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                    </div>
+                </div>
             </div>
             
             <!-- Common Fields -->
@@ -823,7 +992,7 @@ include __DIR__ . '/includes/header.php';
                 <label class="block text-sm font-semibold text-gray-700 mb-3">
                     <i class="fas fa-tag mr-2 text-blue-600"></i>Item Type *
                 </label>
-                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     <button type="button" onclick="selectItemType('custom')" class="item-type-btn bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-4 text-center transition-all" data-type="custom">
                         <i class="fas fa-link text-blue-600 text-2xl mb-2"></i>
                         <div class="font-semibold text-gray-800">Custom Link</div>
@@ -860,6 +1029,27 @@ include __DIR__ . '/includes/header.php';
                         <div class="text-xs text-gray-500 mt-1">Post Category</div>
                     </button>
                     <?php endif; ?>
+                    <!-- New Feature Types -->
+                    <button type="button" onclick="selectItemType('services')" class="item-type-btn bg-teal-50 hover:bg-teal-100 border-2 border-teal-200 rounded-lg p-4 text-center transition-all" data-type="services">
+                        <i class="fas fa-concierge-bell text-teal-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Services</div>
+                        <div class="text-xs text-gray-500 mt-1">Services Page</div>
+                    </button>
+                    <button type="button" onclick="selectItemType('ceo_message')" class="item-type-btn bg-pink-50 hover:bg-pink-100 border-2 border-pink-200 rounded-lg p-4 text-center transition-all" data-type="ceo_message">
+                        <i class="fas fa-user-tie text-pink-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">CEO Message</div>
+                        <div class="text-xs text-gray-500 mt-1">CEO Message Page</div>
+                    </button>
+                    <button type="button" onclick="selectItemType('partners')" class="item-type-btn bg-cyan-50 hover:bg-cyan-100 border-2 border-cyan-200 rounded-lg p-4 text-center transition-all" data-type="partners">
+                        <i class="fas fa-handshake text-cyan-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Partners & Clients</div>
+                        <div class="text-xs text-gray-500 mt-1">Partners Section</div>
+                    </button>
+                    <button type="button" onclick="selectItemType('quality_certifications')" class="item-type-btn bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-lg p-4 text-center transition-all" data-type="quality_certifications">
+                        <i class="fas fa-certificate text-amber-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Quality Certifications</div>
+                        <div class="text-xs text-gray-500 mt-1">Certifications Section</div>
+                    </button>
                 </div>
             </div>
             
@@ -990,6 +1180,114 @@ include __DIR__ . '/includes/header.php';
                     </div>
                 </div>
                 <?php endif; ?>
+                
+                <!-- Services Fields -->
+                <div id="servicesFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-teal-50 border border-teal-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-teal-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-teal-800 font-medium mb-2">Services Page</p>
+                                <p class="text-xs text-teal-700">This will link to the Services page. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-teal-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="services_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="Services (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Services" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-teal-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="<?= url('services.php') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default Services page URL</p>
+                    </div>
+                </div>
+                
+                <!-- CEO Message Fields -->
+                <div id="ceoMessageFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-pink-50 border border-pink-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-pink-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-pink-800 font-medium mb-2">CEO Message Page</p>
+                                <p class="text-xs text-pink-700">This will link to the CEO Message page. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-pink-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="ceo_message_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="CEO Message (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "CEO Message" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-pink-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="<?= url('ceo-message.php') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default CEO Message page URL</p>
+                    </div>
+                </div>
+                
+                <!-- Partners Fields -->
+                <div id="partnersFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-cyan-50 border border-cyan-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-cyan-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners & Clients</p>
+                                <p class="text-xs text-cyan-700">This will link to the Partners & Clients section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-cyan-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners & Clients (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners & Clients" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-cyan-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="<?= url('index.php#partners') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                    </div>
+                </div>
+                
+                <!-- Quality Certifications Fields -->
+                <div id="qualityCertificationsFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-amber-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-amber-800 font-medium mb-2">Quality Certifications</p>
+                                <p class="text-xs text-amber-700">This will link to the Quality Certifications section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-amber-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="quality_certifications_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="Quality Certifications (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Quality Certifications" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-amber-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="<?= url('index.php#quality-certifications') ?> (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                    </div>
+                </div>
             </div>
             
             <!-- Common Fields (shown for all types) -->
@@ -1290,6 +1588,22 @@ function selectItemType(type) {
             fieldsToShow = ['postCategoryFields'];
             requiredFields = ['post_category_name'];
             break;
+        case 'services':
+            fieldsToShow = ['servicesFields'];
+            requiredFields = [];
+            break;
+        case 'ceo_message':
+            fieldsToShow = ['ceoMessageFields'];
+            requiredFields = [];
+            break;
+        case 'partners':
+            fieldsToShow = ['partnersFields'];
+            requiredFields = [];
+            break;
+        case 'quality_certifications':
+            fieldsToShow = ['qualityCertificationsFields'];
+            requiredFields = [];
+            break;
     }
     
     // Show the relevant fields
@@ -1361,6 +1675,8 @@ if (addItemForm) {
             if (!categoryName) {
                 validationError = 'Please select a blog category';
             }
+        } else if (itemType === 'services' || itemType === 'ceo_message' || itemType === 'partners' || itemType === 'quality_certifications') {
+            // These types don't require validation - they have default values
         }
         
         if (validationError) {
@@ -1545,6 +1861,38 @@ async function editItem(id) {
             case 'post_category':
                 document.getElementById('edit_post_category_name').value = item.title || '';
                 break;
+            case 'services':
+                if (document.getElementById('edit_services_title')) {
+                    document.getElementById('edit_services_title').value = item.title || '';
+                }
+                if (document.getElementById('edit_services_url')) {
+                    document.getElementById('edit_services_url').value = item.url || '';
+                }
+                break;
+            case 'ceo_message':
+                if (document.getElementById('edit_ceo_message_title')) {
+                    document.getElementById('edit_ceo_message_title').value = item.title || '';
+                }
+                if (document.getElementById('edit_ceo_message_url')) {
+                    document.getElementById('edit_ceo_message_url').value = item.url || '';
+                }
+                break;
+            case 'partners':
+                if (document.getElementById('edit_partners_title')) {
+                    document.getElementById('edit_partners_title').value = item.title || '';
+                }
+                if (document.getElementById('edit_partners_url')) {
+                    document.getElementById('edit_partners_url').value = item.url || '';
+                }
+                break;
+            case 'quality_certifications':
+                if (document.getElementById('edit_quality_certifications_title')) {
+                    document.getElementById('edit_quality_certifications_title').value = item.title || '';
+                }
+                if (document.getElementById('edit_quality_certifications_url')) {
+                    document.getElementById('edit_quality_certifications_url').value = item.url || '';
+                }
+                break;
         }
         
         // For non-custom types, also populate title and URL fields if they exist (for custom link override)
@@ -1627,6 +1975,22 @@ function selectEditItemType(type) {
             fieldsToShow = ['editPostCategoryFields'];
             requiredFields = ['edit_post_category_name'];
             break;
+        case 'services':
+            fieldsToShow = ['editServicesFields'];
+            requiredFields = [];
+            break;
+        case 'ceo_message':
+            fieldsToShow = ['editCeoMessageFields'];
+            requiredFields = [];
+            break;
+        case 'partners':
+            fieldsToShow = ['editPartnersFields'];
+            requiredFields = [];
+            break;
+        case 'quality_certifications':
+            fieldsToShow = ['editQualityCertificationsFields'];
+            requiredFields = [];
+            break;
     }
     
     // Show the relevant fields
@@ -1647,7 +2011,7 @@ function selectEditItemType(type) {
     
     // Always show custom link fields as an option (for URL override)
     // But make them optional when not in custom mode
-    if (type !== 'custom') {
+    if (type !== 'custom' && type !== 'services' && type !== 'ceo_message' && type !== 'partners' && type !== 'quality_certifications') {
         const customFields = document.getElementById('editCustomLinkFields');
         if (customFields) {
             customFields.classList.remove('hidden');
@@ -1710,6 +2074,8 @@ if (editItemForm) {
             if (!categoryName) {
                 validationError = 'Please select a blog category';
             }
+        } else if (itemType === 'services' || itemType === 'ceo_message' || itemType === 'partners' || itemType === 'quality_certifications') {
+            // These types don't require validation - they have default values
         }
         
         if (validationError) {
