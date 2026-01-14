@@ -344,7 +344,6 @@
     <!-- JavaScript -->
     <script src="<?= asset('assets/js/lazy-load.js') ?>"></script>
     <script src="<?= asset('assets/js/main.js') ?>"></script>
-    <script src="<?= asset('assets/js/advanced-search.js') ?>"></script>
     <script src="<?= asset('assets/js/advanced-ux.js') ?>"></script>
     <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
     <script src="<?= asset('assets/js/hero-slider.js') ?>"></script>

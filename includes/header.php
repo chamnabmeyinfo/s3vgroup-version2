@@ -232,60 +232,6 @@ $navCategories = $categoryModel->getAll(true);
             border: 2px solid white;
         }
         
-        /* Search Bar - Visible in Menu */
-        .nav-search-container {
-            position: relative;
-            width: 200px;
-            min-width: 180px;
-            display: flex !important;
-            align-items: center;
-            margin-left: 0.5rem;
-        }
-        
-        .nav-search-input {
-            width: 100%;
-            padding: 0.625rem 0.75rem 0.625rem 2.5rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 0.625rem;
-            background: #ffffff;
-            font-size: 0.9375rem;
-            font-weight: 500;
-            color: #1f2937;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            height: 2.5rem;
-            line-height: 1.5;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        }
-        
-        .nav-search-input::placeholder {
-            color: #9ca3af;
-            font-weight: 400;
-        }
-        
-        .nav-search-input:focus {
-            outline: none;
-            border-color: var(--logo-primary, #2563eb);
-            background: #ffffff;
-            color: #1f2937;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        
-        .nav-search-icon {
-            position: absolute;
-            left: 0.875rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6b7280;
-            font-size: 0.875rem;
-            transition: color 0.25s;
-            pointer-events: none;
-            z-index: 1;
-        }
-        
-        .nav-search-input:focus + .nav-search-icon {
-            color: var(--logo-primary, #2563eb);
-        }
-        
         /* Enhanced Dropdown Menus */
         .nav-dropdown {
             position: absolute;
@@ -379,47 +325,6 @@ $navCategories = $categoryModel->getAll(true);
                     </span>
                 </a>
                 
-                <!-- Search Field - Aligned Left (Hidden on mobile, small on tablet, full on desktop) -->
-                <div class="hidden md:flex items-center ml-2">
-                    <div class="relative">
-                        <input type="text" 
-                               id="advanced-search" 
-                               placeholder="Search products..." 
-                               autocomplete="off"
-                               class="w-32 md:w-48 lg:w-64 px-3 md:px-4 py-2 md:py-2.5 pl-8 md:pl-10 pr-3 md:pr-4 border border-gray-300 rounded-lg bg-white text-gray-900 text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm">
-                        <i class="fas fa-search absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none text-xs md:text-sm"></i>
-                        <div id="search-results" class="hidden absolute top-full left-0 mt-2 w-80 md:w-96 rounded-lg shadow-xl bg-white border border-gray-200 z-50 max-h-96 overflow-y-auto"></div>
-                    </div>
-                </div>
-                
-                <!-- Mobile Search Icon Button (Alternative) -->
-                <button onclick="toggleMobileSearch()" 
-                        class="md:hidden ml-2 p-2 text-gray-600 hover:text-blue-600 transition-colors"
-                        id="mobile-search-toggle"
-                        aria-label="Search">
-                    <i class="fas fa-search text-lg"></i>
-                </button>
-                
-                <!-- Mobile Search Overlay -->
-                <div id="mobile-search-overlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 md:hidden">
-                    <div class="bg-white p-4">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="relative flex-1">
-                                <input type="text" 
-                                       id="mobile-advanced-search" 
-                                       placeholder="Search products..." 
-                                       autocomplete="off"
-                                       class="w-full px-4 py-3 pl-10 pr-4 border border-gray-300 rounded-lg bg-white text-gray-900 text-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
-                                <div id="mobile-search-results" class="hidden absolute top-full left-0 mt-2 w-full rounded-lg shadow-xl bg-white border border-gray-200 z-50 max-h-96 overflow-y-auto"></div>
-                            </div>
-                            <button onclick="toggleMobileSearch()" 
-                                    class="px-4 py-3 text-gray-600 hover:text-gray-800">
-                                <i class="fas fa-times text-xl"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
                 
                 <!-- Desktop Navigation -->
                 <?php
