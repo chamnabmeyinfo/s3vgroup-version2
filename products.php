@@ -446,7 +446,7 @@ include __DIR__ . '/includes/header.php';
                         <span>You can feature/unfeature products directly from the product cards</span>
                         <?php if (!empty($categoryName) && !empty($category)): ?>
                             <span class="mx-2">•</span>
-                            <span>or feature all products in this category</span>
+                            <span>or feature/unfeature all products in this category</span>
                         <?php endif; ?>
                     </div>
                     <div class="flex items-center gap-2">
@@ -456,7 +456,14 @@ include __DIR__ . '/includes/header.php';
                                     id="feature-category-btn-admin"
                                     title="Feature all products in '<?= escape($categoryName) ?>' category">
                                 <i class="fas fa-star"></i>
-                                <span>Feature All in Category</span>
+                                <span>Feature All</span>
+                            </button>
+                            <button onclick="unfeatureCategory('<?= escape($category['slug']) ?>', <?= $category['id'] ?>)" 
+                                    class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                    id="unfeature-category-btn-admin"
+                                    title="Unfeature all products in '<?= escape($categoryName) ?>' category">
+                                <i class="far fa-star"></i>
+                                <span>Unfeature All</span>
                             </button>
                         <?php endif; ?>
                         <a href="<?= url('admin/products.php') ?>" 
@@ -646,6 +653,13 @@ include __DIR__ . '/includes/header.php';
                                                 title="Feature all products in this category">
                                             <i class="fas fa-star"></i>
                                             <span>Feature All</span>
+                                        </button>
+                                        <button onclick="unfeatureCategory('<?= escape($category['slug']) ?>', <?= $category['id'] ?>)" 
+                                                class="ml-2 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-1.5"
+                                                id="unfeature-category-btn"
+                                                title="Unfeature all products in this category">
+                                            <i class="far fa-star"></i>
+                                            <span>Unfeature All</span>
                                         </button>
                                     <?php endif; ?>
                                 <?php else: ?>
@@ -1356,16 +1370,23 @@ function quickAddToCart(productId) {
 }
 
 // Toggle Featured Status (Admin Only)
+// One click to feature, one more click to unfeature
 function toggleFeatured(productId, buttonElement) {
     if (!buttonElement) {
         buttonElement = document.getElementById('feature-btn-' + productId);
     }
     
-    // Disable button during request
-    if (buttonElement) {
-        buttonElement.disabled = true;
-        buttonElement.style.opacity = '0.6';
+    if (!buttonElement) {
+        console.error('Feature button not found for product:', productId);
+        return;
     }
+    
+    // Disable button during request
+    buttonElement.disabled = true;
+    buttonElement.style.opacity = '0.6';
+    
+    // Get current state from button class
+    const isCurrentlyFeatured = buttonElement.classList.contains('active');
     
     fetch('<?= url('api/toggle-featured.php') ?>', {
         method: 'POST',
@@ -1905,6 +1926,130 @@ function updateFeaturedOrder(productId, orderValue) {
             orderBtn.disabled = false;
             orderBtn.style.opacity = '1';
         }
+    });
+}
+
+// Unfeature All Products in Category
+function unfeatureCategory(categorySlug, categoryId) {
+    const btn = document.getElementById('unfeature-category-btn') || document.getElementById('unfeature-category-btn-admin');
+    
+    if (!btn) {
+        console.error('Unfeature category button not found');
+        return;
+    }
+    
+    // Confirm action
+    const categoryName = btn.getAttribute('title')?.replace("Unfeature all products in '", '').replace("' category", '') || 'this category';
+    if (!confirm(`Are you sure you want to UNFEATURE ALL products in "${categoryName}"?\n\nThis will remove featured status from all products in this category (including subcategories).`)) {
+        return;
+    }
+    
+    // Disable button during request
+    btn.disabled = true;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Processing...</span>';
+    btn.style.opacity = '0.7';
+    
+    // Prepare request data
+    const formData = new URLSearchParams();
+    if (categorySlug) {
+        formData.append('category_slug', categorySlug);
+    }
+    if (categoryId) {
+        formData.append('category_id', categoryId);
+    }
+    
+    fetch('<?= url('api/unfeature-category.php') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: formData.toString()
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            if (typeof showNotification === 'function') {
+                showNotification(data.message, 'success');
+            } else {
+                alert(data.message);
+            }
+            
+            // Update all product cards on the page to remove featured status
+            const productCards = document.querySelectorAll('.app-product-card');
+            productCards.forEach(card => {
+                // Remove featured badge
+                const featuredBadge = card.querySelector('.app-featured-badge');
+                if (featuredBadge) {
+                    featuredBadge.remove();
+                }
+                
+                // Update feature button
+                const featureBtn = card.querySelector('.app-overlay-btn-feature');
+                if (featureBtn) {
+                    featureBtn.classList.remove('active');
+                    featureBtn.title = 'Click to Feature';
+                    const icon = featureBtn.querySelector('i');
+                    if (icon) {
+                        icon.className = 'far fa-star';
+                    }
+                    const textSpan = featureBtn.querySelector('.feature-btn-text');
+                    if (textSpan) {
+                        textSpan.textContent = 'Feature';
+                    } else {
+                        // Create text span if it doesn't exist
+                        const newTextSpan = document.createElement('span');
+                        newTextSpan.className = 'feature-btn-text';
+                        newTextSpan.textContent = 'Feature';
+                        featureBtn.appendChild(newTextSpan);
+                    }
+                }
+                
+                // Remove order button
+                const orderBtn = card.querySelector('.app-overlay-btn-order');
+                if (orderBtn) {
+                    orderBtn.remove();
+                }
+            });
+            
+            // Update button text
+            btn.innerHTML = '<i class="fas fa-check"></i> <span>All Unfeatured!</span>';
+            btn.style.background = '#10b981';
+            btn.style.opacity = '1';
+            
+            // Reset button after 3 seconds
+            setTimeout(() => {
+                btn.innerHTML = originalHTML;
+                btn.style.background = '';
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            // Show error
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error unfeaturing category products', 'error');
+            } else {
+                alert(data.message || 'Error unfeaturing category products');
+            }
+            
+            // Reset button
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Error unfeaturing category products', 'error');
+        } else {
+            alert('Error unfeaturing category products');
+        }
+        
+        // Reset button
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+        btn.style.opacity = '1';
     });
 }
 </script>
