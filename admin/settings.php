@@ -9,6 +9,60 @@ $error = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Handle cache clearing
+    if (isset($_POST['clear_cache']) && $_POST['clear_cache'] == '1') {
+        require_csrf();
+        
+        try {
+            $cleared = [];
+            
+            // Clear OPcache if available
+            if (function_exists('opcache_reset')) {
+                if (opcache_reset()) {
+                    $cleared[] = 'OPcache';
+                }
+            }
+            
+            // Clear APCu cache if available
+            if (function_exists('apcu_clear_cache')) {
+                if (apcu_clear_cache()) {
+                    $cleared[] = 'APCu cache';
+                }
+            }
+            
+            // Clear file-based cache using CacheService
+            try {
+                $cacheService = new \App\Services\CacheService();
+                $cacheService->clear();
+                $cleared[] = 'File cache';
+            } catch (\Exception $e) {
+                // Fallback: manual file clearing
+                $cacheDir = __DIR__ . '/../storage/cache';
+                if (is_dir($cacheDir)) {
+                    $files = glob($cacheDir . '/*');
+                    foreach ($files as $file) {
+                        if (is_file($file) && basename($file) !== '.gitkeep') {
+                            @unlink($file);
+                        }
+                    }
+                    $cleared[] = 'File cache';
+                }
+            }
+            
+            if (!empty($cleared)) {
+                $message = 'Cache cleared successfully: ' . implode(', ', $cleared) . '.';
+            } else {
+                $message = 'No cache systems found or already cleared.';
+            }
+        } catch (\Exception $e) {
+            $error = 'Error clearing cache: ' . $e->getMessage();
+        }
+        
+        // Redirect to prevent form resubmission
+        header('Location: ' . url('admin/settings.php') . '?cache_cleared=1');
+        exit;
+    }
+    
     // Handle logo upload
     if (isset($_FILES['site_logo']) && $_FILES['site_logo']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = __DIR__ . '/../storage/uploads/';
@@ -162,6 +216,13 @@ include __DIR__ . '/includes/header.php';
         </div>
     </div>
 
+    <?php 
+    // Check for cache cleared message from redirect
+    if (isset($_GET['cache_cleared']) && $_GET['cache_cleared'] == '1') {
+        $message = 'Cache cleared successfully!';
+    }
+    ?>
+    
     <?php if (!empty($message)): ?>
     <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
         <div class="flex items-center">
@@ -432,6 +493,58 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         
+        <!-- Cache Settings Section -->
+        <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-200 mt-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-4">
+                <i class="fas fa-broom text-amber-600 mr-2"></i> Cache Settings
+            </label>
+            
+            <div class="bg-white rounded-lg p-4 border border-amber-200">
+                <p class="text-sm text-gray-700 mb-4">
+                    <i class="fas fa-info-circle text-amber-600 mr-2"></i>
+                    Clear cached data to ensure the latest content is displayed. This includes file cache, OPcache, and APCu cache.
+                </p>
+                
+                <?php
+                // Get cache statistics
+                $cacheDir = __DIR__ . '/../storage/cache';
+                $cacheFiles = [];
+                $cacheSize = 0;
+                if (is_dir($cacheDir)) {
+                    $files = glob($cacheDir . '/*');
+                    foreach ($files as $file) {
+                        if (is_file($file) && basename($file) !== '.gitkeep') {
+                            $cacheFiles[] = $file;
+                            $cacheSize += filesize($file);
+                        }
+                    }
+                }
+                $cacheCount = count($cacheFiles);
+                $cacheSizeFormatted = $cacheSize > 0 ? number_format($cacheSize / 1024, 2) . ' KB' : '0 KB';
+                ?>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <p class="text-xs text-gray-600 mb-1">Cache Files</p>
+                        <p class="text-lg font-bold text-gray-800"><?= $cacheCount ?></p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3 border border-gray-200">
+                        <p class="text-xs text-gray-600 mb-1">Cache Size</p>
+                        <p class="text-lg font-bold text-gray-800"><?= $cacheSizeFormatted ?></p>
+                    </div>
+                </div>
+                
+                <form method="POST" action="<?= url('admin/settings.php') ?>" onsubmit="return confirmClearCache()" class="inline-block">
+                    <input type="hidden" name="clear_cache" value="1">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-amber-600 hover:to-orange-600 transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105">
+                        <i class="fas fa-trash-alt mr-2"></i>
+                        Clear All Cache
+                    </button>
+                </form>
+            </div>
+        </div>
+        
         <div class="pt-4 border-t border-gray-200">
             <button type="submit" name="submit" class="bg-gradient-to-r from-gray-700 to-gray-900 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-gray-800 hover:to-gray-950 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
                 <i class="fas fa-save mr-2"></i>
@@ -561,6 +674,10 @@ include __DIR__ . '/includes/header.php';
             input.addEventListener('change', updateLogoSizePreview);
         });
     });
+    
+    function confirmClearCache() {
+        return confirm('Are you sure you want to clear all cache? This action cannot be undone.');
+    }
     </script>
 </div>
 
