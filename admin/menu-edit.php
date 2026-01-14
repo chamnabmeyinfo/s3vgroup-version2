@@ -473,7 +473,6 @@ $pageTitle = $isEdit ? 'Edit Menu' : 'Add Menu';
 include __DIR__ . '/includes/header.php';
 ?>
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css">
 <style>
 .menu-item {
     cursor: move;
@@ -1481,7 +1480,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9hvq45wqt7F2PvU+8k6g1a8IdzW0+3s7z4fGB+6Z3P4ZMXvkd1HPhNb1X4hWtWB8QrN2JBMH8vSAXoGdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let sortableInstance = null;
 
