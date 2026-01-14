@@ -1406,6 +1406,135 @@ function toggleFeatured(productId, buttonElement) {
         }
     });
 }
+
+// Load More Products Handler
+document.addEventListener('DOMContentLoaded', function() {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const productsGrid = document.getElementById('products-grid');
+    
+    if (loadMoreBtn && productsGrid) {
+        loadMoreBtn.addEventListener('click', function() {
+            const currentPage = parseInt(loadMoreBtn.getAttribute('data-current-page')) || 1;
+            const nextPage = currentPage + 1;
+            const category = loadMoreBtn.getAttribute('data-category') || '';
+            const search = loadMoreBtn.getAttribute('data-search') || '';
+            const featured = loadMoreBtn.getAttribute('data-featured') || '';
+            
+            // Show loading state
+            const spinner = document.getElementById('load-more-spinner');
+            const loadMoreText = document.getElementById('load-more-text');
+            if (spinner) spinner.classList.remove('hidden');
+            if (loadMoreText) loadMoreText.textContent = 'Loading...';
+            loadMoreBtn.disabled = true;
+            
+            // Build URL with current filters
+            const urlParams = new URLSearchParams(window.location.search);
+            const params = new URLSearchParams({
+                page: nextPage
+            });
+            
+            // Add filters from URL
+            if (urlParams.get('category')) params.set('category', urlParams.get('category'));
+            if (urlParams.get('search')) params.set('search', urlParams.get('search'));
+            if (urlParams.get('featured')) params.set('featured', urlParams.get('featured'));
+            if (urlParams.get('min_price')) params.set('min_price', urlParams.get('min_price'));
+            if (urlParams.get('max_price')) params.set('max_price', urlParams.get('max_price'));
+            if (urlParams.get('in_stock')) params.set('in_stock', urlParams.get('in_stock'));
+            if (urlParams.get('sort')) params.set('sort', urlParams.get('sort'));
+            
+            // Fetch more products
+            fetch('<?= url('api/load-more-products.php') ?>?' + params.toString())
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.html) {
+                        // Create temporary container to parse HTML
+                        const tempDiv = document.createElement('div');
+                        tempDiv.innerHTML = data.html;
+                        
+                        // Get all product cards from the response
+                        const newProducts = tempDiv.querySelectorAll('.app-product-card');
+                        
+                        // Append each product to the grid
+                        newProducts.forEach(product => {
+                            productsGrid.appendChild(product);
+                        });
+                        
+                        // Apply current layout to new products
+                        const currentLayout = localStorage.getItem('productLayout') || 'grid';
+                        if (currentLayout !== 'grid') {
+                            newProducts.forEach(item => {
+                                if (currentLayout === 'list') {
+                                    item.classList.add('list-item');
+                                } else if (currentLayout === 'compact') {
+                                    item.classList.add('compact-item');
+                                }
+                            });
+                            if (currentLayout === 'list') {
+                                productsGrid.classList.add('list-view');
+                            } else if (currentLayout === 'compact') {
+                                productsGrid.classList.add('compact-view');
+                            }
+                        }
+                        
+                        // Initialize lazy loading for new images
+                        if (typeof initLazyLoading === 'function') {
+                            initLazyLoading();
+                        } else {
+                            // Fallback: trigger lazy loading manually
+                            setTimeout(() => {
+                                const lazyImages = tempDiv.querySelectorAll('img.lazy-load[data-src]');
+                                lazyImages.forEach(img => {
+                                    if (img.dataset.src) {
+                                        img.src = img.dataset.src;
+                                        img.classList.add('loaded');
+                                    }
+                                });
+                            }, 100);
+                        }
+                        
+                        // Update button state
+                        loadMoreBtn.setAttribute('data-current-page', nextPage);
+                        
+                        // Update remaining count
+                        const loadMoreCount = document.getElementById('load-more-count');
+                        if (loadMoreCount) {
+                            const remaining = data.totalProducts - (nextPage * 12);
+                            if (remaining > 0) {
+                                loadMoreCount.textContent = `(${remaining} remaining)`;
+                            } else {
+                                loadMoreCount.textContent = '';
+                            }
+                        }
+                        
+                        // Hide button if no more products
+                        if (!data.hasMore) {
+                            const loadMoreContainer = document.getElementById('load-more-container');
+                            if (loadMoreContainer) {
+                                loadMoreContainer.style.display = 'none';
+                            }
+                        }
+                    } else {
+                        console.error('Failed to load more products');
+                        if (typeof showNotification === 'function') {
+                            showNotification('Failed to load more products', 'error');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading more products:', error);
+                    if (typeof showNotification === 'function') {
+                        showNotification('Error loading more products', 'error');
+                    }
+                })
+                .finally(() => {
+                    // Reset loading state
+                    if (spinner) spinner.classList.add('hidden');
+                    if (loadMoreText) loadMoreText.textContent = 'Load More Products';
+                    loadMoreBtn.disabled = false;
+                });
+        });
+    }
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

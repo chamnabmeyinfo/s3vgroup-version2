@@ -164,17 +164,28 @@ document.addEventListener('DOMContentLoaded', function() {
         if (text) text.textContent = 'Loading...';
         if (btn) btn.disabled = true;
         
-        // Build query params
+        // Build query params - get all current filters from URL
+        const urlParams = new URLSearchParams(window.location.search);
         const params = new URLSearchParams();
         params.append('page', nextPage);
         
-        if (btn.dataset.category) {
+        // Add all filter parameters from URL to maintain filter state
+        if (urlParams.get('category')) params.append('category', urlParams.get('category'));
+        if (urlParams.get('search')) params.append('search', urlParams.get('search'));
+        if (urlParams.get('featured')) params.append('featured', urlParams.get('featured'));
+        if (urlParams.get('min_price')) params.append('min_price', urlParams.get('min_price'));
+        if (urlParams.get('max_price')) params.append('max_price', urlParams.get('max_price'));
+        if (urlParams.get('in_stock')) params.append('in_stock', urlParams.get('in_stock'));
+        if (urlParams.get('sort')) params.append('sort', urlParams.get('sort'));
+        
+        // Also check button data attributes as fallback
+        if (btn.dataset.category && !params.has('category')) {
             params.append('category', btn.dataset.category);
         }
-        if (btn.dataset.search) {
+        if (btn.dataset.search && !params.has('search')) {
             params.append('search', btn.dataset.search);
         }
-        if (btn.dataset.featured) {
+        if (btn.dataset.featured && !params.has('featured')) {
             params.append('featured', btn.dataset.featured);
         }
         
@@ -200,8 +211,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                         });
                         
+                        // Get all product cards (using .app-product-card class for consistency)
+                        const newProducts = temp.querySelectorAll('.app-product-card');
+                        
                         // Append each product with fade-in animation
-                        Array.from(temp.children).forEach((product, index) => {
+                        newProducts.forEach((product, index) => {
                             product.style.opacity = '0';
                             product.style.transform = 'translateY(20px)';
                             productsGrid.appendChild(product);
@@ -301,6 +315,16 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                 // Initialize lazy loading for any future images
                                 initLazyLoading();
+                                
+                                // Ensure feature buttons are properly initialized on newly loaded products
+                                // The toggleFeatured function is defined globally in products.php
+                                // All feature buttons should work automatically since they're in the HTML
+                                // But we can verify they're present
+                                const featureButtons = productsGrid.querySelectorAll('.app-overlay-btn-feature');
+                                if (featureButtons.length > 0 && typeof toggleFeatured === 'function') {
+                                    // Feature buttons are present and function is available
+                                    // They will work automatically via onclick handlers
+                                }
                             }, 300);
                         });
                         
