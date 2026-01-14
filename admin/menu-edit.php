@@ -810,10 +810,10 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-gray-400"></i>URL
                         </label>
-                        <input type="text" name="url" id="edit_custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="/ or /page.php or https://example.com">
+                        <input type="text" name="url" id="edit_custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="page.php?slug=about-us or https://example.com/page.php">
                         <p class="text-xs text-gray-500 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>
-                            Leave empty to use # as URL
+                            Accepts full URLs (https://...) or relative paths (page.php?slug=...). Leave empty to use # as URL.
                         </p>
                     </div>
                 </div>
@@ -926,8 +926,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-teal-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="edit_services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="<?= url('services.php') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default Services page URL</p>
+                        <input type="text" name="url" id="edit_services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="services.php or https://example.com/services.php">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (services.php). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -953,8 +953,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-pink-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="edit_ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="<?= url('ceo-message.php') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default CEO Message page URL</p>
+                        <input type="text" name="url" id="edit_ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="ceo-message.php or https://example.com/ceo-message.php">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (ceo-message.php). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -980,8 +980,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-cyan-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="edit_partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="<?= url('index.php#partners') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                        <input type="text" name="url" id="edit_partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="index.php#partners or https://example.com/index.php#partners">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#partners). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1007,8 +1007,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-amber-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="edit_quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="<?= url('index.php#quality-certifications') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                        <input type="text" name="url" id="edit_quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="index.php#quality-certifications or https://example.com/index.php#quality-certifications">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#quality-certifications). Leave empty to use default.</p>
                     </div>
                 </div>
             </div>
@@ -1157,7 +1157,11 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-gray-400"></i>URL
                         </label>
-                        <input type="text" name="url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="/ or /page.php">
+                        <input type="text" name="url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="page.php?slug=about-us or https://example.com/page.php">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            Accepts full URLs (https://...) or relative paths (page.php?slug=...)
+                        </p>
                         <p class="text-xs text-gray-500 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>
                             Leave empty to use # as URL
@@ -1293,8 +1297,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-teal-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="<?= url('services.php') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default Services page URL</p>
+                        <input type="text" name="url" id="services_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500" placeholder="services.php or https://example.com/services.php">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (services.php). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1320,8 +1324,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-pink-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="<?= url('ceo-message.php') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default CEO Message page URL</p>
+                        <input type="text" name="url" id="ceo_message_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500" placeholder="ceo-message.php or https://example.com/ceo-message.php">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (ceo-message.php). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1347,8 +1351,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-cyan-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="<?= url('index.php#partners') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                        <input type="text" name="url" id="partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="index.php#partners or https://example.com/index.php#partners">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#partners). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1374,8 +1378,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-amber-600"></i>Custom URL (Optional)
                         </label>
-                        <input type="text" name="url" id="quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="<?= url('index.php#quality-certifications') ?> (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use the default homepage anchor link</p>
+                        <input type="text" name="url" id="quality_certifications_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-amber-500" placeholder="index.php#quality-certifications or https://example.com/index.php#quality-certifications">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#quality-certifications). Leave empty to use default.</p>
                     </div>
                 </div>
             </div>
