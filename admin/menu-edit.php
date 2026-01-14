@@ -234,35 +234,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'icon' => trim($_POST['icon'] ?? '')
         ];
         
+        // Get existing item to preserve values if not provided
+        $existingItem = $itemModel->getById($itemId);
+        if (!$existingItem) {
+            echo json_encode(['success' => false, 'error' => 'Item not found']);
+            exit;
+        }
+        
         // Get custom title/URL from form (may come from custom fields or type-specific fields)
         $customTitle = null;
         $customUrl = null;
         
-        // Check for custom title/URL fields (used when type is not custom, but user wants to override)
-        if (isset($_POST['title']) && !empty(trim($_POST['title']))) {
+        // Check for title field - could be 'title' or type-specific field
+        if (isset($_POST['title']) && trim($_POST['title']) !== '') {
             $customTitle = trim($_POST['title']);
         }
-        if (isset($_POST['url']) && !empty(trim($_POST['url']))) {
+        // Also check for edit_custom_title (the actual field ID in the form)
+        if (empty($customTitle) && isset($_POST['edit_custom_title']) && trim($_POST['edit_custom_title']) !== '') {
+            $customTitle = trim($_POST['edit_custom_title']);
+        }
+        
+        // Check for URL field
+        if (isset($_POST['url']) && trim($_POST['url']) !== '') {
             $customUrl = trim($_POST['url']);
+        }
+        // Also check for edit_custom_url (the actual field ID in the form)
+        if (empty($customUrl) && isset($_POST['edit_custom_url']) && trim($_POST['edit_custom_url']) !== '') {
+            $customUrl = trim($_POST['edit_custom_url']);
         }
         
         // Validate based on type
         if ($data['type'] === 'custom') {
-            // For custom links, use the title from POST data
+            // For custom links, title is required
+            // First try to get from POST data (could be 'title' or 'edit_custom_title')
+            $titleValue = null;
             if (!empty($customTitle)) {
-                $data['title'] = $customTitle;
-            } elseif (isset($_POST['title']) && !empty(trim($_POST['title']))) {
-                $data['title'] = trim($_POST['title']);
+                $titleValue = $customTitle;
+            } elseif (isset($_POST['title']) && trim($_POST['title']) !== '') {
+                $titleValue = trim($_POST['title']);
+            } elseif (isset($_POST['edit_custom_title']) && trim($_POST['edit_custom_title']) !== '') {
+                $titleValue = trim($_POST['edit_custom_title']);
+            }
+            
+            if (!empty($titleValue)) {
+                $data['title'] = $titleValue;
+            } elseif (!empty($existingItem['title'])) {
+                // If no title provided in form, preserve existing title
+                $data['title'] = $existingItem['title'];
             } else {
+                // Only error if there's no existing title to preserve
                 echo json_encode(['success' => false, 'error' => 'Title is required for custom links']);
                 exit;
             }
             
-            // Use custom URL if provided, otherwise default to #
+            // Use custom URL if provided, otherwise use existing URL, or default to #
+            $urlValue = null;
             if (!empty($customUrl)) {
-                $data['url'] = $customUrl;
-            } elseif (isset($_POST['url']) && !empty(trim($_POST['url']))) {
-                $data['url'] = trim($_POST['url']);
+                $urlValue = $customUrl;
+            } elseif (isset($_POST['url']) && trim($_POST['url']) !== '') {
+                $urlValue = trim($_POST['url']);
+            } elseif (isset($_POST['edit_custom_url']) && trim($_POST['edit_custom_url']) !== '') {
+                $urlValue = trim($_POST['edit_custom_url']);
+            }
+            
+            if (!empty($urlValue)) {
+                $data['url'] = $urlValue;
+            } elseif (!empty($existingItem['url'])) {
+                $data['url'] = $existingItem['url'];
             } else {
                 $data['url'] = '#';
             }
