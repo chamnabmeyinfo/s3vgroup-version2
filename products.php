@@ -1439,6 +1439,9 @@ function toggleFeatured(productId, buttonElement) {
                             imageWrapper.appendChild(featuredBadge);
                         }
                         
+                        // Get the featured_order from response or default to 0
+                        const featuredOrder = data.featured_order !== undefined ? data.featured_order : 0;
+                        
                         // Show featured order button if it doesn't exist
                         let orderBtn = productCard.querySelector('.app-overlay-btn-order');
                         if (!orderBtn) {
@@ -1447,16 +1450,19 @@ function toggleFeatured(productId, buttonElement) {
                                 orderBtn = document.createElement('button');
                                 orderBtn.className = 'app-overlay-btn app-overlay-btn-order';
                                 orderBtn.id = `order-btn-${productId}`;
-                                orderBtn.title = 'Set Featured Order (current: 0)';
+                                orderBtn.title = `Set Featured Order (current: ${featuredOrder})`;
                                 orderBtn.onclick = function(e) {
                                     e.preventDefault();
                                     e.stopPropagation();
                                     const productName = productCard.querySelector('.app-product-title')?.textContent || 'Product';
-                                    openFeaturedOrderDialog(productId, 0, productName);
+                                    openFeaturedOrderDialog(productId, featuredOrder, productName);
                                 };
                                 orderBtn.innerHTML = '<i class="fas fa-sort-numeric-down"></i>';
                                 overlay.appendChild(orderBtn);
                             }
+                        } else {
+                            // Update existing order button title with new order value
+                            orderBtn.title = `Set Featured Order (current: ${featuredOrder})`;
                         }
                     } else {
                         if (featuredBadge) {
