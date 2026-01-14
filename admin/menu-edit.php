@@ -229,10 +229,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         $data = [
             'type' => $_POST['item_type'] ?? 'custom',
-            'object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
-            'target' => $_POST['target'] ?? '_self',
-            'icon' => trim($_POST['icon'] ?? '')
+            'target' => $_POST['target'] ?? $_POST['edit_target'] ?? '_self',
+            'icon' => trim($_POST['icon'] ?? $_POST['edit_iconInput'] ?? '')
         ];
+        
+        // Get object_id - check multiple possible field names
+        $objectId = null;
+        if (!empty($_POST['object_id'])) {
+            $objectId = (int)$_POST['object_id'];
+        } elseif (!empty($_POST['edit_category_object_id'])) {
+            $objectId = (int)$_POST['edit_category_object_id'];
+        } elseif (!empty($_POST['edit_product_object_id'])) {
+            $objectId = (int)$_POST['edit_product_object_id'];
+        } elseif (!empty($_POST['edit_page_object_id'])) {
+            $objectId = (int)$_POST['edit_page_object_id'];
+        } elseif (!empty($_POST['edit_post_object_id'])) {
+            $objectId = (int)$_POST['edit_post_object_id'];
+        }
+        $data['object_id'] = $objectId > 0 ? $objectId : null;
         
         // Get existing item to preserve values if not provided
         $existingItem = $itemModel->getById($itemId);
@@ -253,6 +267,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($customTitle) && isset($_POST['edit_custom_title']) && trim($_POST['edit_custom_title']) !== '') {
             $customTitle = trim($_POST['edit_custom_title']);
         }
+        // Check for type-specific title fields
+        if (empty($customTitle)) {
+            $typeSpecificTitleFields = [
+                'edit_services_title',
+                'edit_ceo_message_title',
+                'edit_partners_title',
+                'edit_quality_certifications_title'
+            ];
+            foreach ($typeSpecificTitleFields as $fieldName) {
+                if (isset($_POST[$fieldName]) && trim($_POST[$fieldName]) !== '') {
+                    $customTitle = trim($_POST[$fieldName]);
+                    break;
+                }
+            }
+        }
         
         // Check for URL field
         if (isset($_POST['url']) && trim($_POST['url']) !== '') {
@@ -261,6 +290,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Also check for edit_custom_url (the actual field ID in the form)
         if (empty($customUrl) && isset($_POST['edit_custom_url']) && trim($_POST['edit_custom_url']) !== '') {
             $customUrl = trim($_POST['edit_custom_url']);
+        }
+        // Check for type-specific URL fields
+        if (empty($customUrl)) {
+            $typeSpecificUrlFields = [
+                'edit_services_url',
+                'edit_ceo_message_url',
+                'edit_partners_url',
+                'edit_quality_certifications_url'
+            ];
+            foreach ($typeSpecificUrlFields as $fieldName) {
+                if (isset($_POST[$fieldName]) && trim($_POST[$fieldName]) !== '') {
+                    $customUrl = trim($_POST[$fieldName]);
+                    break;
+                }
+            }
         }
         
         // Validate based on type
@@ -375,11 +419,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 exit;
             }
         } elseif ($data['type'] === 'post_category') {
-            if (empty($_POST['category_name'])) {
+            // Check for category_name in POST (could be from edit form or add form)
+            $categoryNameValue = null;
+            if (isset($_POST['category_name']) && trim($_POST['category_name']) !== '') {
+                $categoryNameValue = trim($_POST['category_name']);
+            } elseif (isset($_POST['edit_post_category_name']) && trim($_POST['edit_post_category_name']) !== '') {
+                $categoryNameValue = trim($_POST['edit_post_category_name']);
+            }
+            
+            if (empty($categoryNameValue)) {
                 echo json_encode(['success' => false, 'error' => 'Please select a blog category']);
                 exit;
             }
-            $categoryName = trim($_POST['category_name']);
+            $categoryName = $categoryNameValue;
+            
             try {
                 $categoryExists = db()->fetchOne("SELECT DISTINCT category FROM blog_posts WHERE category = :cat AND is_published = 1 LIMIT 1", ['cat' => $categoryName]);
                 if ($categoryExists) {
