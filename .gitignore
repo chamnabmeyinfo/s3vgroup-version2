@@ -112,3 +112,9 @@ build/
 *.docx
 *.pdf
 
+# GitHub Token files (security - never commit tokens)
+*.token
+*.pat
+config.local
+# Note: .git/config is already ignored by Git by default
+
