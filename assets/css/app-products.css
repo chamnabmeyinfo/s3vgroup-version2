@@ -385,6 +385,27 @@
     color: white !important;
 }
 
+.app-overlay-btn-feature {
+    background: white;
+    color: #fbbf24;
+}
+
+.app-overlay-btn-feature:hover {
+    background: #fbbf24;
+    color: white;
+    transform: scale(1.1);
+}
+
+.app-overlay-btn-feature.active {
+    background: #fbbf24 !important;
+    color: white !important;
+}
+
+.app-overlay-btn-feature.active:hover {
+    background: #f59e0b !important;
+    color: white !important;
+}
+
 .app-overlay-btn-primary:hover {
     background: #1d4ed8;
 }

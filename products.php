@@ -736,6 +736,14 @@ include __DIR__ . '/includes/header.php';
                                                 title="Add to Compare">
                                             <i class="fas fa-balance-scale"></i>
                                         </button>
+                                        <?php if (session('admin_logged_in')): ?>
+                                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleFeatured(<?= $product['id'] ?>, this)" 
+                                                class="app-overlay-btn app-overlay-btn-feature <?= $product['is_featured'] ? 'active' : '' ?>"
+                                                id="feature-btn-<?= $product['id'] ?>"
+                                                title="<?= $product['is_featured'] ? 'Remove from Featured' : 'Mark as Featured' ?>">
+                                            <i class="fas <?= $product['is_featured'] ? 'fa-star' : 'fa-star' ?>"></i>
+                                        </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 
@@ -1286,6 +1294,93 @@ function quickAddToCart(productId) {
     .catch(error => {
         console.error('Error:', error);
         alert('Error adding product to cart');
+    });
+}
+
+// Toggle Featured Status (Admin Only)
+function toggleFeatured(productId, buttonElement) {
+    if (!buttonElement) {
+        buttonElement = document.getElementById('feature-btn-' + productId);
+    }
+    
+    // Disable button during request
+    if (buttonElement) {
+        buttonElement.disabled = true;
+        buttonElement.style.opacity = '0.6';
+    }
+    
+    fetch('<?= url('api/toggle-featured.php') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: 'product_id=' + productId
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update button state
+            if (buttonElement) {
+                buttonElement.classList.toggle('active');
+                buttonElement.title = data.is_featured ? 'Remove from Featured' : 'Mark as Featured';
+                
+                // Update icon
+                const icon = buttonElement.querySelector('i');
+                if (icon) {
+                    icon.className = 'fas fa-star';
+                }
+                
+                // Update featured badge on product card
+                const productCard = buttonElement.closest('.app-product-card');
+                if (productCard) {
+                    let featuredBadge = productCard.querySelector('.app-featured-badge');
+                    if (data.is_featured) {
+                        if (!featuredBadge) {
+                            const imageWrapper = productCard.querySelector('.app-product-image-wrapper');
+                            if (imageWrapper) {
+                                featuredBadge = document.createElement('div');
+                                featuredBadge.className = 'app-featured-badge';
+                                featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
+                                imageWrapper.appendChild(featuredBadge);
+                            }
+                        }
+                    } else {
+                        if (featuredBadge) {
+                            featuredBadge.remove();
+                        }
+                    }
+                }
+            }
+            
+            // Show notification
+            if (typeof showNotification === 'function') {
+                showNotification(data.message, 'success');
+            } else {
+                alert(data.message);
+            }
+        } else {
+            // Show error
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error toggling featured status', 'error');
+            } else {
+                alert(data.message || 'Error toggling featured status');
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Error toggling featured status', 'error');
+        } else {
+            alert('Error toggling featured status');
+        }
+    })
+    .finally(() => {
+        // Re-enable button
+        if (buttonElement) {
+            buttonElement.disabled = false;
+            buttonElement.style.opacity = '1';
+        }
     });
 }
 </script>
