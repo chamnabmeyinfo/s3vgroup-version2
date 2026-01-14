@@ -102,36 +102,38 @@ class Product
         $page = (int)($filters['page'] ?? 1);
         $offset = ($page - 1) * $limit;
 
-        // Sorting - Always show featured products first, then apply sort within each group
-        $orderBy = "p.is_featured DESC"; // Featured products always first
+        // Sorting - Always show featured products first (by featured_order), then apply sort within each group
+        // Featured products are sorted by featured_order ASC (lower numbers first), then by the selected sort
+        $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC"; // Featured products first, ordered by featured_order
+        
         if (!empty($filters['sort'])) {
             switch ($filters['sort']) {
                 case 'name':
-                    $orderBy = "p.is_featured DESC, p.name ASC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.name ASC";
                     break;
                 case 'name_desc':
-                    $orderBy = "p.is_featured DESC, p.name DESC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.name DESC";
                     break;
                 case 'price_asc':
-                    $orderBy = "p.is_featured DESC, COALESCE(p.sale_price, p.price, 0) ASC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, COALESCE(p.sale_price, p.price, 0) ASC";
                     break;
                 case 'price_desc':
-                    $orderBy = "p.is_featured DESC, COALESCE(p.sale_price, p.price, 0) DESC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, COALESCE(p.sale_price, p.price, 0) DESC";
                     break;
                 case 'newest':
-                    $orderBy = "p.is_featured DESC, p.created_at DESC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.created_at DESC";
                     break;
                 case 'featured':
-                    $orderBy = "p.is_featured DESC, p.created_at DESC";
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.created_at DESC";
                     break;
                 default:
-                    // Default: featured first, then by creation date
-                    $orderBy = "p.is_featured DESC, p.created_at DESC";
+                    // Default: featured first (by featured_order), then by creation date
+                    $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.created_at DESC";
                     break;
             }
         } else {
-            // Default: featured first, then by creation date
-            $orderBy = "p.is_featured DESC, p.created_at DESC";
+            // Default: featured first (by featured_order), then by creation date
+            $orderBy = "p.is_featured DESC, CASE WHEN p.is_featured = 1 THEN p.featured_order ELSE 999999 END ASC, p.created_at DESC";
         }
 
         $sql = "SELECT p.*, c.name as category_name, c.slug as category_slug

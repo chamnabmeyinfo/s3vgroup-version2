@@ -757,7 +757,7 @@ include __DIR__ . '/includes/header.php';
                                     <?php endif; ?>
                                     
                                     <!-- Quick Actions Overlay -->
-                                    <div class="app-product-overlay">
+                                    <div class="app-product-overlay" style="position: relative;">
                                         <button onclick="event.preventDefault(); event.stopPropagation(); openQuickView(<?= $product['id'] ?>)" 
                                                 class="app-overlay-btn"
                                                 title="Quick View">
@@ -790,6 +790,20 @@ include __DIR__ . '/includes/header.php';
                                         </button>
                                         <?php endif; ?>
                                     </div>
+                                    <?php if (session('admin_logged_in') && $product['is_featured']): ?>
+                                    <div class="app-featured-order-input" onclick="event.preventDefault(); event.stopPropagation();">
+                                        <input type="number" 
+                                               value="<?= (int)($product['featured_order'] ?? 0) ?>" 
+                                               min="0" 
+                                               step="1"
+                                               class="featured-order-input"
+                                               data-product-id="<?= $product['id'] ?>"
+                                               data-original-value="<?= (int)($product['featured_order'] ?? 0) ?>"
+                                               onchange="updateFeaturedOrder(<?= $product['id'] ?>, this.value)"
+                                               onclick="event.stopPropagation();"
+                                               title="Featured Order (lower numbers appear first)">
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <!-- Product Info -->
@@ -1375,23 +1389,47 @@ function toggleFeatured(productId, buttonElement) {
                     icon.className = data.is_featured ? 'fas fa-star' : 'far fa-star';
                 }
                 
-                // Update featured badge on product card
+                // Update featured badge and order input on product card
                 const productCard = buttonElement.closest('.app-product-card');
                 if (productCard) {
+                    const imageWrapper = productCard.querySelector('.app-product-image-wrapper');
+                    
                     let featuredBadge = productCard.querySelector('.app-featured-badge');
                     if (data.is_featured) {
-                        if (!featuredBadge) {
-                            const imageWrapper = productCard.querySelector('.app-product-image-wrapper');
-                            if (imageWrapper) {
-                                featuredBadge = document.createElement('div');
-                                featuredBadge.className = 'app-featured-badge';
-                                featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
-                                imageWrapper.appendChild(featuredBadge);
-                            }
+                        if (!featuredBadge && imageWrapper) {
+                            featuredBadge = document.createElement('div');
+                            featuredBadge.className = 'app-featured-badge';
+                            featuredBadge.innerHTML = '<i class="fas fa-star"></i><span>Featured</span>';
+                            imageWrapper.appendChild(featuredBadge);
+                        }
+                        
+                        // Show featured order input if it doesn't exist
+                        let orderInput = productCard.querySelector('.app-featured-order-input');
+                        if (!orderInput && imageWrapper) {
+                            orderInput = document.createElement('div');
+                            orderInput.className = 'app-featured-order-input';
+                            orderInput.onclick = function(e) { e.preventDefault(); e.stopPropagation(); };
+                            orderInput.innerHTML = `<input type="number" 
+                                                           value="0" 
+                                                           min="0" 
+                                                           step="1"
+                                                           class="featured-order-input"
+                                                           data-product-id="${productId}"
+                                                           data-original-value="0"
+                                                           onchange="updateFeaturedOrder(${productId}, this.value)"
+                                                           onclick="event.stopPropagation();"
+                                                           title="Featured Order (lower numbers appear first)">`;
+                            imageWrapper.appendChild(orderInput);
                         }
                     } else {
                         if (featuredBadge) {
                             featuredBadge.remove();
+                        }
+                        
+                        // Hide featured order input
+                        const orderInput = productCard.querySelector('.app-featured-order-input');
+                        if (orderInput) {
+                            orderInput.remove();
                         }
                     }
                 }
@@ -1671,6 +1709,83 @@ function featureCategory(categorySlug, categoryId) {
         btn.style.opacity = '1';
     });
 }
+
+// Update Featured Order
+function updateFeaturedOrder(productId, orderValue) {
+    const orderInput = document.querySelector(`.featured-order-input[data-product-id="${productId}"]`);
+    
+    if (!orderInput) {
+        console.error('Featured order input not found');
+        return;
+    }
+    
+    // Validate order value
+    const order = parseInt(orderValue) || 0;
+    if (order < 0) {
+        orderInput.value = 0;
+        return;
+    }
+    
+    // Disable input during request
+    orderInput.disabled = true;
+    orderInput.style.opacity = '0.6';
+    
+    fetch('<?= url('api/update-featured-order.php') ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `product_id=${productId}&featured_order=${order}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message (optional, can be subtle)
+            if (typeof showNotification === 'function') {
+                showNotification('Featured order updated', 'success');
+            }
+            
+            // Optionally reload the page to reorder products
+            // Or just update the order value
+            orderInput.value = data.featured_order;
+        } else {
+            // Show error
+            if (typeof showNotification === 'function') {
+                showNotification(data.message || 'Error updating featured order', 'error');
+            } else {
+                alert(data.message || 'Error updating featured order');
+            }
+            
+            // Revert to original value
+            orderInput.value = orderInput.getAttribute('data-original-value') || 0;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        if (typeof showNotification === 'function') {
+            showNotification('Error updating featured order', 'error');
+        } else {
+            alert('Error updating featured order');
+        }
+        
+        // Revert to original value
+        orderInput.value = orderInput.getAttribute('data-original-value') || 0;
+    })
+    .finally(() => {
+        // Re-enable input
+        orderInput.disabled = false;
+        orderInput.style.opacity = '1';
+    });
+}
+
+// Initialize featured order inputs on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const orderInputs = document.querySelectorAll('.featured-order-input');
+    orderInputs.forEach(input => {
+        // Store original value
+        input.setAttribute('data-original-value', input.value);
+    });
+});
 </script>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

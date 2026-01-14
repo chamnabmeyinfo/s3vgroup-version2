@@ -141,6 +141,20 @@ foreach ($products as $product):
                 </button>
                 <?php endif; ?>
             </div>
+            <?php if ($isAdmin && $product['is_featured']): ?>
+            <div class="app-featured-order-input" onclick="event.preventDefault(); event.stopPropagation();">
+                <input type="number" 
+                       value="<?= (int)($product['featured_order'] ?? 0) ?>" 
+                       min="0" 
+                       step="1"
+                       class="featured-order-input"
+                       data-product-id="<?= $product['id'] ?>"
+                       data-original-value="<?= (int)($product['featured_order'] ?? 0) ?>"
+                       onchange="updateFeaturedOrder(<?= $product['id'] ?>, this.value)"
+                       onclick="event.stopPropagation();"
+                       title="Featured Order (lower numbers appear first)">
+            </div>
+            <?php endif; ?>
         </div>
         
         <!-- Product Info -->
