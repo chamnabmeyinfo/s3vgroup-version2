@@ -202,16 +202,83 @@ $pageTitle = 'Site Settings';
 include __DIR__ . '/includes/header.php';
 ?>
 
+<style>
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    .float-animation {
+        animation: float 6s ease-in-out infinite;
+    }
+    .settings-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .settings-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    .tab-button {
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        transition: width 0.3s ease;
+    }
+    .tab-button.active::after {
+        width: 100%;
+    }
+    .input-group {
+        position: relative;
+    }
+    .input-group input:focus + .input-icon,
+    .input-group textarea:focus + .input-icon,
+    .input-group select:focus + .input-icon {
+        color: #6366f1;
+        transform: scale(1.1);
+    }
+    .glass-effect {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+</style>
+
 <div class="w-full">
-    <!-- Header -->
-    <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
-        <div class="flex items-center justify-between">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
-                    <i class="fas fa-cog mr-2 md:mr-3"></i>
-                    Site Settings
-                </h1>
-                <p class="text-gray-300 text-sm md:text-lg">Configure your website settings</p>
+    <!-- Modern Header with Glassmorphism -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-2xl shadow-2xl mb-6">
+        <!-- Animated Background Pattern -->
+        <div class="absolute inset-0 opacity-20">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, white 1px, transparent 0); background-size: 40px 40px; animation: float 20s linear infinite;"></div>
+        </div>
+        
+        <!-- Floating Orbs -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl float-animation"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-purple-300/20 rounded-full blur-3xl float-animation" style="animation-delay: 2s;"></div>
+        
+        <div class="relative p-6 md:p-8 lg:p-10 text-white">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="p-4 bg-white/20 backdrop-blur-sm rounded-2xl shadow-lg">
+                        <i class="fas fa-cog text-3xl md:text-4xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-3xl md:text-4xl font-bold mb-2">
+                            Site Settings
+                        </h1>
+                        <p class="text-indigo-100 text-base md:text-lg">Configure and customize your website settings</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                    <i class="fas fa-shield-alt text-yellow-300"></i>
+                    <span class="text-sm font-medium">Admin Panel</span>
+                </div>
             </div>
         </div>
     </div>
@@ -224,74 +291,97 @@ include __DIR__ . '/includes/header.php';
     ?>
     
     <?php if (!empty($message)): ?>
-    <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2 text-xl"></i>
-            <span class="font-semibold"><?= escape($message) ?></span>
+    <div class="relative overflow-hidden bg-gradient-to-r from-green-50 to-emerald-50 border-l-4 border-green-500 rounded-xl shadow-lg p-4 mb-6 animate-fadeIn">
+        <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 p-2 bg-green-500 rounded-lg">
+                <i class="fas fa-check-circle text-white text-xl"></i>
+            </div>
+            <div>
+                <span class="font-semibold text-green-800 block"><?= escape($message) ?></span>
+            </div>
         </div>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-green-200/20 rounded-full -mr-16 -mt-16"></div>
     </div>
     <?php endif; ?>
 
     <?php if (!empty($error)): ?>
-    <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg mb-6">
-        <div class="flex items-center">
-            <i class="fas fa-exclamation-circle mr-2 text-xl"></i>
-            <span class="font-semibold"><?= escape($error) ?></span>
+    <div class="relative overflow-hidden bg-gradient-to-r from-red-50 to-rose-50 border-l-4 border-red-500 rounded-xl shadow-lg p-4 mb-6 animate-fadeIn">
+        <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 p-2 bg-red-500 rounded-lg">
+                <i class="fas fa-exclamation-circle text-white text-xl"></i>
+            </div>
+            <div>
+                <span class="font-semibold text-red-800 block"><?= escape($error) ?></span>
+            </div>
         </div>
+        <div class="absolute top-0 right-0 w-32 h-32 bg-red-200/20 rounded-full -mr-16 -mt-16"></div>
     </div>
     <?php endif; ?>
 
-    <!-- Tab Navigation -->
-    <div class="bg-white rounded-xl shadow-lg mb-6 overflow-hidden">
-        <div class="border-b border-gray-200">
-            <nav class="flex flex-wrap -mb-px" id="settings-tabs">
-                <button type="button" onclick="showSettingsTab('general')" id="tab-btn-general" class="settings-tab-button active px-6 py-4 text-sm font-medium border-b-2 border-indigo-600 text-indigo-600 transition-all">
-                    <i class="fas fa-info-circle mr-2"></i>General
-                </button>
-                <button type="button" onclick="showSettingsTab('logo')" id="tab-btn-logo" class="settings-tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all">
-                    <i class="fas fa-image mr-2"></i>Logo & Branding
-                </button>
-                <button type="button" onclick="showSettingsTab('contact')" id="tab-btn-contact" class="settings-tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all">
-                    <i class="fas fa-address-book mr-2"></i>Contact
-                </button>
-                <button type="button" onclick="showSettingsTab('sliders')" id="tab-btn-sliders" class="settings-tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all">
-                    <i class="fas fa-palette mr-2"></i>Logo Sliders
-                </button>
-                <button type="button" onclick="showSettingsTab('system')" id="tab-btn-system" class="settings-tab-button px-6 py-4 text-sm font-medium border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 transition-all">
-                    <i class="fas fa-tools mr-2"></i>System
-                </button>
-            </nav>
-        </div>
+    <!-- Modern Tab Navigation -->
+    <div class="bg-white rounded-2xl shadow-xl mb-6 overflow-hidden border border-gray-100">
+        <nav class="flex flex-wrap" id="settings-tabs">
+            <button type="button" onclick="showSettingsTab('general')" id="tab-btn-general" class="tab-button active flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-indigo-600 bg-indigo-50 transition-all relative group">
+                <i class="fas fa-info-circle mr-2"></i>
+                <span>General</span>
+                <div class="absolute inset-0 bg-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button type="button" onclick="showSettingsTab('logo')" id="tab-btn-logo" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all relative group">
+                <i class="fas fa-image mr-2"></i>
+                <span>Logo & Branding</span>
+                <div class="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button type="button" onclick="showSettingsTab('contact')" id="tab-btn-contact" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all relative group">
+                <i class="fas fa-address-book mr-2"></i>
+                <span>Contact</span>
+                <div class="absolute inset-0 bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button type="button" onclick="showSettingsTab('sliders')" id="tab-btn-sliders" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all relative group">
+                <i class="fas fa-palette mr-2"></i>
+                <span>Logo Sliders</span>
+                <div class="absolute inset-0 bg-purple-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+            <button type="button" onclick="showSettingsTab('system')" id="tab-btn-system" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-all relative group">
+                <i class="fas fa-tools mr-2"></i>
+                <span>System</span>
+                <div class="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            </button>
+        </nav>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8">
+    <form method="POST" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 lg:p-10">
         
         <!-- ============================================ -->
         <!-- TAB 1: GENERAL SITE INFORMATION -->
         <!-- ============================================ -->
         <div id="tab-content-general" class="settings-tab-content">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center">
-                    <i class="fas fa-info-circle text-indigo-600 mr-3"></i>
-                    General Site Information
-                </h2>
-                <p class="text-gray-600">Configure basic website information and settings</p>
+            <!-- Section Header -->
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="p-3 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl shadow-lg">
+                        <i class="fas fa-info-circle text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">General Site Information</h2>
+                        <p class="text-gray-600 mt-1">Configure basic website information and settings</p>
+                    </div>
+                </div>
             </div>
             
-            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-300 space-y-4">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-info-circle text-gray-600 mr-3"></i>
-                General Site Information
-            </h2>
-            <p class="text-sm text-gray-600 mb-6">Basic information about your website</p>
+            <!-- Settings Card -->
+            <div class="settings-card bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-lg space-y-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-globe text-gray-400 mr-2"></i> Site Name
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="input-group">
+                    <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-globe text-indigo-500 mr-2"></i> 
+                        <span>Site Name</span>
                     </label>
-                    <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all">
+                    <div class="relative">
+                        <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
+                               class="w-full px-4 py-3.5 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white shadow-sm hover:shadow-md">
+                        <i class="fas fa-globe input-icon absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-all"></i>
+                    </div>
                 </div>
                 
                 <div>
@@ -1308,15 +1398,20 @@ include __DIR__ . '/includes/header.php';
         </div>
         
         <!-- Save Button - Fixed at bottom -->
-        <div class="sticky bottom-0 bg-white border-t-2 border-gray-200 -mx-4 md:-mx-6 lg:-mx-8 px-4 md:px-6 lg:px-8 py-4 mt-8 shadow-lg">
-            <div class="flex items-center justify-between">
-                <p class="text-sm text-gray-600">
-                    <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                    Make sure to save your changes after editing settings
-                </p>
-                <button type="submit" name="submit" class="bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105">
-                    <i class="fas fa-save mr-2"></i>
-                    Save All Settings
+        <div class="sticky bottom-0 bg-gradient-to-r from-white via-gray-50 to-white border-t-2 border-indigo-200 -mx-6 md:-mx-8 lg:-mx-10 px-6 md:px-8 lg:px-10 py-5 mt-10 shadow-2xl backdrop-blur-sm">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+                    <i class="fas fa-info-circle text-blue-600 text-lg"></i>
+                    <p class="text-sm font-medium text-blue-800">
+                        Make sure to save your changes after editing settings
+                    </p>
+                </div>
+                <button type="submit" name="submit" class="group relative bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 text-white px-10 py-4 rounded-xl font-bold text-lg hover:from-indigo-700 hover:via-purple-700 hover:to-indigo-800 transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105 overflow-hidden">
+                    <span class="relative z-10 flex items-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span>Save All Settings</span>
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                 </button>
             </div>
         </div>
@@ -1324,21 +1419,29 @@ include __DIR__ . '/includes/header.php';
 
     <style>
     /* Settings Tab Styles */
-    .settings-tab-button {
+    .tab-button {
         position: relative;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
-    .settings-tab-button:hover {
-        background-color: #f9fafb;
+    .tab-button::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        transition: width 0.3s ease;
+        border-radius: 3px 3px 0 0;
     }
     
-    .settings-tab-button.active {
-        background-color: #f9fafb;
+    .tab-button.active::after {
+        width: 100%;
     }
     
     .settings-tab-content {
-        animation: fadeIn 0.3s ease-in;
+        animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         min-height: 200px;
     }
     
@@ -1349,12 +1452,37 @@ include __DIR__ . '/includes/header.php';
     @keyframes fadeIn {
         from {
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
             transform: translateY(0);
         }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .float-animation {
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .settings-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .settings-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+    
+    .input-group input:focus,
+    .input-group textarea:focus,
+    .input-group select:focus {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.1), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
     }
     
     .preset-card {
@@ -1528,9 +1656,9 @@ include __DIR__ . '/includes/header.php';
         });
         
         // Remove active class from all buttons
-        document.querySelectorAll('.settings-tab-button').forEach(btn => {
-            btn.classList.remove('active', 'border-indigo-600', 'text-indigo-600');
-            btn.classList.add('border-transparent', 'text-gray-500');
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active', 'text-indigo-600', 'bg-indigo-50', 'text-green-600', 'bg-green-50', 'text-purple-600', 'bg-purple-50', 'text-orange-600', 'bg-orange-50');
+            btn.classList.add('text-gray-600');
         });
         
         // Show selected tab
@@ -1545,11 +1673,25 @@ include __DIR__ . '/includes/header.php';
             alert('Tab content not found: ' + tabName);
         }
         
-        // Activate button
+        // Activate button with appropriate color
         const activeButton = document.getElementById('tab-btn-' + tabName);
         if (activeButton) {
-            activeButton.classList.add('active', 'border-indigo-600', 'text-indigo-600');
-            activeButton.classList.remove('border-transparent', 'text-gray-500');
+            activeButton.classList.add('active');
+            // Remove all color classes first
+            activeButton.classList.remove('text-indigo-600', 'bg-indigo-50', 'text-green-600', 'bg-green-50', 'text-purple-600', 'bg-purple-50', 'text-orange-600', 'bg-orange-50');
+            
+            // Add appropriate color based on tab
+            if (tabName === 'general' || tabName === 'logo') {
+                activeButton.classList.add('text-indigo-600', 'bg-indigo-50');
+            } else if (tabName === 'contact') {
+                activeButton.classList.add('text-green-600', 'bg-green-50');
+            } else if (tabName === 'sliders') {
+                activeButton.classList.add('text-purple-600', 'bg-purple-50');
+            } else if (tabName === 'system') {
+                activeButton.classList.add('text-orange-600', 'bg-orange-50');
+            } else {
+                activeButton.classList.add('text-indigo-600', 'bg-indigo-50');
+            }
         }
         
         // Scroll to form
