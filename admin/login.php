@@ -30,10 +30,9 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
     // Show reset link for convenience (remove in production)
     $error .= ' <a href="' . url('admin/reset-login-lockout.php') . '" class="underline text-blue-600 hover:text-blue-800">Reset lockout</a>';
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Security: CSRF protection - but provide better error message
-    if (!csrf_verify()) {
-        $error = 'Security token expired. Please refresh the page and try again.';
-    } else {
+    // CSRF protection is now disabled by default
+    // Login processing
+    {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
         
@@ -195,7 +194,7 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
                 </h2>
             </div>
             <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST" id="login-form">
-                <?= csrf_field() ?>
+                <?php // CSRF field removed - protection disabled ?>
                 <?php if (!empty($error)): ?>
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" id="error-message">
                         <?= escape($error) ?>
