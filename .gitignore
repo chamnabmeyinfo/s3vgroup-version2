@@ -44,16 +44,40 @@ storage/backups/file-backups/
 # Database exports
 storage/exports/
 
-# Storage uploads - Currently TRACKED in Git (~112MB)
-# DECISION: Keep tracking for now (allows version control of images)
-# If repository becomes too large, uncomment below to ignore uploads:
-# storage/uploads/*
-# !storage/uploads/.gitkeep
-# !storage/uploads/.htaccess
-# Note: storage/uploads/ is INCLUDED to track all images and assets
-# Large zip files in uploads should be ignored
+# Storage uploads - Ignore image and media assets
+# Images and media files (too large for Git, should be managed separately)
+storage/uploads/**/*.jpg
+storage/uploads/**/*.jpeg
+storage/uploads/**/*.png
+storage/uploads/**/*.gif
+storage/uploads/**/*.webp
+storage/uploads/**/*.svg
+storage/uploads/**/*.ico
+storage/uploads/**/*.bmp
+storage/uploads/**/*.tiff
+storage/uploads/**/*.tif
+storage/uploads/**/*.heic
+storage/uploads/**/*.heif
+# Video files
+storage/uploads/**/*.mp4
+storage/uploads/**/*.avi
+storage/uploads/**/*.mov
+storage/uploads/**/*.wmv
+storage/uploads/**/*.flv
+storage/uploads/**/*.webm
+# Audio files
+storage/uploads/**/*.mp3
+storage/uploads/**/*.wav
+storage/uploads/**/*.ogg
+storage/uploads/**/*.m4a
+# Large zip files in uploads
 storage/uploads/*.zip
 storage/uploads.zip
+# Keep directory structure and .htaccess
+!storage/uploads/.gitkeep
+!storage/uploads/.htaccess
+!storage/uploads/**/.gitkeep
+!storage/uploads/**/.htaccess
 
 # Design backups - Currently TRACKED (~0.26MB - small, OK to keep)
 # storage/design-backups/ is included for version history
@@ -138,3 +162,20 @@ config.local
 # CHAMNAB NOTES (Developer personal notes - should not be pushed)
 chamnabnote/*
 chamnabnotes/*
+
+# Additional asset directories to ignore images (if they exist)
+assets/uploads/**/*.jpg
+assets/uploads/**/*.jpeg
+assets/uploads/**/*.png
+assets/uploads/**/*.gif
+assets/uploads/**/*.webp
+assets/uploads/**/*.svg
+public/uploads/**/*.jpg
+public/uploads/**/*.jpeg
+public/uploads/**/*.png
+public/uploads/**/*.gif
+public/uploads/**/*.webp
+public/uploads/**/*.svg
+
+# Note: Essential project assets in assets/ directory are still tracked
+# (CSS, JS, and core images needed for the project structure)
