@@ -366,3 +366,122 @@ if (!function_exists('validate_password')) {
         ];
     }
 }
+
+// Image Resize/Crop Function
+if (!function_exists('resize_and_save_image')) {
+    /**
+     * Resize and save an uploaded image to fit within specified dimensions
+     * Maintains aspect ratio and preserves transparency for PNG/GIF
+     * 
+     * @param string $sourcePath Temporary uploaded file path
+     * @param string $destinationPath Full path where resized image should be saved
+     * @param int $maxWidth Maximum width (default: 800)
+     * @param int $maxHeight Maximum height (default: 800)
+     * @param int $quality JPEG/WebP quality 0-100 (default: 85)
+     * @return bool True on success, false on failure
+     */
+    function resize_and_save_image($sourcePath, $destinationPath, $maxWidth = 800, $maxHeight = 800, $quality = 85)
+    {
+        // Check if GD extension is available
+        if (!extension_loaded('gd')) {
+            // If GD is not available, just copy the file
+            return copy($sourcePath, $destinationPath);
+        }
+        
+        // Get image info
+        $imageInfo = @getimagesize($sourcePath);
+        if (!$imageInfo) {
+            return false;
+        }
+        
+        $originalWidth = $imageInfo[0];
+        $originalHeight = $imageInfo[1];
+        $mimeType = $imageInfo['mime'];
+        $extension = strtolower(pathinfo($destinationPath, PATHINFO_EXTENSION));
+        
+        // Skip SVG files (vector graphics don't need resizing)
+        if ($extension === 'svg' || $mimeType === 'image/svg+xml') {
+            return copy($sourcePath, $destinationPath);
+        }
+        
+        // Create source image resource
+        $source = null;
+        switch ($mimeType) {
+            case 'image/jpeg':
+                $source = @imagecreatefromjpeg($sourcePath);
+                break;
+            case 'image/png':
+                $source = @imagecreatefrompng($sourcePath);
+                break;
+            case 'image/gif':
+                $source = @imagecreatefromgif($sourcePath);
+                break;
+            case 'image/webp':
+                if (function_exists('imagecreatefromwebp')) {
+                    $source = @imagecreatefromwebp($sourcePath);
+                }
+                break;
+            default:
+                return false;
+        }
+        
+        if (!$source) {
+            return false;
+        }
+        
+        // Calculate new dimensions maintaining aspect ratio
+        $ratio = min($maxWidth / $originalWidth, $maxHeight / $originalHeight);
+        
+        // Only resize if image is larger than max dimensions
+        if ($ratio >= 1) {
+            // Image is smaller than max dimensions, just copy it
+            imagedestroy($source);
+            return copy($sourcePath, $destinationPath);
+        }
+        
+        $newWidth = (int)($originalWidth * $ratio);
+        $newHeight = (int)($originalHeight * $ratio);
+        
+        // Create destination image
+        $destination = imagecreatetruecolor($newWidth, $newHeight);
+        
+        // Preserve transparency for PNG and GIF
+        if ($extension === 'png' || $extension === 'gif') {
+            imagealphablending($destination, false);
+            imagesavealpha($destination, true);
+            $transparent = imagecolorallocatealpha($destination, 255, 255, 255, 127);
+            imagefilledrectangle($destination, 0, 0, $newWidth, $newHeight, $transparent);
+        }
+        
+        // Resize image with high quality
+        imagecopyresampled($destination, $source, 0, 0, 0, 0, $newWidth, $newHeight, $originalWidth, $originalHeight);
+        
+        // Save resized image
+        $saved = false;
+        switch ($extension) {
+            case 'jpg':
+            case 'jpeg':
+                $saved = @imagejpeg($destination, $destinationPath, $quality);
+                break;
+            case 'png':
+                // PNG quality is 0-9 (inverted, 0 = best)
+                $pngQuality = (int)(9 - ($quality / 100) * 9);
+                $saved = @imagepng($destination, $destinationPath, $pngQuality);
+                break;
+            case 'gif':
+                $saved = @imagegif($destination, $destinationPath);
+                break;
+            case 'webp':
+                if (function_exists('imagewebp')) {
+                    $saved = @imagewebp($destination, $destinationPath, $quality);
+                }
+                break;
+        }
+        
+        // Clean up
+        imagedestroy($source);
+        imagedestroy($destination);
+        
+        return $saved;
+    }
+}

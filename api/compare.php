@@ -9,11 +9,12 @@ $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 $allowedOrigins = [
     'https://www.s3vtgroup.com.kh',
     'https://s3vtgroup.com.kh',
+    'https://dev.s3vtgroup.com.kh',
     'http://localhost',
     'http://127.0.0.1'
 ];
 
-if (in_array($origin, $allowedOrigins) || strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false) {
+if (in_array($origin, $allowedOrigins) || strpos($origin, 'localhost') !== false || strpos($origin, '127.0.0.1') !== false || strpos($origin, 'dev.s3vtgroup.com.kh') !== false) {
     header("Access-Control-Allow-Origin: $origin");
 }
 header('Access-Control-Allow-Credentials: true');
@@ -37,7 +38,10 @@ switch ($action) {
     case 'add':
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
         if ($productId) {
-            $compare = $_SESSION['compare'] ?? [];
+            if (!isset($_SESSION['compare'])) {
+                $_SESSION['compare'] = [];
+            }
+            $compare = $_SESSION['compare'];
             if (!in_array($productId, $compare) && count($compare) < 4) {
                 $compare[] = $productId;
                 $_SESSION['compare'] = $compare;
@@ -48,23 +52,34 @@ switch ($action) {
                 $response = ['success' => false, 'message' => 'Already in comparison'];
             }
             echo json_encode($response);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Invalid product ID']);
         }
         break;
         
     case 'remove':
         $productId = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
-        $compare = $_SESSION['compare'] ?? [];
+        if (!isset($_SESSION['compare'])) {
+            $_SESSION['compare'] = [];
+        }
+        $compare = $_SESSION['compare'];
         $_SESSION['compare'] = array_values(array_filter($compare, fn($id) => $id != $productId));
         echo json_encode(['success' => true, 'count' => count($_SESSION['compare'])]);
         break;
         
     case 'clear':
+        if (!isset($_SESSION['compare'])) {
+            $_SESSION['compare'] = [];
+        }
         $_SESSION['compare'] = [];
         echo json_encode(['success' => true]);
         break;
         
     case 'get':
-        $compare = $_SESSION['compare'] ?? [];
+        if (!isset($_SESSION['compare'])) {
+            $_SESSION['compare'] = [];
+        }
+        $compare = $_SESSION['compare'];
         echo json_encode([
             'compare' => $compare,
             'count' => count($compare)
@@ -72,12 +87,18 @@ switch ($action) {
         break;
         
     case 'count':
-        $compare = $_SESSION['compare'] ?? [];
+        if (!isset($_SESSION['compare'])) {
+            $_SESSION['compare'] = [];
+        }
+        $compare = $_SESSION['compare'];
         echo json_encode(['count' => count($compare)]);
         break;
         
     default:
-        $compare = $_SESSION['compare'] ?? [];
+        if (!isset($_SESSION['compare'])) {
+            $_SESSION['compare'] = [];
+        }
+        $compare = $_SESSION['compare'];
         echo json_encode([
             'compare' => $compare,
             'count' => count($compare)

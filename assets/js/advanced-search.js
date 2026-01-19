@@ -141,7 +141,11 @@ function addToWishlist(productId) {
                 btn.classList.add('bg-red-500', 'text-white');
                 btn.classList.remove('border-red-300', 'text-red-600');
             }
-            updateWishlistCount();
+            if (typeof updateWishlistCount === 'function') {
+                updateWishlistCount();
+            }
+            // Dispatch event for other components
+            document.dispatchEvent(new CustomEvent('wishlistUpdated', { detail: { count: data.count || 0 } }));
             if (typeof showNotification === 'function') {
                 showNotification('Added to wishlist!', 'success');
             }
@@ -185,7 +189,11 @@ function addToCompare(productId) {
                 btn.classList.remove('border-blue-300', 'text-blue-600');
             }
             // Update compare count in header
-            updateCompareCount();
+            if (typeof updateCompareCount === 'function') {
+                updateCompareCount();
+            }
+            // Dispatch event for other components
+            document.dispatchEvent(new CustomEvent('compareUpdated', { detail: { count: data.count || 0 } }));
         } else {
             if (typeof showNotification === 'function') {
                 showNotification(data.message || 'Error adding to comparison', 'error');

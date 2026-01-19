@@ -160,9 +160,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $filename = 'client_' . time() . '_' . uniqid() . '.' . $extension;
                     $filepath = $uploadDir . $filename;
 
-                    // Move uploaded file
-                    if (move_uploaded_file($file['tmp_name'], $filepath)) {
-                        // Verify file was actually uploaded
+                    // Resize and save image (max 800x800 for logos)
+                    if (resize_and_save_image($file['tmp_name'], $filepath, 800, 800, 85)) {
+                        // Verify file was actually saved
                         if (file_exists($filepath) && filesize($filepath) > 0) {
                             $data['logo'] = 'storage/uploads/' . $filename;
                         } else {
@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             @unlink($filepath); // Clean up
                         }
                     } else {
-                        $error = 'Failed to upload logo. Please check directory permissions.';
+                        $error = 'Failed to process logo. Please check directory permissions and ensure GD extension is enabled.';
                     }
                 }
             }
@@ -270,9 +270,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     if (!is_writable($uploadDir)) {
                         $error = 'Upload directory is not writable. Please check permissions.';
                     }
-                    // Move uploaded file
-                    elseif (move_uploaded_file($file['tmp_name'], $filepath)) {
-                        // Verify file was actually uploaded
+                    // Resize and save image (max 800x800 for logos)
+                    elseif (resize_and_save_image($file['tmp_name'], $filepath, 800, 800, 85)) {
+                        // Verify file was actually saved
                         if (file_exists($filepath) && filesize($filepath) > 0) {
                             $data['logo'] = 'storage/uploads/' . $filename;
                         } else {
@@ -280,7 +280,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             @unlink($filepath); // Clean up
                         }
                     } else {
-                        $error = 'Failed to upload logo. Please check directory permissions.';
+                        $error = 'Failed to process logo. Please check directory permissions and ensure GD extension is enabled.';
                     }
                 }
             }

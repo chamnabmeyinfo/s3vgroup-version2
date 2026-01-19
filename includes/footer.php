@@ -306,6 +306,14 @@
         // Update badges on load
         updateMobileNavBadges();
         
+        // Initialize compare and wishlist counts on page load
+        if (typeof updateCompareCount === 'function') {
+            updateCompareCount();
+        }
+        if (typeof updateWishlistCount === 'function') {
+            updateWishlistCount();
+        }
+        
         // Update badges when cart/compare changes (listen for custom events)
         document.addEventListener('cartUpdated', updateMobileNavBadges);
         document.addEventListener('compareUpdated', updateMobileNavBadges);
@@ -345,6 +353,7 @@
     <script src="<?= asset('assets/js/lazy-load.js') ?>"></script>
     <script src="<?= asset('assets/js/main.js') ?>"></script>
     <script src="<?= asset('assets/js/advanced-ux.js') ?>"></script>
+    <script src="<?= asset('assets/js/advanced-search.js') ?>"></script>
     <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
     <script src="<?= asset('assets/js/hero-slider.js') ?>"></script>
     <script src="<?= asset('assets/js/hero-slider-advanced.js') ?>"></script>

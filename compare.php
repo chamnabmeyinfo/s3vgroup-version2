@@ -55,7 +55,16 @@ include __DIR__ . '/includes/header.php';
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase min-w-[250px]">
                                 <div class="text-center">
                                     <?php if (!empty($product['image'])): ?>
-                                        <img src="<?= asset('storage/uploads/' . escape($product['image'])) ?>" 
+                                        <?php
+                                        // Ensure image path is correct
+                                        $imagePath = $product['image'];
+                                        // If image doesn't start with storage/uploads/, add it
+                                        if (strpos($imagePath, 'storage/uploads/') !== 0 && strpos($imagePath, '/') !== 0 && !preg_match('/^https?:\/\//', $imagePath)) {
+                                            $imagePath = 'storage/uploads/' . ltrim($imagePath, '/');
+                                        }
+                                        $imageUrl = image_url($imagePath);
+                                        ?>
+                                        <img src="<?= escape($imageUrl) ?>" 
                                              alt="<?= escape($product['name']) ?>" 
                                              class="h-32 w-32 object-cover mx-auto mb-2 rounded">
                                     <?php endif; ?>
@@ -179,6 +188,8 @@ function clearComparison() {
     })
     .then(data => {
         if (data.success) {
+            // Dispatch event for other components
+            document.dispatchEvent(new CustomEvent('compareUpdated', { detail: { count: 0 } }));
             window.location.href = '<?= url('compare.php') ?>';
         }
     })
@@ -205,6 +216,8 @@ function removeFromCompare(productId) {
     })
     .then(data => {
         if (data.success) {
+            // Dispatch event for other components
+            document.dispatchEvent(new CustomEvent('compareUpdated', { detail: { count: data.count || 0 } }));
             // Reload page to update the comparison table
             window.location.reload();
         } else {
