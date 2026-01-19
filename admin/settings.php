@@ -434,7 +434,7 @@ include __DIR__ . '/includes/header.php';
                     </div>
                     
                     <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between mb-4">
                             <div class="flex-1">
                                 <label class="block text-sm font-bold text-gray-800 mb-2 flex items-center">
                                     <i class="fas fa-key text-red-600 mr-2"></i>
@@ -460,6 +460,33 @@ include __DIR__ . '/includes/header.php';
                                     </span>
                                 </label>
                             </div>
+                        </div>
+                        
+                        <!-- CSRF Token Reset Section -->
+                        <div class="mt-4 pt-4 border-t border-red-300">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1">
+                                    <label class="block text-sm font-bold text-gray-800 mb-2 flex items-center">
+                                        <i class="fas fa-sync-alt text-blue-600 mr-2"></i>
+                                        Reset CSRF Token
+                                    </label>
+                                    <p class="text-sm text-gray-600 mb-1">
+                                        Regenerate the CSRF token if you're experiencing "Security token expired" errors.
+                                    </p>
+                                    <p class="text-xs text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        This will generate a new token and update all forms on the current page.
+                                    </p>
+                                </div>
+                                <div class="ml-6">
+                                    <button type="button" onclick="resetCsrfTokenInSettings()" 
+                                            class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition-all duration-200 flex items-center gap-2">
+                                        <i class="fas fa-sync-alt"></i>
+                                        <span>Reset Token</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="csrf-reset-message" class="mt-3 hidden"></div>
                         </div>
                     </div>
                 </div>
@@ -1968,6 +1995,83 @@ include __DIR__ . '/includes/header.php';
             });
         }
     });
+    
+    // CSRF Token Reset Function for Settings Page
+    function resetCsrfTokenInSettings() {
+        const messageDiv = document.getElementById('csrf-reset-message');
+        const forms = document.querySelectorAll('form');
+        const resetButton = event.target.closest('button');
+        
+        // Disable button and show loading
+        if (resetButton) {
+            resetButton.disabled = true;
+            resetButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Resetting...</span>';
+        }
+        
+        if (messageDiv) {
+            messageDiv.className = 'mt-3 p-3 rounded-lg';
+            messageDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Resetting CSRF token...';
+            messageDiv.classList.remove('hidden');
+        }
+        
+        // Fetch new token from API
+        fetch('<?= url("api/csrf-reset.php") ?>')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.token) {
+                    // Update all CSRF token inputs in all forms
+                    let updatedCount = 0;
+                    forms.forEach(form => {
+                        const csrfInput = form.querySelector('input[name="csrf_token"]');
+                        if (csrfInput) {
+                            csrfInput.value = data.token;
+                            updatedCount++;
+                        }
+                    });
+                    
+                    // Show success message
+                    if (messageDiv) {
+                        messageDiv.className = 'mt-3 p-3 rounded-lg bg-green-100 border border-green-400 text-green-700';
+                        messageDiv.innerHTML = '<i class="fas fa-check-circle mr-2"></i> CSRF token reset successfully! Updated ' + updatedCount + ' form(s) on this page.';
+                    }
+                    
+                    // Re-enable button
+                    if (resetButton) {
+                        resetButton.disabled = false;
+                        resetButton.innerHTML = '<i class="fas fa-sync-alt"></i> <span>Reset Token</span>';
+                    }
+                    
+                    // Auto-hide success message after 5 seconds
+                    setTimeout(() => {
+                        if (messageDiv) {
+                            messageDiv.style.transition = 'opacity 0.5s';
+                            messageDiv.style.opacity = '0';
+                            setTimeout(() => {
+                                messageDiv.classList.add('hidden');
+                                messageDiv.style.opacity = '1';
+                            }, 500);
+                        }
+                    }, 5000);
+                } else {
+                    throw new Error('Failed to reset token');
+                }
+            })
+            .catch(error => {
+                console.error('Error resetting CSRF token:', error);
+                
+                // Show error message
+                if (messageDiv) {
+                    messageDiv.className = 'mt-3 p-3 rounded-lg bg-red-100 border border-red-400 text-red-700';
+                    messageDiv.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i> Failed to reset token. Please try again or refresh the page.';
+                }
+                
+                // Re-enable button
+                if (resetButton) {
+                    resetButton.disabled = false;
+                    resetButton.innerHTML = '<i class="fas fa-sync-alt"></i> <span>Reset Token</span>';
+                }
+            });
+    }
     </script>
 </div>
 
