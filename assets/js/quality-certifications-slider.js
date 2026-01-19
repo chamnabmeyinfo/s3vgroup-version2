@@ -1,28 +1,58 @@
 // Quality Certifications Logo Slider
-document.addEventListener('DOMContentLoaded', function() {
-    const slider = document.querySelector('.quality-certifications-slider-track');
-    if (!slider) return;
+(function() {
+    const SLIDER_INIT_KEY = 'qualityCertificationsSliderInitialized';
+    
+    function initQualityCertificationsSlider() {
+        const slider = document.querySelector('.quality-certifications-slider-track');
+        if (!slider) return;
 
-    // Clone items for seamless infinite scroll
-    const items = slider.querySelectorAll('.quality-certifications-slider-item');
-    if (items.length === 0) return;
+        // Check if already initialized using data attribute
+        if (slider.dataset.initialized === 'true') {
+            return;
+        }
 
-    // Duplicate items to create seamless loop
-    items.forEach(item => {
-        const clone = item.cloneNode(true);
-        clone.setAttribute('aria-hidden', 'true');
-        slider.appendChild(clone);
-    });
+        // Get only original items (not clones)
+        const originalItems = Array.from(slider.querySelectorAll('.quality-certifications-slider-item')).filter(item => {
+            return !item.hasAttribute('aria-hidden') || item.getAttribute('aria-hidden') !== 'true';
+        });
+        
+        if (originalItems.length === 0) return;
 
-    // Pause animation on hover
-    const wrapper = document.querySelector('.quality-certifications-slider-wrapper');
-    if (wrapper) {
-        wrapper.addEventListener('mouseenter', function() {
-            slider.style.animationPlayState = 'paused';
+        // Remove any existing clones first (in case script runs multiple times)
+        const existingClones = slider.querySelectorAll('.quality-certifications-slider-item[aria-hidden="true"]');
+        existingClones.forEach(clone => clone.remove());
+
+        // Clone items for seamless infinite scroll
+        originalItems.forEach(item => {
+            const clone = item.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            clone.classList.add('slider-clone'); // Add class to identify clones
+            slider.appendChild(clone);
         });
 
-        wrapper.addEventListener('mouseleave', function() {
-            slider.style.animationPlayState = 'running';
-        });
+        // Mark as initialized
+        slider.dataset.initialized = 'true';
+
+        // Pause animation on hover
+        const wrapper = document.querySelector('.quality-certifications-slider-wrapper');
+        if (wrapper && !wrapper.dataset.hoverInitialized) {
+            wrapper.addEventListener('mouseenter', function() {
+                slider.style.animationPlayState = 'paused';
+            });
+
+            wrapper.addEventListener('mouseleave', function() {
+                slider.style.animationPlayState = 'running';
+            });
+            
+            wrapper.dataset.hoverInitialized = 'true';
+        }
     }
-});
+    
+    // Run on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initQualityCertificationsSlider);
+    } else {
+        // Small delay to ensure DOM is fully ready
+        setTimeout(initQualityCertificationsSlider, 100);
+    }
+})();
