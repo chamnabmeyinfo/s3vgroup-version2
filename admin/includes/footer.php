@@ -1,6 +1,70 @@
         </main>
     </div>
     
+    <script>
+    // Global CSRF Token Reset Function
+    if (typeof resetCsrfToken === 'undefined') {
+        window.resetCsrfToken = function() {
+            const errorDiv = document.getElementById('error-message') || document.querySelector('.bg-red-100.text-red-700');
+            const forms = document.querySelectorAll('form');
+            
+            // Show loading state
+            if (errorDiv) {
+                const originalContent = errorDiv.innerHTML;
+                errorDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Resetting token...';
+            }
+            
+            // Fetch new token from API
+            fetch('<?= url("api/csrf-reset.php") ?>')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.token) {
+                        // Update all CSRF token inputs in all forms
+                        forms.forEach(form => {
+                            const csrfInput = form.querySelector('input[name="csrf_token"]');
+                            if (csrfInput) {
+                                csrfInput.value = data.token;
+                            }
+                        });
+                        
+                        // Update error message if exists
+                        if (errorDiv) {
+                            errorDiv.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i> Token reset successfully! You can now try again.';
+                            errorDiv.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded';
+                            
+                            // Auto-hide success message after 5 seconds
+                            setTimeout(() => {
+                                if (errorDiv) {
+                                    errorDiv.style.transition = 'opacity 0.5s';
+                                    errorDiv.style.opacity = '0';
+                                    setTimeout(() => errorDiv.remove(), 500);
+                                }
+                            }, 5000);
+                        }
+                        
+                        // Show success notification
+                        if (typeof showToast === 'function') {
+                            showToast('CSRF token reset successfully!', 'success');
+                        }
+                    } else {
+                        throw new Error('Failed to reset token');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resetting CSRF token:', error);
+                    if (errorDiv) {
+                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i> Failed to reset token. Please refresh the page.';
+                        errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded';
+                    }
+                    
+                    if (typeof showToast === 'function') {
+                        showToast('Failed to reset token. Please refresh the page.', 'error');
+                    }
+                });
+        };
+    }
+    </script>
+    
     <style>
     /* Mobile table scrolling improvements */
     @media (max-width: 768px) {

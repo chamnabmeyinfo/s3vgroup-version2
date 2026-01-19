@@ -258,19 +258,32 @@ if (!function_exists('csrf_token')) {
     /**
      * Generate or retrieve CSRF token
      * 
+     * @param bool $regenerate Whether to regenerate the token
      * @return string CSRF token
      */
-    function csrf_token()
+    function csrf_token($regenerate = false)
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
         
-        if (!isset($_SESSION['csrf_token'])) {
+        if ($regenerate || !isset($_SESSION['csrf_token'])) {
             $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
         }
         
         return $_SESSION['csrf_token'];
+    }
+}
+
+if (!function_exists('csrf_reset')) {
+    /**
+     * Reset/regenerate CSRF token
+     * 
+     * @return string New CSRF token
+     */
+    function csrf_reset()
+    {
+        return csrf_token(true);
     }
 }
 
@@ -328,9 +341,10 @@ if (!function_exists('require_csrf')) {
     /**
      * Require valid CSRF token or die with error
      * 
+     * @param bool $showResetButton Whether to show reset button in error message
      * @return void
      */
-    function require_csrf()
+    function require_csrf($showResetButton = false)
     {
         // Check if CSRF protection is enabled
         try {
@@ -345,7 +359,11 @@ if (!function_exists('require_csrf')) {
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
             http_response_code(403);
-            die('Invalid security token. Please refresh the page and try again.');
+            $errorMsg = 'Invalid security token. Please refresh the page and try again.';
+            if ($showResetButton) {
+                $errorMsg .= ' <button type="button" onclick="resetCsrfToken()" class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Reset Token</button>';
+            }
+            die($errorMsg);
         }
     }
 }

@@ -33,6 +33,7 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
     // Security: CSRF protection - but provide better error message
     if (!csrf_verify()) {
         $error = 'Security token expired. Please refresh the page and try again.';
+        $error .= ' <button type="button" onclick="resetCsrfToken()" class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Reset Token</button>';
     } else {
         $username = trim($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
@@ -183,6 +184,8 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - ForkliftPro</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body class="bg-gray-100">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -192,11 +195,18 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
                     Admin Login
                 </h2>
             </div>
-            <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST">
+            <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST" id="login-form">
                 <?= csrf_field() ?>
                 <?php if (!empty($error)): ?>
-                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-                        <?= escape($error) ?>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded" id="error-message">
+                        <?php 
+                        // Check if error contains HTML (reset button)
+                        if (strpos($error, '<button') !== false || strpos($error, '<a') !== false) {
+                            echo $error; // Don't escape if it contains HTML
+                        } else {
+                            echo escape($error);
+                        }
+                        ?>
                     </div>
                 <?php endif; ?>
                 
@@ -226,6 +236,49 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
             </form>
         </div>
     </div>
+    
+    <script>
+    // CSRF Token Reset Function (fallback if footer not loaded)
+    if (typeof resetCsrfToken === 'undefined') {
+        function resetCsrfToken() {
+            const errorDiv = document.getElementById('error-message');
+            const form = document.getElementById('login-form');
+            const csrfInput = form ? form.querySelector('input[name="csrf_token"]') : null;
+            
+            // Show loading state
+            if (errorDiv) {
+                errorDiv.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Resetting token...';
+            }
+            
+            // Fetch new token from API
+            fetch('<?= url("api/csrf-reset.php") ?>')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.token) {
+                        // Update CSRF token in form
+                        if (csrfInput) {
+                            csrfInput.value = data.token;
+                        }
+                        
+                        // Update error message
+                        if (errorDiv) {
+                            errorDiv.innerHTML = '<i class="fas fa-check-circle text-green-600 mr-2"></i> Token reset successfully! You can now try logging in again.';
+                            errorDiv.className = 'bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded';
+                        }
+                    } else {
+                        throw new Error('Failed to reset token');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error resetting CSRF token:', error);
+                    if (errorDiv) {
+                        errorDiv.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i> Failed to reset token. Please refresh the page.';
+                        errorDiv.className = 'bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded';
+                    }
+                });
+        }
+    }
+    </script>
 </body>
 </html>
 
