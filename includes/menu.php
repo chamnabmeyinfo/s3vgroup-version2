@@ -20,9 +20,12 @@ function processMenuUrl($url) {
     }
     
     // If it starts with /, it's an absolute path from root
-    // Remove leading slash and process through url() function
+    // Keep the leading slash and build the full URL properly
     if (strpos($url, '/') === 0) {
-        return url(ltrim($url, '/'));
+        // Get base URL without trailing slash
+        $baseUrl = rtrim(url(), '/');
+        // Return base URL + absolute path
+        return $baseUrl . $url;
     }
     
     // Otherwise, treat as relative path and process through url() function
