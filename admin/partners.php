@@ -64,8 +64,34 @@ if (!empty($_GET['toggle'])) {
     }
 }
 
+// Handle styling settings form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_styling'])) {
+    require_csrf();
+    
+    // Handle styling settings
+    foreach ($_POST as $key => $value) {
+        if ($key !== 'save_styling' && $key !== 'csrf_token' && strpos($key, 'partners_') === 0) {
+            $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
+            
+            if ($existing) {
+                db()->update('settings', ['value' => trim($value)], '`key` = :key', ['key' => $key]);
+            } else {
+                db()->insert('settings', [
+                    'key' => $key,
+                    'value' => trim($value),
+                    'type' => 'text'
+                ]);
+            }
+        }
+    }
+    
+    $message = 'Partners styling settings updated successfully.';
+    header('Location: ' . url('admin/partners.php') . '?styling_saved=1');
+    exit;
+}
+
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['save_styling'])) {
     if (!empty($_POST['partner_id'])) {
         // Update existing partner
         $partnerId = (int)$_POST['partner_id'];
@@ -314,6 +340,18 @@ if (!empty($_GET['edit'])) {
     }
 }
 
+// Get all settings for styling
+$settingsData = db()->fetchAll("SELECT `key`, value FROM settings");
+$settings = [];
+foreach ($settingsData as $setting) {
+    $settings[$setting['key']] = $setting['value'];
+}
+
+// Show success message for styling save
+if (isset($_GET['styling_saved'])) {
+    $message = 'Partners styling settings updated successfully.';
+}
+
 $pageTitle = 'Partners';
 include __DIR__ . '/includes/header.php';
 ?>
@@ -509,6 +547,414 @@ include __DIR__ . '/includes/header.php';
         </div>
         <?php endif; ?>
     </div>
+
+    <!-- Partners Styling Settings -->
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 mt-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-palette text-blue-600 mr-2 text-xs"></i>
+                Logo Slider Styling
+            </h3>
+            <a href="<?= url('index.php#partners') ?>" target="_blank" class="text-xs text-blue-600 hover:text-blue-800">
+                <i class="fas fa-external-link-alt mr-1"></i>View Full Page
+            </a>
+        </div>
+        
+        <!-- Live Preview -->
+        <div class="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div class="text-xs font-semibold text-gray-600 mb-2 flex items-center">
+                <i class="fas fa-eye mr-2"></i>Live Preview
+            </div>
+            <div id="partners-preview-slider" class="partners-slider-preview" style="border-radius: 8px; overflow: hidden;">
+                <div class="partners-slider-container-preview" style="max-width: 100%; padding: 0 15px;">
+                    <div class="partners-slider-header-preview" style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="
+                            font-size: 1.5rem;
+                            font-weight: 700;
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            margin-bottom: 5px;
+                        ">Our Partners</h2>
+                        <p style="
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                        ">Trusted partnerships with industry leaders</p>
+                    </div>
+                    <div class="partners-slider-wrapper-preview" style="overflow: hidden;">
+                        <div class="partners-slider-track-preview" style="display: flex; flex-shrink: 0;">
+                            <?php 
+                            $previewPartners = array_slice($partners, 0, 6);
+                            if (empty($previewPartners)) {
+                                for ($i = 0; $i < 12; $i++): ?>
+                                <div class="partners-slider-item-preview" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <div style="width: 60%; height: 60%; background: #e5e7eb; border-radius: 4px;"></div>
+                                </div>
+                                <?php endfor;
+                            } else {
+                                foreach (array_merge($previewPartners, $previewPartners) as $partner): ?>
+                                <div class="partners-slider-item-preview" style="flex-shrink: 0; cursor: pointer;">
+                                    <?php if (!empty($partner['logo'])): ?>
+                                    <img src="<?= escape(image_url($partner['logo'])) ?>" alt="<?= escape($partner['name']) ?>" style="width: 100%; height: 100%; object-fit: contain;">
+                                    <?php else: ?>
+                                    <div style="width: 100%; height: 100%; background: #e5e7eb; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #9ca3af; font-size: 0.75rem;">No Logo</span>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endforeach;
+                            } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" id="partners-styling-form">
+            <input type="hidden" name="save_styling" value="1">
+            <?= csrf_field() ?>
+            
+            <div class="space-y-2">
+                <!-- Accordion: Section & Header -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('partners-section')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-layer-group mr-2"></i>Section & Header</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="partners-section-icon"></i>
+                    </button>
+                    <div id="partners-section" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color 1</label>
+                                <input type="color" name="partners_section_bg_color1" value="<?= escape($settings['partners_section_bg_color1'] ?? '#f0f7ff') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color 2</label>
+                                <input type="color" name="partners_section_bg_color2" value="<?= escape($settings['partners_section_bg_color2'] ?? '#e0efff') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Padding</label>
+                                <input type="number" name="partners_section_padding" value="<?= escape($settings['partners_section_padding'] ?? '80') ?>" min="20" max="200" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Title Color 1</label>
+                                <input type="color" name="partners_title_color1" value="<?= escape($settings['partners_title_color1'] ?? '#1e40af') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Title Color 2</label>
+                                <input type="color" name="partners_title_color2" value="<?= escape($settings['partners_title_color2'] ?? '#3b82f6') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Desc Color</label>
+                                <input type="color" name="partners_desc_color" value="<?= escape($settings['partners_desc_color'] ?? '#475569') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Logo Item -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('partners-item')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-image mr-2"></i>Logo Item</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="partners-item-icon"></i>
+                    </button>
+                    <div id="partners-item" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Width</label>
+                                <input type="number" name="partners_logo_item_width" value="<?= escape($settings['partners_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Height</label>
+                                <input type="number" name="partners_logo_item_height" value="<?= escape($settings['partners_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Gap</label>
+                                <input type="number" name="partners_logo_gap" value="<?= escape($settings['partners_logo_gap'] ?? '40') ?>" min="10" max="100" step="5" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Padding</label>
+                                <input type="number" name="partners_logo_padding" value="<?= escape($settings['partners_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border W</label>
+                                <input type="number" name="partners_logo_border_width" value="<?= escape($settings['partners_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border Style</label>
+                                <select name="partners_logo_border_style" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                                    <option value="solid" <?= ($settings['partners_logo_border_style'] ?? 'solid') === 'solid' ? 'selected' : '' ?>>Solid</option>
+                                    <option value="dashed" <?= ($settings['partners_logo_border_style'] ?? '') === 'dashed' ? 'selected' : '' ?>>Dashed</option>
+                                    <option value="dotted" <?= ($settings['partners_logo_border_style'] ?? '') === 'dotted' ? 'selected' : '' ?>>Dotted</option>
+                                    <option value="none" <?= ($settings['partners_logo_border_style'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border Color</label>
+                                <input type="color" name="partners_logo_border_color" value="<?= escape($settings['partners_logo_border_color'] ?? '#3b82f6') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Radius</label>
+                                <input type="number" name="partners_logo_border_radius" value="<?= escape($settings['partners_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color</label>
+                                <input type="color" name="partners_logo_bg_color" value="<?= escape($settings['partners_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Shadow & Hover -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('partners-shadow')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-magic mr-2"></i>Shadow & Hover</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="partners-shadow-icon"></i>
+                    </button>
+                    <div id="partners-shadow" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2 mb-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow X</label>
+                                <input type="number" name="partners_logo_shadow_x" value="<?= escape($settings['partners_logo_shadow_x'] ?? '0') ?>" min="-20" max="20" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow Y</label>
+                                <input type="number" name="partners_logo_shadow_y" value="<?= escape($settings['partners_logo_shadow_y'] ?? '2') ?>" min="-20" max="20" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Blur</label>
+                                <input type="number" name="partners_logo_shadow_blur" value="<?= escape($settings['partners_logo_shadow_blur'] ?? '8') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow Color</label>
+                                <input type="color" name="partners_logo_shadow_color" value="<?= escape($settings['partners_logo_shadow_color'] ?? '#3b82f6') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Opacity %</label>
+                                <input type="number" name="partners_logo_shadow_opacity" value="<?= escape($settings['partners_logo_shadow_opacity'] ?? '10') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Y</label>
+                                <input type="number" name="partners_logo_hover_y" value="<?= escape($settings['partners_logo_hover_y'] ?? '-8') ?>" min="-50" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Scale</label>
+                                <input type="number" name="partners_logo_hover_scale" value="<?= escape($settings['partners_logo_hover_scale'] ?? '1.02') ?>" min="0.5" max="2" step="0.01" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Border</label>
+                                <input type="color" name="partners_logo_hover_border_color" value="<?= escape($settings['partners_logo_hover_border_color'] ?? '#3b82f6') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Shadow Y</label>
+                                <input type="number" name="partners_logo_hover_shadow_y" value="<?= escape($settings['partners_logo_hover_shadow_y'] ?? '8') ?>" min="-20" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Blur</label>
+                                <input type="number" name="partners_logo_hover_shadow_blur" value="<?= escape($settings['partners_logo_hover_shadow_blur'] ?? '24') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Opacity</label>
+                                <input type="number" name="partners_logo_hover_shadow_opacity" value="<?= escape($settings['partners_logo_hover_shadow_opacity'] ?? '20') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Transition</label>
+                                <input type="number" name="partners_logo_transition" value="<?= escape($settings['partners_logo_transition'] ?? '300') ?>" min="0" max="2000" step="50" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Image Effects -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('partners-image')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-adjust mr-2"></i>Image Effects</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="partners-image-icon"></i>
+                    </button>
+                    <div id="partners-image" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Object Fit</label>
+                                <select name="partners_logo_object_fit" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                                    <option value="contain" <?= ($settings['partners_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain</option>
+                                    <option value="cover" <?= ($settings['partners_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover</option>
+                                    <option value="fill" <?= ($settings['partners_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill</option>
+                                    <option value="scale-down" <?= ($settings['partners_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down</option>
+                                    <option value="none" <?= ($settings['partners_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Grayscale %</label>
+                                <input type="number" name="partners_logo_grayscale" value="<?= escape($settings['partners_logo_grayscale'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Opacity %</label>
+                                <input type="number" name="partners_logo_image_opacity" value="<?= escape($settings['partners_logo_image_opacity'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Scale</label>
+                                <input type="number" name="partners_logo_hover_image_scale" value="<?= escape($settings['partners_logo_hover_image_scale'] ?? '1.05') ?>" min="0.5" max="2" step="0.01" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end mt-3 pt-3 border-t border-gray-200">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
+                    <i class="fas fa-save mr-1"></i>Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const icon = document.getElementById(id + '-icon');
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            icon.classList.remove('rotate-180');
+        }
+    }
+    
+    // Live preview update function
+    function hexToRgba(hex, opacity) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity / 100})`;
+    }
+    
+    function updatePartnersPreview() {
+        const form = document.getElementById('partners-styling-form');
+        if (!form) return;
+        
+        const preview = document.getElementById('partners-preview-slider');
+        if (!preview) return;
+        
+        const previewHeader = preview.querySelector('.partners-slider-header-preview');
+        const previewTitle = previewHeader?.querySelector('h2');
+        const previewDesc = previewHeader?.querySelector('p');
+        const previewTrack = preview.querySelector('.partners-slider-track-preview');
+        const previewItems = preview.querySelectorAll('.partners-slider-item-preview');
+        
+        // Get form values
+        const bgColor1 = (form.querySelector('[name="partners_section_bg_color1"]')?.value) || '#f0f7ff';
+        const bgColor2 = (form.querySelector('[name="partners_section_bg_color2"]')?.value) || '#e0efff';
+        const padding = parseInt(form.querySelector('[name="partners_section_padding"]')?.value) || 80;
+        const titleColor1 = (form.querySelector('[name="partners_title_color1"]')?.value) || '#1e40af';
+        const titleColor2 = (form.querySelector('[name="partners_title_color2"]')?.value) || '#3b82f6';
+        const descColor = (form.querySelector('[name="partners_desc_color"]')?.value) || '#475569';
+        const itemWidth = parseInt(form.querySelector('[name="partners_logo_item_width"]')?.value) || 180;
+        const itemHeight = parseInt(form.querySelector('[name="partners_logo_item_height"]')?.value) || 100;
+        const gap = parseInt(form.querySelector('[name="partners_logo_gap"]')?.value) || 40;
+        const itemPadding = parseInt(form.querySelector('[name="partners_logo_padding"]')?.value) || 20;
+        const borderWidth = parseInt(form.querySelector('[name="partners_logo_border_width"]')?.value) || 2;
+        const borderStyle = (form.querySelector('[name="partners_logo_border_style"]')?.value) || 'solid';
+        const borderColor = (form.querySelector('[name="partners_logo_border_color"]')?.value) || '#3b82f6';
+        const borderRadius = parseInt(form.querySelector('[name="partners_logo_border_radius"]')?.value) || 12;
+        const bgColor = (form.querySelector('[name="partners_logo_bg_color"]')?.value) || '#ffffff';
+        const shadowX = parseInt(form.querySelector('[name="partners_logo_shadow_x"]')?.value) || 0;
+        const shadowY = parseInt(form.querySelector('[name="partners_logo_shadow_y"]')?.value) || 2;
+        const shadowBlur = parseInt(form.querySelector('[name="partners_logo_shadow_blur"]')?.value) || 8;
+        const shadowColor = (form.querySelector('[name="partners_logo_shadow_color"]')?.value) || '#3b82f6';
+        const shadowOpacity = parseInt(form.querySelector('[name="partners_logo_shadow_opacity"]')?.value) || 10;
+        const objectFit = (form.querySelector('[name="partners_logo_object_fit"]')?.value) || 'contain';
+        const grayscale = parseInt(form.querySelector('[name="partners_logo_grayscale"]')?.value) || 80;
+        const imageOpacity = parseInt(form.querySelector('[name="partners_logo_image_opacity"]')?.value) || 80;
+        const hoverY = parseInt(form.querySelector('[name="partners_logo_hover_y"]')?.value) || -8;
+        const hoverScale = parseFloat(form.querySelector('[name="partners_logo_hover_scale"]')?.value) || 1.02;
+        const hoverBorderColor = (form.querySelector('[name="partners_logo_hover_border_color"]')?.value) || '#3b82f6';
+        const hoverShadowY = parseInt(form.querySelector('[name="partners_logo_hover_shadow_y"]')?.value) || 8;
+        const hoverShadowBlur = parseInt(form.querySelector('[name="partners_logo_hover_shadow_blur"]')?.value) || 24;
+        const hoverShadowOpacity = parseInt(form.querySelector('[name="partners_logo_hover_shadow_opacity"]')?.value) || 20;
+        const hoverImageScale = parseFloat(form.querySelector('[name="partners_logo_hover_image_scale"]')?.value) || 1.05;
+        const transition = parseInt(form.querySelector('[name="partners_logo_transition"]')?.value) || 300;
+        
+        // Update preview section background
+        preview.style.background = `linear-gradient(135deg, ${bgColor1} 0%, ${bgColor2} 100%)`;
+        preview.style.padding = `${Math.max(15, padding / 4)}px 0`;
+        
+        // Update header
+        if (previewTitle) {
+            previewTitle.style.background = `linear-gradient(135deg, ${titleColor1}, ${titleColor2})`;
+        }
+        if (previewDesc) {
+            previewDesc.style.color = descColor;
+        }
+        
+        // Update track gap
+        if (previewTrack) {
+            previewTrack.style.gap = `${gap}px`;
+        }
+        
+        // Update items
+        previewItems.forEach(item => {
+            item.style.width = `${itemWidth}px`;
+            item.style.height = `${itemHeight}px`;
+            item.style.padding = `${itemPadding}px`;
+            item.style.border = `${borderWidth}px ${borderStyle} ${borderColor}`;
+            item.style.borderRadius = `${borderRadius}px`;
+            item.style.backgroundColor = bgColor;
+            item.style.boxShadow = `${shadowX}px ${shadowY}px ${shadowBlur}px ${hexToRgba(shadowColor, shadowOpacity)}`;
+            item.style.transition = `all ${transition}ms ease`;
+            
+            const img = item.querySelector('img');
+            if (img) {
+                img.style.objectFit = objectFit;
+                img.style.filter = `grayscale(${grayscale}%) opacity(${imageOpacity / 100})`;
+                img.style.transition = `all ${transition}ms ease`;
+            }
+        });
+        
+        // Update hover styles
+        const style = document.getElementById('partners-preview-hover-styles');
+        if (style) {
+            style.textContent = `
+                .partners-slider-item-preview:hover {
+                    transform: translateY(${hoverY}px) scale(${hoverScale}) !important;
+                    border-color: ${hoverBorderColor} !important;
+                    box-shadow: ${shadowX}px ${hoverShadowY}px ${hoverShadowBlur}px ${hexToRgba(shadowColor, hoverShadowOpacity)} !important;
+                }
+                .partners-slider-item-preview:hover img {
+                    filter: grayscale(0%) opacity(1) !important;
+                    transform: scale(${hoverImageScale}) !important;
+                }
+            `;
+        }
+    }
+    
+    // Attach event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('partners-styling-form');
+        if (form) {
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', updatePartnersPreview);
+                input.addEventListener('change', updatePartnersPreview);
+            });
+            updatePartnersPreview();
+        }
+    });
+    </script>
+    
+    <style>
+    @keyframes slidePartners {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .partners-slider-track-preview {
+        animation: slidePartners 20s linear infinite;
+    }
+    .partners-slider-wrapper-preview:hover .partners-slider-track-preview {
+        animation-play-state: paused;
+    }
+    </style>
+    <style id="partners-preview-hover-styles"></style>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

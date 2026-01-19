@@ -289,10 +289,29 @@ include __DIR__ . '/includes/header.php';
     $partners = $partnerModel->getByType('partner', true); // Get only active partners
     
     // Get logo styling settings (including section, title, etc.)
-    $logoStyleSettings = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE '%_logo_%' OR `key` LIKE '%_section_%' OR `key` LIKE '%_title_%' OR `key` LIKE '%_desc_%' OR `key` LIKE '%_text_%'");
-    $logoStyles = [];
-    foreach ($logoStyleSettings as $setting) {
-        $logoStyles[$setting['key']] = $setting['value'];
+    // Fetch all settings that start with partners_, clients_, or certs_
+    try {
+        $logoStyleSettings = db()->fetchAll("
+            SELECT `key`, value 
+            FROM settings 
+            WHERE `key` LIKE 'partners_%' 
+               OR `key` LIKE 'clients_%' 
+               OR `key` LIKE 'certs_%'
+            ORDER BY `key`
+        ");
+        $logoStyles = [];
+        foreach ($logoStyleSettings as $setting) {
+            $logoStyles[$setting['key']] = $setting['value'];
+        }
+        
+        // Debug: Log if no settings found (only in development)
+        if (empty($logoStyles) && defined('APP_DEBUG') && APP_DEBUG) {
+            error_log('No logo slider settings found in database');
+        }
+    } catch (Exception $e) {
+        // If database query fails, use defaults only
+        error_log('Error loading logo slider settings: ' . $e->getMessage());
+        $logoStyles = [];
     }
     
     // Default values - comprehensive styling
@@ -404,11 +423,20 @@ include __DIR__ . '/includes/header.php';
     
     if (!empty($partners)):
     ?>
-    <style>
+    <!-- Dynamic Logo Slider Styles - Generated from Admin Settings -->
+    <style id="logo-slider-dynamic-styles">
     <?php
     // Helper function to convert hex color to rgba
     function hexToRgba($hex, $opacity) {
         $hex = str_replace('#', '', $hex);
+        if (strlen($hex) != 6) {
+            // Handle 3-character hex codes
+            if (strlen($hex) == 3) {
+                $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
+            } else {
+                return "rgba(0, 0, 0, " . ($opacity / 100) . ")";
+            }
+        }
         $r = hexdec(substr($hex, 0, 2));
         $g = hexdec(substr($hex, 2, 2));
         $b = hexdec(substr($hex, 4, 2));
@@ -418,139 +446,140 @@ include __DIR__ . '/includes/header.php';
     
     /* ===== PARTNERS SECTION STYLES ===== */
     .partners-slider {
-        background: linear-gradient(135deg, <?= escape($logoStyles['partners_section_bg_color1']) ?> 0%, <?= escape($logoStyles['partners_section_bg_color2']) ?> 100%) !important;
-        padding: <?= (int)$logoStyles['partners_section_padding'] ?>px 0 !important;
+        background: linear-gradient(135deg, <?= escape($logoStyles['partners_section_bg_color1'] ?? '#f0f7ff') ?> 0%, <?= escape($logoStyles['partners_section_bg_color2'] ?? '#e0efff') ?> 100%) !important;
+        padding: <?= (int)($logoStyles['partners_section_padding'] ?? 80) ?>px 0 !important;
     }
     .partners-slider-header h2 {
-        background: linear-gradient(135deg, <?= escape($logoStyles['partners_title_color1']) ?>, <?= escape($logoStyles['partners_title_color2']) ?>) !important;
+        background: linear-gradient(135deg, <?= escape($logoStyles['partners_title_color1'] ?? '#1e40af') ?>, <?= escape($logoStyles['partners_title_color2'] ?? '#3b82f6') ?>) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
     }
     .partners-slider-header p {
-        color: <?= escape($logoStyles['partners_desc_color']) ?> !important;
+        color: <?= escape($logoStyles['partners_desc_color'] ?? '#475569') ?> !important;
     }
     .partners-slider-track {
-        gap: <?= (int)$logoStyles['partners_logo_gap'] ?>px !important;
+        gap: <?= (int)($logoStyles['partners_logo_gap'] ?? 40) ?>px !important;
     }
     .partners-slider-item {
-        width: <?= (int)$logoStyles['partners_logo_item_width'] ?>px !important;
-        height: <?= (int)$logoStyles['partners_logo_item_height'] ?>px !important;
-        padding: <?= (int)$logoStyles['partners_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['partners_logo_border_width'] ?>px <?= escape($logoStyles['partners_logo_border_style']) ?> <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
-        border-radius: <?= (int)$logoStyles['partners_logo_border_radius'] ?>px !important;
-        background-color: <?= escape($logoStyles['partners_logo_bg_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['partners_logo_shadow_x'] ?>px <?= (int)$logoStyles['partners_logo_shadow_y'] ?>px <?= (int)$logoStyles['partners_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'], (int)$logoStyles['partners_logo_shadow_opacity']) ?> !important;
-        transition: all <?= (int)$logoStyles['partners_logo_transition'] ?>ms ease !important;
+        width: <?= (int)($logoStyles['partners_logo_item_width'] ?? 180) ?>px !important;
+        height: <?= (int)($logoStyles['partners_logo_item_height'] ?? 100) ?>px !important;
+        padding: <?= (int)($logoStyles['partners_logo_padding'] ?? 20) ?>px !important;
+        border: <?= (int)($logoStyles['partners_logo_border_width'] ?? 2) ?>px <?= escape($logoStyles['partners_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['partners_logo_border_color'] ?? '#3b82f6') ?> !important;
+        border-radius: <?= (int)($logoStyles['partners_logo_border_radius'] ?? 12) ?>px !important;
+        background-color: <?= escape($logoStyles['partners_logo_bg_color'] ?? '#ffffff') ?> !important;
+        box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['partners_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_shadow_opacity'] ?? 10)) ?> !important;
+        transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .partners-slider-item:hover {
-        transform: translateY(<?= (int)$logoStyles['partners_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['partners_logo_hover_scale']) ?>) !important;
-        border-color: <?= escape($logoStyles['partners_logo_hover_border_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['partners_logo_shadow_x'] ?>px <?= (int)$logoStyles['partners_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['partners_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'], (int)$logoStyles['partners_logo_hover_shadow_opacity']) ?> !important;
+        transform: translateY(<?= (int)($logoStyles['partners_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['partners_logo_hover_scale'] ?? '1.02') ?>) !important;
+        border-color: <?= escape($logoStyles['partners_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
+        box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
     }
     .partners-slider-item img {
         width: 100% !important;
         height: 100% !important;
-        object-fit: <?= escape($logoStyles['partners_logo_object_fit']) ?> !important;
-        filter: grayscale(<?= (int)$logoStyles['partners_logo_grayscale'] ?>%) opacity(<?= (int)$logoStyles['partners_logo_image_opacity'] / 100 ?>) !important;
-        transition: all <?= (int)$logoStyles['partners_logo_transition'] ?>ms ease !important;
+        object-fit: <?= escape($logoStyles['partners_logo_object_fit'] ?? 'contain') ?> !important;
+        filter: grayscale(<?= (int)($logoStyles['partners_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['partners_logo_image_opacity'] ?? 80) / 100) ?>) !important;
+        transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .partners-slider-item:hover img {
         filter: grayscale(0%) opacity(1) !important;
-        transform: scale(<?= escape($logoStyles['partners_logo_hover_image_scale']) ?>) !important;
+        transform: scale(<?= escape($logoStyles['partners_logo_hover_image_scale'] ?? '1.05') ?>) !important;
     }
     
     /* ===== CLIENTS SECTION STYLES ===== */
     .clients-slider {
-        background: linear-gradient(135deg, <?= escape($logoStyles['clients_section_bg_color1']) ?> 0%, <?= escape($logoStyles['clients_section_bg_color2']) ?> 100%) !important;
-        padding: <?= (int)$logoStyles['clients_section_padding'] ?>px 0 !important;
+        background: linear-gradient(135deg, <?= escape($logoStyles['clients_section_bg_color1'] ?? '#f0fdf4') ?> 0%, <?= escape($logoStyles['clients_section_bg_color2'] ?? '#dcfce7') ?> 100%) !important;
+        padding: <?= (int)($logoStyles['clients_section_padding'] ?? 80) ?>px 0 !important;
     }
     .clients-slider-header h2 {
-        background: linear-gradient(135deg, <?= escape($logoStyles['clients_title_color1']) ?>, <?= escape($logoStyles['clients_title_color2']) ?>) !important;
+        background: linear-gradient(135deg, <?= escape($logoStyles['clients_title_color1'] ?? '#059669') ?>, <?= escape($logoStyles['clients_title_color2'] ?? '#10b981') ?>) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
     }
     .clients-slider-header p {
-        color: <?= escape($logoStyles['clients_desc_color']) ?> !important;
+        color: <?= escape($logoStyles['clients_desc_color'] ?? '#475569') ?> !important;
     }
     .clients-slider-track {
-        gap: <?= (int)$logoStyles['clients_logo_gap'] ?>px !important;
+        gap: <?= (int)($logoStyles['clients_logo_gap'] ?? 40) ?>px !important;
     }
     .clients-slider-item {
-        width: <?= (int)$logoStyles['clients_logo_item_width'] ?>px !important;
-        height: <?= (int)$logoStyles['clients_logo_item_height'] ?>px !important;
-        padding: <?= (int)$logoStyles['clients_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['clients_logo_border_width'] ?>px <?= escape($logoStyles['clients_logo_border_style']) ?> <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
-        border-radius: <?= (int)$logoStyles['clients_logo_border_radius'] ?>px !important;
-        background-color: <?= escape($logoStyles['clients_logo_bg_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['clients_logo_shadow_x'] ?>px <?= (int)$logoStyles['clients_logo_shadow_y'] ?>px <?= (int)$logoStyles['clients_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'], (int)$logoStyles['clients_logo_shadow_opacity']) ?> !important;
-        transition: all <?= (int)$logoStyles['clients_logo_transition'] ?>ms ease !important;
+        width: <?= (int)($logoStyles['clients_logo_item_width'] ?? 180) ?>px !important;
+        height: <?= (int)($logoStyles['clients_logo_item_height'] ?? 100) ?>px !important;
+        padding: <?= (int)($logoStyles['clients_logo_padding'] ?? 20) ?>px !important;
+        border: <?= (int)($logoStyles['clients_logo_border_width'] ?? 2) ?>px <?= escape($logoStyles['clients_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['clients_logo_border_color'] ?? '#10b981') ?> !important;
+        border-radius: <?= (int)($logoStyles['clients_logo_border_radius'] ?? 12) ?>px !important;
+        background-color: <?= escape($logoStyles['clients_logo_bg_color'] ?? '#ffffff') ?> !important;
+        box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['clients_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_shadow_opacity'] ?? 10)) ?> !important;
+        transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .clients-slider-item:hover {
-        transform: translateY(<?= (int)$logoStyles['clients_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['clients_logo_hover_scale']) ?>) !important;
-        border-color: <?= escape($logoStyles['clients_logo_hover_border_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['clients_logo_shadow_x'] ?>px <?= (int)$logoStyles['clients_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['clients_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'], (int)$logoStyles['clients_logo_hover_shadow_opacity']) ?> !important;
+        transform: translateY(<?= (int)($logoStyles['clients_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['clients_logo_hover_scale'] ?? '1.02') ?>) !important;
+        border-color: <?= escape($logoStyles['clients_logo_hover_border_color'] ?? '#10b981') ?> !important;
+        box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
     }
     .clients-slider-item img {
         width: 100% !important;
         height: 100% !important;
-        object-fit: <?= escape($logoStyles['clients_logo_object_fit']) ?> !important;
-        filter: grayscale(<?= (int)$logoStyles['clients_logo_grayscale'] ?>%) opacity(<?= (int)$logoStyles['clients_logo_image_opacity'] / 100 ?>) !important;
-        transition: all <?= (int)$logoStyles['clients_logo_transition'] ?>ms ease !important;
+        object-fit: <?= escape($logoStyles['clients_logo_object_fit'] ?? 'contain') ?> !important;
+        filter: grayscale(<?= (int)($logoStyles['clients_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['clients_logo_image_opacity'] ?? 80) / 100) ?>) !important;
+        transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .clients-slider-item:hover img {
         filter: grayscale(0%) opacity(1) !important;
-        transform: scale(<?= escape($logoStyles['clients_logo_hover_image_scale']) ?>) !important;
+        transform: scale(<?= escape($logoStyles['clients_logo_hover_image_scale'] ?? '1.05') ?>) !important;
     }
     
     /* ===== QUALITY CERTIFICATIONS SECTION STYLES ===== */
     .quality-certifications-slider {
-        background: linear-gradient(to bottom, <?= escape($logoStyles['certs_section_bg_color1']) ?>, <?= escape($logoStyles['certs_section_bg_color2']) ?>) !important;
-        padding: <?= (int)$logoStyles['certs_section_padding'] ?>px 0 !important;
+        background: linear-gradient(to bottom, <?= escape($logoStyles['certs_section_bg_color1'] ?? '#ffffff') ?>, <?= escape($logoStyles['certs_section_bg_color2'] ?? '#f8f9fa') ?>) !important;
+        padding: <?= (int)($logoStyles['certs_section_padding'] ?? 60) ?>px 0 !important;
     }
     .quality-certifications-slider-header h2 {
-        color: <?= escape($logoStyles['certs_title_color']) ?> !important;
+        color: <?= escape($logoStyles['certs_title_color'] ?? '#1a1a1a') ?> !important;
     }
     .quality-certifications-slider-header p {
-        color: <?= escape($logoStyles['certs_desc_color']) ?> !important;
+        color: <?= escape($logoStyles['certs_desc_color'] ?? '#666666') ?> !important;
     }
     .quality-certifications-slider-track {
-        gap: <?= (int)$logoStyles['certs_logo_gap'] ?>px !important;
+        gap: <?= (int)($logoStyles['certs_logo_gap'] ?? 30) ?>px !important;
     }
     .quality-certifications-slider-item {
-        width: <?= (int)$logoStyles['certs_logo_item_width'] ?>px !important;
-        height: <?= (int)$logoStyles['certs_logo_item_height'] ?>px !important;
-        padding: <?= (int)$logoStyles['certs_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['certs_logo_border_width'] ?>px <?= escape($logoStyles['certs_logo_border_style']) ?> <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
-        border-radius: <?= (int)$logoStyles['certs_logo_border_radius'] ?>px !important;
-        background-color: <?= escape($logoStyles['certs_logo_bg_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['certs_logo_shadow_x'] ?>px <?= (int)$logoStyles['certs_logo_shadow_y'] ?>px <?= (int)$logoStyles['certs_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'], (int)$logoStyles['certs_logo_shadow_opacity']) ?> !important;
-        transition: all <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
+        width: <?= (int)($logoStyles['certs_logo_item_width'] ?? 160) ?>px !important;
+        height: <?= (int)($logoStyles['certs_logo_item_height'] ?? 120) ?>px !important;
+        padding: <?= (int)($logoStyles['certs_logo_padding'] ?? 20) ?>px !important;
+        border: <?= (int)($logoStyles['certs_logo_border_width'] ?? 1) ?>px <?= escape($logoStyles['certs_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['certs_logo_border_color'] ?? '#e5e7eb') ?> !important;
+        border-radius: <?= (int)($logoStyles['certs_logo_border_radius'] ?? 12) ?>px !important;
+        background-color: <?= escape($logoStyles['certs_logo_bg_color'] ?? '#ffffff') ?> !important;
+        box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['certs_logo_shadow_blur'] ?? 12) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_shadow_opacity'] ?? 8)) ?> !important;
+        transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .quality-certifications-slider-item:hover {
-        transform: translateY(<?= (int)$logoStyles['certs_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['certs_logo_hover_scale']) ?>) !important;
-        border-color: <?= escape($logoStyles['certs_logo_hover_border_color']) ?> !important;
-        box-shadow: <?= (int)$logoStyles['certs_logo_shadow_x'] ?>px <?= (int)$logoStyles['certs_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['certs_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'], (int)$logoStyles['certs_logo_hover_shadow_opacity']) ?> !important;
+        transform: translateY(<?= (int)($logoStyles['certs_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['certs_logo_hover_scale'] ?? '1.05') ?>) !important;
+        border-color: <?= escape($logoStyles['certs_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
+        box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_hover_shadow_opacity'] ?? 15)) ?> !important;
     }
     .quality-certifications-slider-item img {
         width: 100% !important;
-        max-height: <?= (int)$logoStyles['certs_logo_max_image_height'] ?>px !important;
-        object-fit: <?= escape($logoStyles['certs_logo_object_fit']) ?> !important;
-        transition: all <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
+        max-height: <?= (int)($logoStyles['certs_logo_max_image_height'] ?? 80) ?>px !important;
+        object-fit: <?= escape($logoStyles['certs_logo_object_fit'] ?? 'contain') ?> !important;
+        transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .quality-certifications-slider-item:hover img {
-        transform: scale(<?= escape($logoStyles['certs_logo_hover_image_scale']) ?>) !important;
+        transform: scale(<?= escape($logoStyles['certs_logo_hover_image_scale'] ?? '1.1') ?>) !important;
     }
     .quality-certifications-slider-item .cert-name {
-        color: <?= escape($logoStyles['certs_text_color']) ?> !important;
-        font-size: <?= (int)$logoStyles['certs_text_font_size'] ?>px !important;
-        transition: color <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
+        color: <?= escape($logoStyles['certs_text_color'] ?? '#6b7280') ?> !important;
+        font-size: <?= (int)($logoStyles['certs_text_font_size'] ?? 12) ?>px !important;
+        transition: color <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .quality-certifications-slider-item:hover .cert-name {
-        color: <?= escape($logoStyles['certs_text_hover_color']) ?> !important;
+        color: <?= escape($logoStyles['certs_text_hover_color'] ?? '#3b82f6') ?> !important;
     }
     </style>
+    <!-- End Dynamic Logo Slider Styles -->
     <section id="partners" class="partners-slider">
         <div class="partners-slider-container">
             <div class="partners-slider-header">

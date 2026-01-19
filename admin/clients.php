@@ -64,8 +64,34 @@ if (!empty($_GET['toggle'])) {
     }
 }
 
+// Handle styling settings form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_styling'])) {
+    require_csrf();
+    
+    // Handle styling settings
+    foreach ($_POST as $key => $value) {
+        if ($key !== 'save_styling' && $key !== 'csrf_token' && strpos($key, 'clients_') === 0) {
+            $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
+            
+            if ($existing) {
+                db()->update('settings', ['value' => trim($value)], '`key` = :key', ['key' => $key]);
+            } else {
+                db()->insert('settings', [
+                    'key' => $key,
+                    'value' => trim($value),
+                    'type' => 'text'
+                ]);
+            }
+        }
+    }
+    
+    $message = 'Clients styling settings updated successfully.';
+    header('Location: ' . url('admin/clients.php') . '?styling_saved=1');
+    exit;
+}
+
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['save_styling'])) {
     if (!empty($_POST['client_id'])) {
         // Update existing client
         $clientId = (int)$_POST['client_id'];
@@ -314,6 +340,18 @@ if (!empty($_GET['edit'])) {
     }
 }
 
+// Get all settings for styling
+$settingsData = db()->fetchAll("SELECT `key`, value FROM settings");
+$settings = [];
+foreach ($settingsData as $setting) {
+    $settings[$setting['key']] = $setting['value'];
+}
+
+// Show success message for styling save
+if (isset($_GET['styling_saved'])) {
+    $message = 'Clients styling settings updated successfully.';
+}
+
 $pageTitle = 'Clients';
 include __DIR__ . '/includes/header.php';
 ?>
@@ -502,6 +540,426 @@ include __DIR__ . '/includes/header.php';
         </div>
         <?php endif; ?>
     </div>
+
+    <!-- Clients Styling Settings -->
+    <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 mt-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-sm font-semibold text-gray-800 flex items-center">
+                <i class="fas fa-palette text-green-600 mr-2 text-xs"></i>
+                Logo Slider Styling
+            </h3>
+            <a href="<?= url('index.php#clients') ?>" target="_blank" class="text-xs text-green-600 hover:text-green-800">
+                <i class="fas fa-external-link-alt mr-1"></i>View Full Page
+            </a>
+        </div>
+        
+        <!-- Live Preview -->
+        <div class="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+            <div class="text-xs font-semibold text-gray-600 mb-2 flex items-center">
+                <i class="fas fa-eye mr-2"></i>Live Preview
+            </div>
+            <div id="clients-preview-slider" class="clients-slider-preview" style="border-radius: 8px; overflow: hidden;">
+                <div class="clients-slider-container-preview" style="max-width: 100%; padding: 0 15px;">
+                    <div class="clients-slider-header-preview" style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="
+                            font-size: 1.5rem;
+                            font-weight: 700;
+                            -webkit-background-clip: text;
+                            -webkit-text-fill-color: transparent;
+                            background-clip: text;
+                            margin-bottom: 5px;
+                        ">Our Clients</h2>
+                        <p style="
+                            font-size: 0.875rem;
+                            font-weight: 500;
+                        ">Proud to serve leading companies worldwide</p>
+                    </div>
+                    <div class="clients-slider-wrapper-preview" style="overflow: hidden;">
+                        <div class="clients-slider-track-preview" style="display: flex; flex-shrink: 0;">
+                            <?php 
+                            $previewClients = array_slice($clients, 0, 6);
+                            if (empty($previewClients)) {
+                                // Show placeholder boxes if no clients
+                                for ($i = 0; $i < 12; $i++): ?>
+                                <div class="clients-slider-item-preview" style="flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                    <div style="width: 60%; height: 60%; background: #e5e7eb; border-radius: 4px;"></div>
+                                </div>
+                                <?php endfor;
+                            } else {
+                                foreach (array_merge($previewClients, $previewClients) as $client): ?>
+                                <div class="clients-slider-item-preview" style="flex-shrink: 0; cursor: pointer;">
+                                    <?php if (!empty($client['logo'])): ?>
+                                    <img src="<?= escape(image_url($client['logo'])) ?>" alt="<?= escape($client['name']) ?>" style="width: 100%; height: 100%; object-fit: contain;">
+                                    <?php else: ?>
+                                    <div style="width: 100%; height: 100%; background: #e5e7eb; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                        <span style="color: #9ca3af; font-size: 0.75rem;">No Logo</span>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                                <?php endforeach;
+                            } ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <form method="POST" id="clients-styling-form">
+            <input type="hidden" name="save_styling" value="1">
+            <?= csrf_field() ?>
+            
+            <div class="space-y-2">
+                <!-- Accordion: Section & Header -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('clients-section')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-layer-group mr-2"></i>Section & Header</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="clients-section-icon"></i>
+                    </button>
+                    <div id="clients-section" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-3 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color 1</label>
+                                <input type="color" name="clients_section_bg_color1" value="<?= escape($settings['clients_section_bg_color1'] ?? '#f0fdf4') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color 2</label>
+                                <input type="color" name="clients_section_bg_color2" value="<?= escape($settings['clients_section_bg_color2'] ?? '#dcfce7') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Padding</label>
+                                <input type="number" name="clients_section_padding" value="<?= escape($settings['clients_section_padding'] ?? '80') ?>" min="20" max="200" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Title Color 1</label>
+                                <input type="color" name="clients_title_color1" value="<?= escape($settings['clients_title_color1'] ?? '#059669') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Title Color 2</label>
+                                <input type="color" name="clients_title_color2" value="<?= escape($settings['clients_title_color2'] ?? '#10b981') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Desc Color</label>
+                                <input type="color" name="clients_desc_color" value="<?= escape($settings['clients_desc_color'] ?? '#475569') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Logo Item -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('clients-item')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-image mr-2"></i>Logo Item</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="clients-item-icon"></i>
+                    </button>
+                    <div id="clients-item" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Width</label>
+                                <input type="number" name="clients_logo_item_width" value="<?= escape($settings['clients_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Height</label>
+                                <input type="number" name="clients_logo_item_height" value="<?= escape($settings['clients_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Gap</label>
+                                <input type="number" name="clients_logo_gap" value="<?= escape($settings['clients_logo_gap'] ?? '40') ?>" min="10" max="100" step="5" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Padding</label>
+                                <input type="number" name="clients_logo_padding" value="<?= escape($settings['clients_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border W</label>
+                                <input type="number" name="clients_logo_border_width" value="<?= escape($settings['clients_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border Style</label>
+                                <select name="clients_logo_border_style" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                                    <option value="solid" <?= ($settings['clients_logo_border_style'] ?? 'solid') === 'solid' ? 'selected' : '' ?>>Solid</option>
+                                    <option value="dashed" <?= ($settings['clients_logo_border_style'] ?? '') === 'dashed' ? 'selected' : '' ?>>Dashed</option>
+                                    <option value="dotted" <?= ($settings['clients_logo_border_style'] ?? '') === 'dotted' ? 'selected' : '' ?>>Dotted</option>
+                                    <option value="none" <?= ($settings['clients_logo_border_style'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Border Color</label>
+                                <input type="color" name="clients_logo_border_color" value="<?= escape($settings['clients_logo_border_color'] ?? '#10b981') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Radius</label>
+                                <input type="number" name="clients_logo_border_radius" value="<?= escape($settings['clients_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">BG Color</label>
+                                <input type="color" name="clients_logo_bg_color" value="<?= escape($settings['clients_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Shadow & Hover -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('clients-shadow')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-magic mr-2"></i>Shadow & Hover</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="clients-shadow-icon"></i>
+                    </button>
+                    <div id="clients-shadow" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2 mb-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow X</label>
+                                <input type="number" name="clients_logo_shadow_x" value="<?= escape($settings['clients_logo_shadow_x'] ?? '0') ?>" min="-20" max="20" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow Y</label>
+                                <input type="number" name="clients_logo_shadow_y" value="<?= escape($settings['clients_logo_shadow_y'] ?? '2') ?>" min="-20" max="20" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Blur</label>
+                                <input type="number" name="clients_logo_shadow_blur" value="<?= escape($settings['clients_logo_shadow_blur'] ?? '8') ?>" min="0" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Shadow Color</label>
+                                <input type="color" name="clients_logo_shadow_color" value="<?= escape($settings['clients_logo_shadow_color'] ?? '#10b981') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Opacity %</label>
+                                <input type="number" name="clients_logo_shadow_opacity" value="<?= escape($settings['clients_logo_shadow_opacity'] ?? '10') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Y</label>
+                                <input type="number" name="clients_logo_hover_y" value="<?= escape($settings['clients_logo_hover_y'] ?? '-8') ?>" min="-50" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Scale</label>
+                                <input type="number" name="clients_logo_hover_scale" value="<?= escape($settings['clients_logo_hover_scale'] ?? '1.02') ?>" min="0.5" max="2" step="0.01" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Border</label>
+                                <input type="color" name="clients_logo_hover_border_color" value="<?= escape($settings['clients_logo_hover_border_color'] ?? '#10b981') ?>" class="w-full h-8 border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Shadow Y</label>
+                                <input type="number" name="clients_logo_hover_shadow_y" value="<?= escape($settings['clients_logo_hover_shadow_y'] ?? '8') ?>" min="-20" max="50" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Blur</label>
+                                <input type="number" name="clients_logo_hover_shadow_blur" value="<?= escape($settings['clients_logo_hover_shadow_blur'] ?? '24') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Opacity</label>
+                                <input type="number" name="clients_logo_hover_shadow_opacity" value="<?= escape($settings['clients_logo_hover_shadow_opacity'] ?? '20') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Transition</label>
+                                <input type="number" name="clients_logo_transition" value="<?= escape($settings['clients_logo_transition'] ?? '300') ?>" min="0" max="2000" step="50" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accordion: Image Effects -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('clients-image')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-adjust mr-2"></i>Image Effects</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="clients-image-icon"></i>
+                    </button>
+                    <div id="clients-image" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-4 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Object Fit</label>
+                                <select name="clients_logo_object_fit" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                                    <option value="contain" <?= ($settings['clients_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain</option>
+                                    <option value="cover" <?= ($settings['clients_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover</option>
+                                    <option value="fill" <?= ($settings['clients_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill</option>
+                                    <option value="scale-down" <?= ($settings['clients_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down</option>
+                                    <option value="none" <?= ($settings['clients_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Grayscale %</label>
+                                <input type="number" name="clients_logo_grayscale" value="<?= escape($settings['clients_logo_grayscale'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Opacity %</label>
+                                <input type="number" name="clients_logo_image_opacity" value="<?= escape($settings['clients_logo_image_opacity'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Hover Scale</label>
+                                <input type="number" name="clients_logo_hover_image_scale" value="<?= escape($settings['clients_logo_hover_image_scale'] ?? '1.05') ?>" min="0.5" max="2" step="0.01" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-end mt-3 pt-3 border-t border-gray-200">
+                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium transition-colors">
+                    <i class="fas fa-save mr-1"></i>Save Settings
+                </button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+    function toggleAccordion(id) {
+        const content = document.getElementById(id);
+        const icon = document.getElementById(id + '-icon');
+        if (content.classList.contains('hidden')) {
+            content.classList.remove('hidden');
+            icon.classList.add('rotate-180');
+        } else {
+            content.classList.add('hidden');
+            icon.classList.remove('rotate-180');
+        }
+    }
+    
+    // Live preview update function
+    function hexToRgba(hex, opacity) {
+        hex = hex.replace('#', '');
+        const r = parseInt(hex.substring(0, 2), 16);
+        const g = parseInt(hex.substring(2, 4), 16);
+        const b = parseInt(hex.substring(4, 6), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity / 100})`;
+    }
+    
+    function updateClientsPreview() {
+        const form = document.getElementById('clients-styling-form');
+        if (!form) return;
+        
+        const preview = document.getElementById('clients-preview-slider');
+        if (!preview) return;
+        
+        const previewHeader = preview.querySelector('.clients-slider-header-preview');
+        const previewTitle = previewHeader?.querySelector('h2');
+        const previewDesc = previewHeader?.querySelector('p');
+        const previewTrack = preview.querySelector('.clients-slider-track-preview');
+        const previewItems = preview.querySelectorAll('.clients-slider-item-preview');
+        
+        // Get form values with fallbacks
+        const bgColor1 = (form.querySelector('[name="clients_section_bg_color1"]')?.value) || '#f0fdf4';
+        const bgColor2 = (form.querySelector('[name="clients_section_bg_color2"]')?.value) || '#dcfce7';
+        const padding = parseInt(form.querySelector('[name="clients_section_padding"]')?.value) || 80;
+        const titleColor1 = (form.querySelector('[name="clients_title_color1"]')?.value) || '#059669';
+        const titleColor2 = (form.querySelector('[name="clients_title_color2"]')?.value) || '#10b981';
+        const descColor = (form.querySelector('[name="clients_desc_color"]')?.value) || '#475569';
+        const itemWidth = parseInt(form.querySelector('[name="clients_logo_item_width"]')?.value) || 180;
+        const itemHeight = parseInt(form.querySelector('[name="clients_logo_item_height"]')?.value) || 100;
+        const gap = parseInt(form.querySelector('[name="clients_logo_gap"]')?.value) || 40;
+        const itemPadding = parseInt(form.querySelector('[name="clients_logo_padding"]')?.value) || 20;
+        const borderWidth = parseInt(form.querySelector('[name="clients_logo_border_width"]')?.value) || 2;
+        const borderStyle = (form.querySelector('[name="clients_logo_border_style"]')?.value) || 'solid';
+        const borderColor = (form.querySelector('[name="clients_logo_border_color"]')?.value) || '#10b981';
+        const borderRadius = parseInt(form.querySelector('[name="clients_logo_border_radius"]')?.value) || 12;
+        const bgColor = (form.querySelector('[name="clients_logo_bg_color"]')?.value) || '#ffffff';
+        const shadowX = parseInt(form.querySelector('[name="clients_logo_shadow_x"]')?.value) || 0;
+        const shadowY = parseInt(form.querySelector('[name="clients_logo_shadow_y"]')?.value) || 2;
+        const shadowBlur = parseInt(form.querySelector('[name="clients_logo_shadow_blur"]')?.value) || 8;
+        const shadowColor = (form.querySelector('[name="clients_logo_shadow_color"]')?.value) || '#10b981';
+        const shadowOpacity = parseInt(form.querySelector('[name="clients_logo_shadow_opacity"]')?.value) || 10;
+        const objectFit = (form.querySelector('[name="clients_logo_object_fit"]')?.value) || 'contain';
+        const grayscale = parseInt(form.querySelector('[name="clients_logo_grayscale"]')?.value) || 80;
+        const imageOpacity = parseInt(form.querySelector('[name="clients_logo_image_opacity"]')?.value) || 80;
+        const hoverY = parseInt(form.querySelector('[name="clients_logo_hover_y"]')?.value) || -8;
+        const hoverScale = parseFloat(form.querySelector('[name="clients_logo_hover_scale"]')?.value) || 1.02;
+        const hoverBorderColor = (form.querySelector('[name="clients_logo_hover_border_color"]')?.value) || '#10b981';
+        const hoverShadowY = parseInt(form.querySelector('[name="clients_logo_hover_shadow_y"]')?.value) || 8;
+        const hoverShadowBlur = parseInt(form.querySelector('[name="clients_logo_hover_shadow_blur"]')?.value) || 24;
+        const hoverShadowOpacity = parseInt(form.querySelector('[name="clients_logo_hover_shadow_opacity"]')?.value) || 20;
+        const hoverImageScale = parseFloat(form.querySelector('[name="clients_logo_hover_image_scale"]')?.value) || 1.05;
+        const transition = parseInt(form.querySelector('[name="clients_logo_transition"]')?.value) || 300;
+        
+        // Update preview section background
+        preview.style.background = `linear-gradient(135deg, ${bgColor1} 0%, ${bgColor2} 100%)`;
+        preview.style.padding = `${Math.max(15, padding / 4)}px 0`;
+        
+        // Update header
+        if (previewTitle) {
+            previewTitle.style.background = `linear-gradient(135deg, ${titleColor1}, ${titleColor2})`;
+        }
+        if (previewDesc) {
+            previewDesc.style.color = descColor;
+        }
+        
+        // Update track gap
+        if (previewTrack) {
+            previewTrack.style.gap = `${gap}px`;
+        }
+        
+        // Update items
+        previewItems.forEach(item => {
+            item.style.width = `${itemWidth}px`;
+            item.style.height = `${itemHeight}px`;
+            item.style.padding = `${itemPadding}px`;
+            item.style.border = `${borderWidth}px ${borderStyle} ${borderColor}`;
+            item.style.borderRadius = `${borderRadius}px`;
+            item.style.backgroundColor = bgColor;
+            item.style.boxShadow = `${shadowX}px ${shadowY}px ${shadowBlur}px ${hexToRgba(shadowColor, shadowOpacity)}`;
+            item.style.transition = `all ${transition}ms ease`;
+            
+            // Store hover values as data attributes
+            item.setAttribute('data-hover-y', hoverY);
+            item.setAttribute('data-hover-scale', hoverScale);
+            item.setAttribute('data-hover-border', hoverBorderColor);
+            item.setAttribute('data-hover-shadow-y', hoverShadowY);
+            item.setAttribute('data-hover-shadow-blur', hoverShadowBlur);
+            item.setAttribute('data-hover-shadow-opacity', hoverShadowOpacity);
+            item.setAttribute('data-hover-image-scale', hoverImageScale);
+            item.setAttribute('data-shadow-color', shadowColor);
+            
+            const img = item.querySelector('img');
+            if (img) {
+                img.style.objectFit = objectFit;
+                img.style.filter = `grayscale(${grayscale}%) opacity(${imageOpacity / 100})`;
+                img.style.transition = `all ${transition}ms ease`;
+            }
+        });
+        
+        // Update hover styles dynamically
+        const style = document.getElementById('clients-preview-hover-styles');
+        if (style) {
+            style.textContent = `
+                .clients-slider-item-preview:hover {
+                    transform: translateY(${hoverY}px) scale(${hoverScale}) !important;
+                    border-color: ${hoverBorderColor} !important;
+                    box-shadow: ${shadowX}px ${hoverShadowY}px ${hoverShadowBlur}px ${hexToRgba(shadowColor, hoverShadowOpacity)} !important;
+                }
+                .clients-slider-item-preview:hover img {
+                    filter: grayscale(0%) opacity(1) !important;
+                    transform: scale(${hoverImageScale}) !important;
+                }
+            `;
+        }
+    }
+    
+    // Attach event listeners to all form inputs
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('clients-styling-form');
+        if (form) {
+            const inputs = form.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                input.addEventListener('input', updateClientsPreview);
+                input.addEventListener('change', updateClientsPreview);
+            });
+            // Initial update
+            updateClientsPreview();
+        }
+    });
+    </script>
+    
+    <style>
+    @keyframes slideClients {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    .clients-slider-track-preview {
+        animation: slideClients 20s linear infinite;
+    }
+    .clients-slider-wrapper-preview:hover .clients-slider-track-preview {
+        animation-play-state: paused;
+    }
+    </style>
+    <style id="clients-preview-hover-styles"></style>
 </div>
 
 <?php include __DIR__ . '/includes/footer.php'; ?>

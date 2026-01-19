@@ -321,30 +321,40 @@ include __DIR__ . '/includes/header.php';
     <!-- Modern Tab Navigation -->
     <div class="bg-white rounded-2xl shadow-xl mb-6 overflow-hidden border border-gray-100">
         <nav class="flex flex-wrap" id="settings-tabs">
-            <button type="button" onclick="showSettingsTab('general')" id="tab-btn-general" class="tab-button active flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-indigo-600 bg-indigo-50 transition-all relative group">
-                <i class="fas fa-info-circle mr-2"></i>
-                <span>General</span>
-                <div class="absolute inset-0 bg-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <button type="button" onclick="showSettingsTab('general')" id="tab-btn-general" class="tab-button active flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-indigo-600 bg-indigo-50 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    <span>General</span>
+                </span>
+                <div class="absolute inset-0 bg-indigo-100/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
-            <button type="button" onclick="showSettingsTab('logo')" id="tab-btn-logo" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-indigo-600 hover:bg-indigo-50 transition-all relative group">
-                <i class="fas fa-image mr-2"></i>
-                <span>Logo & Branding</span>
-                <div class="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <button type="button" onclick="showSettingsTab('logo')" id="tab-btn-logo" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-image mr-2"></i>
+                    <span>Logo & Branding</span>
+                </span>
+                <div class="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
-            <button type="button" onclick="showSettingsTab('contact')" id="tab-btn-contact" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-green-600 hover:bg-green-50 transition-all relative group">
-                <i class="fas fa-address-book mr-2"></i>
-                <span>Contact</span>
-                <div class="absolute inset-0 bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <button type="button" onclick="showSettingsTab('contact')" id="tab-btn-contact" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-green-600 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-address-book mr-2"></i>
+                    <span>Contact</span>
+                </span>
+                <div class="absolute inset-0 bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
-            <button type="button" onclick="showSettingsTab('sliders')" id="tab-btn-sliders" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-purple-600 hover:bg-purple-50 transition-all relative group">
-                <i class="fas fa-palette mr-2"></i>
-                <span>Logo Sliders</span>
-                <div class="absolute inset-0 bg-purple-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <button type="button" onclick="showSettingsTab('sliders')" id="tab-btn-sliders" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-purple-600 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-palette mr-2"></i>
+                    <span>Logo Sliders</span>
+                </span>
+                <div class="absolute inset-0 bg-purple-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
-            <button type="button" onclick="showSettingsTab('system')" id="tab-btn-system" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-orange-600 hover:bg-orange-50 transition-all relative group">
-                <i class="fas fa-tools mr-2"></i>
-                <span>System</span>
-                <div class="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+            <button type="button" onclick="showSettingsTab('system')" id="tab-btn-system" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-orange-600 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-tools mr-2"></i>
+                    <span>System</span>
+                </span>
+                <div class="absolute inset-0 bg-orange-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
         </nav>
     </div>
@@ -354,7 +364,7 @@ include __DIR__ . '/includes/header.php';
         <!-- ============================================ -->
         <!-- TAB 1: GENERAL SITE INFORMATION -->
         <!-- ============================================ -->
-        <div id="tab-content-general" class="settings-tab-content">
+        <div id="tab-content-general" class="settings-tab-content show-tab">
             <!-- Section Header -->
             <div class="mb-8">
                 <div class="flex items-center gap-4 mb-3">
@@ -370,26 +380,26 @@ include __DIR__ . '/includes/header.php';
             
             <!-- Settings Card -->
             <div class="settings-card bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-lg space-y-6">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="input-group">
-                    <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
-                        <i class="fas fa-globe text-indigo-500 mr-2"></i> 
-                        <span>Site Name</span>
-                    </label>
-                    <div class="relative">
-                        <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
-                               class="w-full px-4 py-3.5 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white shadow-sm hover:shadow-md">
-                        <i class="fas fa-globe input-icon absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-all"></i>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="input-group">
+                        <label class="block text-sm font-bold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-globe text-indigo-500 mr-2"></i> 
+                            <span>Site Name</span>
+                        </label>
+                        <div class="relative">
+                            <input type="text" name="site_name" value="<?= escape($settings['site_name']) ?>"
+                                   class="w-full px-4 py-3.5 pl-12 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all bg-white shadow-sm hover:shadow-md">
+                            <i class="fas fa-globe input-icon absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 transition-all"></i>
+                        </div>
                     </div>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-file-alt text-gray-400 mr-2"></i> Footer Text
-                    </label>
-                    <textarea name="footer_text" rows="2" 
-                              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['footer_text']) ?></textarea>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-file-alt text-gray-400 mr-2"></i> Footer Text
+                        </label>
+                        <textarea name="footer_text" rows="2" 
+                                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['footer_text']) ?></textarea>
+                    </div>
                 </div>
             </div>
         </div>
@@ -664,7 +674,7 @@ include __DIR__ . '/includes/header.php';
                     <i class="fas fa-palette text-purple-600 mr-3"></i>
                     Logo Slider Styling
                 </h2>
-                <p class="text-gray-600">Customize the appearance of Partners, Clients, and Quality Certifications logo sliders</p>
+                <p class="text-gray-600">Logo slider styling settings have been moved to their respective management pages for easier access.</p>
             </div>
             
             <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200">
@@ -764,572 +774,15 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             
-            <div class="space-y-6">
-                <!-- Partners Logo Styling -->
-                <div class="bg-white rounded-lg p-4 border border-purple-200">
-                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-handshake text-blue-600 mr-2"></i> Partners Logo Styling
-                    </h4>
-                    
-                    <!-- Section Background -->
-                    <div class="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Section Background</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 1</label>
-                                <input type="color" name="partners_section_bg_color1" value="<?= escape($settings['partners_section_bg_color1'] ?? '#f0f7ff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 2</label>
-                                <input type="color" name="partners_section_bg_color2" value="<?= escape($settings['partners_section_bg_color2'] ?? '#e0efff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Section Padding (px)</label>
-                                <input type="number" name="partners_section_padding" value="<?= escape($settings['partners_section_padding'] ?? '80') ?>" min="20" max="200" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Header Styling -->
-                    <div class="mb-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Header Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Title Color 1</label>
-                                <input type="color" name="partners_title_color1" value="<?= escape($settings['partners_title_color1'] ?? '#1e40af') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Title Color 2</label>
-                                <input type="color" name="partners_title_color2" value="<?= escape($settings['partners_title_color2'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Description Color</label>
-                                <input type="color" name="partners_desc_color" value="<?= escape($settings['partners_desc_color'] ?? '#475569') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Item Styling -->
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Logo Item Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Width (px)</label>
-                                <input type="number" name="partners_logo_item_width" value="<?= escape($settings['partners_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Height (px)</label>
-                                <input type="number" name="partners_logo_item_height" value="<?= escape($settings['partners_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Gap Between Items (px)</label>
-                                <input type="number" name="partners_logo_gap" value="<?= escape($settings['partners_logo_gap'] ?? '40') ?>" min="10" max="100" step="5" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Padding (px)</label>
-                                <input type="number" name="partners_logo_padding" value="<?= escape($settings['partners_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Width (px)</label>
-                                <input type="number" name="partners_logo_border_width" value="<?= escape($settings['partners_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Style</label>
-                                <select name="partners_logo_border_style" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="solid" <?= ($settings['partners_logo_border_style'] ?? 'solid') === 'solid' ? 'selected' : '' ?>>Solid</option>
-                                    <option value="dashed" <?= ($settings['partners_logo_border_style'] ?? '') === 'dashed' ? 'selected' : '' ?>>Dashed</option>
-                                    <option value="dotted" <?= ($settings['partners_logo_border_style'] ?? '') === 'dotted' ? 'selected' : '' ?>>Dotted</option>
-                                    <option value="double" <?= ($settings['partners_logo_border_style'] ?? '') === 'double' ? 'selected' : '' ?>>Double</option>
-                                    <option value="none" <?= ($settings['partners_logo_border_style'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Color</label>
-                                <input type="color" name="partners_logo_border_color" value="<?= escape($settings['partners_logo_border_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Radius (px)</label>
-                                <input type="number" name="partners_logo_border_radius" value="<?= escape($settings['partners_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color</label>
-                                <input type="color" name="partners_logo_bg_color" value="<?= escape($settings['partners_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Box Shadow -->
-                    <div class="mb-4 p-3 bg-indigo-50 rounded-lg border border-indigo-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Box Shadow</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow X (px)</label>
-                                <input type="number" name="partners_logo_shadow_x" value="<?= escape($settings['partners_logo_shadow_x'] ?? '0') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Y (px)</label>
-                                <input type="number" name="partners_logo_shadow_y" value="<?= escape($settings['partners_logo_shadow_y'] ?? '2') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Blur (px)</label>
-                                <input type="number" name="partners_logo_shadow_blur" value="<?= escape($settings['partners_logo_shadow_blur'] ?? '8') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Color</label>
-                                <input type="color" name="partners_logo_shadow_color" value="<?= escape($settings['partners_logo_shadow_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Opacity (%)</label>
-                                <input type="number" name="partners_logo_shadow_opacity" value="<?= escape($settings['partners_logo_shadow_opacity'] ?? '10') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hover Effects -->
-                    <div class="mb-4 p-3 bg-pink-50 rounded-lg border border-pink-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Hover Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Transform Y (px)</label>
-                                <input type="number" name="partners_logo_hover_y" value="<?= escape($settings['partners_logo_hover_y'] ?? '-8') ?>" min="-50" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Scale</label>
-                                <input type="number" name="partners_logo_hover_scale" value="<?= escape($settings['partners_logo_hover_scale'] ?? '1.02') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Border Color</label>
-                                <input type="color" name="partners_logo_hover_border_color" value="<?= escape($settings['partners_logo_hover_border_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Y (px)</label>
-                                <input type="number" name="partners_logo_hover_shadow_y" value="<?= escape($settings['partners_logo_hover_shadow_y'] ?? '8') ?>" min="-20" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Blur (px)</label>
-                                <input type="number" name="partners_logo_hover_shadow_blur" value="<?= escape($settings['partners_logo_hover_shadow_blur'] ?? '24') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Opacity (%)</label>
-                                <input type="number" name="partners_logo_hover_shadow_opacity" value="<?= escape($settings['partners_logo_hover_shadow_opacity'] ?? '20') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Transition Duration (ms)</label>
-                                <input type="number" name="partners_logo_transition" value="<?= escape($settings['partners_logo_transition'] ?? '300') ?>" min="0" max="2000" step="50" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Image Effects -->
-                    <div class="p-3 bg-cyan-50 rounded-lg border border-cyan-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Image Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Image Fit</label>
-                                <select name="partners_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="contain" <?= ($settings['partners_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
-                                    <option value="cover" <?= ($settings['partners_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
-                                    <option value="fill" <?= ($settings['partners_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
-                                    <option value="scale-down" <?= ($settings['partners_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
-                                    <option value="none" <?= ($settings['partners_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Grayscale (%)</label>
-                                <input type="number" name="partners_logo_grayscale" value="<?= escape($settings['partners_logo_grayscale'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Image Opacity (%)</label>
-                                <input type="number" name="partners_logo_image_opacity" value="<?= escape($settings['partners_logo_image_opacity'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Image Scale</label>
-                                <input type="number" name="partners_logo_hover_image_scale" value="<?= escape($settings['partners_logo_hover_image_scale'] ?? '1.05') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Clients Logo Styling -->
-                <div class="bg-white rounded-lg p-4 border border-green-200">
-                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-building text-green-600 mr-2"></i> Clients Logo Styling
-                    </h4>
-                    
-                    <!-- Section Background -->
-                    <div class="mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Section Background</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 1</label>
-                                <input type="color" name="clients_section_bg_color1" value="<?= escape($settings['clients_section_bg_color1'] ?? '#f0fdf4') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 2</label>
-                                <input type="color" name="clients_section_bg_color2" value="<?= escape($settings['clients_section_bg_color2'] ?? '#dcfce7') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Section Padding (px)</label>
-                                <input type="number" name="clients_section_padding" value="<?= escape($settings['clients_section_padding'] ?? '80') ?>" min="20" max="200" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Header Styling -->
-                    <div class="mb-4 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Header Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Title Color 1</label>
-                                <input type="color" name="clients_title_color1" value="<?= escape($settings['clients_title_color1'] ?? '#059669') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Title Color 2</label>
-                                <input type="color" name="clients_title_color2" value="<?= escape($settings['clients_title_color2'] ?? '#10b981') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Description Color</label>
-                                <input type="color" name="clients_desc_color" value="<?= escape($settings['clients_desc_color'] ?? '#475569') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Item Styling -->
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Logo Item Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Width (px)</label>
-                                <input type="number" name="clients_logo_item_width" value="<?= escape($settings['clients_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Height (px)</label>
-                                <input type="number" name="clients_logo_item_height" value="<?= escape($settings['clients_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Gap Between Items (px)</label>
-                                <input type="number" name="clients_logo_gap" value="<?= escape($settings['clients_logo_gap'] ?? '40') ?>" min="10" max="100" step="5" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Padding (px)</label>
-                                <input type="number" name="clients_logo_padding" value="<?= escape($settings['clients_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Width (px)</label>
-                                <input type="number" name="clients_logo_border_width" value="<?= escape($settings['clients_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Style</label>
-                                <select name="clients_logo_border_style" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="solid" <?= ($settings['clients_logo_border_style'] ?? 'solid') === 'solid' ? 'selected' : '' ?>>Solid</option>
-                                    <option value="dashed" <?= ($settings['clients_logo_border_style'] ?? '') === 'dashed' ? 'selected' : '' ?>>Dashed</option>
-                                    <option value="dotted" <?= ($settings['clients_logo_border_style'] ?? '') === 'dotted' ? 'selected' : '' ?>>Dotted</option>
-                                    <option value="double" <?= ($settings['clients_logo_border_style'] ?? '') === 'double' ? 'selected' : '' ?>>Double</option>
-                                    <option value="none" <?= ($settings['clients_logo_border_style'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Color</label>
-                                <input type="color" name="clients_logo_border_color" value="<?= escape($settings['clients_logo_border_color'] ?? '#10b981') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Radius (px)</label>
-                                <input type="number" name="clients_logo_border_radius" value="<?= escape($settings['clients_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color</label>
-                                <input type="color" name="clients_logo_bg_color" value="<?= escape($settings['clients_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Box Shadow -->
-                    <div class="mb-4 p-3 bg-teal-50 rounded-lg border border-teal-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Box Shadow</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow X (px)</label>
-                                <input type="number" name="clients_logo_shadow_x" value="<?= escape($settings['clients_logo_shadow_x'] ?? '0') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Y (px)</label>
-                                <input type="number" name="clients_logo_shadow_y" value="<?= escape($settings['clients_logo_shadow_y'] ?? '2') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Blur (px)</label>
-                                <input type="number" name="clients_logo_shadow_blur" value="<?= escape($settings['clients_logo_shadow_blur'] ?? '8') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Color</label>
-                                <input type="color" name="clients_logo_shadow_color" value="<?= escape($settings['clients_logo_shadow_color'] ?? '#10b981') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Opacity (%)</label>
-                                <input type="number" name="clients_logo_shadow_opacity" value="<?= escape($settings['clients_logo_shadow_opacity'] ?? '10') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hover Effects -->
-                    <div class="mb-4 p-3 bg-lime-50 rounded-lg border border-lime-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Hover Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Transform Y (px)</label>
-                                <input type="number" name="clients_logo_hover_y" value="<?= escape($settings['clients_logo_hover_y'] ?? '-8') ?>" min="-50" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Scale</label>
-                                <input type="number" name="clients_logo_hover_scale" value="<?= escape($settings['clients_logo_hover_scale'] ?? '1.02') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Border Color</label>
-                                <input type="color" name="clients_logo_hover_border_color" value="<?= escape($settings['clients_logo_hover_border_color'] ?? '#10b981') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Y (px)</label>
-                                <input type="number" name="clients_logo_hover_shadow_y" value="<?= escape($settings['clients_logo_hover_shadow_y'] ?? '8') ?>" min="-20" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Blur (px)</label>
-                                <input type="number" name="clients_logo_hover_shadow_blur" value="<?= escape($settings['clients_logo_hover_shadow_blur'] ?? '24') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Opacity (%)</label>
-                                <input type="number" name="clients_logo_hover_shadow_opacity" value="<?= escape($settings['clients_logo_hover_shadow_opacity'] ?? '20') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Transition Duration (ms)</label>
-                                <input type="number" name="clients_logo_transition" value="<?= escape($settings['clients_logo_transition'] ?? '300') ?>" min="0" max="2000" step="50" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Image Effects -->
-                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Image Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Image Fit</label>
-                                <select name="clients_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="contain" <?= ($settings['clients_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
-                                    <option value="cover" <?= ($settings['clients_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
-                                    <option value="fill" <?= ($settings['clients_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
-                                    <option value="scale-down" <?= ($settings['clients_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
-                                    <option value="none" <?= ($settings['clients_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Grayscale (%)</label>
-                                <input type="number" name="clients_logo_grayscale" value="<?= escape($settings['clients_logo_grayscale'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Image Opacity (%)</label>
-                                <input type="number" name="clients_logo_image_opacity" value="<?= escape($settings['clients_logo_image_opacity'] ?? '80') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Image Scale</label>
-                                <input type="number" name="clients_logo_hover_image_scale" value="<?= escape($settings['clients_logo_hover_image_scale'] ?? '1.05') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Quality Certifications Logo Styling -->
-                <div class="bg-white rounded-lg p-4 border border-gray-200">
-                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
-                        <i class="fas fa-certificate text-gray-600 mr-2"></i> Quality Certifications Logo Styling
-                    </h4>
-                    
-                    <!-- Section Background -->
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Section Background</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 1</label>
-                                <input type="color" name="certs_section_bg_color1" value="<?= escape($settings['certs_section_bg_color1'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color 2</label>
-                                <input type="color" name="certs_section_bg_color2" value="<?= escape($settings['certs_section_bg_color2'] ?? '#f8f9fa') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Section Padding (px)</label>
-                                <input type="number" name="certs_section_padding" value="<?= escape($settings['certs_section_padding'] ?? '60') ?>" min="20" max="200" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Header Styling -->
-                    <div class="mb-4 p-3 bg-slate-50 rounded-lg border border-slate-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Header Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Title Color</label>
-                                <input type="color" name="certs_title_color" value="<?= escape($settings['certs_title_color'] ?? '#1a1a1a') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Description Color</label>
-                                <input type="color" name="certs_desc_color" value="<?= escape($settings['certs_desc_color'] ?? '#666666') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Item Styling -->
-                    <div class="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Logo Item Styling</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Width (px)</label>
-                                <input type="number" name="certs_logo_item_width" value="<?= escape($settings['certs_logo_item_width'] ?? '160') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Item Height (px)</label>
-                                <input type="number" name="certs_logo_item_height" value="<?= escape($settings['certs_logo_item_height'] ?? '120') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Gap Between Items (px)</label>
-                                <input type="number" name="certs_logo_gap" value="<?= escape($settings['certs_logo_gap'] ?? '30') ?>" min="10" max="100" step="5" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Padding (px)</label>
-                                <input type="number" name="certs_logo_padding" value="<?= escape($settings['certs_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Width (px)</label>
-                                <input type="number" name="certs_logo_border_width" value="<?= escape($settings['certs_logo_border_width'] ?? '1') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Style</label>
-                                <select name="certs_logo_border_style" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="solid" <?= ($settings['certs_logo_border_style'] ?? 'solid') === 'solid' ? 'selected' : '' ?>>Solid</option>
-                                    <option value="dashed" <?= ($settings['certs_logo_border_style'] ?? '') === 'dashed' ? 'selected' : '' ?>>Dashed</option>
-                                    <option value="dotted" <?= ($settings['certs_logo_border_style'] ?? '') === 'dotted' ? 'selected' : '' ?>>Dotted</option>
-                                    <option value="double" <?= ($settings['certs_logo_border_style'] ?? '') === 'double' ? 'selected' : '' ?>>Double</option>
-                                    <option value="none" <?= ($settings['certs_logo_border_style'] ?? '') === 'none' ? 'selected' : '' ?>>None</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Color</label>
-                                <input type="color" name="certs_logo_border_color" value="<?= escape($settings['certs_logo_border_color'] ?? '#e5e7eb') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Border Radius (px)</label>
-                                <input type="number" name="certs_logo_border_radius" value="<?= escape($settings['certs_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Background Color</label>
-                                <input type="color" name="certs_logo_bg_color" value="<?= escape($settings['certs_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Box Shadow -->
-                    <div class="mb-4 p-3 bg-stone-50 rounded-lg border border-stone-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Box Shadow</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow X (px)</label>
-                                <input type="number" name="certs_logo_shadow_x" value="<?= escape($settings['certs_logo_shadow_x'] ?? '0') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Y (px)</label>
-                                <input type="number" name="certs_logo_shadow_y" value="<?= escape($settings['certs_logo_shadow_y'] ?? '2') ?>" min="-20" max="20" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Blur (px)</label>
-                                <input type="number" name="certs_logo_shadow_blur" value="<?= escape($settings['certs_logo_shadow_blur'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Color</label>
-                                <input type="color" name="certs_logo_shadow_color" value="<?= escape($settings['certs_logo_shadow_color'] ?? '#000000') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Shadow Opacity (%)</label>
-                                <input type="number" name="certs_logo_shadow_opacity" value="<?= escape($settings['certs_logo_shadow_opacity'] ?? '8') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Hover Effects -->
-                    <div class="mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Hover Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Transform Y (px)</label>
-                                <input type="number" name="certs_logo_hover_y" value="<?= escape($settings['certs_logo_hover_y'] ?? '-8') ?>" min="-50" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Scale</label>
-                                <input type="number" name="certs_logo_hover_scale" value="<?= escape($settings['certs_logo_hover_scale'] ?? '1.05') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Border Color</label>
-                                <input type="color" name="certs_logo_hover_border_color" value="<?= escape($settings['certs_logo_hover_border_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Y (px)</label>
-                                <input type="number" name="certs_logo_hover_shadow_y" value="<?= escape($settings['certs_logo_hover_shadow_y'] ?? '8') ?>" min="-20" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Blur (px)</label>
-                                <input type="number" name="certs_logo_hover_shadow_blur" value="<?= escape($settings['certs_logo_hover_shadow_blur'] ?? '24') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Shadow Opacity (%)</label>
-                                <input type="number" name="certs_logo_hover_shadow_opacity" value="<?= escape($settings['certs_logo_hover_shadow_opacity'] ?? '15') ?>" min="0" max="100" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Transition Duration (ms)</label>
-                                <input type="number" name="certs_logo_transition" value="<?= escape($settings['certs_logo_transition'] ?? '300') ?>" min="0" max="2000" step="50" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Image Effects -->
-                    <div class="mb-4 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Image Effects</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Image Fit</label>
-                                <select name="certs_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                                    <option value="contain" <?= ($settings['certs_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
-                                    <option value="cover" <?= ($settings['certs_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
-                                    <option value="fill" <?= ($settings['certs_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
-                                    <option value="scale-down" <?= ($settings['certs_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
-                                    <option value="none" <?= ($settings['certs_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Max Image Height (px)</label>
-                                <input type="number" name="certs_logo_max_image_height" value="<?= escape($settings['certs_logo_max_image_height'] ?? '80') ?>" min="40" max="200" step="5" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Image Scale</label>
-                                <input type="number" name="certs_logo_hover_image_scale" value="<?= escape($settings['certs_logo_hover_image_scale'] ?? '1.1') ?>" min="0.5" max="2" step="0.01" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Text Styling (for certification names) -->
-                    <div class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-                        <h5 class="text-xs font-bold text-gray-700 mb-3">Text Styling (Certification Names)</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Text Color</label>
-                                <input type="color" name="certs_text_color" value="<?= escape($settings['certs_text_color'] ?? '#6b7280') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Text Font Size (px)</label>
-                                <input type="number" name="certs_text_font_size" value="<?= escape($settings['certs_text_font_size'] ?? '12') ?>" min="8" max="24" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-gray-600 mb-1">Hover Text Color</label>
-                                <input type="color" name="certs_text_hover_color" value="<?= escape($settings['certs_text_hover_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="bg-white rounded-lg p-4 border border-purple-200">
+                <p class="text-gray-600 text-center py-8">
+                    <i class="fas fa-info-circle text-purple-600 mr-2"></i>
+                    Logo slider styling settings have been moved to their respective pages:
+                    <br><br>
+                    <a href="<?= url('admin/partners.php') ?>" class="text-blue-600 hover:underline font-semibold">Partners Styling</a> | 
+                    <a href="<?= url('admin/clients.php') ?>" class="text-green-600 hover:underline font-semibold">Clients Styling</a> | 
+                    <a href="<?= url('admin/quality-certifications.php') ?>" class="text-gray-600 hover:underline font-semibold">Quality Certifications Styling</a>
+                </p>
             </div>
         </div>
         
@@ -1422,6 +875,7 @@ include __DIR__ . '/includes/header.php';
     .tab-button {
         position: relative;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
     }
     
     .tab-button::after {
@@ -1434,19 +888,42 @@ include __DIR__ . '/includes/header.php';
         background: linear-gradient(90deg, #6366f1, #8b5cf6);
         transition: width 0.3s ease;
         border-radius: 3px 3px 0 0;
+        z-index: 5;
     }
     
     .tab-button.active::after {
         width: 100%;
     }
     
+    .tab-button .relative.z-10 {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .tab-button:hover {
+        transform: translateY(-1px);
+    }
+    
     .settings-tab-content {
         animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         min-height: 200px;
+        /* Don't set display: none by default - let JavaScript handle it */
     }
     
     .settings-tab-content.hidden {
         display: none !important;
+        visibility: hidden !important;
+    }
+    
+    .settings-tab-content.show-tab {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+    
+    /* Ensure tabs without hidden class are visible */
+    .settings-tab-content:not(.hidden) {
+        display: block !important;
     }
     
     @keyframes fadeIn {
@@ -1647,12 +1124,14 @@ include __DIR__ . '/includes/header.php';
     
     // Tab Navigation Functions
     function showSettingsTab(tabName) {
-        console.log('Switching to tab:', tabName);
+        console.log('🔄 Switching to tab:', tabName);
         
-        // Hide all tab contents with both methods
+        // Hide all tab contents
         document.querySelectorAll('.settings-tab-content').forEach(tab => {
-            tab.style.display = 'none';
+            tab.classList.remove('show-tab');
             tab.classList.add('hidden');
+            tab.style.setProperty('display', 'none', 'important');
+            tab.style.setProperty('visibility', 'hidden', 'important');
         });
         
         // Remove active class from all buttons
@@ -1663,15 +1142,75 @@ include __DIR__ . '/includes/header.php';
         
         // Show selected tab
         const selectedTab = document.getElementById('tab-content-' + tabName);
-        console.log('Selected tab element:', selectedTab);
-        if (selectedTab) {
-            selectedTab.style.display = 'block';
-            selectedTab.classList.remove('hidden');
-            console.log('Tab shown successfully');
-        } else {
-            console.error('Tab not found: tab-content-' + tabName);
+        console.log('🔍 Looking for tab:', 'tab-content-' + tabName, 'Found:', !!selectedTab);
+        
+        if (!selectedTab) {
+            console.error('❌ Tab element not found: tab-content-' + tabName);
             alert('Tab content not found: ' + tabName);
+            return;
         }
+        
+        console.log('✅ Tab element found, showing:', tabName);
+        
+        // Remove hidden class and add show-tab class
+        selectedTab.classList.remove('hidden');
+        selectedTab.classList.add('show-tab');
+        
+        // Force display with inline styles using !important (highest priority)
+        selectedTab.style.setProperty('display', 'block', 'important');
+        selectedTab.style.setProperty('visibility', 'visible', 'important');
+        selectedTab.style.setProperty('opacity', '1', 'important');
+        selectedTab.style.setProperty('position', 'relative', 'important');
+        selectedTab.style.setProperty('height', 'auto', 'important');
+        selectedTab.style.setProperty('min-height', '200px', 'important');
+        selectedTab.style.setProperty('width', '100%', 'important');
+        
+        // Immediate check
+        const immediateDisplay = window.getComputedStyle(selectedTab).display;
+        const immediateHeight = selectedTab.offsetHeight;
+        console.log('📊 Immediate check - display:', immediateDisplay, 'offsetHeight:', immediateHeight);
+        
+        // Verify it's visible after a short delay
+        setTimeout(() => {
+            const computedDisplay = window.getComputedStyle(selectedTab).display;
+            const isVisible = selectedTab.offsetHeight > 0;
+            const parentDisplay = window.getComputedStyle(selectedTab.parentElement).display;
+            const parentVisible = selectedTab.parentElement.offsetHeight > 0;
+            
+            console.log('📊 Tab visibility check:', {
+                tabId: selectedTab.id,
+                display: computedDisplay,
+                offsetHeight: selectedTab.offsetHeight,
+                visible: isVisible,
+                classes: selectedTab.classList.toString(),
+                parentDisplay: parentDisplay,
+                parentVisible: parentVisible,
+                parentTag: selectedTab.parentElement.tagName,
+                parentId: selectedTab.parentElement.id || 'no-id'
+            });
+            
+            if (!isVisible || computedDisplay === 'none') {
+                console.warn('⚠️ Tab still not visible! Applying additional fixes...');
+                // Try even more aggressive approach
+                selectedTab.style.setProperty('display', 'block', 'important');
+                selectedTab.style.setProperty('visibility', 'visible', 'important');
+                selectedTab.style.setProperty('opacity', '1', 'important');
+                selectedTab.style.setProperty('position', 'relative', 'important');
+                selectedTab.style.setProperty('height', 'auto', 'important');
+                selectedTab.style.setProperty('min-height', '200px', 'important');
+                selectedTab.style.setProperty('width', '100%', 'important');
+                
+                // Check and fix parent
+                if (selectedTab.parentElement) {
+                    const parent = selectedTab.parentElement;
+                    parent.style.setProperty('display', 'block', 'important');
+                    parent.style.setProperty('visibility', 'visible', 'important');
+                    console.log('🔧 Fixed parent element:', parent.tagName);
+                }
+            } else {
+                console.log('✅ Tab is now visible!');
+            }
+        }, 100);
         
         // Activate button with appropriate color
         const activeButton = document.getElementById('tab-btn-' + tabName);
@@ -1706,26 +1245,69 @@ include __DIR__ . '/includes/header.php';
     // Make function globally available
     window.showSettingsTab = showSettingsTab;
     
+    // Debug function - call from console: debugAllTabs()
+    window.debugAllTabs = function() {
+        console.log('=== DEBUGGING ALL TABS ===');
+        const tabs = document.querySelectorAll('.settings-tab-content');
+        tabs.forEach(tab => {
+            const styles = window.getComputedStyle(tab);
+            console.log(tab.id, {
+                display: styles.display,
+                visibility: styles.visibility,
+                opacity: styles.opacity,
+                offsetHeight: tab.offsetHeight,
+                classes: tab.classList.toString(),
+                inlineDisplay: tab.style.display,
+                parent: tab.parentElement.tagName,
+                parentDisplay: window.getComputedStyle(tab.parentElement).display
+            });
+        });
+    };
+    
     // Initialize - show first tab by default
     function initializeTabs() {
         console.log('Initializing tabs...');
         
-        // Hide all tabs first
+        // Hide all tabs first using inline styles
         document.querySelectorAll('.settings-tab-content').forEach(tab => {
             if (tab.id !== 'tab-content-general') {
-                tab.style.display = 'none';
+                tab.classList.remove('show-tab');
                 tab.classList.add('hidden');
+                tab.style.setProperty('display', 'none', 'important');
             }
         });
         
         // Show general tab
         const generalTab = document.getElementById('tab-content-general');
         if (generalTab) {
-            generalTab.style.display = 'block';
+            // Remove hidden class and add show-tab class
             generalTab.classList.remove('hidden');
-            console.log('General tab initialized');
+            generalTab.classList.add('show-tab');
+            
+            // Force display with !important
+            generalTab.style.setProperty('display', 'block', 'important');
+            generalTab.style.setProperty('visibility', 'visible', 'important');
+            generalTab.style.setProperty('opacity', '1', 'important');
+            generalTab.style.setProperty('position', 'relative', 'important');
+            generalTab.style.setProperty('height', 'auto', 'important');
+            generalTab.style.setProperty('min-height', '200px', 'important');
+            
+            setTimeout(() => {
+                const computedDisplay = window.getComputedStyle(generalTab).display;
+                const isVisible = generalTab.offsetHeight > 0;
+                const parentDisplay = window.getComputedStyle(generalTab.parentElement).display;
+                console.log('✅ General tab initialized:', {
+                    display: computedDisplay,
+                    offsetHeight: generalTab.offsetHeight,
+                    visible: isVisible,
+                    hasHidden: generalTab.classList.contains('hidden'),
+                    hasShowTab: generalTab.classList.contains('show-tab'),
+                    parentDisplay: parentDisplay,
+                    parentTag: generalTab.parentElement.tagName
+                });
+            }, 50);
         } else {
-            console.error('General tab not found!');
+            console.error('❌ General tab not found!');
         }
     }
     
@@ -1734,10 +1316,34 @@ include __DIR__ . '/includes/header.php';
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM loaded, initializing tabs');
             initializeTabs();
+            
+            // Debug: Log all tabs after initialization
+            setTimeout(() => {
+                console.log('=== POST-INITIALIZATION DEBUG ===');
+                document.querySelectorAll('.settings-tab-content').forEach(tab => {
+                    console.log(tab.id, {
+                        display: window.getComputedStyle(tab).display,
+                        offsetHeight: tab.offsetHeight,
+                        classes: tab.classList.toString()
+                    });
+                });
+            }, 200);
         });
     } else {
         console.log('DOM already ready, initializing tabs');
         initializeTabs();
+        
+        // Debug: Log all tabs after initialization
+        setTimeout(() => {
+            console.log('=== POST-INITIALIZATION DEBUG ===');
+            document.querySelectorAll('.settings-tab-content').forEach(tab => {
+                console.log(tab.id, {
+                    display: window.getComputedStyle(tab).display,
+                    offsetHeight: tab.offsetHeight,
+                    classes: tab.classList.toString()
+                });
+            });
+        }, 200);
     }
     
     // Style Presets
