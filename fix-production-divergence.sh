@@ -22,8 +22,15 @@ echo "=== Checking branch status ==="
 git log --oneline --graph --all -5
 
 echo ""
-echo "=== Stashing any local changes ==="
-git stash save "Production changes before merge - $(date)"
+echo "=== Checking for unstaged changes ==="
+if ! git diff-index --quiet HEAD --; then
+    echo "⚠️  Unstaged changes detected! Stashing..."
+    git stash save "Production changes before merge - $(date)"
+    STASHED=true
+else
+    echo "✅ No unstaged changes"
+    STASHED=false
+fi
 
 echo ""
 echo "=== Merging remote changes (fixing divergence) ==="
@@ -61,8 +68,18 @@ else
 fi
 
 echo ""
+if [ "$STASHED" = true ]; then
+    echo "=== Reapplying Stashed Changes ==="
+    git stash pop
+    if [ $? -ne 0 ]; then
+        echo "⚠️  Warning: There were conflicts when reapplying stash"
+        echo "Resolve conflicts manually, then run: git stash drop"
+    else
+        echo "✅ Stashed changes reapplied successfully"
+    fi
+    echo ""
+fi
 echo "=== Stash Information ==="
-echo "If you had stashed changes and need them back:"
-echo "  git stash list    # See all stashed changes"
-echo "  git stash pop     # Restore most recent stash"
-echo "  git stash drop    # Delete a stash (if not needed)"
+echo "To see all stashed changes: git stash list"
+echo "To restore a stash: git stash pop"
+echo "To delete a stash: git stash drop stash@{0}"
