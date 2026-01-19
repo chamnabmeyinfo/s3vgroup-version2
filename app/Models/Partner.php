@@ -39,12 +39,10 @@ class Partner
     public function create($data)
     {
         $fields = ['name', 'logo', 'website_url', 'type', 'sort_order', 'is_active'];
-        $placeholders = [];
         $values = [];
 
         foreach ($fields as $field) {
             if (isset($data[$field])) {
-                $placeholders[] = ":$field";
                 $values[$field] = $data[$field];
             }
         }
@@ -60,29 +58,25 @@ class Partner
             $values['is_active'] = 1;
         }
 
-        $sql = "INSERT INTO partners (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ")";
-        return $this->db->insert($sql, $values);
+        return $this->db->insert('partners', $values);
     }
 
     public function update($id, $data)
     {
         $fields = ['name', 'logo', 'website_url', 'type', 'sort_order', 'is_active'];
-        $updates = [];
-        $values = ['id' => $id];
+        $updateData = [];
 
         foreach ($fields as $field) {
             if (isset($data[$field])) {
-                $updates[] = "$field = :$field";
-                $values[$field] = $data[$field];
+                $updateData[$field] = $data[$field];
             }
         }
 
-        if (empty($updates)) {
+        if (empty($updateData)) {
             return false;
         }
 
-        $sql = "UPDATE partners SET " . implode(', ', $updates) . " WHERE id = :id";
-        return $this->db->update('partners', $values, 'id = :id', ['id' => $id]);
+        return $this->db->update('partners', $updateData, 'id = :id', ['id' => $id]);
     }
 
     public function delete($id)
