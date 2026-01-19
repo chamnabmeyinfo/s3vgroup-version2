@@ -314,6 +314,9 @@ include __DIR__ . '/includes/header.php';
     </section>
     <?php endif; ?>
 
+    <!-- Spacer between sections -->
+    <div style="height: 20px;"></div>
+
     <!-- Clients Section -->
     <?php
     $clients = $partnerModel->getByType('client', true); // Get only active clients

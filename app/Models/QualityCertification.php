@@ -29,12 +29,10 @@ class QualityCertification
     public function create($data)
     {
         $fields = ['name', 'logo', 'reference_url', 'description', 'sort_order', 'is_active'];
-        $placeholders = [];
         $values = [];
 
         foreach ($fields as $field) {
             if (isset($data[$field])) {
-                $placeholders[] = ":$field";
                 $values[$field] = $data[$field];
             }
         }
@@ -47,29 +45,25 @@ class QualityCertification
             $values['is_active'] = 1;
         }
 
-        $sql = "INSERT INTO quality_certifications (" . implode(', ', $fields) . ") VALUES (" . implode(', ', $placeholders) . ")";
-        return $this->db->insert($sql, $values);
+        return $this->db->insert('quality_certifications', $values);
     }
 
     public function update($id, $data)
     {
         $fields = ['name', 'logo', 'reference_url', 'description', 'sort_order', 'is_active'];
-        $updates = [];
-        $values = ['id' => $id];
+        $updateData = [];
 
         foreach ($fields as $field) {
             if (isset($data[$field])) {
-                $updates[] = "$field = :$field";
-                $values[$field] = $data[$field];
+                $updateData[$field] = $data[$field];
             }
         }
 
-        if (empty($updates)) {
+        if (empty($updateData)) {
             return false;
         }
 
-        $sql = "UPDATE quality_certifications SET " . implode(', ', $updates) . " WHERE id = :id";
-        return $this->db->update('quality_certifications', $values, 'id = :id', ['id' => $id]);
+        return $this->db->update('quality_certifications', $updateData, 'id = :id', ['id' => $id]);
     }
 
     public function delete($id)
