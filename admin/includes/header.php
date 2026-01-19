@@ -420,7 +420,11 @@
                 </a>
                 <a href="<?= url('admin/partners.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'partners.php') ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-handshake w-5"></i>
-                    <span>Partners & Clients</span>
+                    <span>Partners</span>
+                </a>
+                <a href="<?= url('admin/clients.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'clients.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-building w-5"></i>
+                    <span>Clients</span>
                 </a>
                 <a href="<?= url('admin/quality-certifications.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'quality-certifications.php') ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-certificate w-5"></i>

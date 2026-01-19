@@ -282,18 +282,18 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
-    <!-- Partners & Clients Section -->
+    <!-- Partners Section -->
     <?php
     use App\Models\Partner;
     $partnerModel = new Partner();
-    $partners = $partnerModel->getAll(true); // Get only active partners
+    $partners = $partnerModel->getByType('partner', true); // Get only active partners
     if (!empty($partners)):
     ?>
-    <section class="partners-slider">
+    <section id="partners" class="partners-slider">
         <div class="partners-slider-container">
             <div class="partners-slider-header">
-                <h2>Our Partners & Clients</h2>
-                <p>Trusted by leading companies worldwide</p>
+                <h2>Our Partners</h2>
+                <p>Trusted partnerships with industry leaders</p>
             </div>
             <div class="partners-slider-wrapper">
                 <div class="partners-slider-track">
@@ -305,6 +305,36 @@ include __DIR__ . '/includes/header.php';
                         </a>
                         <?php else: ?>
                         <img src="<?= escape(image_url($partner['logo'])) ?>" alt="<?= escape($partner['name']) ?>">
+                        <?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <!-- Clients Section -->
+    <?php
+    $clients = $partnerModel->getByType('client', true); // Get only active clients
+    if (!empty($clients)):
+    ?>
+    <section id="clients" class="clients-slider">
+        <div class="clients-slider-container">
+            <div class="clients-slider-header">
+                <h2>Our Clients</h2>
+                <p>Proud to serve leading companies worldwide</p>
+            </div>
+            <div class="clients-slider-wrapper">
+                <div class="clients-slider-track">
+                    <?php foreach ($clients as $client): ?>
+                    <div class="clients-slider-item">
+                        <?php if (!empty($client['website_url'])): ?>
+                        <a href="<?= escape($client['website_url']) ?>" target="_blank" rel="noopener noreferrer" title="<?= escape($client['name']) ?>">
+                            <img src="<?= escape(image_url($client['logo'])) ?>" alt="<?= escape($client['name']) ?>">
+                        </a>
+                        <?php else: ?>
+                        <img src="<?= escape(image_url($client['logo'])) ?>" alt="<?= escape($client['name']) ?>">
                         <?php endif; ?>
                     </div>
                     <?php endforeach; ?>

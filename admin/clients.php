@@ -24,55 +24,55 @@ $error = '';
 // Handle delete
 if (!empty($_GET['delete'])) {
     try {
-        $partnerId = (int)$_GET['delete'];
-        if ($partnerId <= 0) {
-            $error = 'Invalid partner ID.';
+        $clientId = (int)$_GET['delete'];
+        if ($clientId <= 0) {
+            $error = 'Invalid client ID.';
         } else {
-            $partner = $partnerModel->getById($partnerId);
-            // Only allow deleting partners
-            if ($partner && $partner['type'] === 'partner') {
-                if (!empty($partner['logo'])) {
-                    $logoPath = __DIR__ . '/../' . $partner['logo'];
+            $client = $partnerModel->getById($clientId);
+            // Only allow deleting clients
+            if ($client && $client['type'] === 'client') {
+                if (!empty($client['logo'])) {
+                    $logoPath = __DIR__ . '/../' . $client['logo'];
                     if (file_exists($logoPath)) {
                         @unlink($logoPath);
                     }
                 }
-                $partnerModel->delete($partnerId);
-                $message = 'Partner deleted successfully.';
+                $partnerModel->delete($clientId);
+                $message = 'Client deleted successfully.';
             } else {
-                $error = 'Invalid partner or not a partner record.';
+                $error = 'Invalid client or not a client record.';
             }
         }
     } catch (\Exception $e) {
-        $error = 'Error deleting partner: ' . $e->getMessage();
+        $error = 'Error deleting client: ' . $e->getMessage();
     }
 }
 
 // Handle toggle active
 if (!empty($_GET['toggle'])) {
     try {
-        $partnerId = (int)$_GET['toggle'];
-        if ($partnerId > 0) {
-            $partner = $partnerModel->getById($partnerId);
-            if ($partner && $partner['type'] === 'partner') {
-                $partnerModel->update($partnerId, ['is_active' => $partner['is_active'] ? 0 : 1]);
-                $message = 'Partner status updated.';
+        $clientId = (int)$_GET['toggle'];
+        if ($clientId > 0) {
+            $client = $partnerModel->getById($clientId);
+            if ($client && $client['type'] === 'client') {
+                $partnerModel->update($clientId, ['is_active' => $client['is_active'] ? 0 : 1]);
+                $message = 'Client status updated.';
             }
         }
     } catch (\Exception $e) {
-        $error = 'Error updating partner: ' . $e->getMessage();
+        $error = 'Error updating client: ' . $e->getMessage();
     }
 }
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!empty($_POST['partner_id'])) {
-        // Update existing partner
-        $partnerId = (int)$_POST['partner_id'];
+    if (!empty($_POST['client_id'])) {
+        // Update existing client
+        $clientId = (int)$_POST['client_id'];
         $data = [
             'name' => trim($_POST['name'] ?? ''),
             'website_url' => trim($_POST['website_url'] ?? ''),
-            'type' => 'partner', // Always set to partner
+            'type' => 'client', // Always set to client
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
             'is_active' => isset($_POST['is_active']) ? 1 : 0
         ];
@@ -146,10 +146,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 else {
                     // Delete old logo first (only for updates)
-                    if (!empty($partnerId)) {
-                        $oldPartner = $partnerModel->getById($partnerId);
-                        if ($oldPartner && !empty($oldPartner['logo'])) {
-                            $oldLogoPath = __DIR__ . '/../' . $oldPartner['logo'];
+                    if (!empty($clientId)) {
+                        $oldClient = $partnerModel->getById($clientId);
+                        if ($oldClient && !empty($oldClient['logo'])) {
+                            $oldLogoPath = __DIR__ . '/../' . $oldClient['logo'];
                             if (file_exists($oldLogoPath)) {
                                 @unlink($oldLogoPath);
                             }
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     // Generate unique filename
-                    $filename = 'partner_' . time() . '_' . uniqid() . '.' . $extension;
+                    $filename = 'client_' . time() . '_' . uniqid() . '.' . $extension;
                     $filepath = $uploadDir . $filename;
 
                     // Move uploaded file
@@ -178,18 +178,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (empty($error)) {
             try {
-                $partnerModel->update($partnerId, $data);
-                $message = 'Partner updated successfully.';
+                $partnerModel->update($clientId, $data);
+                $message = 'Client updated successfully.';
             } catch (\Exception $e) {
-                $error = 'Error updating partner: ' . $e->getMessage();
+                $error = 'Error updating client: ' . $e->getMessage();
             }
         }
     } else {
-        // Create new partner
+        // Create new client
         $data = [
             'name' => trim($_POST['name'] ?? ''),
             'website_url' => trim($_POST['website_url'] ?? ''),
-            'type' => 'partner', // Always set to partner
+            'type' => 'client', // Always set to client
             'sort_order' => (int)($_POST['sort_order'] ?? 0),
             'is_active' => isset($_POST['is_active']) ? 1 : 0
         ];
@@ -263,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 else {
                     // Generate unique filename
-                    $filename = 'partner_' . time() . '_' . uniqid() . '.' . $extension;
+                    $filename = 'client_' . time() . '_' . uniqid() . '.' . $extension;
                     $filepath = $uploadDir . $filename;
 
                     // Ensure directory is writable
@@ -285,8 +285,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         } else {
-            // No file uploaded - logo is required for new partners only
-            if (empty($partnerId)) {
+            // No file uploaded - logo is required for new clients only
+            if (empty($clientId)) {
                 $error = 'Logo is required.';
             }
         }
@@ -294,47 +294,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (empty($error)) {
             try {
                 $partnerModel->create($data);
-                $message = 'Partner added successfully.';
+                $message = 'Client added successfully.';
             } catch (\Exception $e) {
-                $error = 'Error adding partner: ' . $e->getMessage();
+                $error = 'Error adding client: ' . $e->getMessage();
             }
         }
     }
 }
 
-// Get all partners (filter by type='partner')
-$partners = $partnerModel->getByType('partner', false);
-$editingPartner = null;
+// Get all clients (filter by type='client')
+$clients = $partnerModel->getByType('client', false);
+$editingClient = null;
 if (!empty($_GET['edit'])) {
-    $editingPartner = $partnerModel->getById((int)$_GET['edit']);
-    // Verify it's actually a partner
-    if ($editingPartner && $editingPartner['type'] !== 'partner') {
-        $editingPartner = null;
-        $error = 'Invalid partner record.';
+    $editingClient = $partnerModel->getById((int)$_GET['edit']);
+    // Verify it's actually a client
+    if ($editingClient && $editingClient['type'] !== 'client') {
+        $editingClient = null;
+        $error = 'Invalid client record.';
     }
 }
 
-$pageTitle = 'Partners';
+$pageTitle = 'Clients';
 include __DIR__ . '/includes/header.php';
 ?>
 
 <div class="w-full">
     <!-- Header -->
-    <div class="bg-gradient-to-r from-gray-700 to-gray-900 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
+    <div class="bg-gradient-to-r from-green-700 to-emerald-900 rounded-xl shadow-xl p-4 md:p-6 lg:p-8 mb-4 md:mb-6 text-white">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
-                    <i class="fas fa-handshake mr-2 md:mr-3"></i>
-                    Partners & Clients
+                    <i class="fas fa-building mr-2 md:mr-3"></i>
+                    Clients
                 </h1>
-                <p class="text-gray-300 text-sm md:text-lg">Manage partner and client logos</p>
+                <p class="text-gray-300 text-sm md:text-lg">Manage client logos and information</p>
             </div>
             <div class="flex gap-2">
-                <a href="<?= url('admin/clients.php') ?>" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-building mr-2"></i>Manage Clients
-                </a>
-                <a href="<?= url('admin/partners.php?add=1') ?>" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-plus mr-2"></i>Add New Partner
+                <a href="<?= url('admin/clients.php?add=1') ?>" class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-2"></i>Add New Client
                 </a>
             </div>
         </div>
@@ -359,71 +356,70 @@ include __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <!-- Add/Edit Form -->
-    <?php if ($editingPartner || empty($partners) || (isset($_GET['add']) && $_GET['add'] == '1')): ?>
+    <?php if ($editingClient || empty($clients) || (isset($_GET['add']) && $_GET['add'] == '1')): ?>
     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8 mb-6">
         <h2 class="text-xl font-bold mb-4">
-            <?= $editingPartner ? 'Edit Partner' : 'Add New Partner' ?>
+            <?= $editingClient ? 'Edit Client' : 'Add New Client' ?>
         </h2>
         <form method="POST" enctype="multipart/form-data" class="space-y-4">
-            <input type="hidden" name="partner_id" value="<?= $editingPartner ? $editingPartner['id'] : '' ?>">
-            <input type="hidden" name="type" value="partner">
+            <input type="hidden" name="client_id" value="<?= $editingClient ? $editingClient['id'] : '' ?>">
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-building text-gray-400 mr-2"></i> Name *
                     </label>
-                    <input type="text" name="name" value="<?= escape($editingPartner['name'] ?? '') ?>" required
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="text" name="name" value="<?= escape($editingClient['name'] ?? '') ?>" required
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-link text-gray-400 mr-2"></i> Website URL
                     </label>
-                    <input type="url" name="website_url" value="<?= escape($editingPartner['website_url'] ?? '') ?>"
+                    <input type="url" name="website_url" value="<?= escape($editingClient['website_url'] ?? '') ?>"
                            placeholder="https://example.com"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                 </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                         <i class="fas fa-sort-numeric-down text-gray-400 mr-2"></i> Sort Order
                     </label>
-                    <input type="number" name="sort_order" value="<?= escape($editingPartner['sort_order'] ?? 0) ?>"
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="number" name="sort_order" value="<?= escape($editingClient['sort_order'] ?? 0) ?>"
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        <i class="fas fa-image text-gray-400 mr-2"></i> Logo <?= $editingPartner ? '' : '*' ?>
+                        <i class="fas fa-image text-gray-400 mr-2"></i> Logo <?= $editingClient ? '' : '*' ?>
                     </label>
-                    <?php if ($editingPartner && !empty($editingPartner['logo'])): ?>
+                    <?php if ($editingClient && !empty($editingClient['logo'])): ?>
                     <div class="mb-2">
-                        <img src="<?= escape(image_url($editingPartner['logo'])) ?>" alt="Current Logo" class="h-20 w-auto object-contain border-2 border-gray-200 rounded p-2">
+                        <img src="<?= escape(image_url($editingClient['logo'])) ?>" alt="Current Logo" class="h-20 w-auto object-contain border-2 border-gray-200 rounded p-2">
                         <p class="text-xs text-gray-500 mt-1">Current logo. Upload a new one to replace it.</p>
                     </div>
                     <?php endif; ?>
-                    <input type="file" name="logo" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml" <?= $editingPartner ? '' : 'required' ?>
-                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="file" name="logo" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,image/svg+xml" <?= $editingClient ? '' : 'required' ?>
+                           class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                     <p class="text-xs text-gray-500 mt-1">Recommended: PNG or SVG with transparent background. Max size: 2MB.</p>
                 </div>
 
                 <div class="md:col-span-2">
                     <label class="flex items-center">
-                        <input type="checkbox" name="is_active" value="1" <?= ($editingPartner['is_active'] ?? 1) ? 'checked' : '' ?>
-                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <input type="checkbox" name="is_active" value="1" <?= ($editingClient['is_active'] ?? 1) ? 'checked' : '' ?>
+                               class="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500">
                         <span class="ml-2 text-sm text-gray-700">Active (show in slider)</span>
                     </label>
                 </div>
             </div>
 
             <div class="flex gap-4 pt-4">
-                <button type="submit" class="bg-gradient-to-r from-blue-700 to-indigo-900 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-blue-800 hover:to-indigo-950 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <button type="submit" class="bg-gradient-to-r from-green-700 to-emerald-900 text-white px-8 py-3 rounded-lg font-bold text-lg hover:from-green-800 hover:to-emerald-950 transition-all duration-300 shadow-lg hover:shadow-xl">
                     <i class="fas fa-save mr-2"></i>
-                    <?= $editingPartner ? 'Update Partner' : 'Add Partner' ?>
+                    <?= $editingClient ? 'Update Client' : 'Add Client' ?>
                 </button>
-                <a href="<?= url('admin/partners.php') ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-3 rounded-lg font-bold text-lg transition-all duration-300">
+                <a href="<?= url('admin/clients.php') ?>" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-3 rounded-lg font-bold text-lg transition-all duration-300">
                     Cancel
                 </a>
             </div>
@@ -431,26 +427,23 @@ include __DIR__ . '/includes/header.php';
     </div>
     <?php endif; ?>
 
-    <!-- Partners List -->
+    <!-- Clients List -->
     <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 lg:p-8">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold">All Partners</h2>
+            <h2 class="text-xl font-bold">All Clients</h2>
             <div class="flex gap-2">
-                <a href="<?= url('admin/clients.php') ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-building mr-2"></i>Manage Clients
-                </a>
-                <a href="<?= url('admin/partners.php?add=1') ?>" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
+                <a href="<?= url('admin/clients.php?add=1') ?>" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-plus mr-2"></i>Add New
                 </a>
             </div>
         </div>
 
-        <?php if (empty($partners)): ?>
+        <?php if (empty($clients)): ?>
         <div class="text-center py-12">
-            <i class="fas fa-handshake text-gray-300 text-6xl mb-4"></i>
-            <p class="text-gray-500 text-lg">No partners yet.</p>
-            <a href="<?= url('admin/partners.php?add=1') ?>" class="inline-block mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors">
-                <i class="fas fa-plus mr-2"></i>Add First Partner
+            <i class="fas fa-building text-gray-300 text-6xl mb-4"></i>
+            <p class="text-gray-500 text-lg">No clients yet.</p>
+            <a href="<?= url('admin/clients.php?add=1') ?>" class="inline-block mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg transition-colors">
+                <i class="fas fa-plus mr-2"></i>Add First Client
             </a>
         </div>
         <?php else: ?>
@@ -467,37 +460,37 @@ include __DIR__ . '/includes/header.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($partners as $partner): ?>
+                    <?php foreach ($clients as $client): ?>
                     <tr class="border-b border-gray-100 hover:bg-gray-50">
                         <td class="py-3 px-4">
-                            <?php if (!empty($partner['logo'])): ?>
-                            <img src="<?= escape(image_url($partner['logo'])) ?>" alt="<?= escape($partner['name']) ?>" class="h-12 w-auto object-contain">
+                            <?php if (!empty($client['logo'])): ?>
+                            <img src="<?= escape(image_url($client['logo'])) ?>" alt="<?= escape($client['name']) ?>" class="h-12 w-auto object-contain">
                             <?php else: ?>
                             <span class="text-gray-400">No logo</span>
                             <?php endif; ?>
                         </td>
-                        <td class="py-3 px-4 font-medium"><?= escape($partner['name']) ?></td>
+                        <td class="py-3 px-4 font-medium"><?= escape($client['name']) ?></td>
                         <td class="py-3 px-4">
-                            <?php if (!empty($partner['website_url'])): ?>
-                            <a href="<?= escape($partner['website_url']) ?>" target="_blank" class="text-blue-600 hover:underline">
+                            <?php if (!empty($client['website_url'])): ?>
+                            <a href="<?= escape($client['website_url']) ?>" target="_blank" class="text-green-600 hover:underline">
                                 <i class="fas fa-external-link-alt mr-1"></i>Visit
                             </a>
                             <?php else: ?>
                             <span class="text-gray-400">-</span>
                             <?php endif; ?>
                         </td>
-                        <td class="py-3 px-4"><?= escape($partner['sort_order']) ?></td>
+                        <td class="py-3 px-4"><?= escape($client['sort_order']) ?></td>
                         <td class="py-3 px-4">
-                            <a href="?toggle=<?= $partner['id'] ?>" class="px-2 py-1 rounded text-xs <?= $partner['is_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
-                                <?= $partner['is_active'] ? 'Active' : 'Inactive' ?>
+                            <a href="?toggle=<?= $client['id'] ?>" class="px-2 py-1 rounded text-xs <?= $client['is_active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?>">
+                                <?= $client['is_active'] ? 'Active' : 'Inactive' ?>
                             </a>
                         </td>
                         <td class="py-3 px-4">
                             <div class="flex gap-2">
-                                <a href="?edit=<?= $partner['id'] ?>" class="text-blue-600 hover:text-blue-800" title="Edit">
+                                <a href="?edit=<?= $client['id'] ?>" class="text-green-600 hover:text-green-800" title="Edit">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <a href="?delete=<?= $partner['id'] ?>" class="text-red-600 hover:text-red-800" title="Delete" onclick="return confirm('Are you sure you want to delete this partner?')">
+                                <a href="?delete=<?= $client['id'] ?>" class="text-red-600 hover:text-red-800" title="Delete" onclick="return confirm('Are you sure you want to delete this client?')">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </div>

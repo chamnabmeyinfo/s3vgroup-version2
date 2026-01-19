@@ -80,10 +80,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
         
+        // Get custom title/URL from form (may come from custom fields or type-specific fields)
+        $customTitle = null;
+        $customUrl = null;
+        
+        // Check for title field - could be 'title' or type-specific field
+        if (isset($_POST['title']) && trim($_POST['title']) !== '') {
+            $customTitle = trim($_POST['title']);
+        }
+        // Check for type-specific title fields (for add form)
+        if (empty($customTitle)) {
+            $typeSpecificTitleFields = [
+                'services_title',
+                'ceo_message_title',
+                'partners_title',
+                'clients_title',
+                'quality_certifications_title'
+            ];
+            foreach ($typeSpecificTitleFields as $fieldName) {
+                if (isset($_POST[$fieldName]) && trim($_POST[$fieldName]) !== '') {
+                    $customTitle = trim($_POST[$fieldName]);
+                    break;
+                }
+            }
+        }
+        
+        // Check for URL field
+        if (isset($_POST['url']) && trim($_POST['url']) !== '') {
+            $customUrl = trim($_POST['url']);
+        }
+        // Check for type-specific URL fields (for add form)
+        if (empty($customUrl)) {
+            $typeSpecificUrlFields = [
+                'services_url',
+                'ceo_message_url',
+                'partners_url',
+                'clients_url',
+                'quality_certifications_url'
+            ];
+            foreach ($typeSpecificUrlFields as $fieldName) {
+                if (isset($_POST[$fieldName]) && trim($_POST[$fieldName]) !== '') {
+                    $customUrl = trim($_POST[$fieldName]);
+                    break;
+                }
+            }
+        }
+        
         $data = [
             'menu_id' => $menuId,
-            'title' => trim($_POST['title'] ?? ''),
-            'url' => trim($_POST['url'] ?? ''),
             'type' => $_POST['item_type'] ?? 'custom',
             'object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
             'target' => $_POST['target'] ?? '_self',
@@ -196,9 +240,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'partners') {
-            // Partners & Clients - link to homepage with anchor or custom URL
-            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners & Clients';
+            // Partners - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners';
             $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#partners');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'clients') {
+            // Clients - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Clients';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#clients');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'quality_certifications') {
             // Quality Certifications - link to homepage with anchor or custom URL
@@ -273,6 +322,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'edit_services_title',
                 'edit_ceo_message_title',
                 'edit_partners_title',
+                'edit_clients_title',
                 'edit_quality_certifications_title'
             ];
             foreach ($typeSpecificTitleFields as $fieldName) {
@@ -297,6 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'edit_services_url',
                 'edit_ceo_message_url',
                 'edit_partners_url',
+                'edit_clients_url',
                 'edit_quality_certifications_url'
             ];
             foreach ($typeSpecificUrlFields as $fieldName) {
@@ -460,9 +511,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'partners') {
-            // Partners & Clients - link to homepage with anchor or custom URL
-            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners & Clients';
+            // Partners - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Partners';
             $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#partners');
+            $data['object_id'] = null;
+        } elseif ($data['type'] === 'clients') {
+            // Clients - link to homepage with anchor or custom URL
+            $data['title'] = !empty($customTitle) ? $customTitle : 'Clients';
+            $data['url'] = !empty($customUrl) ? $customUrl : url('index.php#clients');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'quality_certifications') {
             // Quality Certifications - link to homepage with anchor or custom URL
@@ -785,8 +841,13 @@ include __DIR__ . '/includes/header.php';
                     </button>
                     <button type="button" onclick="selectEditItemType('partners')" class="edit-item-type-btn bg-cyan-50 hover:bg-cyan-100 border-2 border-cyan-200 rounded-lg p-4 text-center transition-all" data-type="partners">
                         <i class="fas fa-handshake text-cyan-600 text-2xl mb-2"></i>
-                        <div class="font-semibold text-gray-800">Partners & Clients</div>
+                        <div class="font-semibold text-gray-800">Partners</div>
                         <div class="text-xs text-gray-500 mt-1">Partners Section</div>
+                    </button>
+                    <button type="button" onclick="selectEditItemType('clients')" class="edit-item-type-btn bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-lg p-4 text-center transition-all" data-type="clients">
+                        <i class="fas fa-building text-green-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Clients</div>
+                        <div class="text-xs text-gray-500 mt-1">Clients Section</div>
                     </button>
                     <button type="button" onclick="selectEditItemType('quality_certifications')" class="edit-item-type-btn bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-lg p-4 text-center transition-all" data-type="quality_certifications">
                         <i class="fas fa-certificate text-amber-600 text-2xl mb-2"></i>
@@ -964,8 +1025,8 @@ include __DIR__ . '/includes/header.php';
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-cyan-600 mr-2 mt-1"></i>
                             <div>
-                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners & Clients</p>
-                                <p class="text-xs text-cyan-700">This will link to the Partners & Clients section. You can customize the title and URL below if needed.</p>
+                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners</p>
+                                <p class="text-xs text-cyan-700">This will link to the Partners section. You can customize the title and URL below if needed.</p>
                             </div>
                         </div>
                     </div>
@@ -973,8 +1034,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-heading mr-2 text-cyan-600"></i>Custom Title (Optional)
                         </label>
-                        <input type="text" name="title" id="edit_partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners & Clients (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners & Clients" as the default title</p>
+                        <input type="text" name="title" id="edit_partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners" as the default title</p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -982,6 +1043,33 @@ include __DIR__ . '/includes/header.php';
                         </label>
                         <input type="text" name="url" id="edit_partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="index.php#partners or https://example.com/index.php#partners">
                         <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#partners). Leave empty to use default.</p>
+                    </div>
+                </div>
+                
+                <!-- Clients Fields -->
+                <div id="editClientsFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-green-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-green-800 font-medium mb-2">Clients</p>
+                                <p class="text-xs text-green-700">This will link to the Clients section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-green-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="edit_clients_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Clients (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Clients" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-green-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="edit_clients_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="index.php#clients or https://example.com/index.php#clients">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#clients). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1132,8 +1220,13 @@ include __DIR__ . '/includes/header.php';
                     </button>
                     <button type="button" onclick="selectItemType('partners')" class="item-type-btn bg-cyan-50 hover:bg-cyan-100 border-2 border-cyan-200 rounded-lg p-4 text-center transition-all" data-type="partners">
                         <i class="fas fa-handshake text-cyan-600 text-2xl mb-2"></i>
-                        <div class="font-semibold text-gray-800">Partners & Clients</div>
+                        <div class="font-semibold text-gray-800">Partners</div>
                         <div class="text-xs text-gray-500 mt-1">Partners Section</div>
+                    </button>
+                    <button type="button" onclick="selectItemType('clients')" class="item-type-btn bg-green-50 hover:bg-green-100 border-2 border-green-200 rounded-lg p-4 text-center transition-all" data-type="clients">
+                        <i class="fas fa-building text-green-600 text-2xl mb-2"></i>
+                        <div class="font-semibold text-gray-800">Clients</div>
+                        <div class="text-xs text-gray-500 mt-1">Clients Section</div>
                     </button>
                     <button type="button" onclick="selectItemType('quality_certifications')" class="item-type-btn bg-amber-50 hover:bg-amber-100 border-2 border-amber-200 rounded-lg p-4 text-center transition-all" data-type="quality_certifications">
                         <i class="fas fa-certificate text-amber-600 text-2xl mb-2"></i>
@@ -1335,8 +1428,8 @@ include __DIR__ . '/includes/header.php';
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-cyan-600 mr-2 mt-1"></i>
                             <div>
-                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners & Clients</p>
-                                <p class="text-xs text-cyan-700">This will link to the Partners & Clients section. You can customize the title and URL below if needed.</p>
+                                <p class="text-sm text-cyan-800 font-medium mb-2">Partners</p>
+                                <p class="text-xs text-cyan-700">This will link to the Partners section. You can customize the title and URL below if needed.</p>
                             </div>
                         </div>
                     </div>
@@ -1344,8 +1437,8 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-heading mr-2 text-cyan-600"></i>Custom Title (Optional)
                         </label>
-                        <input type="text" name="title" id="partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners & Clients (default)">
-                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners & Clients" as the default title</p>
+                        <input type="text" name="title" id="partners_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="Partners (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Partners" as the default title</p>
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -1353,6 +1446,33 @@ include __DIR__ . '/includes/header.php';
                         </label>
                         <input type="text" name="url" id="partners_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500" placeholder="index.php#partners or https://example.com/index.php#partners">
                         <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#partners). Leave empty to use default.</p>
+                    </div>
+                </div>
+                
+                <!-- Clients Fields -->
+                <div id="clientsFields" class="item-type-fields hidden">
+                    <div class="mb-4 bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-green-600 mr-2 mt-1"></i>
+                            <div>
+                                <p class="text-sm text-green-800 font-medium mb-2">Clients</p>
+                                <p class="text-xs text-green-700">This will link to the Clients section. You can customize the title and URL below if needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-heading mr-2 text-green-600"></i>Custom Title (Optional)
+                        </label>
+                        <input type="text" name="title" id="clients_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Clients (default)">
+                        <p class="text-xs text-gray-500 mt-1">Leave empty to use "Clients" as the default title</p>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="fas fa-link mr-2 text-green-600"></i>Custom URL (Optional)
+                        </label>
+                        <input type="text" name="url" id="clients_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="index.php#clients or https://example.com/index.php#clients">
+                        <p class="text-xs text-gray-500 mt-1">Accepts full URLs (https://...) or relative paths (index.php#clients). Leave empty to use default.</p>
                     </div>
                 </div>
                 
@@ -1694,6 +1814,10 @@ function selectItemType(type) {
             fieldsToShow = ['partnersFields'];
             requiredFields = [];
             break;
+        case 'clients':
+            fieldsToShow = ['clientsFields'];
+            requiredFields = [];
+            break;
         case 'quality_certifications':
             fieldsToShow = ['qualityCertificationsFields'];
             requiredFields = [];
@@ -1979,6 +2103,14 @@ async function editItem(id) {
                     document.getElementById('edit_partners_url').value = item.url || '';
                 }
                 break;
+            case 'clients':
+                if (document.getElementById('edit_clients_title')) {
+                    document.getElementById('edit_clients_title').value = item.title || '';
+                }
+                if (document.getElementById('edit_clients_url')) {
+                    document.getElementById('edit_clients_url').value = item.url || '';
+                }
+                break;
             case 'quality_certifications':
                 if (document.getElementById('edit_quality_certifications_title')) {
                     document.getElementById('edit_quality_certifications_title').value = item.title || '';
@@ -2081,6 +2213,10 @@ function selectEditItemType(type) {
             fieldsToShow = ['editPartnersFields'];
             requiredFields = [];
             break;
+        case 'clients':
+            fieldsToShow = ['editClientsFields'];
+            requiredFields = [];
+            break;
         case 'quality_certifications':
             fieldsToShow = ['editQualityCertificationsFields'];
             requiredFields = [];
@@ -2105,7 +2241,7 @@ function selectEditItemType(type) {
     
     // Always show custom link fields as an option (for URL override)
     // But make them optional when not in custom mode
-    if (type !== 'custom' && type !== 'services' && type !== 'ceo_message' && type !== 'partners' && type !== 'quality_certifications') {
+    if (type !== 'custom' && type !== 'services' && type !== 'ceo_message' && type !== 'partners' && type !== 'clients' && type !== 'quality_certifications') {
         const customFields = document.getElementById('editCustomLinkFields');
         if (customFields) {
             customFields.classList.remove('hidden');
