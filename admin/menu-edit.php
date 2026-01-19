@@ -235,9 +235,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['url'] = !empty($customUrl) ? $customUrl : url('services.php');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'ceo_message') {
-            // CEO Message page
+            // CEO Message page - use absolute path /ceo-message.php
             $data['title'] = !empty($customTitle) ? $customTitle : 'CEO Message';
-            $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
+            $data['url'] = !empty($customUrl) ? $customUrl : '/ceo-message.php';
             $data['object_id'] = null;
         } elseif ($data['type'] === 'partners') {
             // Partners - link to homepage with anchor or custom URL
@@ -506,9 +506,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $data['url'] = !empty($customUrl) ? $customUrl : url('services.php');
             $data['object_id'] = null;
         } elseif ($data['type'] === 'ceo_message') {
-            // CEO Message page
+            // CEO Message page - use absolute path /ceo-message.php
             $data['title'] = !empty($customTitle) ? $customTitle : 'CEO Message';
-            $data['url'] = !empty($customUrl) ? $customUrl : url('ceo-message.php');
+            $data['url'] = !empty($customUrl) ? $customUrl : '/ceo-message.php';
             $data['object_id'] = null;
         } elseif ($data['type'] === 'partners') {
             // Partners - link to homepage with anchor or custom URL
@@ -701,9 +701,14 @@ include __DIR__ . '/includes/header.php';
     <div class="bg-white rounded-xl shadow-lg p-6">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800">Menu Items</h2>
-            <button onclick="showAddItemModal()" class="btn-primary">
-                <i class="fas fa-plus"></i>Add Menu Item
-            </button>
+            <div class="flex gap-2">
+                <button onclick="quickAddCeoMessage()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Quick Add CEO Message">
+                    <i class="fas fa-user-tie mr-2"></i>Quick Add: CEO Message
+                </button>
+                <button onclick="showAddItemModal()" class="btn-primary">
+                    <i class="fas fa-plus"></i>Add Menu Item
+                </button>
+            </div>
         </div>
 
         <div id="menuItemsList" class="space-y-2">
@@ -2023,6 +2028,61 @@ function saveMenuOrder() {
             saveBtn.disabled = false;
             saveBtn.innerHTML = originalText;
         });
+    }
+}
+
+// Quick Add CEO Message function
+async function quickAddCeoMessage() {
+    const menuId = <?= $menuId ?>;
+    if (!menuId || menuId <= 0) {
+        customAlert('Invalid menu ID', 'Error', 'error').then(() => {});
+        return;
+    }
+    
+    // Show loading state
+    const btn = document.querySelector('button[onclick="quickAddCeoMessage()"]');
+    if (!btn) {
+        customAlert('Button not found', 'Error', 'error').then(() => {});
+        return;
+    }
+    
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Adding...';
+    
+    try {
+        const formData = new FormData();
+        formData.append('action', 'add_item');
+        formData.append('menu_id', menuId);
+        formData.append('item_type', 'ceo_message');
+        formData.append('title', 'CEO Message');
+        formData.append('url', '/ceo-message.php');
+        formData.append('target', '_self');
+        formData.append('icon', 'fas fa-user-tie');
+        
+        const response = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+            customAlert('CEO Message added to menu successfully!', 'Success', 'success').then(() => {
+                location.reload();
+            });
+        } else {
+            customAlert('Error adding CEO Message: ' + (result.error || 'Unknown error'), 'Error', 'error').then(() => {});
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch (error) {
+        customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
+        btn.disabled = false;
+        btn.innerHTML = originalText;
     }
 }
 

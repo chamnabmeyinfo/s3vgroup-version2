@@ -1,0 +1,7 @@
+   cd /home/s3vtgroup/dev.s3vtgroup.com.kh
+   git stash
+   git pull origin main
+
+
+
+   cd /home/s3vtgroup/dev.s3vtgroup.com.kh && git stash && git pull origin main

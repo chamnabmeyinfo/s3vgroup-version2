@@ -287,8 +287,105 @@ include __DIR__ . '/includes/header.php';
     use App\Models\Partner;
     $partnerModel = new Partner();
     $partners = $partnerModel->getByType('partner', true); // Get only active partners
+    
+    // Get logo styling settings
+    $logoStyleSettings = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE '%_logo_%'");
+    $logoStyles = [];
+    foreach ($logoStyleSettings as $setting) {
+        $logoStyles[$setting['key']] = $setting['value'];
+    }
+    
+    // Default values
+    $defaultLogoStyles = [
+        'partners_logo_border_width' => '2',
+        'partners_logo_border_color' => '#3b82f6',
+        'partners_logo_border_radius' => '12',
+        'partners_logo_padding' => '20',
+        'partners_logo_bg_color' => '#ffffff',
+        'partners_logo_object_fit' => 'contain',
+        'partners_logo_item_width' => '180',
+        'partners_logo_item_height' => '100',
+        'clients_logo_border_width' => '2',
+        'clients_logo_border_color' => '#10b981',
+        'clients_logo_border_radius' => '12',
+        'clients_logo_padding' => '20',
+        'clients_logo_bg_color' => '#ffffff',
+        'clients_logo_object_fit' => 'contain',
+        'clients_logo_item_width' => '180',
+        'clients_logo_item_height' => '100',
+        'certs_logo_border_width' => '1',
+        'certs_logo_border_color' => '#e5e7eb',
+        'certs_logo_border_radius' => '12',
+        'certs_logo_padding' => '20',
+        'certs_logo_bg_color' => '#ffffff',
+        'certs_logo_object_fit' => 'contain',
+        'certs_logo_item_width' => '160',
+        'certs_logo_item_height' => '120',
+    ];
+    
+    foreach ($defaultLogoStyles as $key => $default) {
+        if (!isset($logoStyles[$key])) {
+            $logoStyles[$key] = $default;
+        }
+    }
+    
     if (!empty($partners)):
     ?>
+    <style>
+    /* Partners Logo Dynamic Styles */
+    .partners-slider-item {
+        width: <?= (int)$logoStyles['partners_logo_item_width'] ?>px !important;
+        height: <?= (int)$logoStyles['partners_logo_item_height'] ?>px !important;
+        padding: <?= (int)$logoStyles['partners_logo_padding'] ?>px !important;
+        border: <?= (int)$logoStyles['partners_logo_border_width'] ?>px solid <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
+        border-radius: <?= (int)$logoStyles['partners_logo_border_radius'] ?>px !important;
+        background-color: <?= escape($logoStyles['partners_logo_bg_color']) ?> !important;
+    }
+    .partners-slider-item:hover {
+        border-color: <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
+    }
+    .partners-slider-item img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: <?= escape($logoStyles['partners_logo_object_fit']) ?> !important;
+    }
+    
+    /* Clients Logo Dynamic Styles */
+    .clients-slider-item {
+        width: <?= (int)$logoStyles['clients_logo_item_width'] ?>px !important;
+        height: <?= (int)$logoStyles['clients_logo_item_height'] ?>px !important;
+        padding: <?= (int)$logoStyles['clients_logo_padding'] ?>px !important;
+        border: <?= (int)$logoStyles['clients_logo_border_width'] ?>px solid <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
+        border-radius: <?= (int)$logoStyles['clients_logo_border_radius'] ?>px !important;
+        background-color: <?= escape($logoStyles['clients_logo_bg_color']) ?> !important;
+    }
+    .clients-slider-item:hover {
+        border-color: <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
+    }
+    .clients-slider-item img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: <?= escape($logoStyles['clients_logo_object_fit']) ?> !important;
+    }
+    
+    /* Quality Certifications Logo Dynamic Styles */
+    .quality-certifications-slider-item {
+        width: <?= (int)$logoStyles['certs_logo_item_width'] ?>px !important;
+        height: <?= (int)$logoStyles['certs_logo_item_height'] ?>px !important;
+        padding: <?= (int)$logoStyles['certs_logo_padding'] ?>px !important;
+        border: <?= (int)$logoStyles['certs_logo_border_width'] ?>px solid <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
+        border-radius: <?= (int)$logoStyles['certs_logo_border_radius'] ?>px !important;
+        background-color: <?= escape($logoStyles['certs_logo_bg_color']) ?> !important;
+    }
+    .quality-certifications-slider-item:hover {
+        border-color: <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
+    }
+    .quality-certifications-slider-item img {
+        width: 100% !important;
+        max-height: 80px !important;
+        object-fit: <?= escape($logoStyles['certs_logo_object_fit']) ?> !important;
+    }
+    </style>
     <section id="partners" class="partners-slider">
         <div class="partners-slider-container">
             <div class="partners-slider-header">

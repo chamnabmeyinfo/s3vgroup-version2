@@ -493,6 +493,156 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
         
+        <!-- Logo Slider Styling Settings -->
+        <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-6 border-2 border-purple-200 mt-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-4">
+                <i class="fas fa-palette text-purple-600 mr-2"></i> Logo Slider Styling (Partners, Clients, Certifications)
+            </label>
+            
+            <div class="space-y-6">
+                <!-- Partners Logo Styling -->
+                <div class="bg-white rounded-lg p-4 border border-purple-200">
+                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-handshake text-blue-600 mr-2"></i> Partners Logo Styling
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Width (px)</label>
+                            <input type="number" name="partners_logo_border_width" value="<?= escape($settings['partners_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Color</label>
+                            <input type="color" name="partners_logo_border_color" value="<?= escape($settings['partners_logo_border_color'] ?? '#3b82f6') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Radius (px)</label>
+                            <input type="number" name="partners_logo_border_radius" value="<?= escape($settings['partners_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Padding (px)</label>
+                            <input type="number" name="partners_logo_padding" value="<?= escape($settings['partners_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Background Color</label>
+                            <input type="color" name="partners_logo_bg_color" value="<?= escape($settings['partners_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Image Fit</label>
+                            <select name="partners_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                                <option value="contain" <?= ($settings['partners_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
+                                <option value="cover" <?= ($settings['partners_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
+                                <option value="fill" <?= ($settings['partners_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
+                                <option value="scale-down" <?= ($settings['partners_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
+                                <option value="none" <?= ($settings['partners_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Width (px)</label>
+                            <input type="number" name="partners_logo_item_width" value="<?= escape($settings['partners_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Height (px)</label>
+                            <input type="number" name="partners_logo_item_height" value="<?= escape($settings['partners_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Clients Logo Styling -->
+                <div class="bg-white rounded-lg p-4 border border-green-200">
+                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-building text-green-600 mr-2"></i> Clients Logo Styling
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Width (px)</label>
+                            <input type="number" name="clients_logo_border_width" value="<?= escape($settings['clients_logo_border_width'] ?? '2') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Color</label>
+                            <input type="color" name="clients_logo_border_color" value="<?= escape($settings['clients_logo_border_color'] ?? '#10b981') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Radius (px)</label>
+                            <input type="number" name="clients_logo_border_radius" value="<?= escape($settings['clients_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Padding (px)</label>
+                            <input type="number" name="clients_logo_padding" value="<?= escape($settings['clients_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Background Color</label>
+                            <input type="color" name="clients_logo_bg_color" value="<?= escape($settings['clients_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Image Fit</label>
+                            <select name="clients_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                                <option value="contain" <?= ($settings['clients_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
+                                <option value="cover" <?= ($settings['clients_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
+                                <option value="fill" <?= ($settings['clients_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
+                                <option value="scale-down" <?= ($settings['clients_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
+                                <option value="none" <?= ($settings['clients_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Width (px)</label>
+                            <input type="number" name="clients_logo_item_width" value="<?= escape($settings['clients_logo_item_width'] ?? '180') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Height (px)</label>
+                            <input type="number" name="clients_logo_item_height" value="<?= escape($settings['clients_logo_item_height'] ?? '100') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quality Certifications Logo Styling -->
+                <div class="bg-white rounded-lg p-4 border border-gray-200">
+                    <h4 class="text-sm font-bold text-gray-800 mb-4 flex items-center">
+                        <i class="fas fa-certificate text-gray-600 mr-2"></i> Quality Certifications Logo Styling
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Width (px)</label>
+                            <input type="number" name="certs_logo_border_width" value="<?= escape($settings['certs_logo_border_width'] ?? '1') ?>" min="0" max="10" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Color</label>
+                            <input type="color" name="certs_logo_border_color" value="<?= escape($settings['certs_logo_border_color'] ?? '#e5e7eb') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Border Radius (px)</label>
+                            <input type="number" name="certs_logo_border_radius" value="<?= escape($settings['certs_logo_border_radius'] ?? '12') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Padding (px)</label>
+                            <input type="number" name="certs_logo_padding" value="<?= escape($settings['certs_logo_padding'] ?? '20') ?>" min="0" max="50" step="1" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Background Color</label>
+                            <input type="color" name="certs_logo_bg_color" value="<?= escape($settings['certs_logo_bg_color'] ?? '#ffffff') ?>" class="w-full h-10 border-2 border-gray-300 rounded-lg">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Image Fit</label>
+                            <select name="certs_logo_object_fit" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                                <option value="contain" <?= ($settings['certs_logo_object_fit'] ?? 'contain') === 'contain' ? 'selected' : '' ?>>Contain (Fit within frame)</option>
+                                <option value="cover" <?= ($settings['certs_logo_object_fit'] ?? '') === 'cover' ? 'selected' : '' ?>>Cover (Fill frame, may crop)</option>
+                                <option value="fill" <?= ($settings['certs_logo_object_fit'] ?? '') === 'fill' ? 'selected' : '' ?>>Fill (Stretch to fit)</option>
+                                <option value="scale-down" <?= ($settings['certs_logo_object_fit'] ?? '') === 'scale-down' ? 'selected' : '' ?>>Scale Down (Shrink if needed)</option>
+                                <option value="none" <?= ($settings['certs_logo_object_fit'] ?? '') === 'none' ? 'selected' : '' ?>>None (Original size)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Width (px)</label>
+                            <input type="number" name="certs_logo_item_width" value="<?= escape($settings['certs_logo_item_width'] ?? '160') ?>" min="100" max="400" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-600 mb-2">Item Height (px)</label>
+                            <input type="number" name="certs_logo_item_height" value="<?= escape($settings['certs_logo_item_height'] ?? '120') ?>" min="60" max="300" step="10" class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
         <!-- Cache Settings Section -->
         <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border-2 border-amber-200 mt-6">
             <label class="block text-sm font-semibold text-gray-700 mb-4">

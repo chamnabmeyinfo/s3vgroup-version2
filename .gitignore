@@ -118,3 +118,5 @@ build/
 config.local
 # Note: .git/config is already ignored by Git by default
 
+# CHAMNAB NOTES
+chamnabnotes/*
