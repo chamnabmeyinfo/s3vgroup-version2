@@ -424,6 +424,7 @@ include __DIR__ . '/includes/header.php';
     if (!empty($partners)):
     ?>
     <!-- Dynamic Logo Slider Styles - Generated from Admin Settings -->
+    <!-- These styles override external CSS files to match backend settings exactly -->
     <style id="logo-slider-dynamic-styles">
     <?php
     // Helper function to convert hex color to rgba
@@ -445,23 +446,41 @@ include __DIR__ . '/includes/header.php';
     ?>
     
     /* ===== PARTNERS SECTION STYLES ===== */
+    /* Override external CSS to match backend settings exactly */
+    section.partners-slider,
     .partners-slider {
         background: linear-gradient(135deg, <?= escape($logoStyles['partners_section_bg_color1'] ?? '#f0f7ff') ?> 0%, <?= escape($logoStyles['partners_section_bg_color2'] ?? '#e0efff') ?> 100%) !important;
         padding: <?= (int)($logoStyles['partners_section_padding'] ?? 80) ?>px 0 !important;
     }
-    .partners-slider-header h2 {
+    /* Remove default ::before pseudo-element if needed */
+    .partners-slider::before {
+        display: none !important;
+    }
+    .partners-slider-header h2,
+    section.partners-slider .partners-slider-header h2,
+    section#partners .partners-slider-header h2 {
         background: linear-gradient(135deg, <?= escape($logoStyles['partners_title_color1'] ?? '#1e40af') ?>, <?= escape($logoStyles['partners_title_color2'] ?? '#3b82f6') ?>) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 10px !important;
     }
-    .partners-slider-header p {
+    .partners-slider-header p,
+    section.partners-slider .partners-slider-header p {
         color: <?= escape($logoStyles['partners_desc_color'] ?? '#475569') ?> !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
     }
-    .partners-slider-track {
+    .partners-slider-track,
+    section.partners-slider .partners-slider-track {
         gap: <?= (int)($logoStyles['partners_logo_gap'] ?? 40) ?>px !important;
+        display: flex !important;
     }
-    .partners-slider-item {
+    .partners-slider-item,
+    section.partners-slider .partners-slider-item {
+        flex-shrink: 0 !important;
         width: <?= (int)($logoStyles['partners_logo_item_width'] ?? 180) ?>px !important;
         height: <?= (int)($logoStyles['partners_logo_item_height'] ?? 100) ?>px !important;
         padding: <?= (int)($logoStyles['partners_logo_padding'] ?? 20) ?>px !important;
@@ -470,42 +489,71 @@ include __DIR__ . '/includes/header.php';
         background-color: <?= escape($logoStyles['partners_logo_bg_color'] ?? '#ffffff') ?> !important;
         box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['partners_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_shadow_opacity'] ?? 10)) ?> !important;
         transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    .partners-slider-item:hover {
+    .partners-slider-item:hover,
+    section.partners-slider .partners-slider-item:hover,
+    section#partners .partners-slider-item:hover {
         transform: translateY(<?= (int)($logoStyles['partners_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['partners_logo_hover_scale'] ?? '1.02') ?>) !important;
         border-color: <?= escape($logoStyles['partners_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
         box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
     }
-    .partners-slider-item img {
+    .partners-slider-item img,
+    section.partners-slider .partners-slider-item img {
         width: 100% !important;
         height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         object-fit: <?= escape($logoStyles['partners_logo_object_fit'] ?? 'contain') ?> !important;
         filter: grayscale(<?= (int)($logoStyles['partners_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['partners_logo_image_opacity'] ?? 80) / 100) ?>) !important;
         transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
     }
-    .partners-slider-item:hover img {
+    .partners-slider-item:hover img,
+    section.partners-slider .partners-slider-item:hover img,
+    section#partners .partners-slider-item:hover img {
         filter: grayscale(0%) opacity(1) !important;
         transform: scale(<?= escape($logoStyles['partners_logo_hover_image_scale'] ?? '1.05') ?>) !important;
     }
     
     /* ===== CLIENTS SECTION STYLES ===== */
+    /* Override external CSS to match backend settings exactly */
+    section.clients-slider,
     .clients-slider {
         background: linear-gradient(135deg, <?= escape($logoStyles['clients_section_bg_color1'] ?? '#f0fdf4') ?> 0%, <?= escape($logoStyles['clients_section_bg_color2'] ?? '#dcfce7') ?> 100%) !important;
         padding: <?= (int)($logoStyles['clients_section_padding'] ?? 80) ?>px 0 !important;
+        margin-top: 0 !important;
     }
-    .clients-slider-header h2 {
+    /* Remove default ::before pseudo-element if needed */
+    .clients-slider::before {
+        display: none !important;
+    }
+    .clients-slider-header h2,
+    section.clients-slider .clients-slider-header h2,
+    section#clients .clients-slider-header h2 {
         background: linear-gradient(135deg, <?= escape($logoStyles['clients_title_color1'] ?? '#059669') ?>, <?= escape($logoStyles['clients_title_color2'] ?? '#10b981') ?>) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 10px !important;
     }
-    .clients-slider-header p {
+    .clients-slider-header p,
+    section.clients-slider .clients-slider-header p {
         color: <?= escape($logoStyles['clients_desc_color'] ?? '#475569') ?> !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
     }
-    .clients-slider-track {
+    .clients-slider-track,
+    section.clients-slider .clients-slider-track {
         gap: <?= (int)($logoStyles['clients_logo_gap'] ?? 40) ?>px !important;
+        display: flex !important;
     }
-    .clients-slider-item {
+    .clients-slider-item,
+    section.clients-slider .clients-slider-item {
+        flex-shrink: 0 !important;
         width: <?= (int)($logoStyles['clients_logo_item_width'] ?? 180) ?>px !important;
         height: <?= (int)($logoStyles['clients_logo_item_height'] ?? 100) ?>px !important;
         padding: <?= (int)($logoStyles['clients_logo_padding'] ?? 20) ?>px !important;
@@ -514,39 +562,62 @@ include __DIR__ . '/includes/header.php';
         background-color: <?= escape($logoStyles['clients_logo_bg_color'] ?? '#ffffff') ?> !important;
         box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['clients_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_shadow_opacity'] ?? 10)) ?> !important;
         transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    .clients-slider-item:hover {
+    .clients-slider-item:hover,
+    section.clients-slider .clients-slider-item:hover,
+    section#clients .clients-slider-item:hover {
         transform: translateY(<?= (int)($logoStyles['clients_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['clients_logo_hover_scale'] ?? '1.02') ?>) !important;
         border-color: <?= escape($logoStyles['clients_logo_hover_border_color'] ?? '#10b981') ?> !important;
         box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
     }
-    .clients-slider-item img {
+    .clients-slider-item img,
+    section.clients-slider .clients-slider-item img {
         width: 100% !important;
         height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         object-fit: <?= escape($logoStyles['clients_logo_object_fit'] ?? 'contain') ?> !important;
         filter: grayscale(<?= (int)($logoStyles['clients_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['clients_logo_image_opacity'] ?? 80) / 100) ?>) !important;
         transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
     }
-    .clients-slider-item:hover img {
+    .clients-slider-item:hover img,
+    section.clients-slider .clients-slider-item:hover img,
+    section#clients .clients-slider-item:hover img {
         filter: grayscale(0%) opacity(1) !important;
         transform: scale(<?= escape($logoStyles['clients_logo_hover_image_scale'] ?? '1.05') ?>) !important;
     }
     
     /* ===== QUALITY CERTIFICATIONS SECTION STYLES ===== */
+    /* Override external CSS to match backend settings exactly */
+    section.quality-certifications-slider,
     .quality-certifications-slider {
         background: linear-gradient(to bottom, <?= escape($logoStyles['certs_section_bg_color1'] ?? '#ffffff') ?>, <?= escape($logoStyles['certs_section_bg_color2'] ?? '#f8f9fa') ?>) !important;
         padding: <?= (int)($logoStyles['certs_section_padding'] ?? 60) ?>px 0 !important;
+        border-top: none !important;
     }
-    .quality-certifications-slider-header h2 {
+    .quality-certifications-slider-header h2,
+    section.quality-certifications-slider .quality-certifications-slider-header h2 {
         color: <?= escape($logoStyles['certs_title_color'] ?? '#1a1a1a') ?> !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 10px !important;
     }
-    .quality-certifications-slider-header p {
+    .quality-certifications-slider-header p,
+    section.quality-certifications-slider .quality-certifications-slider-header p {
         color: <?= escape($logoStyles['certs_desc_color'] ?? '#666666') ?> !important;
+        font-size: 1rem !important;
     }
-    .quality-certifications-slider-track {
+    .quality-certifications-slider-track,
+    section.quality-certifications-slider .quality-certifications-slider-track {
         gap: <?= (int)($logoStyles['certs_logo_gap'] ?? 30) ?>px !important;
+        display: flex !important;
     }
-    .quality-certifications-slider-item {
+    .quality-certifications-slider-item,
+    section.quality-certifications-slider .quality-certifications-slider-item {
+        flex-shrink: 0 !important;
         width: <?= (int)($logoStyles['certs_logo_item_width'] ?? 160) ?>px !important;
         height: <?= (int)($logoStyles['certs_logo_item_height'] ?? 120) ?>px !important;
         padding: <?= (int)($logoStyles['certs_logo_padding'] ?? 20) ?>px !important;
@@ -555,27 +626,40 @@ include __DIR__ . '/includes/header.php';
         background-color: <?= escape($logoStyles['certs_logo_bg_color'] ?? '#ffffff') ?> !important;
         box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['certs_logo_shadow_blur'] ?? 12) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_shadow_opacity'] ?? 8)) ?> !important;
         transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
-    .quality-certifications-slider-item:hover {
+    .quality-certifications-slider-item:hover,
+    section.quality-certifications-slider .quality-certifications-slider-item:hover {
         transform: translateY(<?= (int)($logoStyles['certs_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['certs_logo_hover_scale'] ?? '1.05') ?>) !important;
         border-color: <?= escape($logoStyles['certs_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
         box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_hover_shadow_opacity'] ?? 15)) ?> !important;
     }
-    .quality-certifications-slider-item img {
+    .quality-certifications-slider-item img,
+    section.quality-certifications-slider .quality-certifications-slider-item img {
         width: 100% !important;
+        max-width: 100% !important;
         max-height: <?= (int)($logoStyles['certs_logo_max_image_height'] ?? 80) ?>px !important;
         object-fit: <?= escape($logoStyles['certs_logo_object_fit'] ?? 'contain') ?> !important;
         transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
     }
-    .quality-certifications-slider-item:hover img {
+    .quality-certifications-slider-item:hover img,
+    section.quality-certifications-slider .quality-certifications-slider-item:hover img {
         transform: scale(<?= escape($logoStyles['certs_logo_hover_image_scale'] ?? '1.1') ?>) !important;
     }
-    .quality-certifications-slider-item .cert-name {
+    .quality-certifications-slider-item .cert-name,
+    section.quality-certifications-slider .quality-certifications-slider-item .cert-name {
         color: <?= escape($logoStyles['certs_text_color'] ?? '#6b7280') ?> !important;
         font-size: <?= (int)($logoStyles['certs_text_font_size'] ?? 12) ?>px !important;
         transition: color <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
+        margin-top: 8px !important;
+        text-align: center !important;
+        font-weight: 500 !important;
     }
-    .quality-certifications-slider-item:hover .cert-name {
+    .quality-certifications-slider-item:hover .cert-name,
+    section.quality-certifications-slider .quality-certifications-slider-item:hover .cert-name {
         color: <?= escape($logoStyles['certs_text_hover_color'] ?? '#3b82f6') ?> !important;
     }
     </style>
