@@ -18,6 +18,15 @@ Run this command via **SSH** or **cPanel Terminal**:
 cd /home/s3vtgroup/public_html && \
 git fetch origin && \
 git stash && \
+git merge origin/main --no-ff -m "Merge from GitHub" && \
+git push origin main
+```
+
+**Or if you prefer git pull (will prompt for merge message):**
+```bash
+cd /home/s3vtgroup/public_html && \
+git fetch origin && \
+git stash && \
 git pull origin main --no-ff && \
 git push origin main
 ```
@@ -45,7 +54,7 @@ git fetch origin
 git stash save "Production changes before merge - $(date)"
 
 # 4. Merge with no fast-forward (fixes divergence)
-git pull origin main --no-ff -m "Merge remote changes from GitHub"
+git merge origin/main --no-ff -m "Merge remote changes from GitHub"
 
 # 5. Push the merged result
 git push origin main
@@ -113,7 +122,7 @@ git reset --hard origin/main
 **For Production Server (Recommended):**
 
 ```bash
-cd /home/s3vtgroup/public_html && git fetch origin && git stash && git pull origin main --no-ff -m "Merge from GitHub" && git push origin main
+cd /home/s3vtgroup/public_html && git fetch origin && git stash && git merge origin/main --no-ff -m "Merge from GitHub" && git push origin main
 ```
 
 **Or use the script:**
@@ -215,7 +224,7 @@ If the merge shows conflicts:
 cd /home/s3vtgroup/public_html && \
 git fetch origin && \
 git stash && \
-git pull origin main --no-ff && \
+git merge origin/main --no-ff -m "Merge from GitHub" && \
 git push origin main
 
 # Or use the script

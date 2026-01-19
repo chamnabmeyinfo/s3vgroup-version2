@@ -34,7 +34,8 @@ fi
 
 echo ""
 echo "=== Merging remote changes (fixing divergence) ==="
-git pull origin main --no-ff -m "Merge remote changes from GitHub"
+# Use git merge instead of git pull to allow custom merge message
+git merge origin/main --no-ff -m "Merge remote changes from GitHub - $(date '+%Y-%m-%d %H:%M:%S')"
 
 if [ $? -eq 0 ]; then
     echo ""

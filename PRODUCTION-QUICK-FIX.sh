@@ -42,7 +42,8 @@ echo ""
 
 # Merge with no fast-forward
 echo "🔄 Merging remote changes (fixing divergence)..."
-git pull origin main --no-ff -m "Merge remote changes from GitHub - $(date '+%Y-%m-%d %H:%M:%S')"
+# Use git merge instead of git pull to allow custom merge message
+git merge origin/main --no-ff -m "Merge remote changes from GitHub - $(date '+%Y-%m-%d %H:%M:%S')"
 
 if [ $? -eq 0 ]; then
     echo "✅ Merge successful!"
