@@ -288,39 +288,112 @@ include __DIR__ . '/includes/header.php';
     $partnerModel = new Partner();
     $partners = $partnerModel->getByType('partner', true); // Get only active partners
     
-    // Get logo styling settings
-    $logoStyleSettings = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE '%_logo_%'");
+    // Get logo styling settings (including section, title, etc.)
+    $logoStyleSettings = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE '%_logo_%' OR `key` LIKE '%_section_%' OR `key` LIKE '%_title_%' OR `key` LIKE '%_desc_%' OR `key` LIKE '%_text_%'");
     $logoStyles = [];
     foreach ($logoStyleSettings as $setting) {
         $logoStyles[$setting['key']] = $setting['value'];
     }
     
-    // Default values
+    // Default values - comprehensive styling
     $defaultLogoStyles = [
-        'partners_logo_border_width' => '2',
-        'partners_logo_border_color' => '#3b82f6',
-        'partners_logo_border_radius' => '12',
-        'partners_logo_padding' => '20',
-        'partners_logo_bg_color' => '#ffffff',
-        'partners_logo_object_fit' => 'contain',
+        // Partners
+        'partners_section_bg_color1' => '#f0f7ff',
+        'partners_section_bg_color2' => '#e0efff',
+        'partners_section_padding' => '80',
+        'partners_title_color1' => '#1e40af',
+        'partners_title_color2' => '#3b82f6',
+        'partners_desc_color' => '#475569',
         'partners_logo_item_width' => '180',
         'partners_logo_item_height' => '100',
-        'clients_logo_border_width' => '2',
-        'clients_logo_border_color' => '#10b981',
-        'clients_logo_border_radius' => '12',
-        'clients_logo_padding' => '20',
-        'clients_logo_bg_color' => '#ffffff',
-        'clients_logo_object_fit' => 'contain',
+        'partners_logo_gap' => '40',
+        'partners_logo_padding' => '20',
+        'partners_logo_border_width' => '2',
+        'partners_logo_border_style' => 'solid',
+        'partners_logo_border_color' => '#3b82f6',
+        'partners_logo_border_radius' => '12',
+        'partners_logo_bg_color' => '#ffffff',
+        'partners_logo_shadow_x' => '0',
+        'partners_logo_shadow_y' => '2',
+        'partners_logo_shadow_blur' => '8',
+        'partners_logo_shadow_color' => '#3b82f6',
+        'partners_logo_shadow_opacity' => '10',
+        'partners_logo_hover_y' => '-8',
+        'partners_logo_hover_scale' => '1.02',
+        'partners_logo_hover_border_color' => '#3b82f6',
+        'partners_logo_hover_shadow_y' => '8',
+        'partners_logo_hover_shadow_blur' => '24',
+        'partners_logo_hover_shadow_opacity' => '20',
+        'partners_logo_transition' => '300',
+        'partners_logo_object_fit' => 'contain',
+        'partners_logo_grayscale' => '80',
+        'partners_logo_image_opacity' => '80',
+        'partners_logo_hover_image_scale' => '1.05',
+        // Clients
+        'clients_section_bg_color1' => '#f0fdf4',
+        'clients_section_bg_color2' => '#dcfce7',
+        'clients_section_padding' => '80',
+        'clients_title_color1' => '#059669',
+        'clients_title_color2' => '#10b981',
+        'clients_desc_color' => '#475569',
         'clients_logo_item_width' => '180',
         'clients_logo_item_height' => '100',
-        'certs_logo_border_width' => '1',
-        'certs_logo_border_color' => '#e5e7eb',
-        'certs_logo_border_radius' => '12',
-        'certs_logo_padding' => '20',
-        'certs_logo_bg_color' => '#ffffff',
-        'certs_logo_object_fit' => 'contain',
+        'clients_logo_gap' => '40',
+        'clients_logo_padding' => '20',
+        'clients_logo_border_width' => '2',
+        'clients_logo_border_style' => 'solid',
+        'clients_logo_border_color' => '#10b981',
+        'clients_logo_border_radius' => '12',
+        'clients_logo_bg_color' => '#ffffff',
+        'clients_logo_shadow_x' => '0',
+        'clients_logo_shadow_y' => '2',
+        'clients_logo_shadow_blur' => '8',
+        'clients_logo_shadow_color' => '#10b981',
+        'clients_logo_shadow_opacity' => '10',
+        'clients_logo_hover_y' => '-8',
+        'clients_logo_hover_scale' => '1.02',
+        'clients_logo_hover_border_color' => '#10b981',
+        'clients_logo_hover_shadow_y' => '8',
+        'clients_logo_hover_shadow_blur' => '24',
+        'clients_logo_hover_shadow_opacity' => '20',
+        'clients_logo_transition' => '300',
+        'clients_logo_object_fit' => 'contain',
+        'clients_logo_grayscale' => '80',
+        'clients_logo_image_opacity' => '80',
+        'clients_logo_hover_image_scale' => '1.05',
+        // Certifications
+        'certs_section_bg_color1' => '#ffffff',
+        'certs_section_bg_color2' => '#f8f9fa',
+        'certs_section_padding' => '60',
+        'certs_title_color' => '#1a1a1a',
+        'certs_desc_color' => '#666666',
         'certs_logo_item_width' => '160',
         'certs_logo_item_height' => '120',
+        'certs_logo_gap' => '30',
+        'certs_logo_padding' => '20',
+        'certs_logo_border_width' => '1',
+        'certs_logo_border_style' => 'solid',
+        'certs_logo_border_color' => '#e5e7eb',
+        'certs_logo_border_radius' => '12',
+        'certs_logo_bg_color' => '#ffffff',
+        'certs_logo_shadow_x' => '0',
+        'certs_logo_shadow_y' => '2',
+        'certs_logo_shadow_blur' => '12',
+        'certs_logo_shadow_color' => '#000000',
+        'certs_logo_shadow_opacity' => '8',
+        'certs_logo_hover_y' => '-8',
+        'certs_logo_hover_scale' => '1.05',
+        'certs_logo_hover_border_color' => '#3b82f6',
+        'certs_logo_hover_shadow_y' => '8',
+        'certs_logo_hover_shadow_blur' => '24',
+        'certs_logo_hover_shadow_opacity' => '15',
+        'certs_logo_transition' => '300',
+        'certs_logo_object_fit' => 'contain',
+        'certs_logo_max_image_height' => '80',
+        'certs_logo_hover_image_scale' => '1.1',
+        'certs_text_color' => '#6b7280',
+        'certs_text_font_size' => '12',
+        'certs_text_hover_color' => '#3b82f6',
     ];
     
     foreach ($defaultLogoStyles as $key => $default) {
@@ -332,58 +405,150 @@ include __DIR__ . '/includes/header.php';
     if (!empty($partners)):
     ?>
     <style>
-    /* Partners Logo Dynamic Styles */
+    <?php
+    // Helper function to convert hex color to rgba
+    function hexToRgba($hex, $opacity) {
+        $hex = str_replace('#', '', $hex);
+        $r = hexdec(substr($hex, 0, 2));
+        $g = hexdec(substr($hex, 2, 2));
+        $b = hexdec(substr($hex, 4, 2));
+        return "rgba($r, $g, $b, " . ($opacity / 100) . ")";
+    }
+    ?>
+    
+    /* ===== PARTNERS SECTION STYLES ===== */
+    .partners-slider {
+        background: linear-gradient(135deg, <?= escape($logoStyles['partners_section_bg_color1']) ?> 0%, <?= escape($logoStyles['partners_section_bg_color2']) ?> 100%) !important;
+        padding: <?= (int)$logoStyles['partners_section_padding'] ?>px 0 !important;
+    }
+    .partners-slider-header h2 {
+        background: linear-gradient(135deg, <?= escape($logoStyles['partners_title_color1']) ?>, <?= escape($logoStyles['partners_title_color2']) ?>) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+    .partners-slider-header p {
+        color: <?= escape($logoStyles['partners_desc_color']) ?> !important;
+    }
+    .partners-slider-track {
+        gap: <?= (int)$logoStyles['partners_logo_gap'] ?>px !important;
+    }
     .partners-slider-item {
         width: <?= (int)$logoStyles['partners_logo_item_width'] ?>px !important;
         height: <?= (int)$logoStyles['partners_logo_item_height'] ?>px !important;
         padding: <?= (int)$logoStyles['partners_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['partners_logo_border_width'] ?>px solid <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
+        border: <?= (int)$logoStyles['partners_logo_border_width'] ?>px <?= escape($logoStyles['partners_logo_border_style']) ?> <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
         border-radius: <?= (int)$logoStyles['partners_logo_border_radius'] ?>px !important;
         background-color: <?= escape($logoStyles['partners_logo_bg_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['partners_logo_shadow_x'] ?>px <?= (int)$logoStyles['partners_logo_shadow_y'] ?>px <?= (int)$logoStyles['partners_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'], (int)$logoStyles['partners_logo_shadow_opacity']) ?> !important;
+        transition: all <?= (int)$logoStyles['partners_logo_transition'] ?>ms ease !important;
     }
     .partners-slider-item:hover {
-        border-color: <?= escape($logoStyles['partners_logo_border_color']) ?> !important;
+        transform: translateY(<?= (int)$logoStyles['partners_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['partners_logo_hover_scale']) ?>) !important;
+        border-color: <?= escape($logoStyles['partners_logo_hover_border_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['partners_logo_shadow_x'] ?>px <?= (int)$logoStyles['partners_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['partners_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'], (int)$logoStyles['partners_logo_hover_shadow_opacity']) ?> !important;
     }
     .partners-slider-item img {
         width: 100% !important;
         height: 100% !important;
         object-fit: <?= escape($logoStyles['partners_logo_object_fit']) ?> !important;
+        filter: grayscale(<?= (int)$logoStyles['partners_logo_grayscale'] ?>%) opacity(<?= (int)$logoStyles['partners_logo_image_opacity'] / 100 ?>) !important;
+        transition: all <?= (int)$logoStyles['partners_logo_transition'] ?>ms ease !important;
+    }
+    .partners-slider-item:hover img {
+        filter: grayscale(0%) opacity(1) !important;
+        transform: scale(<?= escape($logoStyles['partners_logo_hover_image_scale']) ?>) !important;
     }
     
-    /* Clients Logo Dynamic Styles */
+    /* ===== CLIENTS SECTION STYLES ===== */
+    .clients-slider {
+        background: linear-gradient(135deg, <?= escape($logoStyles['clients_section_bg_color1']) ?> 0%, <?= escape($logoStyles['clients_section_bg_color2']) ?> 100%) !important;
+        padding: <?= (int)$logoStyles['clients_section_padding'] ?>px 0 !important;
+    }
+    .clients-slider-header h2 {
+        background: linear-gradient(135deg, <?= escape($logoStyles['clients_title_color1']) ?>, <?= escape($logoStyles['clients_title_color2']) ?>) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+    }
+    .clients-slider-header p {
+        color: <?= escape($logoStyles['clients_desc_color']) ?> !important;
+    }
+    .clients-slider-track {
+        gap: <?= (int)$logoStyles['clients_logo_gap'] ?>px !important;
+    }
     .clients-slider-item {
         width: <?= (int)$logoStyles['clients_logo_item_width'] ?>px !important;
         height: <?= (int)$logoStyles['clients_logo_item_height'] ?>px !important;
         padding: <?= (int)$logoStyles['clients_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['clients_logo_border_width'] ?>px solid <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
+        border: <?= (int)$logoStyles['clients_logo_border_width'] ?>px <?= escape($logoStyles['clients_logo_border_style']) ?> <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
         border-radius: <?= (int)$logoStyles['clients_logo_border_radius'] ?>px !important;
         background-color: <?= escape($logoStyles['clients_logo_bg_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['clients_logo_shadow_x'] ?>px <?= (int)$logoStyles['clients_logo_shadow_y'] ?>px <?= (int)$logoStyles['clients_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'], (int)$logoStyles['clients_logo_shadow_opacity']) ?> !important;
+        transition: all <?= (int)$logoStyles['clients_logo_transition'] ?>ms ease !important;
     }
     .clients-slider-item:hover {
-        border-color: <?= escape($logoStyles['clients_logo_border_color']) ?> !important;
+        transform: translateY(<?= (int)$logoStyles['clients_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['clients_logo_hover_scale']) ?>) !important;
+        border-color: <?= escape($logoStyles['clients_logo_hover_border_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['clients_logo_shadow_x'] ?>px <?= (int)$logoStyles['clients_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['clients_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'], (int)$logoStyles['clients_logo_hover_shadow_opacity']) ?> !important;
     }
     .clients-slider-item img {
         width: 100% !important;
         height: 100% !important;
         object-fit: <?= escape($logoStyles['clients_logo_object_fit']) ?> !important;
+        filter: grayscale(<?= (int)$logoStyles['clients_logo_grayscale'] ?>%) opacity(<?= (int)$logoStyles['clients_logo_image_opacity'] / 100 ?>) !important;
+        transition: all <?= (int)$logoStyles['clients_logo_transition'] ?>ms ease !important;
+    }
+    .clients-slider-item:hover img {
+        filter: grayscale(0%) opacity(1) !important;
+        transform: scale(<?= escape($logoStyles['clients_logo_hover_image_scale']) ?>) !important;
     }
     
-    /* Quality Certifications Logo Dynamic Styles */
+    /* ===== QUALITY CERTIFICATIONS SECTION STYLES ===== */
+    .quality-certifications-slider {
+        background: linear-gradient(to bottom, <?= escape($logoStyles['certs_section_bg_color1']) ?>, <?= escape($logoStyles['certs_section_bg_color2']) ?>) !important;
+        padding: <?= (int)$logoStyles['certs_section_padding'] ?>px 0 !important;
+    }
+    .quality-certifications-slider-header h2 {
+        color: <?= escape($logoStyles['certs_title_color']) ?> !important;
+    }
+    .quality-certifications-slider-header p {
+        color: <?= escape($logoStyles['certs_desc_color']) ?> !important;
+    }
+    .quality-certifications-slider-track {
+        gap: <?= (int)$logoStyles['certs_logo_gap'] ?>px !important;
+    }
     .quality-certifications-slider-item {
         width: <?= (int)$logoStyles['certs_logo_item_width'] ?>px !important;
         height: <?= (int)$logoStyles['certs_logo_item_height'] ?>px !important;
         padding: <?= (int)$logoStyles['certs_logo_padding'] ?>px !important;
-        border: <?= (int)$logoStyles['certs_logo_border_width'] ?>px solid <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
+        border: <?= (int)$logoStyles['certs_logo_border_width'] ?>px <?= escape($logoStyles['certs_logo_border_style']) ?> <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
         border-radius: <?= (int)$logoStyles['certs_logo_border_radius'] ?>px !important;
         background-color: <?= escape($logoStyles['certs_logo_bg_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['certs_logo_shadow_x'] ?>px <?= (int)$logoStyles['certs_logo_shadow_y'] ?>px <?= (int)$logoStyles['certs_logo_shadow_blur'] ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'], (int)$logoStyles['certs_logo_shadow_opacity']) ?> !important;
+        transition: all <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
     }
     .quality-certifications-slider-item:hover {
-        border-color: <?= escape($logoStyles['certs_logo_border_color']) ?> !important;
+        transform: translateY(<?= (int)$logoStyles['certs_logo_hover_y'] ?>px) scale(<?= escape($logoStyles['certs_logo_hover_scale']) ?>) !important;
+        border-color: <?= escape($logoStyles['certs_logo_hover_border_color']) ?> !important;
+        box-shadow: <?= (int)$logoStyles['certs_logo_shadow_x'] ?>px <?= (int)$logoStyles['certs_logo_hover_shadow_y'] ?>px <?= (int)$logoStyles['certs_logo_hover_shadow_blur'] ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'], (int)$logoStyles['certs_logo_hover_shadow_opacity']) ?> !important;
     }
     .quality-certifications-slider-item img {
         width: 100% !important;
-        max-height: 80px !important;
+        max-height: <?= (int)$logoStyles['certs_logo_max_image_height'] ?>px !important;
         object-fit: <?= escape($logoStyles['certs_logo_object_fit']) ?> !important;
+        transition: all <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
+    }
+    .quality-certifications-slider-item:hover img {
+        transform: scale(<?= escape($logoStyles['certs_logo_hover_image_scale']) ?>) !important;
+    }
+    .quality-certifications-slider-item .cert-name {
+        color: <?= escape($logoStyles['certs_text_color']) ?> !important;
+        font-size: <?= (int)$logoStyles['certs_text_font_size'] ?>px !important;
+        transition: color <?= (int)$logoStyles['certs_logo_transition'] ?>ms ease !important;
+    }
+    .quality-certifications-slider-item:hover .cert-name {
+        color: <?= escape($logoStyles['certs_text_hover_color']) ?> !important;
     }
     </style>
     <section id="partners" class="partners-slider">
