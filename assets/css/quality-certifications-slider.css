@@ -42,6 +42,13 @@
     will-change: transform;
 }
 
+/* Hide cloned items visually (they're for animation only) */
+.quality-certifications-slider-item[aria-hidden="true"],
+.quality-certifications-slider-item.slider-clone {
+    /* Keep in DOM for animation but ensure they don't appear as duplicates */
+    /* The animation will handle the seamless loop */
+}
+
 .quality-certifications-slider-track:hover {
     animation-play-state: paused;
 }
