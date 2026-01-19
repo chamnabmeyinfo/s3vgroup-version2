@@ -8,6 +8,22 @@ echo "=== Checking Git Status ==="
 git status
 
 echo ""
+echo "=== Checking for unstaged changes ==="
+if ! git diff-index --quiet HEAD --; then
+    echo "⚠️  Unstaged changes detected!"
+    echo "Stashing changes before pull..."
+    git stash push -m "Auto-stash before pull - $(date '+%Y-%m-%d %H:%M:%S')"
+    STASHED=true
+else
+    STASHED=false
+fi
+
+# Check for untracked files that might cause issues
+if [ -n "$(git ls-files --others --exclude-standard)" ]; then
+    echo "ℹ️  Untracked files found (these won't block pull)"
+fi
+
+echo ""
 echo "=== Fetching latest changes ==="
 git fetch origin
 
@@ -54,6 +70,18 @@ else
     
     echo ""
     echo "=== Done! ==="
-    echo "If you need the stashed changes back, run: git stash pop"
+    if [ "$STASHED" = true ]; then
+        echo ""
+        echo "=== Reapplying stashed changes ==="
+        git stash pop
+        if [ $? -ne 0 ]; then
+            echo "⚠️  Warning: There were conflicts when reapplying stash"
+            echo "Resolve conflicts manually, then run: git stash drop"
+        else
+            echo "✅ Stashed changes reapplied successfully"
+        fi
+    fi
+    echo ""
     echo "To see stashed changes: git stash list"
+    echo "To drop a stash: git stash drop stash@{0}"
 fi
