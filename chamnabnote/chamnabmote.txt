@@ -1,7 +1,0 @@
-cd /home/s3vtgroup/dev.s3vtgroup.com.kh
-git stash
-git pull origin main
-
-# For Dev Pull
-cd /home/s3vtgroup/dev.s3vtgroup.com.kh && git stash && git pull origin main
-#For Live Pull 

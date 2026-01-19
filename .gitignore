@@ -44,20 +44,35 @@ storage/backups/file-backups/
 # Database exports
 storage/exports/
 
-# Storage uploads - Currently TRACKED in Git
-# If you want to ignore uploads, uncomment the next 3 lines:
+# Storage uploads - Currently TRACKED in Git (~112MB)
+# DECISION: Keep tracking for now (allows version control of images)
+# If repository becomes too large, uncomment below to ignore uploads:
 # storage/uploads/*
 # !storage/uploads/.gitkeep
 # !storage/uploads/.htaccess
-# Note: storage/uploads/ is now INCLUDED in Git to track all images and assets
-# Design backups can be included if needed
-# storage/design-backups/ is included
+# Note: storage/uploads/ is INCLUDED to track all images and assets
+# Large zip files in uploads should be ignored
+storage/uploads/*.zip
+storage/uploads.zip
+
+# Design backups - Currently TRACKED (~0.26MB - small, OK to keep)
+# storage/design-backups/ is included for version history
+# If backups become large, uncomment below:
+# storage/design-backups/*
+# !storage/design-backups/.gitkeep
+
+# Additional storage directories (runtime generated)
+storage/catalogs/*
+!storage/catalogs/.gitkeep
+storage/qrcodes/*
+!storage/qrcodes/.gitkeep
 
 # Test Files
 test-*.php
 *test.php
 hello.php
-fix-*.php
+# Note: fix-*.sh and pull-*.sh scripts are KEPT (useful for deployment)
+# Only ignore PHP test files, not shell scripts
 verify-*.php
 check-*.php
 
@@ -111,6 +126,8 @@ build/
 # Documentation files (keep main ones, ignore generated)
 *.docx
 *.pdf
+# Keep markdown documentation files (useful for deployment)
+# !*.md
 
 # GitHub Token files (security - never commit tokens)
 *.token
@@ -118,5 +135,6 @@ build/
 config.local
 # Note: .git/config is already ignored by Git by default
 
-# CHAMNAB NOTES
+# CHAMNAB NOTES (Developer personal notes - should not be pushed)
+chamnabnote/*
 chamnabnotes/*
