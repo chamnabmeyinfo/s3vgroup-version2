@@ -149,9 +149,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
+    // Handle CSRF protection setting (checkbox - needs special handling)
+    $csrfEnabled = isset($_POST['csrf_protection_enabled']) && $_POST['csrf_protection_enabled'] === '1' ? '1' : '0';
+    $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => 'csrf_protection_enabled']);
+    if ($existing) {
+        db()->update('settings', ['value' => $csrfEnabled], '`key` = :key', ['key' => 'csrf_protection_enabled']);
+    } else {
+        db()->insert('settings', [
+            'key' => 'csrf_protection_enabled',
+            'value' => $csrfEnabled,
+            'type' => 'text'
+        ]);
+    }
+    
     // Handle text settings
     foreach ($_POST as $key => $value) {
-        if ($key !== 'submit' && $key !== 'site_logo') {
+        if ($key !== 'submit' && $key !== 'site_logo' && $key !== 'clear_cache' && $key !== 'csrf_protection_enabled') {
+            // Handle array values
+            if (is_array($value)) {
+                $value = implode(',', $value);
+            }
+            
             $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = :key", ['key' => $key]);
             
             if ($existing) {
@@ -189,7 +207,8 @@ $defaults = [
     'logo_height_mobile' => '40',
     'logo_height_tablet' => '56',
     'logo_height_desktop' => '64',
-    'logo_max_width' => ''
+    'logo_max_width' => '',
+    'csrf_protection_enabled' => '1' // Default: enabled for security
 ];
 
 foreach ($defaults as $key => $default) {
@@ -399,6 +418,49 @@ include __DIR__ . '/includes/header.php';
                         </label>
                         <textarea name="footer_text" rows="2" 
                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['footer_text']) ?></textarea>
+                    </div>
+                </div>
+                
+                <!-- Security Settings Section -->
+                <div class="mt-8 pt-8 border-t-2 border-gray-200">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="p-2 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg shadow-md">
+                            <i class="fas fa-shield-alt text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">Security Settings</h3>
+                            <p class="text-sm text-gray-600">Configure security features and protections</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl p-6 border-2 border-red-200">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <label class="block text-sm font-bold text-gray-800 mb-2 flex items-center">
+                                    <i class="fas fa-key text-red-600 mr-2"></i>
+                                    CSRF Protection
+                                </label>
+                                <p class="text-sm text-gray-600 mb-1">
+                                    Enable CSRF token validation to protect against cross-site request forgery attacks.
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    <i class="fas fa-info-circle mr-1"></i>
+                                    <strong>Recommended:</strong> Keep enabled for security. Disable only if experiencing token expiration issues.
+                                </p>
+                            </div>
+                            <div class="ml-6">
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <input type="hidden" name="csrf_protection_enabled" value="0">
+                                    <input type="checkbox" name="csrf_protection_enabled" value="1" 
+                                           <?= ($settings['csrf_protection_enabled'] ?? '1') === '1' ? 'checked' : '' ?>
+                                           class="sr-only peer">
+                                    <div class="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-red-500 peer-checked:to-orange-600 shadow-lg"></div>
+                                    <span class="ml-3 text-sm font-medium text-gray-700" id="csrf-status">
+                                        <?= ($settings['csrf_protection_enabled'] ?? '1') === '1' ? 'Enabled' : 'Disabled' ?>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1894,6 +1956,18 @@ include __DIR__ . '/includes/header.php';
             alert(`"${presetNames[presetName]}" preset applied successfully! Don't forget to click "Save Settings" to save your changes.`);
         }, 100);
     }
+    
+    // Update CSRF toggle label dynamically
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfToggle = document.querySelector('input[name="csrf_protection_enabled"][type="checkbox"]');
+        const csrfStatus = document.getElementById('csrf-status');
+        
+        if (csrfToggle && csrfStatus) {
+            csrfToggle.addEventListener('change', function() {
+                csrfStatus.textContent = this.checked ? 'Enabled' : 'Disabled';
+            });
+        }
+    });
     </script>
 </div>
 

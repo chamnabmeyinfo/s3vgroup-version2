@@ -295,6 +295,17 @@ if (!function_exists('csrf_verify')) {
      */
     function csrf_verify($token = null)
     {
+        // Check if CSRF protection is enabled
+        try {
+            $csrfEnabled = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
+            if ($csrfEnabled && $csrfEnabled['value'] === '0') {
+                // CSRF protection is disabled
+                return true;
+            }
+        } catch (\Exception $e) {
+            // If setting doesn't exist or error, default to enabled (secure by default)
+        }
+        
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -321,6 +332,17 @@ if (!function_exists('require_csrf')) {
      */
     function require_csrf()
     {
+        // Check if CSRF protection is enabled
+        try {
+            $csrfEnabled = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
+            if ($csrfEnabled && $csrfEnabled['value'] === '0') {
+                // CSRF protection is disabled, skip verification
+                return;
+            }
+        } catch (\Exception $e) {
+            // If setting doesn't exist or error, default to enabled (secure by default)
+        }
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
             http_response_code(403);
             die('Invalid security token. Please refresh the page and try again.');
