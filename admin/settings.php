@@ -278,7 +278,7 @@ include __DIR__ . '/includes/header.php';
                 <p class="text-gray-600">Configure basic website information and settings</p>
             </div>
             
-            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-300">
+            <div class="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-300 space-y-4">
             <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-info-circle text-gray-600 mr-3"></i>
                 General Site Information
@@ -1339,6 +1339,11 @@ include __DIR__ . '/includes/header.php';
     
     .settings-tab-content {
         animation: fadeIn 0.3s ease-in;
+        min-height: 200px;
+    }
+    
+    .settings-tab-content.hidden {
+        display: none !important;
     }
     
     @keyframes fadeIn {
@@ -1514,8 +1519,11 @@ include __DIR__ . '/includes/header.php';
     
     // Tab Navigation Functions
     function showSettingsTab(tabName) {
-        // Hide all tab contents
+        console.log('Switching to tab:', tabName);
+        
+        // Hide all tab contents with both methods
         document.querySelectorAll('.settings-tab-content').forEach(tab => {
+            tab.style.display = 'none';
             tab.classList.add('hidden');
         });
         
@@ -1527,8 +1535,14 @@ include __DIR__ . '/includes/header.php';
         
         // Show selected tab
         const selectedTab = document.getElementById('tab-content-' + tabName);
+        console.log('Selected tab element:', selectedTab);
         if (selectedTab) {
+            selectedTab.style.display = 'block';
             selectedTab.classList.remove('hidden');
+            console.log('Tab shown successfully');
+        } else {
+            console.error('Tab not found: tab-content-' + tabName);
+            alert('Tab content not found: ' + tabName);
         }
         
         // Activate button
@@ -1538,14 +1552,51 @@ include __DIR__ . '/includes/header.php';
             activeButton.classList.remove('border-transparent', 'text-gray-500');
         }
         
-        // Scroll to top of form
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Scroll to form
+        setTimeout(() => {
+            const formElement = document.querySelector('form[method="POST"]');
+            if (formElement) {
+                formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 150);
     }
     
+    // Make function globally available
+    window.showSettingsTab = showSettingsTab;
+    
     // Initialize - show first tab by default
-    document.addEventListener('DOMContentLoaded', function() {
-        showSettingsTab('general');
-    });
+    function initializeTabs() {
+        console.log('Initializing tabs...');
+        
+        // Hide all tabs first
+        document.querySelectorAll('.settings-tab-content').forEach(tab => {
+            if (tab.id !== 'tab-content-general') {
+                tab.style.display = 'none';
+                tab.classList.add('hidden');
+            }
+        });
+        
+        // Show general tab
+        const generalTab = document.getElementById('tab-content-general');
+        if (generalTab) {
+            generalTab.style.display = 'block';
+            generalTab.classList.remove('hidden');
+            console.log('General tab initialized');
+        } else {
+            console.error('General tab not found!');
+        }
+    }
+    
+    // Run on DOM ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing tabs');
+            initializeTabs();
+        });
+    } else {
+        console.log('DOM already ready, initializing tabs');
+        initializeTabs();
+    }
     
     // Style Presets
     const stylePresets = {
