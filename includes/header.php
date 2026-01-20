@@ -117,7 +117,7 @@ $navCategories = $categoryModel->getAll(true);
         max-width: 100% !important;
         max-height: 100% !important;
         object-fit: <?= escape($logoStyles['partners_logo_object_fit'] ?? 'contain') ?> !important;
-        filter: grayscale(<?= (int)($logoStyles['partners_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['partners_logo_image_opacity'] ?? 80) / 100) ?>) !important;
+        filter: grayscale(<?= (int)($logoStyles['partners_logo_grayscale'] ?? 80) ?>%) opacity(<?= number_format(($logoStyles['partners_logo_image_opacity'] ?? 80) / 100, 2, '.', '') ?>) !important;
         transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .partners-slider-item:hover img,
@@ -190,7 +190,7 @@ $navCategories = $categoryModel->getAll(true);
         max-width: 100% !important;
         max-height: 100% !important;
         object-fit: <?= escape($logoStyles['clients_logo_object_fit'] ?? 'contain') ?> !important;
-        filter: grayscale(<?= (int)($logoStyles['clients_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['clients_logo_image_opacity'] ?? 80) / 100) ?>) !important;
+        filter: grayscale(<?= (int)($logoStyles['clients_logo_grayscale'] ?? 80) ?>%) opacity(<?= number_format(($logoStyles['clients_logo_image_opacity'] ?? 80) / 100, 2, '.', '') ?>) !important;
         transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
     }
     .clients-slider-item:hover img,
