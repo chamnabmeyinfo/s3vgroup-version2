@@ -28,6 +28,138 @@ $allCategories = $categoryModel->getAll(true);
 $categories = array_slice($allCategories, 0, 5);
 
 $pageTitle = 'Forklift & Equipment Pro - Industrial Equipment Solutions';
+
+// Get logo styling settings BEFORE header is included (so we can use them in header)
+// Fetch all settings that start with partners_, clients_, or certs_
+
+// Default values - comprehensive styling (define BEFORE try-catch)
+$defaultLogoStyles = [
+        // Partners
+        'partners_section_bg_color1' => '#f0f7ff',
+        'partners_section_bg_color2' => '#e0efff',
+        'partners_section_padding' => '80',
+        'partners_title_color1' => '#1e40af',
+        'partners_title_color2' => '#3b82f6',
+        'partners_desc_color' => '#475569',
+        'partners_logo_item_width' => '180',
+        'partners_logo_item_height' => '100',
+        'partners_logo_gap' => '40',
+        'partners_logo_padding' => '20',
+        'partners_logo_border_width' => '2',
+        'partners_logo_border_style' => 'solid',
+        'partners_logo_border_color' => '#3b82f6',
+        'partners_logo_border_radius' => '12',
+        'partners_logo_bg_color' => '#ffffff',
+        'partners_logo_shadow_x' => '0',
+        'partners_logo_shadow_y' => '2',
+        'partners_logo_shadow_blur' => '8',
+        'partners_logo_shadow_color' => '#3b82f6',
+        'partners_logo_shadow_opacity' => '10',
+        'partners_logo_hover_y' => '-8',
+        'partners_logo_hover_scale' => '1.02',
+        'partners_logo_hover_border_color' => '#3b82f6',
+        'partners_logo_hover_shadow_y' => '8',
+        'partners_logo_hover_shadow_blur' => '24',
+        'partners_logo_hover_shadow_opacity' => '20',
+        'partners_logo_transition' => '300',
+        'partners_logo_object_fit' => 'contain',
+        'partners_logo_grayscale' => '80',
+        'partners_logo_image_opacity' => '80',
+        'partners_logo_hover_image_scale' => '1.05',
+        // Clients
+        'clients_section_bg_color1' => '#f0fdf4',
+        'clients_section_bg_color2' => '#dcfce7',
+        'clients_section_padding' => '80',
+        'clients_title_color1' => '#059669',
+        'clients_title_color2' => '#10b981',
+        'clients_desc_color' => '#475569',
+        'clients_logo_item_width' => '180',
+        'clients_logo_item_height' => '100',
+        'clients_logo_gap' => '40',
+        'clients_logo_padding' => '20',
+        'clients_logo_border_width' => '2',
+        'clients_logo_border_style' => 'solid',
+        'clients_logo_border_color' => '#10b981',
+        'clients_logo_border_radius' => '12',
+        'clients_logo_bg_color' => '#ffffff',
+        'clients_logo_shadow_x' => '0',
+        'clients_logo_shadow_y' => '2',
+        'clients_logo_shadow_blur' => '8',
+        'clients_logo_shadow_color' => '#10b981',
+        'clients_logo_shadow_opacity' => '10',
+        'clients_logo_hover_y' => '-8',
+        'clients_logo_hover_scale' => '1.02',
+        'clients_logo_hover_border_color' => '#10b981',
+        'clients_logo_hover_shadow_y' => '8',
+        'clients_logo_hover_shadow_blur' => '24',
+        'clients_logo_hover_shadow_opacity' => '20',
+        'clients_logo_transition' => '300',
+        'clients_logo_object_fit' => 'contain',
+        'clients_logo_grayscale' => '80',
+        'clients_logo_image_opacity' => '80',
+        'clients_logo_hover_image_scale' => '1.05',
+        // Certifications
+        'certs_section_bg_color1' => '#ffffff',
+        'certs_section_bg_color2' => '#f8f9fa',
+        'certs_section_padding' => '60',
+        'certs_title_color' => '#1a1a1a',
+        'certs_desc_color' => '#666666',
+        'certs_logo_item_width' => '160',
+        'certs_logo_item_height' => '120',
+        'certs_logo_gap' => '30',
+        'certs_logo_padding' => '20',
+        'certs_logo_border_width' => '1',
+        'certs_logo_border_style' => 'solid',
+        'certs_logo_border_color' => '#e5e7eb',
+        'certs_logo_border_radius' => '12',
+        'certs_logo_bg_color' => '#ffffff',
+        'certs_logo_shadow_x' => '0',
+        'certs_logo_shadow_y' => '2',
+        'certs_logo_shadow_blur' => '12',
+        'certs_logo_shadow_color' => '#000000',
+        'certs_logo_shadow_opacity' => '8',
+        'certs_logo_hover_y' => '-8',
+        'certs_logo_hover_scale' => '1.05',
+        'certs_logo_hover_border_color' => '#3b82f6',
+        'certs_logo_hover_shadow_y' => '8',
+        'certs_logo_hover_shadow_blur' => '24',
+        'certs_logo_hover_shadow_opacity' => '15',
+        'certs_logo_transition' => '300',
+        'certs_logo_object_fit' => 'contain',
+        'certs_logo_max_image_height' => '80',
+        'certs_logo_hover_image_scale' => '1.1',
+        'certs_text_color' => '#6b7280',
+        'certs_text_font_size' => '12',
+        'certs_text_hover_color' => '#3b82f6',
+    ];
+
+// Initialize logoStyles array
+$logoStyles = [];
+
+try {
+    $logoStyleSettings = db()->fetchAll("
+        SELECT `key`, value 
+        FROM settings 
+        WHERE `key` LIKE 'partners_%' 
+           OR `key` LIKE 'clients_%' 
+           OR `key` LIKE 'certs_%'
+        ORDER BY `key`
+    ");
+    foreach ($logoStyleSettings as $setting) {
+        $logoStyles[$setting['key']] = $setting['value'];
+    }
+} catch (Exception $e) {
+    // If database query fails, use defaults only
+    error_log('Error loading logo slider settings: ' . $e->getMessage());
+}
+
+// Apply defaults for any missing settings
+foreach ($defaultLogoStyles as $key => $default) {
+    if (!isset($logoStyles[$key])) {
+        $logoStyles[$key] = $default;
+    }
+}
+
 include __DIR__ . '/includes/header.php';
 ?>
 
@@ -288,382 +420,8 @@ include __DIR__ . '/includes/header.php';
     $partnerModel = new Partner();
     $partners = $partnerModel->getByType('partner', true); // Get only active partners
     
-    // Get logo styling settings (including section, title, etc.)
-    // Fetch all settings that start with partners_, clients_, or certs_
-    try {
-        $logoStyleSettings = db()->fetchAll("
-            SELECT `key`, value 
-            FROM settings 
-            WHERE `key` LIKE 'partners_%' 
-               OR `key` LIKE 'clients_%' 
-               OR `key` LIKE 'certs_%'
-            ORDER BY `key`
-        ");
-        $logoStyles = [];
-        foreach ($logoStyleSettings as $setting) {
-            $logoStyles[$setting['key']] = $setting['value'];
-        }
-        
-        // Debug: Log if no settings found (only in development)
-        if (empty($logoStyles) && defined('APP_DEBUG') && APP_DEBUG) {
-            error_log('No logo slider settings found in database');
-        }
-    } catch (Exception $e) {
-        // If database query fails, use defaults only
-        error_log('Error loading logo slider settings: ' . $e->getMessage());
-        $logoStyles = [];
-    }
-    
-    // Default values - comprehensive styling
-    $defaultLogoStyles = [
-        // Partners
-        'partners_section_bg_color1' => '#f0f7ff',
-        'partners_section_bg_color2' => '#e0efff',
-        'partners_section_padding' => '80',
-        'partners_title_color1' => '#1e40af',
-        'partners_title_color2' => '#3b82f6',
-        'partners_desc_color' => '#475569',
-        'partners_logo_item_width' => '180',
-        'partners_logo_item_height' => '100',
-        'partners_logo_gap' => '40',
-        'partners_logo_padding' => '20',
-        'partners_logo_border_width' => '2',
-        'partners_logo_border_style' => 'solid',
-        'partners_logo_border_color' => '#3b82f6',
-        'partners_logo_border_radius' => '12',
-        'partners_logo_bg_color' => '#ffffff',
-        'partners_logo_shadow_x' => '0',
-        'partners_logo_shadow_y' => '2',
-        'partners_logo_shadow_blur' => '8',
-        'partners_logo_shadow_color' => '#3b82f6',
-        'partners_logo_shadow_opacity' => '10',
-        'partners_logo_hover_y' => '-8',
-        'partners_logo_hover_scale' => '1.02',
-        'partners_logo_hover_border_color' => '#3b82f6',
-        'partners_logo_hover_shadow_y' => '8',
-        'partners_logo_hover_shadow_blur' => '24',
-        'partners_logo_hover_shadow_opacity' => '20',
-        'partners_logo_transition' => '300',
-        'partners_logo_object_fit' => 'contain',
-        'partners_logo_grayscale' => '80',
-        'partners_logo_image_opacity' => '80',
-        'partners_logo_hover_image_scale' => '1.05',
-        // Clients
-        'clients_section_bg_color1' => '#f0fdf4',
-        'clients_section_bg_color2' => '#dcfce7',
-        'clients_section_padding' => '80',
-        'clients_title_color1' => '#059669',
-        'clients_title_color2' => '#10b981',
-        'clients_desc_color' => '#475569',
-        'clients_logo_item_width' => '180',
-        'clients_logo_item_height' => '100',
-        'clients_logo_gap' => '40',
-        'clients_logo_padding' => '20',
-        'clients_logo_border_width' => '2',
-        'clients_logo_border_style' => 'solid',
-        'clients_logo_border_color' => '#10b981',
-        'clients_logo_border_radius' => '12',
-        'clients_logo_bg_color' => '#ffffff',
-        'clients_logo_shadow_x' => '0',
-        'clients_logo_shadow_y' => '2',
-        'clients_logo_shadow_blur' => '8',
-        'clients_logo_shadow_color' => '#10b981',
-        'clients_logo_shadow_opacity' => '10',
-        'clients_logo_hover_y' => '-8',
-        'clients_logo_hover_scale' => '1.02',
-        'clients_logo_hover_border_color' => '#10b981',
-        'clients_logo_hover_shadow_y' => '8',
-        'clients_logo_hover_shadow_blur' => '24',
-        'clients_logo_hover_shadow_opacity' => '20',
-        'clients_logo_transition' => '300',
-        'clients_logo_object_fit' => 'contain',
-        'clients_logo_grayscale' => '80',
-        'clients_logo_image_opacity' => '80',
-        'clients_logo_hover_image_scale' => '1.05',
-        // Certifications
-        'certs_section_bg_color1' => '#ffffff',
-        'certs_section_bg_color2' => '#f8f9fa',
-        'certs_section_padding' => '60',
-        'certs_title_color' => '#1a1a1a',
-        'certs_desc_color' => '#666666',
-        'certs_logo_item_width' => '160',
-        'certs_logo_item_height' => '120',
-        'certs_logo_gap' => '30',
-        'certs_logo_padding' => '20',
-        'certs_logo_border_width' => '1',
-        'certs_logo_border_style' => 'solid',
-        'certs_logo_border_color' => '#e5e7eb',
-        'certs_logo_border_radius' => '12',
-        'certs_logo_bg_color' => '#ffffff',
-        'certs_logo_shadow_x' => '0',
-        'certs_logo_shadow_y' => '2',
-        'certs_logo_shadow_blur' => '12',
-        'certs_logo_shadow_color' => '#000000',
-        'certs_logo_shadow_opacity' => '8',
-        'certs_logo_hover_y' => '-8',
-        'certs_logo_hover_scale' => '1.05',
-        'certs_logo_hover_border_color' => '#3b82f6',
-        'certs_logo_hover_shadow_y' => '8',
-        'certs_logo_hover_shadow_blur' => '24',
-        'certs_logo_hover_shadow_opacity' => '15',
-        'certs_logo_transition' => '300',
-        'certs_logo_object_fit' => 'contain',
-        'certs_logo_max_image_height' => '80',
-        'certs_logo_hover_image_scale' => '1.1',
-        'certs_text_color' => '#6b7280',
-        'certs_text_font_size' => '12',
-        'certs_text_hover_color' => '#3b82f6',
-    ];
-    
-    foreach ($defaultLogoStyles as $key => $default) {
-        if (!isset($logoStyles[$key])) {
-            $logoStyles[$key] = $default;
-        }
-    }
-    
     if (!empty($partners)):
     ?>
-    <!-- Dynamic Logo Slider Styles - Generated from Admin Settings -->
-    <!-- These styles override external CSS files to match backend settings exactly -->
-    <style id="logo-slider-dynamic-styles">
-    <?php
-    // Helper function to convert hex color to rgba
-    function hexToRgba($hex, $opacity) {
-        $hex = str_replace('#', '', $hex);
-        if (strlen($hex) != 6) {
-            // Handle 3-character hex codes
-            if (strlen($hex) == 3) {
-                $hex = $hex[0] . $hex[0] . $hex[1] . $hex[1] . $hex[2] . $hex[2];
-            } else {
-                return "rgba(0, 0, 0, " . ($opacity / 100) . ")";
-            }
-        }
-        $r = hexdec(substr($hex, 0, 2));
-        $g = hexdec(substr($hex, 2, 2));
-        $b = hexdec(substr($hex, 4, 2));
-        return "rgba($r, $g, $b, " . ($opacity / 100) . ")";
-    }
-    ?>
-    
-    /* ===== PARTNERS SECTION STYLES ===== */
-    /* Override external CSS to match backend settings exactly */
-    section.partners-slider,
-    .partners-slider {
-        background: linear-gradient(135deg, <?= escape($logoStyles['partners_section_bg_color1'] ?? '#f0f7ff') ?> 0%, <?= escape($logoStyles['partners_section_bg_color2'] ?? '#e0efff') ?> 100%) !important;
-        padding: <?= (int)($logoStyles['partners_section_padding'] ?? 80) ?>px 0 !important;
-    }
-    /* Remove default ::before pseudo-element if needed */
-    .partners-slider::before {
-        display: none !important;
-    }
-    .partners-slider-header h2,
-    section.partners-slider .partners-slider-header h2,
-    section#partners .partners-slider-header h2 {
-        background: linear-gradient(135deg, <?= escape($logoStyles['partners_title_color1'] ?? '#1e40af') ?>, <?= escape($logoStyles['partners_title_color2'] ?? '#3b82f6') ?>) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        margin-bottom: 10px !important;
-    }
-    .partners-slider-header p,
-    section.partners-slider .partners-slider-header p {
-        color: <?= escape($logoStyles['partners_desc_color'] ?? '#475569') ?> !important;
-        font-size: 1.1rem !important;
-        font-weight: 500 !important;
-    }
-    .partners-slider-track,
-    section.partners-slider .partners-slider-track {
-        gap: <?= (int)($logoStyles['partners_logo_gap'] ?? 40) ?>px !important;
-        display: flex !important;
-    }
-    .partners-slider-item,
-    section.partners-slider .partners-slider-item {
-        flex-shrink: 0 !important;
-        width: <?= (int)($logoStyles['partners_logo_item_width'] ?? 180) ?>px !important;
-        height: <?= (int)($logoStyles['partners_logo_item_height'] ?? 100) ?>px !important;
-        padding: <?= (int)($logoStyles['partners_logo_padding'] ?? 20) ?>px !important;
-        border: <?= (int)($logoStyles['partners_logo_border_width'] ?? 2) ?>px <?= escape($logoStyles['partners_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['partners_logo_border_color'] ?? '#3b82f6') ?> !important;
-        border-radius: <?= (int)($logoStyles['partners_logo_border_radius'] ?? 12) ?>px !important;
-        background-color: <?= escape($logoStyles['partners_logo_bg_color'] ?? '#ffffff') ?> !important;
-        box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['partners_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_shadow_opacity'] ?? 10)) ?> !important;
-        transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    .partners-slider-item:hover,
-    section.partners-slider .partners-slider-item:hover,
-    section#partners .partners-slider-item:hover {
-        transform: translateY(<?= (int)($logoStyles['partners_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['partners_logo_hover_scale'] ?? '1.02') ?>) !important;
-        border-color: <?= escape($logoStyles['partners_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
-        box-shadow: <?= (int)($logoStyles['partners_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['partners_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['partners_logo_shadow_color'] ?? '#3b82f6', (int)($logoStyles['partners_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
-    }
-    .partners-slider-item img,
-    section.partners-slider .partners-slider-item img {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: <?= escape($logoStyles['partners_logo_object_fit'] ?? 'contain') ?> !important;
-        filter: grayscale(<?= (int)($logoStyles['partners_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['partners_logo_image_opacity'] ?? 80) / 100) ?>) !important;
-        transition: all <?= (int)($logoStyles['partners_logo_transition'] ?? 300) ?>ms ease !important;
-    }
-    .partners-slider-item:hover img,
-    section.partners-slider .partners-slider-item:hover img,
-    section#partners .partners-slider-item:hover img {
-        filter: grayscale(0%) opacity(1) !important;
-        transform: scale(<?= escape($logoStyles['partners_logo_hover_image_scale'] ?? '1.05') ?>) !important;
-    }
-    
-    /* ===== CLIENTS SECTION STYLES ===== */
-    /* Override external CSS to match backend settings exactly */
-    section.clients-slider,
-    .clients-slider {
-        background: linear-gradient(135deg, <?= escape($logoStyles['clients_section_bg_color1'] ?? '#f0fdf4') ?> 0%, <?= escape($logoStyles['clients_section_bg_color2'] ?? '#dcfce7') ?> 100%) !important;
-        padding: <?= (int)($logoStyles['clients_section_padding'] ?? 80) ?>px 0 !important;
-        margin-top: 0 !important;
-    }
-    /* Remove default ::before pseudo-element if needed */
-    .clients-slider::before {
-        display: none !important;
-    }
-    .clients-slider-header h2,
-    section.clients-slider .clients-slider-header h2,
-    section#clients .clients-slider-header h2 {
-        background: linear-gradient(135deg, <?= escape($logoStyles['clients_title_color1'] ?? '#059669') ?>, <?= escape($logoStyles['clients_title_color2'] ?? '#10b981') ?>) !important;
-        -webkit-background-clip: text !important;
-        -webkit-text-fill-color: transparent !important;
-        background-clip: text !important;
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        margin-bottom: 10px !important;
-    }
-    .clients-slider-header p,
-    section.clients-slider .clients-slider-header p {
-        color: <?= escape($logoStyles['clients_desc_color'] ?? '#475569') ?> !important;
-        font-size: 1.1rem !important;
-        font-weight: 500 !important;
-    }
-    .clients-slider-track,
-    section.clients-slider .clients-slider-track {
-        gap: <?= (int)($logoStyles['clients_logo_gap'] ?? 40) ?>px !important;
-        display: flex !important;
-    }
-    .clients-slider-item,
-    section.clients-slider .clients-slider-item {
-        flex-shrink: 0 !important;
-        width: <?= (int)($logoStyles['clients_logo_item_width'] ?? 180) ?>px !important;
-        height: <?= (int)($logoStyles['clients_logo_item_height'] ?? 100) ?>px !important;
-        padding: <?= (int)($logoStyles['clients_logo_padding'] ?? 20) ?>px !important;
-        border: <?= (int)($logoStyles['clients_logo_border_width'] ?? 2) ?>px <?= escape($logoStyles['clients_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['clients_logo_border_color'] ?? '#10b981') ?> !important;
-        border-radius: <?= (int)($logoStyles['clients_logo_border_radius'] ?? 12) ?>px !important;
-        background-color: <?= escape($logoStyles['clients_logo_bg_color'] ?? '#ffffff') ?> !important;
-        box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['clients_logo_shadow_blur'] ?? 8) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_shadow_opacity'] ?? 10)) ?> !important;
-        transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    .clients-slider-item:hover,
-    section.clients-slider .clients-slider-item:hover,
-    section#clients .clients-slider-item:hover {
-        transform: translateY(<?= (int)($logoStyles['clients_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['clients_logo_hover_scale'] ?? '1.02') ?>) !important;
-        border-color: <?= escape($logoStyles['clients_logo_hover_border_color'] ?? '#10b981') ?> !important;
-        box-shadow: <?= (int)($logoStyles['clients_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['clients_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['clients_logo_shadow_color'] ?? '#10b981', (int)($logoStyles['clients_logo_hover_shadow_opacity'] ?? 20)) ?> !important;
-    }
-    .clients-slider-item img,
-    section.clients-slider .clients-slider-item img {
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        object-fit: <?= escape($logoStyles['clients_logo_object_fit'] ?? 'contain') ?> !important;
-        filter: grayscale(<?= (int)($logoStyles['clients_logo_grayscale'] ?? 80) ?>%) opacity(<?= (int)(($logoStyles['clients_logo_image_opacity'] ?? 80) / 100) ?>) !important;
-        transition: all <?= (int)($logoStyles['clients_logo_transition'] ?? 300) ?>ms ease !important;
-    }
-    .clients-slider-item:hover img,
-    section.clients-slider .clients-slider-item:hover img,
-    section#clients .clients-slider-item:hover img {
-        filter: grayscale(0%) opacity(1) !important;
-        transform: scale(<?= escape($logoStyles['clients_logo_hover_image_scale'] ?? '1.05') ?>) !important;
-    }
-    
-    /* ===== QUALITY CERTIFICATIONS SECTION STYLES ===== */
-    /* Override external CSS to match backend settings exactly */
-    section.quality-certifications-slider,
-    .quality-certifications-slider {
-        background: linear-gradient(to bottom, <?= escape($logoStyles['certs_section_bg_color1'] ?? '#ffffff') ?>, <?= escape($logoStyles['certs_section_bg_color2'] ?? '#f8f9fa') ?>) !important;
-        padding: <?= (int)($logoStyles['certs_section_padding'] ?? 60) ?>px 0 !important;
-        border-top: none !important;
-    }
-    .quality-certifications-slider-header h2,
-    section.quality-certifications-slider .quality-certifications-slider-header h2 {
-        color: <?= escape($logoStyles['certs_title_color'] ?? '#1a1a1a') ?> !important;
-        font-size: 2rem !important;
-        font-weight: 700 !important;
-        margin-bottom: 10px !important;
-    }
-    .quality-certifications-slider-header p,
-    section.quality-certifications-slider .quality-certifications-slider-header p {
-        color: <?= escape($logoStyles['certs_desc_color'] ?? '#666666') ?> !important;
-        font-size: 1rem !important;
-    }
-    .quality-certifications-slider-track,
-    section.quality-certifications-slider .quality-certifications-slider-track {
-        gap: <?= (int)($logoStyles['certs_logo_gap'] ?? 30) ?>px !important;
-        display: flex !important;
-    }
-    .quality-certifications-slider-item,
-    section.quality-certifications-slider .quality-certifications-slider-item {
-        flex-shrink: 0 !important;
-        width: <?= (int)($logoStyles['certs_logo_item_width'] ?? 160) ?>px !important;
-        height: <?= (int)($logoStyles['certs_logo_item_height'] ?? 120) ?>px !important;
-        padding: <?= (int)($logoStyles['certs_logo_padding'] ?? 20) ?>px !important;
-        border: <?= (int)($logoStyles['certs_logo_border_width'] ?? 1) ?>px <?= escape($logoStyles['certs_logo_border_style'] ?? 'solid') ?> <?= escape($logoStyles['certs_logo_border_color'] ?? '#e5e7eb') ?> !important;
-        border-radius: <?= (int)($logoStyles['certs_logo_border_radius'] ?? 12) ?>px !important;
-        background-color: <?= escape($logoStyles['certs_logo_bg_color'] ?? '#ffffff') ?> !important;
-        box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_shadow_y'] ?? 2) ?>px <?= (int)($logoStyles['certs_logo_shadow_blur'] ?? 12) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_shadow_opacity'] ?? 8)) ?> !important;
-        transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-    .quality-certifications-slider-item:hover,
-    section.quality-certifications-slider .quality-certifications-slider-item:hover {
-        transform: translateY(<?= (int)($logoStyles['certs_logo_hover_y'] ?? -8) ?>px) scale(<?= escape($logoStyles['certs_logo_hover_scale'] ?? '1.05') ?>) !important;
-        border-color: <?= escape($logoStyles['certs_logo_hover_border_color'] ?? '#3b82f6') ?> !important;
-        box-shadow: <?= (int)($logoStyles['certs_logo_shadow_x'] ?? 0) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_y'] ?? 8) ?>px <?= (int)($logoStyles['certs_logo_hover_shadow_blur'] ?? 24) ?>px <?= hexToRgba($logoStyles['certs_logo_shadow_color'] ?? '#000000', (int)($logoStyles['certs_logo_hover_shadow_opacity'] ?? 15)) ?> !important;
-    }
-    .quality-certifications-slider-item img,
-    section.quality-certifications-slider .quality-certifications-slider-item img {
-        width: 100% !important;
-        max-width: 100% !important;
-        max-height: <?= (int)($logoStyles['certs_logo_max_image_height'] ?? 80) ?>px !important;
-        object-fit: <?= escape($logoStyles['certs_logo_object_fit'] ?? 'contain') ?> !important;
-        transition: all <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
-    }
-    .quality-certifications-slider-item:hover img,
-    section.quality-certifications-slider .quality-certifications-slider-item:hover img {
-        transform: scale(<?= escape($logoStyles['certs_logo_hover_image_scale'] ?? '1.1') ?>) !important;
-    }
-    .quality-certifications-slider-item .cert-name,
-    section.quality-certifications-slider .quality-certifications-slider-item .cert-name {
-        color: <?= escape($logoStyles['certs_text_color'] ?? '#6b7280') ?> !important;
-        font-size: <?= (int)($logoStyles['certs_text_font_size'] ?? 12) ?>px !important;
-        transition: color <?= (int)($logoStyles['certs_logo_transition'] ?? 300) ?>ms ease !important;
-        margin-top: 8px !important;
-        text-align: center !important;
-        font-weight: 500 !important;
-    }
-    .quality-certifications-slider-item:hover .cert-name,
-    section.quality-certifications-slider .quality-certifications-slider-item:hover .cert-name {
-        color: <?= escape($logoStyles['certs_text_hover_color'] ?? '#3b82f6') ?> !important;
-    }
-    </style>
-    <!-- End Dynamic Logo Slider Styles -->
     <section id="partners" class="partners-slider">
         <div class="partners-slider-container">
             <div class="partners-slider-header">
