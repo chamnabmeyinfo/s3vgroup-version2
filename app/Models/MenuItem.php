@@ -61,7 +61,9 @@ class MenuItem
         try {
             $fields = [
                 'menu_id', 'parent_id', 'title', 'url', 'type', 'object_id',
-                'target', 'css_classes', 'icon', 'description', 'sort_order', 'is_active'
+                'target', 'css_classes', 'icon', 'description', 'sort_order', 'is_active',
+                'mega_menu_enabled', 'mega_menu_layout', 'mega_menu_width', 'mega_menu_columns',
+                'mega_menu_content', 'mega_menu_background', 'mega_menu_custom_css'
             ];
             
             $insertData = [];
@@ -128,7 +130,9 @@ class MenuItem
         try {
             $fields = [
                 'parent_id', 'title', 'url', 'type', 'object_id',
-                'target', 'css_classes', 'icon', 'description', 'sort_order', 'is_active'
+                'target', 'css_classes', 'icon', 'description', 'sort_order', 'is_active',
+                'mega_menu_enabled', 'mega_menu_layout', 'mega_menu_width', 'mega_menu_columns',
+                'mega_menu_content', 'mega_menu_background', 'mega_menu_custom_css'
             ];
             
             $updateData = [];

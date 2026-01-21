@@ -20,6 +20,7 @@ $navCategories = $categoryModel->getAll(true);
     <link rel="stylesheet" href="<?= asset('assets/css/product-images.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/mobile-bottom-nav.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/category-modern.css') ?>">
+    <link rel="stylesheet" href="<?= asset('assets/css/mega-menu.css') ?>">
     <?php if (basename($_SERVER['PHP_SELF']) === 'index.php'): ?>
     <link rel="stylesheet" href="<?= asset('assets/css/hero-slider.css') ?>">
     <link rel="stylesheet" href="<?= asset('assets/css/hero-slider-advanced.css') ?>">
@@ -746,13 +747,14 @@ $navCategories = $categoryModel->getAll(true);
                         </a>
                         
                         <!-- Products Mega Menu -->
-                        <div class="nav-dropdown-group relative" id="products-dropdown">
-                            <button class="nav-link-modern" style="white-space: nowrap;">
-                                <i class="fas fa-box"></i>
+                        <div class="nav-dropdown-group relative group" id="products-dropdown">
+                            <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center" style="white-space: nowrap;">
+                                <i class="fas fa-box mr-2"></i>
                                 <span>Products</span>
-                                <i class="fas fa-chevron-down text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                                <span class="nav-link-indicator"></span>
                             </button>
-                            <div class="nav-dropdown w-80 overflow-hidden">
+                            <div class="nav-dropdown w-[600px] overflow-hidden">
                                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
                                 <div class="p-4 bg-gradient-to-r from-blue-50/70 to-indigo-50/70 border-b border-gray-100/50 relative">
                                     <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
@@ -760,20 +762,22 @@ $navCategories = $categoryModel->getAll(true);
                                         Browse Categories
                                     </h3>
                                 </div>
-                                <div class="p-3 max-h-96 overflow-y-auto">
+                                <div class="p-4 max-h-[500px] overflow-y-auto">
                                     <?php if (!empty($navCategories)): ?>
-                                        <?php foreach (array_slice($navCategories, 0, 8) as $cat): ?>
-                                        <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
-                                           class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg mb-1.5 relative overflow-hidden">
-                                            <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
-                                            <div class="flex items-center justify-between relative z-10">
-                                                <span class="text-sm font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
-                                                <i class="fas fa-arrow-right text-xs text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
-                                            </div>
-                                        </a>
-                                        <?php endforeach; ?>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            <?php foreach (array_slice($navCategories, 0, 12) as $cat): ?>
+                                            <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
+                                               class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg relative overflow-hidden">
+                                                <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
+                                                <div class="flex items-center justify-between relative z-10">
+                                                    <span class="text-sm font-semibold text-gray-700 group-hover/item:text-blue-600 transition-colors"><?= escape($cat['name']) ?></span>
+                                                    <i class="fas fa-arrow-right text-xs text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
+                                                </div>
+                                            </a>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
-                                    <div class="mt-3 pt-3 border-t border-gray-200/50 p-2">
+                                    <div class="mt-4 pt-4 border-t border-gray-200/50">
                                         <a href="<?= url('products.php') ?>" class="block px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-white transition-all duration-300 font-semibold text-sm text-center shadow-lg hover:shadow-xl transform hover:scale-105">
                                             <i class="fas fa-th mr-2"></i>View All Products
                                         </a>

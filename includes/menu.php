@@ -90,7 +90,16 @@ if ($location === 'header'): ?>
             }
         ?>
             <?php if ($hasChildren): ?>
-                <div class="relative group" id="menu-<?= $item['id'] ?>">
+                <?php
+                // Check if mega menu is enabled
+                $megaMenuEnabled = !empty($item['mega_menu_enabled']);
+                
+                // Load mega menu helper if enabled
+                if ($megaMenuEnabled) {
+                    require_once __DIR__ . '/../app/Helpers/MegaMenuHelper.php';
+                }
+                ?>
+                <div class="relative group mega-menu-wrapper" id="menu-<?= $item['id'] ?>" data-mega-menu="<?= $megaMenuEnabled ? 'true' : 'false' ?>">
                     <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <?php if ($itemIcon): ?>
                             <i class="<?= escape($itemIcon) ?> mr-2"></i>
@@ -99,31 +108,35 @@ if ($location === 'header'): ?>
                         <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
                         <span class="nav-link-indicator"></span>
                     </button>
-                    <div class="absolute top-full left-0 mt-4 w-80 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-white/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);">
-                        <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
-                        <div class="p-3 max-h-96 overflow-y-auto">
-                            <?php foreach ($item['children'] as $child): 
-                                $childUrl = $child['url'] ?? '#';
-                                $childTitle = escape($child['title']);
-                                $childIcon = $child['icon'] ?? '';
-                            ?>
-                                <a href="<?= escape($childUrl) ?>" 
-                                   target="<?= escape($child['target'] ?? '_self') ?>"
-                                   class="group/item block px-4 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg mb-1.5 relative overflow-hidden">
-                                    <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
-                                    <div class="flex items-center justify-between relative z-10">
-                                        <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors flex items-center">
-                                            <?php if ($childIcon): ?>
-                                                <i class="<?= escape($childIcon) ?> mr-2.5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300"></i>
-                                            <?php endif; ?>
-                                            <?= $childTitle ?>
-                                        </span>
-                                        <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
-                                    </div>
-                                </a>
-                            <?php endforeach; ?>
+                    <?php if ($megaMenuEnabled): ?>
+                        <?= \App\Helpers\render_mega_menu($item, $item['children']) ?>
+                    <?php else: ?>
+                        <div class="absolute top-full left-0 mt-4 w-80 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-500 transform translate-y-4 group-hover:translate-y-0 border border-white/50 overflow-hidden" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%);">
+                            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500"></div>
+                            <div class="p-3 max-h-96 overflow-y-auto">
+                                <?php foreach ($item['children'] as $child): 
+                                    $childUrl = $child['url'] ?? '#';
+                                    $childTitle = escape($child['title']);
+                                    $childIcon = $child['icon'] ?? '';
+                                ?>
+                                    <a href="<?= escape($childUrl) ?>" 
+                                       target="<?= escape($child['target'] ?? '_self') ?>"
+                                       class="group/item block px-4 py-3.5 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg mb-1.5 relative overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
+                                        <div class="flex items-center justify-between relative z-10">
+                                            <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors flex items-center">
+                                                <?php if ($childIcon): ?>
+                                                    <i class="<?= escape($childIcon) ?> mr-2.5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300"></i>
+                                                <?php endif; ?>
+                                                <?= $childTitle ?>
+                                            </span>
+                                            <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
+                                        </div>
+                                    </a>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
-                    </div>
+                    <?php endif; ?>
                 </div>
             <?php else: ?>
                 <a href="<?= escape($itemUrl) ?>" 

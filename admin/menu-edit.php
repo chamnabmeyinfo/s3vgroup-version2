@@ -279,7 +279,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = [
             'type' => $_POST['item_type'] ?? 'custom',
             'target' => $_POST['target'] ?? $_POST['edit_target'] ?? '_self',
-            'icon' => trim($_POST['icon'] ?? $_POST['edit_iconInput'] ?? '')
+            'icon' => trim($_POST['icon'] ?? $_POST['edit_iconInput'] ?? ''),
+            'mega_menu_enabled' => !empty($_POST['mega_menu_enabled']) ? 1 : 0,
+            'mega_menu_layout' => $_POST['mega_menu_layout'] ?? 'columns',
+            'mega_menu_width' => $_POST['mega_menu_width'] ?? 'auto',
+            'mega_menu_columns' => !empty($_POST['mega_menu_columns']) ? (int)$_POST['mega_menu_columns'] : 3,
+            'mega_menu_background' => $_POST['mega_menu_background'] ?? null,
+            'mega_menu_custom_css' => $_POST['mega_menu_custom_css'] ?? null
         ];
         
         // Get object_id - check multiple possible field names
@@ -1543,6 +1549,70 @@ include __DIR__ . '/includes/header.php';
                         <option value="_blank">New Window/Tab (_blank)</option>
                     </select>
                 </div>
+                
+                <!-- Mega Menu Settings -->
+                <div class="mb-4 border-t pt-4 mt-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="block text-sm font-semibold text-gray-700">
+                            <i class="fas fa-th-large mr-2 text-purple-600"></i>Enable Mega Menu
+                        </label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="mega_menu_enabled" id="mega_menu_enabled" value="1" class="sr-only peer" onchange="toggleMegaMenuSettings()">
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                        </label>
+                    </div>
+                    
+                    <div id="megaMenuSettings" class="hidden space-y-4 bg-purple-50 p-4 rounded-lg border border-purple-200">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-columns mr-2 text-purple-600"></i>Layout
+                                </label>
+                                <select name="mega_menu_layout" id="mega_menu_layout" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="columns">Columns</option>
+                                    <option value="grid">Grid</option>
+                                    <option value="fullwidth">Full Width</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    <i class="fas fa-arrows-alt-h mr-2 text-purple-600"></i>Width
+                                </label>
+                                <select name="mega_menu_width" id="mega_menu_width" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="auto">Auto</option>
+                                    <option value="600px">600px</option>
+                                    <option value="800px">800px</option>
+                                    <option value="1000px">1000px</option>
+                                    <option value="1200px">1200px</option>
+                                    <option value="full">Full Width</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-th mr-2 text-purple-600"></i>Number of Columns
+                            </label>
+                            <input type="number" name="mega_menu_columns" id="mega_menu_columns" min="1" max="6" value="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-palette mr-2 text-purple-600"></i>Background Color/Image
+                            </label>
+                            <input type="text" name="mega_menu_background" id="mega_menu_background" placeholder="#ffffff or url(...)" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-code mr-2 text-purple-600"></i>Custom CSS
+                            </label>
+                            <textarea name="mega_menu_custom_css" id="mega_menu_custom_css" rows="3" placeholder="Custom CSS styles..." class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-mono text-sm"></textarea>
+                        </div>
+                        <div class="pt-2 border-t">
+                            <a href="mega-menu-manager.php?menu_item_id=<?= $item['id'] ?? '' ?>" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">
+                                <i class="fas fa-cog mr-2"></i>Manage Mega Menu Content
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="flex justify-end gap-3 pt-4 border-t mt-4">
@@ -2118,6 +2188,27 @@ async function editItem(id) {
         // Select the item type
         selectEditItemType(item.type);
         
+        // Populate mega menu fields
+        if (document.getElementById('mega_menu_enabled')) {
+            document.getElementById('mega_menu_enabled').checked = item.mega_menu_enabled == 1;
+            toggleMegaMenuSettings();
+        }
+        if (document.getElementById('mega_menu_layout')) {
+            document.getElementById('mega_menu_layout').value = item.mega_menu_layout || 'columns';
+        }
+        if (document.getElementById('mega_menu_width')) {
+            document.getElementById('mega_menu_width').value = item.mega_menu_width || 'auto';
+        }
+        if (document.getElementById('mega_menu_columns')) {
+            document.getElementById('mega_menu_columns').value = item.mega_menu_columns || 3;
+        }
+        if (document.getElementById('mega_menu_background')) {
+            document.getElementById('mega_menu_background').value = item.mega_menu_background || '';
+        }
+        if (document.getElementById('mega_menu_custom_css')) {
+            document.getElementById('mega_menu_custom_css').value = item.mega_menu_custom_css || '';
+        }
+        
         // Populate fields based on current type
         switch(item.type) {
             case 'custom':
@@ -2610,6 +2701,18 @@ function closeIconPicker() {
     document.getElementById('iconSearch').value = '';
     filteredIcons = [...commonIcons];
     renderIcons();
+}
+
+function toggleMegaMenuSettings() {
+    const enabled = document.getElementById('mega_menu_enabled');
+    const settings = document.getElementById('megaMenuSettings');
+    if (enabled && settings) {
+        if (enabled.checked) {
+            settings.classList.remove('hidden');
+        } else {
+            settings.classList.add('hidden');
+        }
+    }
 }
 
 function renderIcons() {
