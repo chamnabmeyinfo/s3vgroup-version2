@@ -66,6 +66,7 @@ $defaultLogoStyles = [
         'partners_logo_grayscale' => '80',
         'partners_logo_image_opacity' => '80',
         'partners_logo_hover_image_scale' => '1.05',
+        'partners_logo_slide_speed' => '30',
         // Clients
         'clients_section_bg_color1' => '#f0fdf4',
         'clients_section_bg_color2' => '#dcfce7',
@@ -98,6 +99,7 @@ $defaultLogoStyles = [
         'clients_logo_grayscale' => '80',
         'clients_logo_image_opacity' => '80',
         'clients_logo_hover_image_scale' => '1.05',
+        'clients_logo_slide_speed' => '30',
         // Certifications
         'certs_section_bg_color1' => '#ffffff',
         'certs_section_bg_color2' => '#f8f9fa',
@@ -131,6 +133,7 @@ $defaultLogoStyles = [
         'certs_text_color' => '#6b7280',
         'certs_text_font_size' => '12',
         'certs_text_hover_color' => '#3b82f6',
+        'certs_logo_slide_speed' => '25',
     ];
 
 // Initialize logoStyles array

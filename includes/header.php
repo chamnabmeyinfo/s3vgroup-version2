@@ -87,6 +87,7 @@ $navCategories = $categoryModel->getAll(true);
     section.partners-slider .partners-slider-track {
         gap: <?= (int)($logoStyles['partners_logo_gap'] ?? 40) ?>px !important;
         display: flex !important;
+        animation: slide <?= (int)($logoStyles['partners_logo_slide_speed'] ?? 30) ?>s linear infinite !important;
     }
     .partners-slider-item,
     section.partners-slider .partners-slider-item {
@@ -160,6 +161,7 @@ $navCategories = $categoryModel->getAll(true);
     section.clients-slider .clients-slider-track {
         gap: <?= (int)($logoStyles['clients_logo_gap'] ?? 40) ?>px !important;
         display: flex !important;
+        animation: slide <?= (int)($logoStyles['clients_logo_slide_speed'] ?? 30) ?>s linear infinite !important;
     }
     .clients-slider-item,
     section.clients-slider .clients-slider-item {
@@ -224,6 +226,7 @@ $navCategories = $categoryModel->getAll(true);
     section.quality-certifications-slider .quality-certifications-slider-track {
         gap: <?= (int)($logoStyles['certs_logo_gap'] ?? 30) ?>px !important;
         display: flex !important;
+        animation: slideCertifications <?= (int)($logoStyles['certs_logo_slide_speed'] ?? 25) ?>s linear infinite !important;
     }
     .quality-certifications-slider-item,
     section.quality-certifications-slider .quality-certifications-slider-item {
@@ -271,6 +274,25 @@ $navCategories = $categoryModel->getAll(true);
     .quality-certifications-slider-item:hover .cert-name,
     section.quality-certifications-slider .quality-certifications-slider-item:hover .cert-name {
         color: <?= escape($logoStyles['certs_text_hover_color'] ?? '#3b82f6') ?> !important;
+    }
+    
+    /* Animation Keyframes - Ensure they're defined */
+    @keyframes slide {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+    
+    @keyframes slideCertifications {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
     }
     </style>
     <?php endif; ?>

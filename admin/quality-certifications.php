@@ -802,6 +802,23 @@ include __DIR__ . '/includes/header.php';
                         </div>
                     </div>
                 </div>
+                
+                <!-- Accordion: Animation Settings -->
+                <div class="border border-gray-200 rounded">
+                    <button type="button" onclick="toggleAccordion('certs-animation')" class="w-full px-3 py-2 text-left text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 flex items-center justify-between">
+                        <span><i class="fas fa-tachometer-alt mr-2"></i>Animation Settings</span>
+                        <i class="fas fa-chevron-down text-xs transform transition-transform" id="certs-animation-icon"></i>
+                    </button>
+                    <div id="certs-animation" class="hidden p-3 bg-white border-t border-gray-200">
+                        <div class="grid grid-cols-1 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Slide Speed (seconds)</label>
+                                <input type="number" name="certs_logo_slide_speed" value="<?= escape($settings['certs_logo_slide_speed'] ?? '25') ?>" min="5" max="120" step="1" class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                                <p class="text-xs text-gray-500 mt-1">Time for one complete slide cycle. Lower = faster animation.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             
             <div class="flex justify-end mt-3 pt-3 border-t border-gray-200">
