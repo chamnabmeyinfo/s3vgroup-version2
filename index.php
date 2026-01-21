@@ -461,44 +461,117 @@ include __DIR__ . '/includes/header.php';
     
     if ($sectionEnabled && ($missionEnabled || $visionEnabled)):
     ?>
-    <section class="mission-vision-section" style="
+    <section class="mission-vision-section relative overflow-hidden" style="
         background: linear-gradient(to bottom, <?= escape($mvSettings['mission_vision_bg_color1'] ?? '#ffffff') ?>, <?= escape($mvSettings['mission_vision_bg_color2'] ?? '#f8f9fa') ?>);
         padding: <?= (int)($mvSettings['mission_vision_padding'] ?? 80) ?>px 0;
     ">
-        <div class="container mx-auto px-4">
-            <div class="grid md:grid-cols-2 gap-8">
+        <!-- Decorative Background Elements -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+            <div class="absolute top-0 left-1/4 w-96 h-96 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+            <div class="absolute top-0 right-1/4 w-96 h-96 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+            <div class="absolute -bottom-8 left-1/2 w-96 h-96 bg-pink-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        </div>
+        
+        <div class="container mx-auto px-4 relative z-10">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-12">
                 <?php if ($missionEnabled): ?>
-                <!-- Mission Card -->
-                <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 transform hover:scale-105 transition-all duration-300">
-                    <div class="w-16 h-16 bg-gradient-to-br <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?> <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?> rounded-2xl flex items-center justify-center mb-6" style="background: linear-gradient(135deg, <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>, <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?>);">
-                        <i class="fas <?= escape($mvSettings['mission_icon'] ?? 'fa-bullseye') ?> text-white text-2xl"></i>
+                <!-- Mission Card - Modern Design -->
+                <a href="<?= url('mission.php') ?>" class="group relative bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-gray-100 transform hover:-translate-y-3 transition-all duration-500 hover:shadow-2xl overflow-hidden block cursor-pointer">
+                    <!-- Animated Background Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Icon Container with Modern Animation -->
+                    <div class="relative z-10 mb-6">
+                        <div class="w-20 h-20 bg-gradient-to-br rounded-2xl flex items-center justify-center mx-auto transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg group-hover:shadow-2xl" style="background: linear-gradient(135deg, <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>, <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?>);">
+                            <i class="fas <?= escape($mvSettings['mission_icon'] ?? 'fa-bullseye') ?> text-white text-3xl transform group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <!-- Decorative Ring -->
+                        <div class="absolute inset-0 rounded-2xl border-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="border-color: <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>; transform: scale(1.2);"></div>
                     </div>
-                    <h2 class="text-2xl font-bold mb-4" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
-                        <?= escape($mvSettings['mission_title'] ?? 'Our Mission') ?>
-                    </h2>
-                    <p class="leading-relaxed" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
-                        <?= nl2br(escape($mvSettings['mission_content'] ?? '')) ?>
-                    </p>
-                </div>
+                    
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-5 group-hover:scale-105 transition-transform duration-300" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
+                            <?= escape($mvSettings['mission_title'] ?? 'Our Mission') ?>
+                        </h2>
+                        <div class="h-1 w-20 bg-gradient-to-r rounded-full mb-6 transform group-hover:w-32 transition-all duration-500" style="background: linear-gradient(90deg, <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>, <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?>);"></div>
+                        <p class="text-lg leading-relaxed group-hover:text-gray-700 transition-colors duration-300 line-clamp-3" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
+                            <?= nl2br(escape($mvSettings['mission_content'] ?? '')) ?>
+                        </p>
+                        <!-- Read More Indicator -->
+                        <div class="mt-6 flex items-center text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="color: <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>;">
+                            <span>Read More</span>
+                            <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Hover Effect Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-transparent rounded-3xl transition-all duration-500 pointer-events-none"></div>
+                </a>
                 <?php endif; ?>
                 
                 <?php if ($visionEnabled): ?>
-                <!-- Vision Card -->
-                <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 transform hover:scale-105 transition-all duration-300">
-                    <div class="w-16 h-16 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-6" style="background: linear-gradient(135deg, <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>, <?= escape($mvSettings['vision_icon_bg_color2'] ?? '#7c3aed') ?>);">
-                        <i class="fas <?= escape($mvSettings['vision_icon'] ?? 'fa-eye') ?> text-white text-2xl"></i>
+                <!-- Vision Card - Modern Design -->
+                <a href="<?= url('vision.php') ?>" class="group relative bg-white rounded-3xl shadow-xl p-8 md:p-10 border border-gray-100 transform hover:-translate-y-3 transition-all duration-500 hover:shadow-2xl overflow-hidden block cursor-pointer">
+                    <!-- Animated Background Gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-50/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Icon Container with Modern Animation -->
+                    <div class="relative z-10 mb-6">
+                        <div class="w-20 h-20 bg-gradient-to-br rounded-2xl flex items-center justify-center mx-auto transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg group-hover:shadow-2xl" style="background: linear-gradient(135deg, <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>, <?= escape($mvSettings['vision_icon_bg_color2'] ?? '#7c3aed') ?>);">
+                            <i class="fas <?= escape($mvSettings['vision_icon'] ?? 'fa-eye') ?> text-white text-3xl transform group-hover:scale-110 transition-transform duration-300"></i>
+                        </div>
+                        <!-- Decorative Ring -->
+                        <div class="absolute inset-0 rounded-2xl border-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="border-color: <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>; transform: scale(1.2);"></div>
                     </div>
-                    <h2 class="text-2xl font-bold mb-4" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
-                        <?= escape($mvSettings['vision_title'] ?? 'Our Vision') ?>
-                    </h2>
-                    <p class="leading-relaxed" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
-                        <?= nl2br(escape($mvSettings['vision_content'] ?? '')) ?>
-                    </p>
-                </div>
+                    
+                    <!-- Content -->
+                    <div class="relative z-10">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-5 group-hover:scale-105 transition-transform duration-300" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
+                            <?= escape($mvSettings['vision_title'] ?? 'Our Vision') ?>
+                        </h2>
+                        <div class="h-1 w-20 bg-gradient-to-r rounded-full mb-6 transform group-hover:w-32 transition-all duration-500" style="background: linear-gradient(90deg, <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>, <?= escape($mvSettings['vision_icon_bg_color2'] ?? '#7c3aed') ?>);"></div>
+                        <p class="text-lg leading-relaxed group-hover:text-gray-700 transition-colors duration-300 line-clamp-3" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
+                            <?= nl2br(escape($mvSettings['vision_content'] ?? '')) ?>
+                        </p>
+                        <!-- Read More Indicator -->
+                        <div class="mt-6 flex items-center text-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="color: <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>;">
+                            <span>Read More</span>
+                            <i class="fas fa-arrow-right ml-2 transform group-hover:translate-x-2 transition-transform duration-300"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Hover Effect Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-br from-purple-500/0 to-purple-500/0 group-hover:from-purple-500/5 group-hover:to-transparent rounded-3xl transition-all duration-500 pointer-events-none"></div>
+                </a>
                 <?php endif; ?>
             </div>
         </div>
     </section>
+    
+    <!-- Add Modern Animation Styles -->
+    <style>
+    @keyframes blob {
+        0%, 100% {
+            transform: translate(0, 0) scale(1);
+        }
+        33% {
+            transform: translate(30px, -50px) scale(1.1);
+        }
+        66% {
+            transform: translate(-20px, 20px) scale(0.9);
+        }
+    }
+    .animate-blob {
+        animation: blob 7s infinite;
+    }
+    .animation-delay-2000 {
+        animation-delay: 2s;
+    }
+    .animation-delay-4000 {
+        animation-delay: 4s;
+    }
+    </style>
     <?php endif; ?>
 
     <!-- Partners Section -->
@@ -602,6 +675,7 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
     <?php endif; ?>
+
 
     <!-- Categories Section - Minimal Design -->
     <?php if (!empty($categories)): ?>
@@ -862,6 +936,7 @@ include __DIR__ . '/includes/header.php';
             </div>
         </div>
     </section>
+
 </main>
 
 <?php include __DIR__ . '/includes/quick-view-modal.php'; ?>
