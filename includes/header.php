@@ -5,10 +5,24 @@ $categoryModel = new Category();
 $navCategories = $categoryModel->getAll(true);
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<?php
+// Get current language from session or default
+$currentLanguage = $_SESSION['site_language'] ?? 'en';
+$langCodes = [
+    'en' => 'en',
+    'km' => 'km',
+    'th' => 'th',
+    'vi' => 'vi',
+    'zh' => 'zh-CN',
+    'ja' => 'ja',
+];
+$htmlLang = $langCodes[$currentLanguage] ?? 'en';
+?>
+<html lang="<?= escape($htmlLang) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="content-language" content="<?= escape($htmlLang) ?>">
     <meta name="description" content="<?= escape($metaDescription ?? 'Premium forklifts and industrial equipment for warehouses and factories') ?>">
     <title><?= escape($pageTitle ?? 'Forklift & Equipment Pro') ?></title>
     
@@ -902,8 +916,11 @@ $navCategories = $categoryModel->getAll(true);
                     </div>
                 <?php } ?>
                 
-                <!-- Right Section: Hotline & Account -->
+                <!-- Right Section: Language, Hotline & Account -->
                 <div class="ml-auto flex items-center gap-2 lg:gap-3">
+                    <!-- Language Switcher -->
+                    <?php include __DIR__ . '/language-switcher.php'; ?>
+                    
                     <!-- Hotline -->
                     <?php
                     // Get hotline from settings - prioritize 'hotline' key, fallback to 'site_phone'

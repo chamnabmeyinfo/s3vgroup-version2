@@ -149,9 +149,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
     
+    // Handle language settings (JSON array)
+    if (isset($_POST['available_languages']) && is_array($_POST['available_languages'])) {
+        $languages = [];
+        foreach ($_POST['available_languages'] as $lang) {
+            if (!empty($lang['code']) && !empty($lang['name'])) {
+                $languages[] = [
+                    'code' => trim($lang['code']),
+                    'name' => trim($lang['name']),
+                    'flag' => trim($lang['flag'] ?? '🌐')
+                ];
+            }
+        }
+        $langJson = json_encode($languages);
+        $existing = db()->fetchOne("SELECT id FROM settings WHERE `key` = 'available_languages'");
+        if ($existing) {
+            db()->update('settings', ['value' => $langJson], '`key` = :key', ['key' => 'available_languages']);
+        } else {
+            db()->insert('settings', [
+                'key' => 'available_languages',
+                'value' => $langJson,
+                'type' => 'json'
+            ]);
+        }
+    }
+    
     // Handle text settings
     foreach ($_POST as $key => $value) {
-        if ($key !== 'submit' && $key !== 'site_logo' && $key !== 'clear_cache') {
+        if ($key !== 'submit' && $key !== 'site_logo' && $key !== 'clear_cache' && $key !== 'available_languages') {
             // Handle array values
             if (is_array($value)) {
                 $value = implode(',', $value);
@@ -339,6 +364,13 @@ include __DIR__ . '/includes/header.php';
                     <span>Logo & Branding</span>
                 </span>
                 <div class="absolute inset-0 bg-indigo-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
+            </button>
+            <button type="button" onclick="showSettingsTab('language')" id="tab-btn-language" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-green-600 transition-all relative group overflow-hidden">
+                <span class="relative z-10 flex items-center">
+                    <i class="fas fa-language mr-2"></i>
+                    <span>Language</span>
+                </span>
+                <div class="absolute inset-0 bg-green-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-0"></div>
             </button>
             <button type="button" onclick="showSettingsTab('contact')" id="tab-btn-contact" class="tab-button flex-1 md:flex-none px-6 py-4 text-sm font-semibold text-gray-600 hover:text-green-600 transition-all relative group overflow-hidden">
                 <span class="relative z-10 flex items-center">
@@ -617,7 +649,105 @@ include __DIR__ . '/includes/header.php';
 
         
         <!-- ============================================ -->
-        <!-- TAB 3: CONTACT INFORMATION -->
+        <!-- TAB 3: LANGUAGE SETTINGS -->
+        <!-- ============================================ -->
+        <div id="tab-content-language" class="settings-tab-content hidden">
+            <div class="mb-8">
+                <div class="flex items-center gap-4 mb-3">
+                    <div class="p-3 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl shadow-lg">
+                        <i class="fas fa-language text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Language Settings</h2>
+                        <p class="text-gray-600 mt-1">Configure available languages for Chrome Translate</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-card bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-lg">
+                <div class="mb-6">
+                    <label class="block text-sm font-bold text-gray-700 mb-3">
+                        <i class="fas fa-globe text-green-500 mr-2"></i>
+                        Available Languages
+                    </label>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Configure which languages users can select. Chrome will automatically translate the page when a language is selected.
+                    </p>
+                    
+                    <div id="languagesList" class="space-y-3">
+                        <?php
+                        $availableLanguages = [];
+                        try {
+                            $langSetting = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'available_languages'");
+                            if ($langSetting && !empty($langSetting['value'])) {
+                                $availableLanguages = json_decode($langSetting['value'], true) ?: [];
+                            }
+                        } catch (\Exception $e) {
+                            $availableLanguages = [];
+                        }
+                        
+                        // Default languages if not configured
+                        if (empty($availableLanguages)) {
+                            $availableLanguages = [
+                                ['code' => 'en', 'name' => 'English', 'flag' => '🇺🇸'],
+                                ['code' => 'km', 'name' => 'ខ្មែរ', 'flag' => '🇰🇭'],
+                                ['code' => 'th', 'name' => 'ไทย', 'flag' => '🇹🇭'],
+                                ['code' => 'vi', 'name' => 'Tiếng Việt', 'flag' => '🇻🇳'],
+                                ['code' => 'zh', 'name' => '中文', 'flag' => '🇨🇳'],
+                                ['code' => 'ja', 'name' => '日本語', 'flag' => '🇯🇵'],
+                            ];
+                        }
+                        
+                        foreach ($availableLanguages as $index => $lang):
+                        ?>
+                        <div class="language-item flex items-center gap-3 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 transition-all">
+                            <i class="fas fa-grip-vertical text-gray-400 cursor-move"></i>
+                            <input type="text" 
+                                   name="available_languages[<?= $index ?>][code]" 
+                                   value="<?= escape($lang['code']) ?>" 
+                                   placeholder="Code (e.g., en, km)"
+                                   class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+                                   required>
+                            <input type="text" 
+                                   name="available_languages[<?= $index ?>][name]" 
+                                   value="<?= escape($lang['name']) ?>" 
+                                   placeholder="Language Name"
+                                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                                   required>
+                            <input type="text" 
+                                   name="available_languages[<?= $index ?>][flag]" 
+                                   value="<?= escape($lang['flag'] ?? '🌐') ?>" 
+                                   placeholder="Flag emoji"
+                                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center"
+                                   maxlength="2">
+                            <button type="button" onclick="removeLanguage(this)" class="text-red-600 hover:text-red-800 p-2">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <button type="button" onclick="addLanguage()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all">
+                        <i class="fas fa-plus mr-2"></i>Add Language
+                    </button>
+                </div>
+                
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 class="font-semibold text-blue-800 mb-2">
+                        <i class="fas fa-info-circle mr-2"></i>How It Works
+                    </h3>
+                    <ul class="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                        <li>Users can select a language from the language switcher in the header</li>
+                        <li>Chrome browser will automatically detect the language change</li>
+                        <li>Chrome will offer to translate the page to the selected language</li>
+                        <li>Language preference is saved in the browser</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ============================================ -->
+        <!-- TAB 4: CONTACT INFORMATION -->
         <!-- ============================================ -->
         <div id="tab-content-contact" class="settings-tab-content hidden">
             <div class="mb-6">
@@ -1145,6 +1275,16 @@ include __DIR__ . '/includes/header.php';
             btn.classList.add('text-gray-600');
         });
         
+        // Tab-specific active styles
+        const tabStyles = {
+            'general': { color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            'logo': { color: 'text-indigo-600', bg: 'bg-indigo-50' },
+            'language': { color: 'text-green-600', bg: 'bg-green-50' },
+            'contact': { color: 'text-green-600', bg: 'bg-green-50' },
+            'sliders': { color: 'text-purple-600', bg: 'bg-purple-50' },
+            'system': { color: 'text-orange-600', bg: 'bg-orange-50' }
+        };
+        
         // Show selected tab
         const selectedTab = document.getElementById('tab-content-' + tabName);
         console.log('🔍 Looking for tab:', 'tab-content-' + tabName, 'Found:', !!selectedTab);
@@ -1225,17 +1365,16 @@ include __DIR__ . '/includes/header.php';
             activeButton.classList.remove('text-indigo-600', 'bg-indigo-50', 'text-green-600', 'bg-green-50', 'text-purple-600', 'bg-purple-50', 'text-orange-600', 'bg-orange-50');
             
             // Add appropriate color based on tab
-            if (tabName === 'general' || tabName === 'logo') {
-                activeButton.classList.add('text-indigo-600', 'bg-indigo-50');
-            } else if (tabName === 'contact') {
-                activeButton.classList.add('text-green-600', 'bg-green-50');
-            } else if (tabName === 'sliders') {
-                activeButton.classList.add('text-purple-600', 'bg-purple-50');
-            } else if (tabName === 'system') {
-                activeButton.classList.add('text-orange-600', 'bg-orange-50');
-            } else {
-                activeButton.classList.add('text-indigo-600', 'bg-indigo-50');
-            }
+            const tabStyles = {
+                'general': { color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                'logo': { color: 'text-indigo-600', bg: 'bg-indigo-50' },
+                'language': { color: 'text-green-600', bg: 'bg-green-50' },
+                'contact': { color: 'text-green-600', bg: 'bg-green-50' },
+                'sliders': { color: 'text-purple-600', bg: 'bg-purple-50' },
+                'system': { color: 'text-orange-600', bg: 'bg-orange-50' }
+            };
+            const style = tabStyles[tabName] || { color: 'text-indigo-600', bg: 'bg-indigo-50' };
+            activeButton.classList.add(style.color, style.bg);
         }
         
         // Scroll to form
@@ -1898,6 +2037,49 @@ include __DIR__ . '/includes/header.php';
         setTimeout(() => {
             alert(`"${presetNames[presetName]}" preset applied successfully! Don't forget to click "Save Settings" to save your changes.`);
         }, 100);
+    }
+    
+    // Language Management Functions
+    let languageIndex = <?= count($availableLanguages) ?>;
+    
+    function addLanguage() {
+        const list = document.getElementById('languagesList');
+        if (!list) return;
+        
+        const newItem = document.createElement('div');
+        newItem.className = 'language-item flex items-center gap-3 p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-green-400 transition-all';
+        newItem.innerHTML = `
+            <i class="fas fa-grip-vertical text-gray-400 cursor-move"></i>
+            <input type="text" 
+                   name="available_languages[${languageIndex}][code]" 
+                   value="" 
+                   placeholder="Code (e.g., en, km)"
+                   class="w-24 px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono"
+                   required>
+            <input type="text" 
+                   name="available_languages[${languageIndex}][name]" 
+                   value="" 
+                   placeholder="Language Name"
+                   class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                   required>
+            <input type="text" 
+                   name="available_languages[${languageIndex}][flag]" 
+                   value="🌐" 
+                   placeholder="Flag emoji"
+                   class="w-20 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center"
+                   maxlength="2">
+            <button type="button" onclick="removeLanguage(this)" class="text-red-600 hover:text-red-800 p-2">
+                <i class="fas fa-trash"></i>
+            </button>
+        `;
+        list.appendChild(newItem);
+        languageIndex++;
+    }
+    
+    function removeLanguage(button) {
+        if (confirm('Remove this language?')) {
+            button.closest('.language-item').remove();
+        }
     }
     
     </script>
