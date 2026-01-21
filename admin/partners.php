@@ -891,6 +891,7 @@ include __DIR__ . '/includes/header.php';
         const hoverShadowOpacity = parseInt(form.querySelector('[name="partners_logo_hover_shadow_opacity"]')?.value) || 20;
         const hoverImageScale = parseFloat(form.querySelector('[name="partners_logo_hover_image_scale"]')?.value) || 1.05;
         const transition = parseInt(form.querySelector('[name="partners_logo_transition"]')?.value) || 300;
+        const slideSpeed = parseInt(form.querySelector('[name="partners_logo_slide_speed"]')?.value) || 30;
         
         // Update preview section background
         preview.style.background = `linear-gradient(135deg, ${bgColor1} 0%, ${bgColor2} 100%)`;
@@ -904,9 +905,10 @@ include __DIR__ . '/includes/header.php';
             previewDesc.style.color = descColor;
         }
         
-        // Update track gap
+        // Update track gap and animation speed
         if (previewTrack) {
             previewTrack.style.gap = `${gap}px`;
+            previewTrack.style.animation = `slidePartners ${slideSpeed}s linear infinite`;
         }
         
         // Update items
@@ -965,7 +967,7 @@ include __DIR__ . '/includes/header.php';
         100% { transform: translateX(-50%); }
     }
     .partners-slider-track-preview {
-        animation: slidePartners 20s linear infinite;
+        animation: slidePartners <?= (int)($settings['partners_logo_slide_speed'] ?? 30) ?>s linear infinite;
     }
     .partners-slider-wrapper-preview:hover .partners-slider-track-preview {
         animation-play-state: paused;

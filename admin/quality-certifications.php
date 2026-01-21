@@ -898,6 +898,7 @@ include __DIR__ . '/includes/header.php';
         const hoverShadowBlur = parseInt(form.querySelector('[name="certs_logo_hover_shadow_blur"]')?.value) || 24;
         const hoverShadowOpacity = parseInt(form.querySelector('[name="certs_logo_hover_shadow_opacity"]')?.value) || 15;
         const transition = parseInt(form.querySelector('[name="certs_logo_transition"]')?.value) || 300;
+        const slideSpeed = parseInt(form.querySelector('[name="certs_logo_slide_speed"]')?.value) || 25;
         
         // Update preview section background
         preview.style.background = `linear-gradient(to bottom, ${bgColor1}, ${bgColor2})`;
@@ -911,9 +912,10 @@ include __DIR__ . '/includes/header.php';
             previewDesc.style.color = descColor;
         }
         
-        // Update track gap
+        // Update track gap and animation speed
         if (previewTrack) {
             previewTrack.style.gap = `${gap}px`;
+            previewTrack.style.animation = `slideCerts ${slideSpeed}s linear infinite`;
         }
         
         // Update items
@@ -981,7 +983,7 @@ include __DIR__ . '/includes/header.php';
         100% { transform: translateX(-50%); }
     }
     .quality-certifications-slider-track-preview {
-        animation: slideCerts 20s linear infinite;
+        animation: slideCerts <?= (int)($settings['certs_logo_slide_speed'] ?? 25) ?>s linear infinite;
     }
     .quality-certifications-slider-wrapper-preview:hover .quality-certifications-slider-track-preview {
         animation-play-state: paused;

@@ -417,6 +417,90 @@ include __DIR__ . '/includes/header.php';
         </div>
     </section>
 
+    <!-- Mission & Vision Section -->
+    <?php
+    // Get Mission & Vision settings
+    $mvSettingsData = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` LIKE 'mission_%' OR `key` LIKE 'vision_%'");
+    $mvSettings = [];
+    foreach ($mvSettingsData as $setting) {
+        $mvSettings[$setting['key']] = $setting['value'];
+    }
+    
+    // Default values
+    $mvDefaults = [
+        'mission_title' => 'Our Mission',
+        'mission_content' => 'To provide exceptional forklift and industrial equipment solutions that empower businesses to achieve their operational goals. We are committed to delivering quality products, outstanding service, and innovative solutions that drive productivity and success.',
+        'mission_icon' => 'fa-bullseye',
+        'mission_enabled' => 1,
+        'vision_title' => 'Our Vision',
+        'vision_content' => 'To become the most trusted partner in the industrial equipment industry, recognized for excellence, innovation, and customer satisfaction. We envision a future where every business has access to the best equipment solutions tailored to their unique needs.',
+        'vision_icon' => 'fa-eye',
+        'vision_enabled' => 1,
+        'mission_vision_section_enabled' => 1,
+        'mission_vision_bg_color1' => '#ffffff',
+        'mission_vision_bg_color2' => '#f8f9fa',
+        'mission_vision_padding' => 80,
+        'mission_vision_title_color' => '#1a1a1a',
+        'mission_vision_text_color' => '#475569',
+        'mission_vision_icon_bg_color1' => '#3b82f6',
+        'mission_vision_icon_bg_color2' => '#2563eb',
+        'vision_icon_bg_color1' => '#8b5cf6',
+        'vision_icon_bg_color2' => '#7c3aed',
+    ];
+    
+    foreach ($mvDefaults as $key => $default) {
+        if (!isset($mvSettings[$key])) {
+            $mvSettings[$key] = $default;
+        }
+    }
+    
+    // Check if section is enabled and at least one is enabled
+    $sectionEnabled = ($mvSettings['mission_vision_section_enabled'] ?? 1) == 1;
+    $missionEnabled = ($mvSettings['mission_enabled'] ?? 1) == 1;
+    $visionEnabled = ($mvSettings['vision_enabled'] ?? 1) == 1;
+    
+    if ($sectionEnabled && ($missionEnabled || $visionEnabled)):
+    ?>
+    <section class="mission-vision-section" style="
+        background: linear-gradient(to bottom, <?= escape($mvSettings['mission_vision_bg_color1'] ?? '#ffffff') ?>, <?= escape($mvSettings['mission_vision_bg_color2'] ?? '#f8f9fa') ?>);
+        padding: <?= (int)($mvSettings['mission_vision_padding'] ?? 80) ?>px 0;
+    ">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-8">
+                <?php if ($missionEnabled): ?>
+                <!-- Mission Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 transform hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?> <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?> rounded-2xl flex items-center justify-center mb-6" style="background: linear-gradient(135deg, <?= escape($mvSettings['mission_vision_icon_bg_color1'] ?? '#3b82f6') ?>, <?= escape($mvSettings['mission_vision_icon_bg_color2'] ?? '#2563eb') ?>);">
+                        <i class="fas <?= escape($mvSettings['mission_icon'] ?? 'fa-bullseye') ?> text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
+                        <?= escape($mvSettings['mission_title'] ?? 'Our Mission') ?>
+                    </h2>
+                    <p class="leading-relaxed" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
+                        <?= nl2br(escape($mvSettings['mission_content'] ?? '')) ?>
+                    </p>
+                </div>
+                <?php endif; ?>
+                
+                <?php if ($visionEnabled): ?>
+                <!-- Vision Card -->
+                <div class="bg-white rounded-2xl shadow-xl p-8 border border-gray-100 transform hover:scale-105 transition-all duration-300">
+                    <div class="w-16 h-16 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-6" style="background: linear-gradient(135deg, <?= escape($mvSettings['vision_icon_bg_color1'] ?? '#8b5cf6') ?>, <?= escape($mvSettings['vision_icon_bg_color2'] ?? '#7c3aed') ?>);">
+                        <i class="fas <?= escape($mvSettings['vision_icon'] ?? 'fa-eye') ?> text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-4" style="color: <?= escape($mvSettings['mission_vision_title_color'] ?? '#1a1a1a') ?>;">
+                        <?= escape($mvSettings['vision_title'] ?? 'Our Vision') ?>
+                    </h2>
+                    <p class="leading-relaxed" style="color: <?= escape($mvSettings['mission_vision_text_color'] ?? '#475569') ?>;">
+                        <?= nl2br(escape($mvSettings['vision_content'] ?? '')) ?>
+                    </p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
     <!-- Partners Section -->
     <?php
     use App\Models\Partner;
