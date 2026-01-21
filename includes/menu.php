@@ -8,6 +8,11 @@ if (!isset($menu) || !isset($items)) {
     return '';
 }
 
+// Load Category model if needed
+if (!class_exists('App\Models\Category')) {
+    require_once __DIR__ . '/../app/Models/Category.php';
+}
+
 // Helper function to process menu item URLs
 function processMenuUrl($url) {
     if (empty($url) || $url === '#') {
@@ -46,6 +51,107 @@ function buildMenuTree($items, $parentId = null) {
     foreach ($items as $item) {
         if (($item['parent_id'] ?? null) == $parentId) {
             $item['children'] = buildMenuTree($items, $item['id']);
+            
+            // Auto-inject categories for Products menu item
+            if (empty($item['parent_id']) && 
+                (strtolower(trim($item['title'] ?? '')) === 'products' || 
+                strtolower(trim($item['title'] ?? '')) === 'product' ||
+                strpos(strtolower($item['url'] ?? ''), 'products.php') !== false)) {
+                
+                // Check if we should auto-inject categories
+                $autoInjectCategories = true;
+                try {
+                    $setting = db()->fetchOne(
+                        "SELECT value FROM settings WHERE `key` = 'products_menu_auto_categories'"
+                    );
+                    $autoInjectCategories = empty($setting) || $setting['value'] == '1';
+                } catch (\Exception $e) {
+                    $autoInjectCategories = true;
+                }
+                
+                if ($autoInjectCategories) {
+                    // Get categories
+                    try {
+                        $categoryModel = new \App\Models\Category();
+                        $categories = $categoryModel->getAll(true);
+                        
+                        // Check if we should use selected categories
+                        $useSelectedCategories = false;
+                        $selectedCategoryIds = [];
+                        try {
+                            $tableExists = false;
+                            try {
+                                db()->fetchOne("SELECT 1 FROM menu_category_selections LIMIT 1");
+                                $tableExists = true;
+                            } catch (\Exception $e) {
+                                $tableExists = false;
+                            }
+                            
+                            if ($tableExists) {
+                                $setting = db()->fetchOne(
+                                    "SELECT value FROM settings WHERE `key` = 'products_menu_use_selected_categories'"
+                                );
+                                $useSelectedCategories = !empty($setting) && $setting['value'] == '1';
+                                
+                                if ($useSelectedCategories) {
+                                    $selected = db()->fetchAll(
+                                        "SELECT category_id, display_order FROM menu_category_selections 
+                                         WHERE menu_item_id IS NULL AND is_active = 1 
+                                         ORDER BY display_order ASC"
+                                    );
+                                    $selectedCategoryIds = array_column($selected, 'category_id');
+                                    $categoryOrders = [];
+                                    foreach ($selected as $sel) {
+                                        $categoryOrders[$sel['category_id']] = $sel['display_order'];
+                                    }
+                                    
+                                    // Filter and reorder
+                                    if (!empty($selectedCategoryIds)) {
+                                        $categories = array_filter($categories, function($cat) use ($selectedCategoryIds) {
+                                            return in_array($cat['id'], $selectedCategoryIds);
+                                        });
+                                        usort($categories, function($a, $b) use ($selectedCategoryIds, $categoryOrders) {
+                                            $posA = array_search($a['id'], $selectedCategoryIds);
+                                            $posB = array_search($b['id'], $selectedCategoryIds);
+                                            if ($posA === false) return 1;
+                                            if ($posB === false) return -1;
+                                            $orderA = $categoryOrders[$a['id']] ?? $posA;
+                                            $orderB = $categoryOrders[$b['id']] ?? $posB;
+                                            return $orderA <=> $orderB;
+                                        });
+                                    } else {
+                                        $categories = [];
+                                    }
+                                }
+                            }
+                        } catch (\Exception $e) {
+                            // Fallback to all categories
+                        }
+                        
+                        // Convert categories to menu item format
+                        $categoryChildren = [];
+                        foreach ($categories as $index => $category) {
+                            $categoryChildren[] = [
+                                'id' => 'cat_' . $category['id'],
+                                'title' => $category['name'],
+                                'url' => url('products.php?category=' . $category['slug']),
+                                'icon' => 'fa-folder',
+                                'type' => 'category',
+                                'object_id' => $category['id'],
+                                'target' => '_self',
+                                'children' => [],
+                                'is_auto_injected' => true
+                            ];
+                        }
+                        
+                        // Merge with existing children (existing children first, then auto-injected)
+                        $item['children'] = array_merge($item['children'], $categoryChildren);
+                    } catch (\Exception $e) {
+                        // If category model fails, just use existing children
+                    }
+                }
+            }
+            
             $tree[] = $item;
         }
     }
@@ -101,11 +207,17 @@ if ($location === 'header'): ?>
                 ?>
                 <div class="relative group mega-menu-wrapper" id="menu-<?= $item['id'] ?>" data-mega-menu="<?= $megaMenuEnabled ? 'true' : 'false' ?>">
                     <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                        <?php if ($itemIcon): ?>
-                            <i class="<?= escape($itemIcon) ?> mr-2"></i>
+                        <?php if ($itemIcon): 
+                            // Ensure icon has fas/far prefix if not already present
+                            $iconClass = $itemIcon;
+                            if (strpos($iconClass, 'fa-') !== false && strpos($iconClass, 'fas ') === false && strpos($iconClass, 'far ') === false && strpos($iconClass, 'fal ') === false && strpos($iconClass, 'fab ') === false) {
+                                $iconClass = 'fas ' . $iconClass;
+                            }
+                        ?>
+                            <i class="<?= escape($iconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                         <?php endif; ?>
-                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%;"><?= $itemTitle ?></span>
-                        <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                        <span class="flex-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%; line-height: 1.5;"><?= $itemTitle ?></span>
+                        <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300 flex-shrink-0" style="line-height: 1;"></i>
                         <span class="nav-link-indicator"></span>
                     </button>
                     <?php if ($megaMenuEnabled): ?>
@@ -125,10 +237,16 @@ if ($location === 'header'): ?>
                                         <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
                                         <div class="flex items-center justify-between relative z-10">
                                             <span class="font-semibold text-gray-800 group-hover/item:text-blue-600 transition-colors flex items-center">
-                                                <?php if ($childIcon): ?>
-                                                    <i class="<?= escape($childIcon) ?> mr-2.5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300"></i>
+                                                <?php if ($childIcon): 
+                                                    // Ensure icon has fas/far prefix if not already present
+                                                    $childIconClass = $childIcon;
+                                                    if (strpos($childIconClass, 'fa-') !== false && strpos($childIconClass, 'fas ') === false && strpos($childIconClass, 'far ') === false && strpos($childIconClass, 'fal ') === false && strpos($childIconClass, 'fab ') === false) {
+                                                        $childIconClass = 'fas ' . $childIconClass;
+                                                    }
+                                                ?>
+                                                    <i class="<?= escape($childIconClass) ?> mr-2.5 text-blue-500 group-hover/item:scale-110 transition-transform duration-300 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                                                 <?php endif; ?>
-                                                <?= $childTitle ?>
+                                                <span style="line-height: 1.5;"><?= $childTitle ?></span>
                                             </span>
                                             <i class="fas fa-arrow-right text-gray-400 group-hover/item:text-blue-600 transform group-hover/item:translate-x-2 transition-all duration-300"></i>
                                         </div>
@@ -141,12 +259,18 @@ if ($location === 'header'): ?>
             <?php else: ?>
                 <a href="<?= escape($itemUrl) ?>" 
                    target="<?= escape($itemTarget) ?>"
-                   class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>"
+                   class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center <?= $itemClasses ?> <?= $isActive ? 'active' : '' ?>"
                    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    <?php if ($itemIcon): ?>
-                        <i class="<?= escape($itemIcon) ?> mr-2"></i>
+                    <?php if ($itemIcon): 
+                        // Ensure icon has fas/far prefix if not already present
+                        $iconClass = $itemIcon;
+                        if (strpos($iconClass, 'fa-') !== false && strpos($iconClass, 'fas ') === false && strpos($iconClass, 'far ') === false && strpos($iconClass, 'fal ') === false && strpos($iconClass, 'fab ') === false) {
+                            $iconClass = 'fas ' . $iconClass;
+                        }
+                    ?>
+                        <i class="<?= escape($iconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                     <?php endif; ?>
-                    <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%;"><?= $itemTitle ?></span>
+                    <span class="flex-1" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; max-width: 100%; line-height: 1.5;"><?= $itemTitle ?></span>
                     <span class="nav-link-indicator"></span>
                 </a>
             <?php endif; ?>
@@ -165,28 +289,51 @@ if ($location === 'header'): ?>
             ?>
                 <?php if ($hasChildren): ?>
                     <div class="border-b border-gray-200 pb-2">
-                        <div class="font-semibold text-gray-800 px-4 py-2">
-                            <?php if ($itemIcon): ?>
-                                <i class="<?= escape($itemIcon) ?> mr-2"></i>
+                        <div class="font-semibold text-gray-800 px-4 py-2 flex items-center">
+                            <?php if ($itemIcon): 
+                                // Ensure icon has fas/far prefix if not already present
+                                $iconClass = $itemIcon;
+                                if (strpos($iconClass, 'fa-') !== false && strpos($iconClass, 'fas ') === false && strpos($iconClass, 'far ') === false && strpos($iconClass, 'fal ') === false && strpos($iconClass, 'fab ') === false) {
+                                    $iconClass = 'fas ' . $iconClass;
+                                }
+                            ?>
+                                <i class="<?= escape($iconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                             <?php endif; ?>
-                            <?= $itemTitle ?>
+                            <span style="line-height: 1.5;"><?= $itemTitle ?></span>
                         </div>
                         <div class="pl-6 space-y-1 mt-2">
-                            <?php foreach ($item['children'] as $child): ?>
+                            <?php foreach ($item['children'] as $child): 
+                                $childIcon = $child['icon'] ?? '';
+                            ?>
                                 <a href="<?= escape($child['url'] ?? '#') ?>" 
-                                   class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
-                                    <?= escape($child['title']) ?>
+                                   class="block px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg flex items-center">
+                                    <?php if ($childIcon): 
+                                        // Ensure icon has fas/far prefix if not already present
+                                        $childIconClass = $childIcon;
+                                        if (strpos($childIconClass, 'fa-') !== false && strpos($childIconClass, 'fas ') === false && strpos($childIconClass, 'far ') === false && strpos($childIconClass, 'fal ') === false && strpos($childIconClass, 'fab ') === false) {
+                                            $childIconClass = 'fas ' . $childIconClass;
+                                        }
+                                    ?>
+                                        <i class="<?= escape($childIconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
+                                    <?php endif; ?>
+                                    <span style="line-height: 1.5;"><?= escape($child['title']) ?></span>
                                 </a>
                             <?php endforeach; ?>
                         </div>
                     </div>
                 <?php else: ?>
                     <a href="<?= escape($itemUrl) ?>" 
-                       class="block px-4 py-2 text-gray-800 hover:bg-gray-50 rounded-lg">
-                        <?php if ($itemIcon): ?>
-                            <i class="<?= escape($itemIcon) ?> mr-2"></i>
+                       class="block px-4 py-2 text-gray-800 hover:bg-gray-50 rounded-lg flex items-center">
+                        <?php if ($itemIcon): 
+                            // Ensure icon has fas/far prefix if not already present
+                            $iconClass = $itemIcon;
+                            if (strpos($iconClass, 'fa-') !== false && strpos($iconClass, 'fas ') === false && strpos($iconClass, 'far ') === false && strpos($iconClass, 'fal ') === false && strpos($iconClass, 'fab ') === false) {
+                                $iconClass = 'fas ' . $iconClass;
+                            }
+                        ?>
+                            <i class="<?= escape($iconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                         <?php endif; ?>
-                        <?= $itemTitle ?>
+                        <span style="line-height: 1.5;"><?= $itemTitle ?></span>
                     </a>
                 <?php endif; ?>
             <?php endforeach; ?>
@@ -204,11 +351,17 @@ if ($location === 'header'): ?>
             <li>
                 <a href="<?= escape($itemUrl) ?>" 
                    target="<?= escape($item['target'] ?? '_self') ?>"
-                   class="<?= $item['css_classes'] ?? '' ?>">
-                    <?php if ($itemIcon): ?>
-                        <i class="<?= escape($itemIcon) ?>"></i>
+                   class="flex items-center <?= $item['css_classes'] ?? '' ?>">
+                    <?php if ($itemIcon): 
+                        // Ensure icon has fas/far prefix if not already present
+                        $iconClass = $itemIcon;
+                        if (strpos($iconClass, 'fa-') !== false && strpos($iconClass, 'fas ') === false && strpos($iconClass, 'far ') === false && strpos($iconClass, 'fal ') === false && strpos($iconClass, 'fab ') === false) {
+                            $iconClass = 'fas ' . $iconClass;
+                        }
+                    ?>
+                        <i class="<?= escape($iconClass) ?> mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
                     <?php endif; ?>
-                    <?= $itemTitle ?>
+                    <span style="line-height: 1.5;"><?= $itemTitle ?></span>
                 </a>
                 <?php if ($hasChildren): ?>
                     <ul>

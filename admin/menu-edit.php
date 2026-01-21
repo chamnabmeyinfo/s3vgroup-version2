@@ -67,6 +67,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 exit;
             }
+            
+            if ($data['action'] === 'find_products_item') {
+                require_once __DIR__ . '/../app/Helpers/CategoryMenuSync.php';
+                $menuId = (int)($data['menu_id'] ?? 0);
+                if ($menuId > 0) {
+                    $productsItem = \App\Helpers\find_products_menu_item($menuId);
+                    if ($productsItem) {
+                        echo json_encode(['success' => true, 'item_id' => $productsItem['id'], 'item' => $productsItem]);
+                    } else {
+                        echo json_encode(['success' => false, 'error' => 'Products menu item not found. Please create a menu item titled "Products" first.']);
+                    }
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Invalid menu ID']);
+                }
+                exit;
+            }
+            
+            if ($data['action'] === 'sync_categories') {
+                require_once __DIR__ . '/../app/Helpers/CategoryMenuSync.php';
+                $menuId = (int)($data['menu_id'] ?? 0);
+                $productsItemId = (int)($data['products_item_id'] ?? 0);
+                
+                if ($menuId > 0 && $productsItemId > 0) {
+                    // Check if use selected categories
+                    $useSelected = false;
+                    try {
+                        $setting = db()->fetchOne(
+                            "SELECT value FROM settings WHERE `key` = 'products_menu_use_selected_categories'"
+                        );
+                        $useSelected = !empty($setting) && $setting['value'] == '1';
+                    } catch (\Exception $e) {
+                        $useSelected = false;
+                    }
+                    
+                    $result = \App\Helpers\sync_categories_to_products_menu($productsItemId, [
+                        'use_selected_categories' => $useSelected
+                    ]);
+                    echo json_encode($result);
+                } else {
+                    echo json_encode(['success' => false, 'error' => 'Invalid menu ID or Products item ID']);
+                }
+                exit;
+            }
         }
     }
     
@@ -126,13 +169,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
         
+        // Get object_id - check multiple possible field names
+        $objectId = null;
+        if (!empty($_POST['object_id'])) {
+            $objectId = (int)$_POST['object_id'];
+        } elseif (!empty($_POST['category_object_id'])) {
+            $objectId = (int)$_POST['category_object_id'];
+        } elseif (!empty($_POST['product_object_id'])) {
+            $objectId = (int)$_POST['product_object_id'];
+        } elseif (!empty($_POST['page_object_id'])) {
+            $objectId = (int)$_POST['page_object_id'];
+        } elseif (!empty($_POST['post_object_id'])) {
+            $objectId = (int)$_POST['post_object_id'];
+        }
+        
         $data = [
             'menu_id' => $menuId,
             'type' => $_POST['item_type'] ?? 'custom',
-            'object_id' => !empty($_POST['object_id']) ? (int)$_POST['object_id'] : null,
+            'object_id' => $objectId > 0 ? $objectId : null,
             'target' => $_POST['target'] ?? '_self',
             'icon' => trim($_POST['icon'] ?? '')
         ];
+        
+        // Handle custom title/URL for custom type
+        if ($data['type'] === 'custom') {
+            if (!empty($customTitle)) {
+                $data['title'] = $customTitle;
+            } elseif (isset($_POST['title']) && trim($_POST['title']) !== '') {
+                $data['title'] = trim($_POST['title']);
+            } elseif (isset($_POST['custom_title']) && trim($_POST['custom_title']) !== '') {
+                $data['title'] = trim($_POST['custom_title']);
+            }
+            
+            if (!empty($customUrl)) {
+                $data['url'] = $customUrl;
+            } elseif (isset($_POST['url']) && trim($_POST['url']) !== '') {
+                $data['url'] = trim($_POST['url']);
+            } elseif (isset($_POST['custom_url']) && trim($_POST['custom_url']) !== '') {
+                $data['url'] = trim($_POST['custom_url']);
+            } else {
+                $data['url'] = '#';
+            }
+        }
         
         // Validate based on type
         if ($data['type'] === 'custom') {
@@ -708,6 +786,9 @@ include __DIR__ . '/includes/header.php';
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800">Menu Items</h2>
             <div class="flex gap-2">
+                <button onclick="syncCategoriesToProducts()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Sync All Categories to Products Menu">
+                    <i class="fas fa-sync-alt mr-2"></i>Sync Categories to Products
+                </button>
                 <button onclick="quickAddCeoMessage()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Quick Add CEO Message">
                     <i class="fas fa-user-tie mr-2"></i>Quick Add: CEO Message
                 </button>
@@ -1279,7 +1360,7 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-folder mr-2 text-indigo-600"></i>Select Category *
                         </label>
-                        <select name="object_id" id="category_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <select name="category_object_id" id="category_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                             <option value="">-- Select Category --</option>
                             <?php 
                             $categoryTree = $categoryModel->getFlatTree(null, true);
@@ -1303,7 +1384,7 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-box mr-2 text-purple-600"></i>Select Product *
                         </label>
-                        <select name="object_id" id="product_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
+                        <select name="product_object_id" id="product_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500">
                             <option value="">-- Select Product --</option>
                             <?php foreach ($products as $prod): ?>
                                 <option value="<?= $prod['id'] ?>"><?= escape($prod['name']) ?></option>
@@ -1323,7 +1404,7 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-file-alt mr-2 text-green-600"></i>Select Page *
                         </label>
-                        <select name="object_id" id="page_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
+                        <select name="page_object_id" id="page_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500">
                             <option value="">-- Select Page --</option>
                             <?php foreach ($pages as $page): ?>
                                 <option value="<?= $page['id'] ?>"><?= escape($page['title']) ?></option>
@@ -1344,7 +1425,7 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-newspaper mr-2 text-orange-600"></i>Select Blog Post *
                         </label>
-                        <select name="object_id" id="post_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                        <select name="post_object_id" id="post_object_id" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
                             <option value="">-- Select Blog Post --</option>
                             <?php foreach ($posts as $post): ?>
                                 <option value="<?= $post['id'] ?>"><?= escape($post['title']) ?></option>
@@ -1607,7 +1688,7 @@ include __DIR__ . '/includes/header.php';
                             <textarea name="mega_menu_custom_css" id="mega_menu_custom_css" rows="3" placeholder="Custom CSS styles..." class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 font-mono text-sm"></textarea>
                         </div>
                         <div class="pt-2 border-t">
-                            <a href="mega-menu-manager.php?menu_item_id=<?= $item['id'] ?? '' ?>" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">
+                            <a href="mega-menu-manager.php?menu_item_id=<?= $menuItemId ?? '' ?>" id="megaMenuManagerLink" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all">
                                 <i class="fas fa-cog mr-2"></i>Manage Mega Menu Content
                             </a>
                         </div>
@@ -2101,6 +2182,75 @@ function saveMenuOrder() {
     }
 }
 
+// Sync Categories to Products Menu
+async function syncCategoriesToProducts() {
+    const menuId = <?= $menuId ?>;
+    if (!menuId || menuId <= 0) {
+        customAlert('Invalid menu ID', 'Error', 'error').then(() => {});
+        return;
+    }
+    
+    // Find Products menu item
+    const response = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            action: 'find_products_item',
+            menu_id: menuId
+        })
+    });
+    
+    const result = await response.json();
+    if (!result.success || !result.item_id) {
+        customAlert('Please create a "Products" menu item first, then use this feature to sync categories under it.', 'Info', 'info').then(() => {});
+        return;
+    }
+    
+    if (!confirm('This will sync all categories as sub-items under the Products menu. Existing category items will be updated. Continue?')) {
+        return;
+    }
+    
+    const btn = event.target;
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Syncing...';
+    
+    try {
+        const syncResponse = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                action: 'sync_categories',
+                menu_id: menuId,
+                products_item_id: result.item_id
+            })
+        });
+        
+        const syncResult = await syncResponse.json();
+        if (syncResult.success) {
+            customAlert(
+                `Categories synced successfully!\n\nAdded: ${syncResult.added}\nUpdated: ${syncResult.updated}\nRemoved: ${syncResult.removed}\nTotal: ${syncResult.total}`,
+                'Success',
+                'success'
+            ).then(() => {
+                location.reload();
+            });
+        } else {
+            customAlert('Error syncing categories: ' + (syncResult.error || 'Unknown error'), 'Error', 'error').then(() => {});
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    } catch (error) {
+        customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    }
+}
+
 // Quick Add CEO Message function
 async function quickAddCeoMessage() {
     const menuId = <?= $menuId ?>;
@@ -2192,6 +2342,12 @@ async function editItem(id) {
         if (document.getElementById('mega_menu_enabled')) {
             document.getElementById('mega_menu_enabled').checked = item.mega_menu_enabled == 1;
             toggleMegaMenuSettings();
+        }
+        
+        // Update mega menu manager link
+        const managerLink = document.getElementById('megaMenuManagerLink');
+        if (managerLink) {
+            managerLink.href = 'mega-menu-manager.php?menu_item_id=' + item.id;
         }
         if (document.getElementById('mega_menu_layout')) {
             document.getElementById('mega_menu_layout').value = item.mega_menu_layout || 'columns';

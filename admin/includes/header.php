@@ -446,9 +446,13 @@
                     <i class="fas fa-layer-group w-5"></i>
                     <span>Parallax Section</span>
                 </a>
-                <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php'])) ? 'bg-gray-700' : '' ?>">
+                <a href="<?= url('admin/menus.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (in_array(basename($_SERVER['PHP_SELF']), ['menus.php', 'menu-edit.php', 'menu-locations.php', 'menu-categories.php', 'mega-menu-manager.php'])) ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-bars w-5"></i>
                     <span>Menus</span>
+                </a>
+                <a href="<?= url('admin/menu-categories.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'menu-categories.php') ? 'bg-gray-700' : '' ?>">
+                    <i class="fas fa-list-ul w-5"></i>
+                    <span>Menu Categories</span>
                 </a>
                 <a href="<?= url('admin/orders.php') ?>" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors <?= (basename($_SERVER['PHP_SELF']) == 'orders.php') ? 'bg-gray-700' : '' ?>">
                     <i class="fas fa-shopping-cart w-5"></i>

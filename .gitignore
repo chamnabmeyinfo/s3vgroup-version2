@@ -95,10 +95,18 @@ storage/qrcodes/*
 test-*.php
 *test.php
 hello.php
-# Note: fix-*.sh and pull-*.sh scripts are KEPT (useful for deployment)
-# Only ignore PHP test files, not shell scripts
+# Note: pull-*.sh scripts are KEPT (useful for deployment)
+# Old fix-*.sh scripts have been removed
 verify-*.php
 check-*.php
+
+# Cleanup documentation (temporary)
+PROJECT-CLEANUP-PLAN.md
+CLEANUP-SUMMARY.md
+PRE-PUSH-CHECKLIST.md
+FINAL-CLEANUP-REPORT.md
+README-CLEANUP.md
+cleanup-project.ps1
 
 # Developer Notes
 developer/chamnab notepad/

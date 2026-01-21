@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['action']) && $_POST[
         $data = [
             'location' => trim($_POST['location'] ?? ''),
             'area' => trim($_POST['area'] ?? 'main'),
+            'layout' => trim($_POST['layout'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'menu_id' => !empty($_POST['menu_id']) ? (int)$_POST['menu_id'] : null
         ];
@@ -150,7 +151,7 @@ include __DIR__ . '/includes/header.php';
         <h2 class="text-xl font-bold text-gray-800 mb-4">
             <i class="fas fa-plus-circle text-blue-600 mr-2"></i>Create New Location
         </h2>
-        <form method="POST" class="grid md:grid-cols-4 gap-4">
+        <form method="POST" class="grid md:grid-cols-5 gap-4">
             <input type="hidden" name="action" value="create_location">
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Location Name *</label>
@@ -170,6 +171,13 @@ include __DIR__ . '/includes/header.php';
                 </select>
             </div>
             <?php endif; ?>
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Layout/Theme</label>
+                <input type="text" name="layout" 
+                       placeholder="e.g., default, modern, classic"
+                       class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">Optional: Theme or layout identifier</p>
+            </div>
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
                 <input type="text" name="description" 

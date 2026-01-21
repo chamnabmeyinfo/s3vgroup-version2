@@ -42,7 +42,7 @@ if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
 // Load helper functions
 require_once __DIR__ . '/../app/Support/functions.php';
 
-// Autoloader
+// Autoloader (must be registered first so classes can be autoloaded)
 spl_autoload_register(function ($class) {
     $prefix = 'App\\';
     $baseDir = __DIR__ . '/../app/';
@@ -59,6 +59,15 @@ spl_autoload_register(function ($class) {
         require $file;
     }
 });
+
+// Load Hook Manager (needed for post types)
+require_once __DIR__ . '/../app/Hooks/HookManager.php';
+
+// Load Post Type Registry (needed before post-types.php)
+require_once __DIR__ . '/../app/Registry/PostTypeRegistry.php';
+
+// Register default post types
+require_once __DIR__ . '/../app/Support/post-types.php';
 
 // Error reporting
 if (config('app.debug', false)) {

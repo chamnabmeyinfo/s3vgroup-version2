@@ -415,6 +415,28 @@ $navCategories = $categoryModel->getAll(true);
         .nav-link-ultra:hover {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
+        
+        /* Menu Icon Alignment - Ensure all icons align with text */
+        .nav-link-ultra i,
+        .menu-item i,
+        .nav-dropdown i,
+        .mega-menu-item i,
+        .mega-menu-widget i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            vertical-align: middle;
+        }
+        
+        /* Ensure flex containers align icons properly */
+        .nav-link-ultra.flex.items-center i,
+        .menu-item.flex.items-center i,
+        a.flex.items-center i,
+        button.flex.items-center i {
+            flex-shrink: 0;
+            line-height: 1;
+        }
             -webkit-backdrop-filter: blur(16px);
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
@@ -749,9 +771,9 @@ $navCategories = $categoryModel->getAll(true);
                         <!-- Products Mega Menu -->
                         <div class="nav-dropdown-group relative group" id="products-dropdown">
                             <button class="nav-link-ultra px-4 py-2.5 rounded-xl transition-all duration-300 group relative flex items-center" style="white-space: nowrap;">
-                                <i class="fas fa-box mr-2"></i>
-                                <span>Products</span>
-                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300"></i>
+                                <i class="fas fa-box mr-2 flex-shrink-0" style="line-height: 1; vertical-align: middle;"></i>
+                                <span style="line-height: 1.5;">Products</span>
+                                <i class="fas fa-chevron-down ml-2 text-xs transform group-hover:rotate-180 transition-transform duration-300 flex-shrink-0" style="line-height: 1;"></i>
                                 <span class="nav-link-indicator"></span>
                             </button>
                             <div class="nav-dropdown w-[600px] overflow-hidden">
@@ -763,9 +785,58 @@ $navCategories = $categoryModel->getAll(true);
                                     </h3>
                                 </div>
                                 <div class="p-4 max-h-[500px] overflow-y-auto">
+                                    <?php
+                                    // Check if we should use selected categories
+                                    $useSelectedCategories = false;
+                                    $selectedCategoryIds = [];
+                                    try {
+                                        // Check if table exists first
+                                        $tableExists = false;
+                                        try {
+                                            db()->fetchOne("SELECT 1 FROM menu_category_selections LIMIT 1");
+                                            $tableExists = true;
+                                        } catch (\Exception $e) {
+                                            $tableExists = false;
+                                        }
+                                        
+                                        if ($tableExists) {
+                                            $setting = db()->fetchOne(
+                                                "SELECT value FROM settings WHERE `key` = 'products_menu_use_selected_categories'"
+                                            );
+                                            $useSelectedCategories = !empty($setting) && $setting['value'] == '1';
+                                            
+                                            if ($useSelectedCategories) {
+                                                $selected = db()->fetchAll(
+                                                    "SELECT category_id FROM menu_category_selections 
+                                                     WHERE menu_item_id IS NULL AND is_active = 1 
+                                                     ORDER BY display_order ASC"
+                                                );
+                                                $selectedCategoryIds = array_column($selected, 'category_id');
+                                                
+                                                // Filter categories to only show selected ones
+                                                if (!empty($selectedCategoryIds)) {
+                                                    $navCategories = array_filter($navCategories, function($cat) use ($selectedCategoryIds) {
+                                                        return in_array($cat['id'], $selectedCategoryIds);
+                                                    });
+                                                    // Reorder by display order
+                                                    usort($navCategories, function($a, $b) use ($selectedCategoryIds) {
+                                                        $posA = array_search($a['id'], $selectedCategoryIds);
+                                                        $posB = array_search($b['id'], $selectedCategoryIds);
+                                                        return $posA <=> $posB;
+                                                    });
+                                                } else {
+                                                    $navCategories = []; // No categories selected
+                                                }
+                                            }
+                                        }
+                                    } catch (\Exception $e) {
+                                        // Fallback to showing all categories
+                                        error_log('Menu categories selection error: ' . $e->getMessage());
+                                    }
+                                    ?>
                                     <?php if (!empty($navCategories)): ?>
                                         <div class="grid grid-cols-2 gap-2">
-                                            <?php foreach (array_slice($navCategories, 0, 12) as $cat): ?>
+                                            <?php foreach ($navCategories as $cat): ?>
                                             <a href="<?= url('products.php?category=' . escape($cat['slug'])) ?>" 
                                                class="group/item block px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-blue-50/80 hover:via-indigo-50/80 hover:to-purple-50/80 transition-all duration-300 border-l-4 border-transparent hover:border-blue-500 hover:shadow-lg relative overflow-hidden">
                                                 <div class="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-indigo-500/0 to-purple-500/0 group-hover/item:from-blue-500/5 group-hover/item:via-indigo-500/5 group-hover/item:to-purple-500/5 transition-all duration-300"></div>
