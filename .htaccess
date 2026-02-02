@@ -33,6 +33,12 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     RewriteCond %{REQUEST_URI} !^/api [NC]
     RewriteRule ^(.*)$ https://www.s3vtgroup.com.kh/$1 [R=301,L]
     
+    # Sitemap index (for Google Search Console)
+    RewriteRule ^sitemap_index\.xml$ sitemap-index.php [L]
+    
+    # Dynamic robots.txt
+    RewriteRule ^robots\.txt$ robots.php [L]
+    
     # Redirect to remove .php extension
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
