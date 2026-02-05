@@ -20,6 +20,23 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 ?>
 <html lang="<?= escape($htmlLang) ?>">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17871315689"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'AW-17871315689');
+    </script>
+    <!-- Event snippet for Page view conversion page -->
+    <script>
+      gtag('event', 'conversion', {
+          'send_to': 'AW-17871315689/CNNSCP7U_-EbEOnF2slC',
+          'value': 1.0,
+          'currency': 'USD'
+      });
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="content-language" content="<?= escape($htmlLang) ?>">
