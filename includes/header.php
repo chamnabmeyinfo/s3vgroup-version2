@@ -20,6 +20,14 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 ?>
 <html lang="<?= escape($htmlLang) ?>">
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-5DSZM6R8');</script>
+    <!-- End Google Tag Manager -->
+
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-5LY6BHRJCB"></script>
     <script>
@@ -808,6 +816,11 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 
 </head>
 <body class="bg-white">
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5DSZM6R8"
+    height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <!-- Premium Modern Navigation -->
     <nav class="sticky top-0 z-50" id="main-nav">
         <div class="container mx-auto px-4 lg:px-6 xl:px-8">
