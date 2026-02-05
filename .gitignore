@@ -124,6 +124,13 @@ Thumbs.db
 *.swo
 *~
 
+# Cursor (IDE + skills): not pushed by default
+# To share skills with the team, remove the line below and optionally add:
+#   .cursor/*
+#   !.cursor/skills/
+#   !.cursor/skills/**/
+.cursor/
+
 # Node modules (if any)
 node_modules/
 package-lock.json
