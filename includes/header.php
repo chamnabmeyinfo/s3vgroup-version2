@@ -29,6 +29,14 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 
       gtag('config', 'AW-17871315689');
     </script>
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "vck0gjxcsv");
+    </script>
     <?php if (!empty($trackGoogleConversion)): ?>
     <!-- Event snippet for Page view conversion (fires on success pages: contact, quote, checkout) -->
     <script>
