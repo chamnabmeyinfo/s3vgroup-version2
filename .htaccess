@@ -33,6 +33,16 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     RewriteCond %{REQUEST_URI} !^/api [NC]
     RewriteRule ^(.*)$ https://www.s3vtgroup.com.kh/$1 [R=301,L]
     
+    # Redirect old WordPress/legacy URLs to reduce 404s (common patterns)
+    RewriteRule ^wp-content/(.*)$ / [R=301,L]
+    RewriteRule ^wp-includes/(.*)$ / [R=301,L]
+    RewriteRule ^author/(.*)$ / [R=301,L]
+    RewriteRule ^feed/?$ / [R=301,L]
+    RewriteRule ^wp-login\.php$ / [R=301,L]
+    RewriteRule ^xmlrpc\.php$ / [R=301,L]
+    # WordPress sitemap stubs (404 otherwise)
+    RewriteRule ^(author|category|page|post|post_tag|product|product_cat|tbay_footer|tbay_header|tbay_megamenu)-sitemap\.xml$ /sitemap_index.xml [R=301,L]
+    
     # Sitemap index (for Google Search Console)
     RewriteRule ^sitemap_index\.xml$ sitemap-index.php [L]
     # Main sitemap (so crawlers get correct Content-Type)

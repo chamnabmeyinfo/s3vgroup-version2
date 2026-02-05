@@ -75,6 +75,13 @@ $totalPages = ceil($totalProducts / $filters['limit']);
 $categoryTree = $categoryModel->getTree(null, true);
 $categories = $categoryModel->getAll(true);
 
+// Canonical URL to avoid duplicate-without-canonical (category or base products)
+if (!empty($_GET['category']) && !empty($category)) {
+    $canonicalUrl = url('products.php?category=' . rawurlencode($category['slug']));
+} elseif (empty($_GET['search']) && (empty($_GET['page']) || ($_GET['page'] ?? 1) == 1)) {
+    $canonicalUrl = url('products.php');
+}
+
 $pageTitle = 'Products - ' . get_site_name();
 $metaDescription = 'Browse our selection of forklifts and industrial equipment';
 

@@ -23,6 +23,7 @@ foreach ($cartItems as $productId => $quantity) {
 }
 
 $pageTitle = 'Shopping Cart - ' . get_site_name();
+$robotsNoIndex = true;
 include __DIR__ . '/includes/header.php';
 ?>
 

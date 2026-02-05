@@ -5,12 +5,13 @@
  */
 require_once __DIR__ . '/bootstrap/app.php';
 
+header('Content-Type: application/xml; charset=utf-8');
+
+try {
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Service;
 use App\Models\Page;
-
-header('Content-Type: application/xml; charset=utf-8');
 
 $baseUrl = config('app.url');
 if (empty($baseUrl)) {
@@ -94,4 +95,12 @@ foreach ($pages as $page) {
 }
 
 echo '</urlset>';
+
+} catch (Throwable $e) {
+    header('Content-Type: application/xml; charset=utf-8');
+    echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+    $base = rtrim(config('app.url', '') ?: (($_SERVER['HTTPS'] ?? '') === 'on' ? 'https://' : 'http://') . ($_SERVER['HTTP_HOST'] ?? 'localhost'), '/');
+    echo '<url><loc>' . htmlspecialchars($base, ENT_XML1, 'UTF-8') . '</loc><lastmod>' . date('Y-m-d') . '</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>';
+    echo '</urlset>';
+}
 

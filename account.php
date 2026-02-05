@@ -55,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $pageTitle = 'My Account - ' . get_site_name();
+$robotsNoIndex = true;
 include __DIR__ . '/includes/header.php';
 ?>
 

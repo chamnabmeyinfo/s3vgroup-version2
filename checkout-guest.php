@@ -88,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $trackGoogleConversion = !empty($message);
 
 $pageTitle = 'Checkout - ' . get_site_name();
+$robotsNoIndex = true;
 include __DIR__ . '/includes/header.php';
 ?>
 
