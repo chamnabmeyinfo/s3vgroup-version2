@@ -786,7 +786,7 @@ include __DIR__ . '/includes/header.php';
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800">Menu Items</h2>
             <div class="flex gap-2">
-                <button onclick="syncCategoriesToProducts()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Sync All Categories to Products Menu">
+                <button onclick="syncCategoriesToProducts(event)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Sync All Categories to Products Menu">
                     <i class="fas fa-sync-alt mr-2"></i>Sync Categories to Products
                 </button>
                 <button onclick="quickAddCeoMessage()" class="bg-pink-600 hover:bg-pink-700 text-white px-4 py-2 rounded-lg font-semibold transition-all" title="Quick Add CEO Message">
@@ -1851,7 +1851,7 @@ include __DIR__ . '/includes/header.php';
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9hvq45wqt7F2PvU+8k6g1a8IdzW0+3s7z4fGB+6Z3P4ZMXvkd1HPhNb1X4hWtWB8QrN2JBMH8vSAXoGdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" integrity="sha512-Eezs+g9Lq4TCCq0wae01s9PuNWzHYoCMkE97e2qdkYthpI0pzC3UGB03lgEHn2XM85hDOUF6qgqqszs+iXU4UA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 let sortableInstance = null;
 
@@ -2183,7 +2183,7 @@ function saveMenuOrder() {
 }
 
 // Sync Categories to Products Menu
-async function syncCategoriesToProducts() {
+async function syncCategoriesToProducts(evt) {
     const menuId = <?= $menuId ?>;
     if (!menuId || menuId <= 0) {
         customAlert('Invalid menu ID', 'Error', 'error').then(() => {});
@@ -2212,10 +2212,12 @@ async function syncCategoriesToProducts() {
         return;
     }
     
-    const btn = event.target;
-    btn.disabled = true;
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Syncing...';
+    const btn = (evt && evt.target) ? evt.target : document.querySelector('button[onclick*="syncCategoriesToProducts"]');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Syncing...';
+    }
     
     try {
         const syncResponse = await fetch('<?= url("admin/menu-edit.php?id={$menuId}") ?>', {
@@ -2241,13 +2243,11 @@ async function syncCategoriesToProducts() {
             });
         } else {
             customAlert('Error syncing categories: ' + (syncResult.error || 'Unknown error'), 'Error', 'error').then(() => {});
-            btn.disabled = false;
-            btn.innerHTML = originalText;
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
         }
     } catch (error) {
         customAlert('Error: ' + error.message, 'Error', 'error').then(() => {});
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
     }
 }
 
