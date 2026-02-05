@@ -134,6 +134,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Check for type-specific title fields (for add form)
         if (empty($customTitle)) {
             $typeSpecificTitleFields = [
+                'custom_title',
                 'services_title',
                 'ceo_message_title',
                 'partners_title',
@@ -155,6 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Check for type-specific URL fields (for add form)
         if (empty($customUrl)) {
             $typeSpecificUrlFields = [
+                'custom_url',
                 'services_url',
                 'ceo_message_url',
                 'partners_url',
@@ -396,7 +398,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (isset($_POST['title']) && trim($_POST['title']) !== '') {
             $customTitle = trim($_POST['title']);
         }
-        // Also check for edit_custom_title (the actual field ID in the form)
+        // Check for edit_custom_title (custom link field - use before generic title due to duplicate names)
         if (empty($customTitle) && isset($_POST['edit_custom_title']) && trim($_POST['edit_custom_title']) !== '') {
             $customTitle = trim($_POST['edit_custom_title']);
         }
@@ -957,13 +959,13 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-heading mr-2 text-gray-400"></i>Title *
                         </label>
-                        <input type="text" name="title" id="edit_custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Menu Item Title">
+                        <input type="text" name="edit_custom_title" id="edit_custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="Menu Item Title">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-gray-400"></i>URL
                         </label>
-                        <input type="text" name="url" id="edit_custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="/page.php, page.php?slug=about-us, or https://example.com/page.php">
+                        <input type="text" name="edit_custom_url" id="edit_custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500" placeholder="/page.php, page.php?slug=about-us, or https://example.com/page.php">
                         <p class="text-xs text-gray-500 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>
                             Accepts full URLs (https://...), absolute paths (/page.php), or relative paths (page.php?slug=...). Leave empty to use # as URL.
@@ -1336,13 +1338,13 @@ include __DIR__ . '/includes/header.php';
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-heading mr-2 text-gray-400"></i>Title *
                         </label>
-                        <input type="text" name="title" id="custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Menu Item Title">
+                        <input type="text" name="custom_title" id="custom_title" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Menu Item Title">
                     </div>
                     <div class="mb-4">
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-link mr-2 text-gray-400"></i>URL
                         </label>
-                        <input type="text" name="url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="/page.php, page.php?slug=about-us, or https://example.com/page.php">
+                        <input type="text" name="custom_url" id="custom_url" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="/page.php, page.php?slug=about-us, or https://example.com/page.php">
                         <p class="text-xs text-gray-500 mt-1">
                             <i class="fas fa-info-circle mr-1"></i>
                             Accepts full URLs (https://...) or relative paths (page.php?slug=...)
