@@ -56,7 +56,12 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
                     ['id' => $customer['id']]
                 );
                 
-                $redirect = $_GET['redirect'] ?? 'account.php';
+                // Security: whitelist redirect to prevent open redirect
+                $allowedRedirects = ['account.php', 'index.php', 'cart.php', 'checkout.php', 'products.php'];
+                $requested = $_GET['redirect'] ?? 'account.php';
+                $basename = preg_replace('/[?#].*$/', '', $requested);
+                $basename = $basename === '' ? 'account.php' : $basename;
+                $redirect = in_array($basename, $allowedRedirects, true) ? $basename : 'account.php';
                 header('Location: ' . url($redirect));
                 exit;
             } else {

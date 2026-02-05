@@ -95,8 +95,9 @@ class PermissionService {
             
             return ($result['count'] ?? 0) > 0;
         } catch (\Exception $e) {
-            // On error, allow access (fail open during setup)
-            return true;
+            // Fail closed: on error deny access (safe default after setup)
+            error_log('PermissionService hasPermission error: ' . $e->getMessage());
+            return false;
         }
     }
     

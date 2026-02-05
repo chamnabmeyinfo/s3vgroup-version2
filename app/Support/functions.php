@@ -308,34 +308,32 @@ if (!function_exists('csrf_verify')) {
      */
     function csrf_verify($token = null)
     {
-        // CSRF protection is disabled by default
-        // Check if CSRF protection is enabled in settings
+        // CSRF protection is enabled by default; only skip if explicitly disabled in settings
         try {
-            $csrfEnabled = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
-            if ($csrfEnabled && $csrfEnabled['value'] === '1') {
-                // CSRF protection is explicitly enabled - verify token
-                if (session_status() === PHP_SESSION_NONE) {
-                    session_start();
-                }
-                
-                if (!isset($_SESSION['csrf_token'])) {
-                    return false;
-                }
-                
-                $token = $token ?? ($_POST['csrf_token'] ?? $_GET['csrf_token'] ?? null);
-                
-                if (empty($token)) {
-                    return false;
-                }
-                
-                return hash_equals($_SESSION['csrf_token'], $token);
+            $row = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
+            if ($row && $row['value'] === '0') {
+                return true; // Explicitly disabled
             }
         } catch (\Exception $e) {
-            // If setting doesn't exist or error, default to disabled
+            // If settings table missing (e.g. during setup), skip so install/setup forms work
+            return true;
         }
-        
-        // Default: CSRF protection is disabled - return true
-        return true;
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['csrf_token'])) {
+            return false;
+        }
+
+        $token = $token ?? ($_POST['csrf_token'] ?? $_GET['csrf_token'] ?? null);
+
+        if (empty($token)) {
+            return false;
+        }
+
+        return hash_equals($_SESSION['csrf_token'], $token);
     }
 }
 
@@ -348,27 +346,25 @@ if (!function_exists('require_csrf')) {
      */
     function require_csrf($showResetButton = false)
     {
-        // CSRF protection is disabled by default
-        // Check if CSRF protection is enabled in settings
+        // CSRF protection is enabled by default; only skip if explicitly disabled in settings
         try {
-            $csrfEnabled = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
-            if ($csrfEnabled && $csrfEnabled['value'] === '1') {
-                // CSRF protection is explicitly enabled - verify token
-                if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
-                    http_response_code(403);
-                    $errorMsg = 'Invalid security token. Please refresh the page and try again.';
-                    if ($showResetButton) {
-                        $errorMsg .= ' <button type="button" onclick="resetCsrfToken()" class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Reset Token</button>';
-                    }
-                    die($errorMsg);
-                }
+            $row = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'csrf_protection_enabled'");
+            if ($row && $row['value'] === '0') {
+                return; // Explicitly disabled
             }
         } catch (\Exception $e) {
-            // If setting doesn't exist or error, default to disabled - do nothing
+            // If settings table missing (e.g. during setup), skip so install/setup forms work
+            return;
         }
-        
-        // Default: CSRF protection is disabled - allow request to proceed
-        return;
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !csrf_verify()) {
+            http_response_code(403);
+            $errorMsg = 'Invalid security token. Please refresh the page and try again.';
+            if ($showResetButton) {
+                $errorMsg .= ' <button type="button" onclick="resetCsrfToken()" class="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm">Reset Token</button>';
+            }
+            die($errorMsg);
+        }
     }
 }
 

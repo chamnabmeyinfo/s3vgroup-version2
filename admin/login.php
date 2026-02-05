@@ -9,15 +9,30 @@ if (session('admin_logged_in')) {
 
 $error = '';
 
-// Handle login form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
-    $password = $_POST['password'] ?? '';
-    
-    if (empty($username) || empty($password)) {
-        $error = 'Please enter username and password.';
+// Security: rate limiting for admin login attempts
+$attempts = session('admin_login_attempts') ?? 0;
+$lastAttempt = session('admin_last_attempt') ?? 0;
+$lockoutTime = 900; // 15 minutes
+
+if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
+    $remainingTime = ceil(($lockoutTime - (time() - $lastAttempt)) / 60);
+    $error = "Too many failed attempts. Try again in {$remainingTime} minute(s).";
+} elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Security: CSRF protection (always enforced for admin login)
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $token = $_POST['csrf_token'] ?? null;
+    if (empty($token) || !isset($_SESSION['csrf_token']) || !hash_equals($_SESSION['csrf_token'], $token)) {
+        $error = 'Invalid security token. Please refresh the page and try again.';
     } else {
-        try {
+        $username = trim($_POST['username'] ?? '');
+        $password = $_POST['password'] ?? '';
+
+        if (empty($username) || empty($password)) {
+            $error = 'Please enter username and password.';
+        } else {
+            try {
             // Find user by username (case-insensitive)
             $user = null;
             
@@ -70,11 +85,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (empty($user['password'])) {
                     $error = 'User account has no password set. Please contact administrator.';
                 } elseif (password_verify($password, $user['password'])) {
+                    // Security: clear failed attempts and regenerate session (prevent fixation)
+                    session('admin_login_attempts', 0);
+                    session('admin_last_attempt', 0);
+                    if (session_status() === PHP_SESSION_ACTIVE) {
+                        session_regenerate_id(true);
+                    }
                     // Password is correct - login successful
                     session('admin_logged_in', true);
                     session('admin_user_id', $user['id']);
                     session('admin_username', $user['username']);
-                    
+
                     // Load role information
                     if (!empty($user['role_id'])) {
                         session('admin_role_id', $user['role_id']);
@@ -85,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             session('admin_role_slug', $user['role_slug']);
                         }
                     }
-                
+
                     // Update last login
                     try {
                         db()->query(
@@ -95,16 +116,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } catch (\Exception $e) {
                         // Ignore if update fails (last_login column might not exist)
                     }
-                    
+
                     header('Location: ' . url('admin/index.php'));
                     exit;
                 } else {
                     // Password is incorrect
                     $error = 'Invalid username or password.';
+                    session('admin_login_attempts', (session('admin_login_attempts') ?? 0) + 1);
+                    session('admin_last_attempt', time());
                 }
             } else {
                 // User not found
                 $error = 'Invalid username or password.';
+                session('admin_login_attempts', (session('admin_login_attempts') ?? 0) + 1);
+                session('admin_last_attempt', time());
             }
         } catch (\Exception $e) {
             $error = 'Database error. Please check your database setup.';
@@ -132,12 +157,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </h2>
             </div>
             <form class="mt-8 space-y-6 bg-white p-8 rounded-lg shadow-md" method="POST">
+                <?= csrf_field() ?>
                 <?php if (!empty($error)): ?>
                     <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
                         <?= escape($error) ?>
                     </div>
                 <?php endif; ?>
-                
+
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
                     <input id="username" name="username" type="text" required
