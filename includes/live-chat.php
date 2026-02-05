@@ -41,7 +41,7 @@
                 </ul>
                 <div class="bg-gray-100 rounded-lg p-4 text-center">
                     <p class="text-sm font-semibold mb-2">Or contact us directly:</p>
-                    <a href="<?= url('contact.php') ?>" class="btn-primary-sm inline-block">
+                    <a href="<?= function_exists('url') ? url('contact.php') : 'contact.php' ?>" class="btn-primary-sm inline-block">
                         Contact Form
                     </a>
                 </div>

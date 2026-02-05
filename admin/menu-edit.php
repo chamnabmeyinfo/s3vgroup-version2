@@ -884,7 +884,7 @@ include __DIR__ . '/includes/header.php';
                     <i class="fas fa-tag mr-2 text-green-600"></i>Item Type *
                 </label>
                 <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    <button type="button" onclick="selectEditItemType('custom')" class="edit-item-type-btn bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-4 text-center transition-all" data-type="custom">
+                    <button type="button" onclick="selectEditItemType('custom')" class="edit-item-type-btn bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 rounded-lg p-4 text-center transition-all active" data-type="custom">
                         <i class="fas fa-link text-blue-600 text-2xl mb-2"></i>
                         <div class="font-semibold text-gray-800">Custom Link</div>
                         <div class="text-xs text-gray-500 mt-1">Any URL</div>

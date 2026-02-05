@@ -1,16 +1,14 @@
 <?php
+require_once __DIR__ . '/bootstrap/app.php';
+
 // Check if database is set up
 try {
-    require_once __DIR__ . '/bootstrap/app.php';
     $db = db();
     $db->fetchOne("SELECT 1 FROM products LIMIT 1");
 } catch (Exception $e) {
-    // Database not set up - redirect to setup
     header('Location: setup.php');
     exit;
 }
-
-require_once __DIR__ . '/bootstrap/app.php';
 
 // Check under construction mode
 use App\Helpers\UnderConstruction;
