@@ -21,12 +21,13 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 <html lang="<?= escape($htmlLang) ?>">
 <head>
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=AW-17871315689"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-5LY6BHRJCB"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
 
+      gtag('config', 'G-5LY6BHRJCB');
       gtag('config', 'AW-17871315689');
     </script>
     <!-- Microsoft Clarity -->
