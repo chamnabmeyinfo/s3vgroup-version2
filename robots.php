@@ -13,4 +13,4 @@ echo "User-agent: *\n";
 echo "Allow: /\n";
 echo "\n";
 echo "Sitemap: {$baseUrl}/sitemap_index.xml\n";
-echo "Sitemap: {$baseUrl}/sitemap\n";
+echo "Sitemap: {$baseUrl}/sitemap.xml\n";

@@ -45,7 +45,8 @@ AddHandler application/x-httpd-php .php .php5 .phtml
     
     # Sitemap index (for Google Search Console)
     RewriteRule ^sitemap_index\.xml$ sitemap-index.php [L]
-    # Main sitemap (so crawlers get correct Content-Type)
+    # Main sitemap (sitemap.xml and /sitemap both work)
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
     RewriteRule ^sitemap$ sitemap.php [L]
     
     # Dynamic robots.txt

@@ -3,9 +3,12 @@
  * XML Sitemap Index Generator
  * Serves as sitemap_index.xml for Google Search Console and other crawlers.
  */
+ob_start();
 require_once __DIR__ . '/bootstrap/app.php';
+ob_end_clean();
 
 header('Content-Type: application/xml; charset=utf-8');
+header('Cache-Control: public, max-age=3600');
 
 // Get base URL (same logic as sitemap.php)
 $baseUrl = config('app.url');
@@ -22,8 +25,8 @@ if (empty($baseUrl)) {
 }
 $baseUrl = rtrim($baseUrl, '/\\');
 
-// Main sitemap URL (/sitemap rewrites to sitemap.php)
-$sitemapUrl = $baseUrl . '/sitemap';
+// Main sitemap URL (use .xml extension for better crawler compatibility)
+$sitemapUrl = $baseUrl . '/sitemap.xml';
 
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 echo '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
