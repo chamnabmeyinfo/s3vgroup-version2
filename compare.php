@@ -28,7 +28,7 @@ foreach ($ids as $id) {
     }
 }
 
-$pageTitle = 'Compare Products - Forklift & Equipment Pro';
+$pageTitle = 'Compare Products - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

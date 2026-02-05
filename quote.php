@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Track Google Ads conversion when quote request submitted successfully
 $trackGoogleConversion = !empty($message);
 
-$pageTitle = 'Request a Quote - Forklift & Equipment Pro';
+$pageTitle = 'Request a Quote - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';
 ?>

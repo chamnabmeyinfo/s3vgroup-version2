@@ -8,7 +8,7 @@ if (session_status() === PHP_SESSION_NONE) {
 // Get testimonials
 $testimonials = db()->fetchAll("SELECT * FROM testimonials WHERE is_active = 1 ORDER BY display_order, created_at DESC");
 
-$pageTitle = 'Customer Testimonials - Forklift & Equipment Pro';
+$pageTitle = 'Customer Testimonials - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

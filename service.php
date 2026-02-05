@@ -35,8 +35,10 @@ if (!$service) {
 }
 
 // Set page title and meta
-$pageTitle = !empty($service['meta_title']) ? $service['meta_title'] : $service['title'] . ' - Services';
+$pageTitle = !empty($service['meta_title']) ? $service['meta_title'] : $service['title'] . ' - ' . get_site_name();
 $metaDescription = $service['meta_description'] ?? $service['description'] ?? '';
+$canonicalUrl = url('service.php?slug=' . urlencode($service['slug']));
+$ogImage = !empty($service['image']) ? image_url($service['image']) : (function_exists('get_seo_defaults') ? (get_seo_defaults()['og_image'] ?? '') : '');
 
 include __DIR__ . '/includes/header.php';
 ?>

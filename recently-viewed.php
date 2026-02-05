@@ -18,7 +18,7 @@ foreach ($recentIds as $id) {
     }
 }
 
-$pageTitle = 'Recently Viewed Products - Forklift & Equipment Pro';
+$pageTitle = 'Recently Viewed Products - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

@@ -67,7 +67,7 @@ if ($sort === 'price_asc') {
     usort($filteredProducts, fn($a, $b) => strcmp($a['name'], $b['name']));
 }
 
-$pageTitle = 'Browse Products - Forklift & Equipment Pro';
+$pageTitle = 'Browse Products - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

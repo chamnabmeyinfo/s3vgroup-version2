@@ -81,7 +81,7 @@ if ($attempts >= 5 && (time() - $lastAttempt) < $lockoutTime) {
     }
 }
 
-$pageTitle = 'Customer Login - Forklift & Equipment Pro';
+$pageTitle = 'Customer Login - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';
 ?>

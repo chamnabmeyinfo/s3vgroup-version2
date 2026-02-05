@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'My Account - Forklift & Equipment Pro';
+$pageTitle = 'My Account - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

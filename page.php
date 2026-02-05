@@ -35,8 +35,10 @@ if (!$page) {
 }
 
 // Set page title and meta
-$pageTitle = !empty($page['meta_title']) ? $page['meta_title'] : $page['title'];
+$pageTitle = !empty($page['meta_title']) ? $page['meta_title'] : $page['title'] . ' - ' . get_site_name();
 $metaDescription = $page['meta_description'] ?? '';
+$canonicalUrl = url('page.php?slug=' . urlencode($page['slug']));
+$ogImage = (function_exists('get_seo_defaults') ? (get_seo_defaults()['og_image'] ?? '') : '');
 
 include __DIR__ . '/includes/header.php';
 ?>

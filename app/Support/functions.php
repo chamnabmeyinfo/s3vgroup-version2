@@ -529,3 +529,99 @@ if (!function_exists('resize_and_save_image')) {
         return $saved;
     }
 }
+
+// SEO helpers
+if (!function_exists('canonical_url')) {
+    /**
+     * Build canonical URL for current page (strips tracking params).
+     * Pass explicit URL from page script to override (e.g. product, service, page).
+     *
+     * @param string|null $override Full canonical URL to use, or null to build from request
+     * @return string
+     */
+    function canonical_url($override = null)
+    {
+        if ($override !== null && $override !== '') {
+            return $override;
+        }
+        $baseUrl = rtrim(config('app.url', ''), '/');
+        $uri = $_SERVER['REQUEST_URI'] ?? '';
+        $path = parse_url($uri, PHP_URL_PATH);
+        $query = parse_url($uri, PHP_URL_QUERY);
+        if ($path === null || $path === false) {
+            return $baseUrl;
+        }
+        $path = '/' . ltrim($path, '/');
+        if (!empty($query)) {
+            parse_str($query, $params);
+            $strip = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'fbclid', 'gclid', 'msclkid'];
+            foreach ($strip as $key) {
+                unset($params[$key]);
+            }
+            $query = http_build_query($params);
+            return $baseUrl . $path . ($query !== '' ? '?' . $query : '');
+        }
+        return $baseUrl . $path;
+    }
+}
+
+if (!function_exists('get_site_name')) {
+    /**
+     * Get site name from settings (for titles, OG site_name).
+     *
+     * @return string
+     */
+    function get_site_name()
+    {
+        static $name = null;
+        if ($name !== null) {
+            return $name;
+        }
+        try {
+            $row = db()->fetchOne("SELECT value FROM settings WHERE `key` = 'site_name'");
+            $name = ($row && !empty($row['value'])) ? $row['value'] : 'Forklift & Equipment Pro';
+        } catch (\Exception $e) {
+            $name = 'Forklift & Equipment Pro';
+        }
+        return $name;
+    }
+}
+
+if (!function_exists('get_seo_defaults')) {
+    /**
+     * Get default SEO values from settings (meta title, meta description, OG image).
+     *
+     * @return array{meta_title: string, meta_description: string, og_image: string}
+     */
+    function get_seo_defaults()
+    {
+        static $defaults = null;
+        if ($defaults !== null) {
+            return $defaults;
+        }
+        try {
+            $rows = db()->fetchAll("SELECT `key`, value FROM settings WHERE `key` IN ('seo_default_meta_title', 'seo_default_meta_description', 'seo_og_image')");
+            $kv = [];
+            foreach ($rows as $r) {
+                $kv[$r['key']] = $r['value'] ?? '';
+            }
+            $baseUrl = rtrim(config('app.url', ''), '/');
+            $ogImage = !empty($kv['seo_og_image']) ? $kv['seo_og_image'] : '';
+            if ($ogImage && strpos($ogImage, 'http') !== 0) {
+                $ogImage = $baseUrl . '/' . ltrim($ogImage, '/');
+            }
+            $defaults = [
+                'meta_title' => $kv['seo_default_meta_title'] ?? get_site_name(),
+                'meta_description' => $kv['seo_default_meta_description'] ?? 'Premium forklifts and industrial equipment for warehouses and factories',
+                'og_image' => $ogImage,
+            ];
+        } catch (\Exception $e) {
+            $defaults = [
+                'meta_title' => get_site_name(),
+                'meta_description' => 'Premium forklifts and industrial equipment for warehouses and factories',
+                'og_image' => '',
+            ];
+        }
+        return $defaults;
+    }
+}

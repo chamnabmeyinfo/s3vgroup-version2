@@ -51,7 +51,7 @@ $categories = db()->fetchAll("SELECT DISTINCT category FROM blog_posts WHERE is_
     }
 }
 
-$pageTitle = 'Blog & News - Forklift & Equipment Pro';
+$pageTitle = 'Blog & News - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

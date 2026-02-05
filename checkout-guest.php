@@ -87,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Track Google Ads conversion when order submitted successfully
 $trackGoogleConversion = !empty($message);
 
-$pageTitle = 'Checkout - Forklift & Equipment Pro';
+$pageTitle = 'Checkout - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

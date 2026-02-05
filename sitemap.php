@@ -1,18 +1,19 @@
 <?php
 /**
  * XML Sitemap Generator
+ * Includes: homepage, static pages, products, categories, services, CMS pages.
  */
 require_once __DIR__ . '/bootstrap/app.php';
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Service;
+use App\Models\Page;
 
 header('Content-Type: application/xml; charset=utf-8');
 
-// Get base URL from config (auto-detects based on current directory)
 $baseUrl = config('app.url');
 if (empty($baseUrl)) {
-    // Fallback: auto-detect if config doesn't provide it
     $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $scriptPath = $_SERVER['SCRIPT_NAME'] ?? $_SERVER['PHP_SELF'] ?? '';
@@ -23,58 +24,73 @@ if (empty($baseUrl)) {
     }
     $baseUrl = $protocol . $host . $basePath;
 }
+$baseUrl = rtrim($baseUrl, '/');
 
 $productModel = new Product();
 $categoryModel = new Category();
+$serviceModel = new Service();
+$pageModel = new Page();
 
-$products = $productModel->getAll(['limit' => 1000]);
+$products = $productModel->getAll(['limit' => 5000]);
 $categories = $categoryModel->getAll(true);
+$services = $serviceModel->getAll(true);
+$pages = $pageModel->getAll(true);
+
+function sitemapUrl($baseUrl, $path, $lastmod = null, $changefreq = 'weekly', $priority = '0.8') {
+    $loc = $baseUrl . '/' . ltrim($path, '/');
+    $lastmod = $lastmod ? date('Y-m-d', is_numeric($lastmod) ? $lastmod : strtotime($lastmod)) : date('Y-m-d');
+    echo '<url>';
+    echo '<loc>' . htmlspecialchars($loc, ENT_XML1, 'UTF-8') . '</loc>';
+    echo '<lastmod>' . $lastmod . '</lastmod>';
+    echo '<changefreq>' . $changefreq . '</changefreq>';
+    echo '<priority>' . $priority . '</priority>';
+    echo '</url>';
+}
 
 echo '<?xml version="1.0" encoding="UTF-8"?>';
 echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
 // Homepage
-echo '<url>';
-echo '<loc>' . escape($baseUrl) . '</loc>';
-echo '<lastmod>' . date('Y-m-d') . '</lastmod>';
-echo '<changefreq>daily</changefreq>';
-echo '<priority>1.0</priority>';
-echo '</url>';
+sitemapUrl($baseUrl, '', null, 'daily', '1.0');
 
-// Products page
-echo '<url>';
-echo '<loc>' . escape($baseUrl) . '/products.php</loc>';
-echo '<lastmod>' . date('Y-m-d') . '</lastmod>';
-echo '<changefreq>daily</changefreq>';
-echo '<priority>0.9</priority>';
-echo '</url>';
-
-// Contact page
-echo '<url>';
-echo '<loc>' . escape($baseUrl) . '/contact.php</loc>';
-echo '<lastmod>' . date('Y-m-d') . '</lastmod>';
-echo '<changefreq>monthly</changefreq>';
-echo '<priority>0.7</priority>';
-echo '</url>';
+// Static pages
+$staticPages = [
+    'products.php' => ['changefreq' => 'daily', 'priority' => '0.9'],
+    'contact.php' => ['changefreq' => 'monthly', 'priority' => '0.7'],
+    'about-us.php' => ['changefreq' => 'monthly', 'priority' => '0.8'],
+    'services.php' => ['changefreq' => 'weekly', 'priority' => '0.8'],
+    'mission-vision.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+    'mission.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+    'vision.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+    'ceo-message.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+    'faq.php' => ['changefreq' => 'monthly', 'priority' => '0.7'],
+    'blog.php' => ['changefreq' => 'weekly', 'priority' => '0.7'],
+    'quote.php' => ['changefreq' => 'monthly', 'priority' => '0.7'],
+    'request-catalog.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+    'testimonials.php' => ['changefreq' => 'monthly', 'priority' => '0.6'],
+];
+foreach ($staticPages as $file => $opts) {
+    sitemapUrl($baseUrl, $file, null, $opts['changefreq'], $opts['priority']);
+}
 
 // Categories
 foreach ($categories as $category) {
-    echo '<url>';
-    echo '<loc>' . escape($baseUrl) . '/products.php?category=' . escape($category['slug']) . '</loc>';
-    echo '<lastmod>' . date('Y-m-d', strtotime($category['updated_at'] ?? 'now')) . '</lastmod>';
-    echo '<changefreq>weekly</changefreq>';
-    echo '<priority>0.8</priority>';
-    echo '</url>';
+    sitemapUrl($baseUrl, 'products.php?category=' . rawurlencode($category['slug']), $category['updated_at'] ?? null, 'weekly', '0.8');
 }
 
 // Products
 foreach ($products as $product) {
-    echo '<url>';
-    echo '<loc>' . escape($baseUrl) . '/product.php?slug=' . escape($product['slug']) . '</loc>';
-    echo '<lastmod>' . date('Y-m-d', strtotime($product['updated_at'] ?? 'now')) . '</lastmod>';
-    echo '<changefreq>weekly</changefreq>';
-    echo '<priority>0.8</priority>';
-    echo '</url>';
+    sitemapUrl($baseUrl, 'product.php?slug=' . rawurlencode($product['slug']), $product['updated_at'] ?? null, 'weekly', '0.8');
+}
+
+// Services
+foreach ($services as $service) {
+    sitemapUrl($baseUrl, 'service.php?slug=' . rawurlencode($service['slug']), $service['updated_at'] ?? null, 'monthly', '0.7');
+}
+
+// CMS pages
+foreach ($pages as $page) {
+    sitemapUrl($baseUrl, 'page.php?slug=' . rawurlencode($page['slug']), $page['updated_at'] ?? null, 'monthly', '0.7');
 }
 
 echo '</urlset>';

@@ -219,7 +219,10 @@ $defaults = [
     'logo_height_mobile' => '40',
     'logo_height_tablet' => '56',
     'logo_height_desktop' => '64',
-    'logo_max_width' => ''
+    'logo_max_width' => '',
+    'seo_default_meta_title' => '',
+    'seo_default_meta_description' => '',
+    'seo_og_image' => '',
 ];
 
 foreach ($defaults as $key => $default) {
@@ -436,6 +439,33 @@ include __DIR__ . '/includes/header.php';
                         </label>
                         <textarea name="footer_text" rows="2" 
                                   class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition-all"><?= escape($settings['footer_text']) ?></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SEO Defaults Card -->
+            <div class="settings-card bg-gradient-to-br from-gray-50 via-white to-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200 shadow-lg mt-6 space-y-6">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center">
+                    <i class="fas fa-search text-green-600 mr-2"></i> SEO Defaults
+                </h3>
+                <p class="text-sm text-gray-600 -mt-2">Used when a page doesn’t set its own meta or image. Leave blank to use site name / default description.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Default Meta Title</label>
+                        <input type="text" name="seo_default_meta_title" value="<?= escape($settings['seo_default_meta_title'] ?? '') ?>"
+                               placeholder="e.g. Site Name - Tagline"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Default Meta Description</label>
+                        <textarea name="seo_default_meta_description" rows="2" placeholder="Short description for search results and social sharing"
+                                  class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"><?= escape($settings['seo_default_meta_description'] ?? '') ?></textarea>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Default OG Image URL</label>
+                        <input type="text" name="seo_og_image" value="<?= escape($settings['seo_og_image'] ?? '') ?>"
+                               placeholder="Full URL or path e.g. storage/uploads/og-default.jpg"
+                               class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all">
                     </div>
                 </div>
             </div>

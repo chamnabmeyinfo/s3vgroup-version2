@@ -22,7 +22,7 @@ foreach ($cartItems as $productId => $quantity) {
     }
 }
 
-$pageTitle = 'Shopping Cart - Forklift & Equipment Pro';
+$pageTitle = 'Shopping Cart - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

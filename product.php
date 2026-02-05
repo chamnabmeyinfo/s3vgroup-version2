@@ -98,8 +98,21 @@ try {
     $variants = [];
 }
 
-$pageTitle = escape($product['name']) . ' - Forklift & Equipment Pro';
-$metaDescription = escape($product['short_description'] ?? $product['description'] ?? '');
+$siteName = get_site_name();
+$pageTitle = !empty(trim($product['meta_title'] ?? '')) ? escape($product['meta_title']) : (escape($product['name']) . ' - ' . $siteName);
+$metaDescription = !empty(trim($product['meta_description'] ?? '')) ? escape($product['meta_description']) : (escape($product['short_description'] ?? $product['description'] ?? ''));
+$canonicalUrl = url('product.php?slug=' . urlencode($product['slug']));
+$ogImage = !empty($product['image']) ? image_url($product['image']) : (get_seo_defaults()['og_image'] ?? '');
+$jsonLd = [
+    '@context' => 'https://schema.org',
+    '@type' => 'Product',
+    'name' => $product['name'],
+    'description' => strip_tags($product['short_description'] ?? $product['description'] ?? ''),
+    'url' => $canonicalUrl,
+];
+if (!empty($ogImage)) {
+    $jsonLd['image'] = $ogImage;
+}
 
 include __DIR__ . '/includes/header.php';
 ?>

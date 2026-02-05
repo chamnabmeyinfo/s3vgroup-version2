@@ -10,7 +10,7 @@ use App\Models\Service;
 $serviceModel = new Service();
 $services = $serviceModel->getAll(true); // Get only active services
 
-$pageTitle = 'Our Services - Forklift & Equipment Pro';
+$pageTitle = 'Our Services - ' . get_site_name();
 $metaDescription = 'Comprehensive services for all your forklift and industrial equipment needs. Professional maintenance, repairs, rentals, and more.';
 
 include __DIR__ . '/includes/header.php';

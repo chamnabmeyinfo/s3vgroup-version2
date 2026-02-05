@@ -75,7 +75,7 @@ $totalPages = ceil($totalProducts / $filters['limit']);
 $categoryTree = $categoryModel->getTree(null, true);
 $categories = $categoryModel->getAll(true);
 
-$pageTitle = 'Products - Forklift & Equipment Pro';
+$pageTitle = 'Products - ' . get_site_name();
 $metaDescription = 'Browse our selection of forklifts and industrial equipment';
 
 include __DIR__ . '/includes/header.php';

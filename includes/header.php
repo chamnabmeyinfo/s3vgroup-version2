@@ -51,9 +51,38 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="content-language" content="<?= escape($htmlLang) ?>">
-    <meta name="description" content="<?= escape($metaDescription ?? 'Premium forklifts and industrial equipment for warehouses and factories') ?>">
-    <title><?= escape($pageTitle ?? 'Forklift & Equipment Pro') ?></title>
-    
+    <?php
+    $seoDefaults = function_exists('get_seo_defaults') ? get_seo_defaults() : ['meta_title' => 'Forklift & Equipment Pro', 'meta_description' => 'Premium forklifts and industrial equipment for warehouses and factories', 'og_image' => ''];
+    $finalTitle = $pageTitle ?? $seoDefaults['meta_title'];
+    $finalDescription = $metaDescription ?? $seoDefaults['meta_description'];
+    $finalCanonical = $canonicalUrl ?? (function_exists('canonical_url') ? canonical_url() : '');
+    $finalOgImage = $ogImage ?? $seoDefaults['og_image'];
+    $finalSiteName = function_exists('get_site_name') ? get_site_name() : 'Forklift & Equipment Pro';
+    ?>
+    <meta name="description" content="<?= escape($finalDescription) ?>">
+    <title><?= escape($finalTitle) ?></title>
+    <?php if (!empty($finalCanonical)): ?>
+    <link rel="canonical" href="<?= escape($finalCanonical) ?>">
+    <?php endif; ?>
+    <!-- Open Graph -->
+    <meta property="og:type" content="<?= escape($ogType ?? 'website') ?>">
+    <meta property="og:title" content="<?= escape($finalTitle) ?>">
+    <meta property="og:description" content="<?= escape($finalDescription) ?>">
+    <meta property="og:url" content="<?= escape($finalCanonical ?: (function_exists('canonical_url') ? canonical_url() : url(''))) ?>">
+    <meta property="og:site_name" content="<?= escape($finalSiteName) ?>">
+    <meta property="og:locale" content="<?= escape($htmlLang) ?>">
+    <?php if (!empty($finalOgImage)): ?>
+    <meta property="og:image" content="<?= escape($finalOgImage) ?>">
+    <meta property="og:image:secure_url" content="<?= escape($finalOgImage) ?>">
+    <?php endif; ?>
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="<?= !empty($finalOgImage) ? 'summary_large_image' : 'summary' ?>">
+    <meta name="twitter:title" content="<?= escape($finalTitle) ?>">
+    <meta name="twitter:description" content="<?= escape($finalDescription) ?>">
+    <?php if (!empty($finalOgImage)): ?>
+    <meta name="twitter:image" content="<?= escape($finalOgImage) ?>">
+    <?php endif; ?>
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -729,7 +758,29 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
+    <?php
+    // JSON-LD: page-specific (e.g. Product) or default Organization
+    if (!empty($jsonLd) && is_array($jsonLd)) {
+        echo '<script type="application/ld+json">' . "\n" . json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n" . '</script>';
+    } elseif (strpos($_SERVER['PHP_SELF'] ?? '', '/admin') === false && function_exists('get_site_name')) {
+        $orgUrl = rtrim(config('app.url', ''), '/');
+        $orgSchema = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => get_site_name(),
+            'url' => $orgUrl,
+        ];
+        if (function_exists('get_seo_defaults')) {
+            $def = get_seo_defaults();
+            if (!empty($def['og_image'])) {
+                $orgSchema['logo'] = $def['og_image'];
+            }
+        }
+        echo '<script type="application/ld+json">' . "\n" . json_encode($orgSchema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n" . '</script>';
+    }
+    ?>
+
 </head>
 <body class="bg-white">
     <!-- Premium Modern Navigation -->

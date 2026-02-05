@@ -25,7 +25,7 @@ $allCategories = $categoryModel->getAll(true);
 // Get only first 5 categories for homepage (minimal design)
 $categories = array_slice($allCategories, 0, 5);
 
-$pageTitle = 'Forklift & Equipment Pro - Industrial Equipment Solutions';
+$pageTitle = get_site_name() . ' - Industrial Equipment Solutions';
 
 // Get logo styling settings BEFORE header is included (so we can use them in header)
 // Fetch all settings that start with partners_, clients_, or certs_

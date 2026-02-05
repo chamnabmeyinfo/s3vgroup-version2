@@ -14,7 +14,7 @@ if ($category) {
     $faqs = array_filter($faqs, fn($f) => $f['category'] === $category);
 }
 
-$pageTitle = 'Frequently Asked Questions - Forklift & Equipment Pro';
+$pageTitle = 'Frequently Asked Questions - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

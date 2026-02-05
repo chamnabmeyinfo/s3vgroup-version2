@@ -47,7 +47,7 @@ $trackGoogleConversion = !empty($message);
 // Generate QR code for website
 $qrCodeUrl = QrCodeHelper::generateWebsiteQr('', 200, 'url');
 
-$pageTitle = 'Contact Us - Forklift & Equipment Pro';
+$pageTitle = 'Contact Us - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';
 ?>

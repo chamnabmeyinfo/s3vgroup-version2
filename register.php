@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pageTitle = 'Create Account - Forklift & Equipment Pro';
+$pageTitle = 'Create Account - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';
 ?>

@@ -20,7 +20,7 @@ foreach ($wishlistIds as $id) {
     }
 }
 
-$pageTitle = 'My Wishlist - Forklift & Equipment Pro';
+$pageTitle = 'My Wishlist - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

@@ -25,7 +25,7 @@ if ($orderNumber) {
     }
 }
 
-$pageTitle = 'Order Tracking - Forklift & Equipment Pro';
+$pageTitle = 'Order Tracking - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 

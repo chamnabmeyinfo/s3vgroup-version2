@@ -73,7 +73,7 @@ $prices = array_map(fn($p) => $p['sale_price'] ?? $p['price'], $allProducts);
 $minPriceRange = $prices ? min($prices) : 0;
 $maxPriceRange = $prices ? max($prices) : 10000;
 
-$pageTitle = 'Browse Products - Forklift & Equipment Pro';
+$pageTitle = 'Browse Products - ' . get_site_name();
 include __DIR__ . '/includes/header.php';
 ?>
 
