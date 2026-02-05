@@ -17,8 +17,8 @@ $siteAddress = $settingModel->get('site_address', '');
 // Generate QR code for website
 $qrCodeUrl = QrCodeHelper::generateWebsiteQr('', 200, 'url');
 
-$pageTitle = 'About Us - ' . $siteName;
-$metaDescription = 'Learn about our mission, vision, and story. We deliver quality forklift and industrial equipment solutions with integrity and customer focus.';
+$pageTitle = 'About Us - S3 Group | Industrial Equipment & Weighing Bridge Manufacturer Cambodia';
+$metaDescription = 'S3 Group: trusted manufacturer and trading partner in Cambodia since 2006. Industrial equipment, weighing bridge steel structures, ISO 9001:2015 certified. Serving logistics, mining, agriculture, construction & more.';
 
 include __DIR__ . '/includes/header.php';
 ?>
@@ -35,7 +35,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 tracking-tight">About Us</h1>
                 <p class="text-lg md:text-xl text-blue-100 max-w-2xl mx-auto leading-relaxed">
-                    Leading the industry in forklift and industrial equipment solutions
+                    S3 Group — Industrial equipment &amp; weighing bridge manufacturer in Cambodia since 2006
                 </p>
             </div>
         </div>
@@ -50,7 +50,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Our Mission</h2>
                 <p class="text-gray-600 leading-relaxed mb-6">
-                    To provide exceptional forklift and industrial equipment solutions that empower businesses to achieve their operational goals. We are committed to delivering quality products, outstanding service, and innovative solutions that drive productivity and success.
+                    To deliver value through innovation, safety, and customer satisfaction as a trusted manufacturer and trading partner. We focus on long-term relationships and consistent, high-quality industrial equipment and weighing bridge solutions that meet international standards.
                 </p>
                 <a href="<?= url('mission-vision.php') ?>" class="inline-flex items-center gap-2 text-blue-600 font-semibold hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-colors duration-200 cursor-pointer">
                     <span>Mission &amp; Vision</span>
@@ -64,7 +64,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">Our Vision</h2>
                 <p class="text-gray-600 leading-relaxed mb-6">
-                    To become the most trusted partner in the industrial equipment industry, recognized for excellence, innovation, and customer satisfaction. We envision a future where every business has access to the best equipment solutions tailored to their unique needs.
+                    To be Cambodia’s most trusted manufacturer and trading partner for industrial equipment and weighing bridge steel structures, recognized for quality, integrity, and continual improvement in everything we do.
                 </p>
                 <a href="<?= url('mission-vision.php') ?>" class="inline-flex items-center gap-2 text-purple-600 font-semibold hover:text-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 rounded-lg transition-colors duration-200 cursor-pointer">
                     <span>Learn more</span>
@@ -74,20 +74,32 @@ include __DIR__ . '/includes/header.php';
         </section>
 
         <!-- Our Story -->
-        <section class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12 mb-16 md:mb-20">
+        <section class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12 mb-16 md:mb-20" aria-labelledby="our-story-heading">
             <div class="text-center mb-10">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Our Story</h2>
+                <h2 id="our-story-heading" class="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Our Story</h2>
                 <div class="w-16 h-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full mx-auto"></div>
             </div>
             <div class="prose prose-lg max-w-none text-gray-700">
                 <p class="text-lg leading-relaxed mb-6">
-                    Founded with a passion for excellence and a commitment to customer success, we have grown from a small local business to a leading provider of forklift and industrial equipment solutions. Our journey has been marked by continuous innovation, unwavering dedication to quality, and a deep understanding of our customers' needs.
+                    <strong>S3 Group</strong> was founded in <strong>2006</strong> with a commitment to quality and integrity. Today we are a trusted manufacturer and trading partner in Cambodia, focusing on long-term relationships and delivering value through innovation, safety, and customer satisfaction.
                 </p>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-8 mb-3">What We Do</h3>
                 <p class="text-lg leading-relaxed mb-6">
-                    Over the years, we have built strong relationships with manufacturers, suppliers, and most importantly, our customers. We take pride in offering a comprehensive range of products, from compact warehouse forklifts to heavy-duty industrial machinery, all backed by expert service and support.
+                    We are a professional manufacturing and trading company specializing in <strong>industrial equipment</strong> and <strong>weighing bridge steel structures</strong>. With experienced engineers, well-trained skilled workers, modern workshops, and strict quality control, we deliver products that meet international standards and customer expectations.
+                </p>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-8 mb-3">Experience &amp; Industries We Serve</h3>
+                <p class="text-lg leading-relaxed mb-6">
+                    With over <strong>20 years of experience</strong>, S3 Group has served many local and international industries in Cambodia, including logistics, mining, airport, agriculture, port authority, batching plant, petroleum, garment, manufacturing, construction, and waste management. We have earned the trust of these companies through reliable supplies and excellent service.
+                </p>
+
+                <h3 class="text-xl font-bold text-gray-800 mt-8 mb-3">ISO 9001:2015 Certification</h3>
+                <p class="text-lg leading-relaxed mb-6">
+                    In <strong>2025</strong>, S3 Group achieved certification to <strong>ISO 9001:2015</strong>, the internationally recognized standard for quality management systems. This certification demonstrates our commitment to delivering consistent, high-quality products and services, enhancing customer satisfaction, and continually improving our processes.
                 </p>
                 <p class="text-lg leading-relaxed">
-                    Today, we continue to evolve and adapt, embracing new technologies and best practices to ensure we remain at the forefront of the industry. Our team of experienced professionals is dedicated to helping you find the perfect equipment solutions for your business.
+                    This recognition reflects our commitment to maintaining the highest standards of accuracy, quality, and compliance in all related processes within our operations.
                 </p>
             </div>
         </section>
@@ -101,10 +113,10 @@ include __DIR__ . '/includes/header.php';
             <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 <?php
                 $values = [
-                    ['icon' => 'fas fa-shield-alt', 'title' => 'Quality', 'bg' => 'from-blue-500 to-blue-600', 'description' => 'Uncompromising commitment to quality in every product and service'],
-                    ['icon' => 'fas fa-handshake', 'title' => 'Integrity', 'bg' => 'from-emerald-500 to-emerald-600', 'description' => 'Honest, transparent, and ethical in all our business practices'],
-                    ['icon' => 'fas fa-lightbulb', 'title' => 'Innovation', 'bg' => 'from-amber-500 to-amber-600', 'description' => 'Continuously seeking better solutions and improved methods'],
-                    ['icon' => 'fas fa-heart', 'title' => 'Customer Focus', 'bg' => 'from-rose-500 to-rose-600', 'description' => 'Your success is our success — we put customers first'],
+                    ['icon' => 'fas fa-shield-alt', 'title' => 'Quality', 'bg' => 'from-blue-500 to-blue-600', 'description' => 'ISO 9001:2015 certified; consistent, high-quality industrial equipment and weighing bridge solutions'],
+                    ['icon' => 'fas fa-handshake', 'title' => 'Integrity', 'bg' => 'from-emerald-500 to-emerald-600', 'description' => 'Founded on integrity; trusted by local and international industries across Cambodia'],
+                    ['icon' => 'fas fa-lightbulb', 'title' => 'Innovation', 'bg' => 'from-amber-500 to-amber-600', 'description' => 'Continuous improvement in processes, safety, and customer satisfaction'],
+                    ['icon' => 'fas fa-heart', 'title' => 'Customer Focus', 'bg' => 'from-rose-500 to-rose-600', 'description' => 'Long-term relationships and reliable supplies tailored to your industry'],
                 ];
                 foreach ($values as $value):
                 ?>
