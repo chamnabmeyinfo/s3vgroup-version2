@@ -1,15 +1,3 @@
-// Advanced Hero Slider JavaScript with All Features
-// This extends the basic hero-slider.js functionality
-
-document.addEventListener('DOMContentLoaded', function() {
-    const slider = document.querySelector('.hero-slider');
-    if (!slider) return;
-    
-    const slides = slider.querySelectorAll('.hero-slide');
-    if (slides.length === 0) return;
-    
-    let parallaxScrollHandler = null;
-    
 // Advanced Hero Slider JavaScript - Extends Basic Functionality
 // This adds advanced features on top of the basic hero-slider.js
 

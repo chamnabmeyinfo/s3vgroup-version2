@@ -511,6 +511,11 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
         .nav-link-ultra:hover {
             background: rgba(255, 255, 255, 0.85);
             backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
         
         /* Menu Icon Alignment - Ensure all icons align with text */
         .nav-link-ultra i,
@@ -532,11 +537,6 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
         button.flex.items-center i {
             flex-shrink: 0;
             line-height: 1;
-        }
-            -webkit-backdrop-filter: blur(16px);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.2);
-            border-color: rgba(59, 130, 246, 0.4);
         }
         
         .nav-link-ultra.active {
