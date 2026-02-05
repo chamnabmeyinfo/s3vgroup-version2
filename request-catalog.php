@@ -54,6 +54,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Get categories for filter
 $categories = $categoryModel->getAll(true);
 
+// Track Google Ads conversion when catalog request submitted successfully
+$trackGoogleConversion = !empty($message);
+
 $pageTitle = 'Request Product Catalog - Forklift & Equipment Pro';
 include __DIR__ . '/includes/header.php';
 include __DIR__ . '/includes/message.php';

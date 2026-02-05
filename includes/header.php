@@ -29,7 +29,8 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
 
       gtag('config', 'AW-17871315689');
     </script>
-    <!-- Event snippet for Page view conversion page -->
+    <?php if (!empty($trackGoogleConversion)): ?>
+    <!-- Event snippet for Page view conversion (fires on success pages: contact, quote, checkout) -->
     <script>
       gtag('event', 'conversion', {
           'send_to': 'AW-17871315689/CNNSCP7U_-EbEOnF2slC',
@@ -37,6 +38,7 @@ $htmlLang = $langCodes[$currentLanguage] ?? 'en';
           'currency': 'USD'
       });
     </script>
+    <?php endif; ?>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="content-language" content="<?= escape($htmlLang) ?>">

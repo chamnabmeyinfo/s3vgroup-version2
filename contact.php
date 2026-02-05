@@ -41,6 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $productName = $_GET['product'] ?? '';
 
+// Track Google Ads conversion when form submitted successfully
+$trackGoogleConversion = !empty($message);
+
 // Generate QR code for website
 $qrCodeUrl = QrCodeHelper::generateWebsiteQr('', 200, 'url');
 
